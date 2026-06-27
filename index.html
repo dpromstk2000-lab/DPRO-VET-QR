@@ -1,58 +1,144 @@
 <!doctype html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#2f6f5e">
-  <title>DPRO PET CARE LINE｜動物病院DEMO入口 STEP VET-10</title>
-
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#223b34" />
+  <title>DPRO PET CARE LINE｜動物病院LINE診察券・受付管理DEMO</title>
   <script src="./config.js"></script>
-
   <style>
     :root{
-      --bg:#f4f7f3;
+      --bg:#f4f1ea;
       --card:#ffffff;
-      --ink:#1f2a24;
-      --muted:#68746d;
-      --line:#dbe5dc;
-      --main:#2f6f5e;
-      --main-dark:#243b35;
-      --main2:#4f9078;
-      --green:#2f7a5b;
-      --green-soft:#e8f5ee;
-      --blue:#2d68a6;
+      --ink:#22302c;
+      --muted:#6f7b75;
+      --line:#d9d2c4;
+      --main:#1f8f65;
+      --main-dark:#223b34;
+      --green-soft:#e8f7ef;
+      --blue:#3d74a8;
       --blue-soft:#edf5ff;
-      --amber:#8a621f;
-      --amber-soft:#fff6de;
+      --amber:#936513;
+      --amber-soft:#fff5df;
       --red:#b84a4a;
       --red-soft:#fff0ef;
-      --soft:#f8fbf8;
-      --gold:#b88a36;
-      --gold-soft:#fff6df;
-      --shadow:0 18px 44px rgba(35,64,50,.12);
-      --radius:24px;
+      --soft:#fbfaf6;
+      --shadow:0 20px 54px rgba(34,48,44,.13);
+      --radius:26px;
     }
 
     *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
     body{
       margin:0;
       min-height:100vh;
-      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Yu Gothic","YuGothic","Noto Sans JP",Meiryo,sans-serif;
       color:var(--ink);
       background:
-        radial-gradient(circle at top left,rgba(79,144,120,.22),transparent 32%),
-        radial-gradient(circle at 90% 12%,rgba(184,138,54,.16),transparent 28%),
-        linear-gradient(180deg,#fbfdfb 0%,var(--bg) 100%);
+        radial-gradient(circle at top left,rgba(31,143,101,.18),transparent 34%),
+        radial-gradient(circle at 88% 12%,rgba(231,151,36,.13),transparent 28%),
+        linear-gradient(180deg,#fbfaf6 0%,var(--bg) 100%);
+      line-height:1.7;
     }
 
-    a{color:inherit;text-decoration:none}
-    button,input,select,textarea{font:inherit}
-    button{cursor:pointer}
+    a{color:inherit}
+    button{font:inherit;cursor:pointer}
 
-    .app{
-      width:min(1280px,100%);
+    .page{
+      width:min(1240px,calc(100% - 28px));
       margin:0 auto;
-      padding:18px 16px 38px;
+      padding:22px 0 54px;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom:18px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width:0;
+    }
+
+    .logo{
+      width:52px;
+      height:52px;
+      border-radius:18px;
+      display:grid;
+      place-items:center;
+      color:#fff;
+      background:linear-gradient(135deg,#1f8f65,#83c99f);
+      box-shadow:0 14px 26px rgba(31,143,101,.23);
+      font-size:26px;
+      flex:0 0 auto;
+    }
+
+    .brand small{
+      display:block;
+      color:var(--muted);
+      font-weight:950;
+      font-size:12px;
+      letter-spacing:.08em;
+    }
+
+    .brand strong{
+      display:block;
+      font-size:clamp(19px,2.4vw,30px);
+      line-height:1.12;
+      letter-spacing:-.03em;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .top-actions{
+      display:flex;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+      gap:8px;
+    }
+
+    .pill,
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:7px;
+      border:1px solid var(--line);
+      border-radius:999px;
+      padding:9px 13px;
+      background:rgba(255,255,255,.86);
+      color:var(--ink);
+      text-decoration:none;
+      font-size:13px;
+      font-weight:950;
+      line-height:1.15;
+      transition:.15s transform,.15s box-shadow,.15s background;
+    }
+
+    .pill:hover,
+    .btn:hover{
+      transform:translateY(-1px);
+      box-shadow:0 10px 22px rgba(34,48,44,.11);
+      background:#fff;
+    }
+
+    .btn-main{
+      border-color:transparent;
+      background:var(--main);
+      color:#fff;
+      box-shadow:0 14px 28px rgba(31,143,101,.24);
+    }
+
+    .btn-sub{
+      border-color:#bfe3cc;
+      background:var(--green-soft);
+      color:#11704c;
     }
 
     .hero{
@@ -60,30 +146,32 @@
       overflow:hidden;
       border-radius:34px;
       background:
-        linear-gradient(135deg,rgba(36,59,53,.98),rgba(47,111,94,.96)),
-        radial-gradient(circle at 84% 10%,rgba(255,255,255,.22),transparent 26%);
+        linear-gradient(135deg,rgba(34,59,52,.98),rgba(31,143,101,.92)),
+        radial-gradient(circle at 88% 10%,rgba(255,255,255,.22),transparent 24%);
       color:#fff;
-      padding:30px 26px;
       box-shadow:var(--shadow);
+      padding:clamp(24px,4vw,48px);
     }
 
     .hero::after{
-      content:"🐾";
+      content:"PET CARE";
       position:absolute;
-      right:24px;
-      bottom:-18px;
-      font-size:148px;
-      opacity:.11;
-      transform:rotate(-10deg);
+      right:-18px;
+      bottom:-34px;
+      font-size:clamp(72px,12vw,160px);
+      font-weight:1000;
+      letter-spacing:.05em;
+      opacity:.06;
+      pointer-events:none;
     }
 
-    .hero-top{
-      display:flex;
-      justify-content:space-between;
-      gap:24px;
-      align-items:flex-start;
+    .hero-inner{
       position:relative;
       z-index:1;
+      display:grid;
+      grid-template-columns:1.08fr .92fr;
+      gap:26px;
+      align-items:center;
     }
 
     .badge{
@@ -98,844 +186,657 @@
       font-size:12px;
       font-weight:950;
       letter-spacing:.04em;
+      margin-bottom:14px;
     }
 
-    .hero h1{
-      margin:18px 0 10px;
-      font-size:42px;
-      line-height:1.12;
-      letter-spacing:.02em;
+    h1{
+      margin:0 0 14px;
+      font-size:clamp(33px,5vw,66px);
+      line-height:1.06;
+      letter-spacing:-.055em;
     }
 
-    .hero p{
+    .lead{
       margin:0;
-      color:rgba(255,255,255,.9);
-      line-height:1.85;
-      font-size:15px;
-      max-width:760px;
+      max-width:800px;
+      color:rgba(255,255,255,.88);
+      font-size:clamp(15px,1.7vw,18px);
+      font-weight:770;
+      line-height:1.9;
     }
-
-    .hero-side{
-      min-width:310px;
-      display:grid;
-      gap:10px;
-    }
-
-    .status-card{
-      border-radius:22px;
-      background:rgba(255,255,255,.14);
-      border:1px solid rgba(255,255,255,.24);
-      padding:14px;
-      backdrop-filter:blur(10px);
-    }
-
-    .status-row{
-      display:flex;
-      justify-content:space-between;
-      gap:10px;
-      align-items:center;
-      padding:7px 0;
-      border-bottom:1px solid rgba(255,255,255,.14);
-      font-size:12px;
-    }
-
-    .status-row:last-child{border-bottom:none}
-    .status-row strong{font-size:13px}
-    .status-value{
-      display:inline-flex;
-      align-items:center;
-      gap:7px;
-      font-weight:950;
-      white-space:nowrap;
-    }
-
-    .dot{
-      width:8px;height:8px;border-radius:50%;
-      background:#f4c96a;
-      box-shadow:0 0 0 4px rgba(244,201,106,.14);
-    }
-
-    .dot.ok{background:#9ff0be;box-shadow:0 0 0 4px rgba(159,240,190,.14)}
-    .dot.ng{background:#ffb3a6;box-shadow:0 0 0 4px rgba(255,179,166,.14)}
 
     .hero-actions{
       display:flex;
       flex-wrap:wrap;
       gap:10px;
-      margin-top:20px;
-      position:relative;
-      z-index:1;
+      margin-top:22px;
     }
 
-    .btn{
-      appearance:none;
-      border:none;
-      border-radius:999px;
-      padding:13px 17px;
-      min-height:50px;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:8px;
-      background:var(--main);
+    .hero-actions .btn{
+      padding:12px 16px;
+      font-size:14px;
+    }
+
+    .phone{
+      width:min(390px,100%);
+      margin-left:auto;
+      border-radius:38px;
+      background:linear-gradient(180deg,#26322f,#101614);
+      padding:15px;
+      box-shadow:0 30px 70px rgba(0,0,0,.28);
+    }
+
+    .phone-screen{
+      border-radius:28px;
+      overflow:hidden;
+      background:#f7f6ef;
+      color:var(--ink);
+    }
+
+    .line-head{
+      background:#06c755;
       color:#fff;
+      padding:13px 15px;
       font-weight:950;
-      text-decoration:none;
-      box-shadow:0 12px 24px rgba(47,111,94,.18);
-    }
-
-    .btn.white{
-      background:#fff;
-      color:var(--main-dark);
-      box-shadow:0 12px 30px rgba(0,0,0,.12);
-    }
-
-    .btn.secondary{
-      background:#fff;
-      color:var(--main);
-      border:1px solid #cddbd2;
-      box-shadow:none;
-    }
-
-    .btn.green{background:var(--green);color:#fff}
-    .btn.blue{background:var(--blue);color:#fff}
-    .btn.warn{background:var(--amber);color:#fff}
-    .btn.red{background:var(--red);color:#fff}
-
-    .section{
-      margin-top:18px;
-    }
-
-    .section-head{
       display:flex;
       justify-content:space-between;
-      gap:12px;
-      align-items:flex-end;
-      margin:0 0 12px;
+      align-items:center;
     }
 
-    .section-head h2{
-      margin:0;
-      font-size:24px;
+    .line-head small{
+      display:block;
+      font-size:11px;
+      opacity:.92;
+    }
+
+    .chat{
+      min-height:205px;
+      padding:15px;
+      background:linear-gradient(180deg,#edf6ee,#f8f7f0);
+    }
+
+    .bubble{
+      width:fit-content;
+      max-width:90%;
+      margin-bottom:10px;
+      padding:10px 12px;
+      border-radius:17px 17px 17px 5px;
+      background:#fff;
+      font-size:12px;
+      font-weight:850;
+      box-shadow:0 8px 18px rgba(34,48,44,.08);
+    }
+
+    .rich{
+      border-top:1px solid #dfe6dc;
+      background:#fff;
+      padding:9px;
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:7px;
+    }
+
+    .rich-cell{
+      min-height:56px;
+      border:1px solid #dce5db;
+      border-radius:14px;
+      display:grid;
+      place-items:center;
+      text-align:center;
+      padding:7px 5px;
+      background:linear-gradient(180deg,#fff,#f4faf6);
+      color:#1f493a;
+      font-size:11px;
       line-height:1.25;
+      font-weight:950;
     }
 
-    .section-head p{
-      margin:4px 0 0;
+    .rich-cell span{
+      display:block;
+      font-size:19px;
+      margin-bottom:3px;
+    }
+
+    .section-title{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-end;
+      gap:14px;
+      margin:30px 0 14px;
+    }
+
+    .section-title h2{
+      margin:0;
+      font-size:clamp(24px,3vw,38px);
+      line-height:1.2;
+      letter-spacing:-.035em;
+    }
+
+    .section-title p{
+      margin:0;
       color:var(--muted);
-      line-height:1.65;
+      text-align:right;
       font-size:13px;
+      font-weight:850;
     }
 
     .grid{
       display:grid;
+      grid-template-columns:repeat(3,1fr);
       gap:14px;
     }
 
-    .grid.cards{
-      grid-template-columns:repeat(3,1fr);
-    }
-
-    .grid.flow{
-      grid-template-columns:repeat(4,1fr);
-    }
-
     .card{
-      background:#fff;
-      border:1px solid rgba(219,229,220,.92);
-      border-radius:var(--radius);
-      padding:18px;
-      box-shadow:var(--shadow);
-      min-height:188px;
-      display:flex;
-      flex-direction:column;
-      justify-content:space-between;
-      gap:12px;
       position:relative;
       overflow:hidden;
+      border:1px solid rgba(217,210,196,.88);
+      border-radius:var(--radius);
+      background:rgba(255,255,255,.92);
+      box-shadow:0 15px 40px rgba(34,48,44,.09);
+      padding:18px;
     }
 
     .card::after{
       content:"";
       position:absolute;
-      right:-44px;
-      top:-44px;
-      width:130px;
-      height:130px;
-      border-radius:50%;
-      background:rgba(47,111,94,.06);
+      width:118px;
+      height:118px;
+      right:-54px;
+      bottom:-54px;
+      border-radius:999px;
+      background:rgba(31,143,101,.07);
+      pointer-events:none;
     }
-
-    .card.gold::after{background:rgba(184,138,54,.10)}
-    .card.blue::after{background:rgba(45,104,166,.08)}
-    .card.red::after{background:rgba(184,74,74,.08)}
 
     .icon{
-      width:48px;
-      height:48px;
-      border-radius:17px;
+      width:54px;
+      height:54px;
+      border-radius:18px;
       display:grid;
       place-items:center;
+      font-size:28px;
+      margin-bottom:13px;
       background:var(--green-soft);
-      color:var(--main);
-      font-size:25px;
-      position:relative;
-      z-index:1;
     }
 
-    .card.gold .icon{background:var(--gold-soft);color:var(--gold)}
-    .card.blue .icon{background:var(--blue-soft);color:var(--blue)}
-    .card.red .icon{background:var(--red-soft);color:var(--red)}
+    .card:nth-child(2) .icon{background:var(--blue-soft)}
+    .card:nth-child(3) .icon{background:var(--amber-soft)}
+    .card:nth-child(4) .icon{background:#f0f3ff}
+    .card:nth-child(5) .icon{background:var(--red-soft)}
+    .card:nth-child(6) .icon{background:#f6f2e9}
 
     .card h3{
-      margin:0;
-      font-size:19px;
-      line-height:1.3;
-      position:relative;
-      z-index:1;
+      margin:0 0 7px;
+      font-size:21px;
+      line-height:1.28;
+      letter-spacing:-.02em;
     }
 
     .card p{
-      margin:8px 0 0;
-      color:var(--muted);
-      line-height:1.7;
-      font-size:13px;
-      position:relative;
-      z-index:1;
-    }
-
-    .card .btn{
-      width:100%;
-      margin-top:8px;
-      position:relative;
-      z-index:1;
-    }
-
-    .flow-card{
-      background:#fff;
-      border:1px solid rgba(219,229,220,.92);
-      border-radius:22px;
-      padding:16px;
-      box-shadow:0 10px 24px rgba(35,64,50,.07);
-      position:relative;
-    }
-
-    .flow-no{
-      width:34px;
-      height:34px;
-      border-radius:50%;
-      display:grid;
-      place-items:center;
-      background:var(--main);
-      color:#fff;
-      font-weight:950;
-      margin-bottom:10px;
-    }
-
-    .flow-card strong{
-      display:block;
-      font-size:16px;
-      line-height:1.35;
-      margin-bottom:6px;
-    }
-
-    .flow-card span{
-      color:var(--muted);
-      font-size:13px;
-      line-height:1.7;
-    }
-
-    .panel{
-      background:#fff;
-      border:1px solid rgba(219,229,220,.92);
-      border-radius:var(--radius);
-      box-shadow:var(--shadow);
-      overflow:hidden;
-      margin-top:18px;
-    }
-
-    .panel-head{
-      padding:16px 18px;
-      display:flex;
-      justify-content:space-between;
-      gap:12px;
-      align-items:center;
-      border-bottom:1px solid var(--line);
-      background:linear-gradient(180deg,#fff,#fbfdfb);
-    }
-
-    .panel-head h2{
       margin:0;
-      font-size:22px;
-      line-height:1.25;
-    }
-
-    .panel-head small{
-      color:var(--muted);
-      font-weight:850;
-    }
-
-    .panel-body{
-      padding:16px;
-    }
-
-    .demo-script{
-      display:grid;
-      gap:10px;
-    }
-
-    .demo-step{
-      display:grid;
-      grid-template-columns:46px 1fr auto;
-      gap:12px;
-      align-items:center;
-      border:1px solid #dde9e1;
-      border-radius:18px;
-      padding:12px;
-      background:#fff;
-    }
-
-    .demo-step .num{
-      width:36px;
-      height:36px;
-      border-radius:50%;
-      display:grid;
-      place-items:center;
-      background:var(--main);
-      color:#fff;
-      font-weight:950;
-    }
-
-    .demo-step strong{
-      display:block;
-      margin-bottom:3px;
-    }
-
-    .demo-step span{
-      color:var(--muted);
+      color:#5b6862;
       font-size:13px;
-      line-height:1.6;
+      font-weight:760;
+      line-height:1.75;
+    }
+
+    .card-actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top:14px;
+      position:relative;
+      z-index:1;
+    }
+
+    .status-grid{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:12px;
+    }
+
+    .metric{
+      border:1px solid rgba(217,210,196,.86);
+      border-radius:20px;
+      background:rgba(255,255,255,.92);
+      box-shadow:0 12px 30px rgba(34,48,44,.08);
+      padding:16px;
+      min-height:94px;
+    }
+
+    .metric small{
+      display:block;
+      color:var(--muted);
+      font-weight:950;
+      font-size:12px;
+    }
+
+    .metric b{
+      display:block;
+      font-size:28px;
+      line-height:1.2;
+      letter-spacing:-.04em;
+      margin-top:2px;
+    }
+
+    .metric span{
+      display:block;
+      color:#62706a;
+      font-size:12px;
+      font-weight:850;
+      margin-top:3px;
     }
 
     .notice{
-      display:flex;
-      gap:10px;
-      align-items:flex-start;
-      border:1px solid #d6e8dc;
-      background:var(--green-soft);
-      color:#285a46;
-      border-radius:20px;
-      padding:13px;
-      line-height:1.65;
-      font-size:13px;
-      margin-top:14px;
-    }
-
-    .notice.warn{
-      background:var(--amber-soft);
-      border-color:#edd89e;
-      color:#6d501b;
-    }
-
-    .links-grid{
-      display:grid;
-      grid-template-columns:repeat(2,1fr);
-      gap:10px;
-    }
-
-    .mini-link{
-      display:flex;
-      justify-content:space-between;
-      gap:10px;
-      align-items:center;
-      border:1px solid #dde9e1;
-      border-radius:18px;
+      margin-top:12px;
+      border-radius:17px;
       padding:12px;
-      background:#fff;
-      box-shadow:0 8px 18px rgba(35,64,50,.045);
+      font-size:13px;
+      font-weight:850;
+      line-height:1.7;
+      background:var(--amber-soft);
+      border:1px solid #efd89e;
+      color:var(--amber);
     }
 
-    .mini-link strong{
-      display:block;
-      font-size:14px;
-      margin-bottom:3px;
+    .notice.ok{
+      background:var(--green-soft);
+      border-color:#bfe3cc;
+      color:#11704c;
     }
 
-    .mini-link span{
-      display:block;
-      color:var(--muted);
-      font-size:12px;
-      line-height:1.5;
-      word-break:break-all;
+    .notice.ng{
+      background:var(--red-soft);
+      border-color:#ecc0bc;
+      color:#9f3939;
     }
 
-    .tag{
-      display:inline-flex;
-      align-items:center;
-      border-radius:999px;
-      padding:5px 8px;
-      font-size:11px;
-      font-weight:950;
-      white-space:nowrap;
-      background:#eef2f7;
-      color:#46546c;
+    .flow{
+      display:grid;
+      grid-template-columns:repeat(5,1fr);
+      gap:10px;
     }
 
-    .tag.ok{background:var(--green-soft);color:var(--green)}
-    .tag.warn{background:var(--amber-soft);color:var(--amber)}
-
-    .debug{
-      margin-top:14px;
-      border:1px solid #dce8df;
-      border-radius:18px;
-      background:#fff;
-      overflow:hidden;
-    }
-
-    .debug summary{
-      cursor:pointer;
-      padding:12px 14px;
-      font-weight:900;
-      color:var(--muted);
-    }
-
-    .debug pre{
-      margin:0;
+    .step{
+      border:1px solid rgba(217,210,196,.88);
+      background:rgba(255,255,255,.92);
+      border-radius:20px;
       padding:14px;
-      overflow:auto;
-      background:#10251e;
-      color:#dff8e8;
+      min-height:130px;
+      box-shadow:0 12px 30px rgba(34,48,44,.08);
+    }
+
+    .step b{
+      display:inline-flex;
+      margin-bottom:8px;
+      border-radius:999px;
+      padding:3px 8px;
+      background:var(--green-soft);
+      color:#11704c;
       font-size:12px;
+      font-weight:950;
+    }
+
+    .step strong{
+      display:block;
+      font-size:16px;
+      line-height:1.35;
+      margin-bottom:5px;
+    }
+
+    .step span{
+      display:block;
+      color:#5f6b65;
+      font-size:12px;
+      font-weight:780;
       line-height:1.6;
-      max-height:360px;
     }
 
-    @media (max-width:1040px){
-      .hero-top{display:block}
-      .hero-side{min-width:0;margin-top:18px}
-      .grid.cards{grid-template-columns:repeat(2,1fr)}
-      .grid.flow{grid-template-columns:repeat(2,1fr)}
-      .demo-step{grid-template-columns:46px 1fr}
-      .demo-step .btn{grid-column:1 / -1}
+    .comparison{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
     }
 
-    @media (max-width:700px){
-      .app{padding:12px 10px 28px}
-      .hero{border-radius:26px;padding:22px 18px}
-      .hero h1{font-size:30px}
-      .grid.cards,.grid.flow,.links-grid{grid-template-columns:1fr}
-      .section-head{display:block}
-      .panel-head{display:block}
-      .panel-head .btn{margin-top:10px}
-      .status-card{font-size:12px}
+    .compare{
+      border:1px solid rgba(217,210,196,.88);
+      border-radius:var(--radius);
+      background:rgba(255,255,255,.92);
+      box-shadow:0 15px 40px rgba(34,48,44,.08);
+      padding:18px;
+    }
+
+    .compare.strong{
+      border-color:rgba(31,143,101,.33);
+      background:linear-gradient(180deg,#fff,#f2fbf6);
+    }
+
+    .compare h3{
+      margin:0 0 11px;
+      font-size:20px;
+    }
+
+    .compare ul{
+      margin:0;
+      padding-left:1.15em;
+      color:#53615b;
+      font-weight:780;
+      font-size:13px;
+      line-height:1.85;
+    }
+
+    .footer{
+      margin-top:22px;
+      padding:16px 18px;
+      border:1px solid rgba(217,210,196,.88);
+      border-radius:22px;
+      background:rgba(255,255,255,.78);
+      color:#56645e;
+      font-size:13px;
+      font-weight:780;
+      line-height:1.7;
+    }
+
+    @media(max-width:980px){
+      .hero-inner,
+      .comparison{grid-template-columns:1fr}
+      .phone{margin:0}
+      .grid{grid-template-columns:repeat(2,1fr)}
+      .flow{grid-template-columns:repeat(2,1fr)}
+      .status-grid{grid-template-columns:repeat(2,1fr)}
+      .section-title{align-items:flex-start;flex-direction:column}
+      .section-title p{text-align:left}
+    }
+
+    @media(max-width:620px){
+      .topbar{align-items:flex-start;flex-direction:column}
+      .top-actions{justify-content:flex-start}
+      .grid,
+      .flow,
+      .status-grid{grid-template-columns:1fr}
+      .hero{border-radius:24px}
+      .card,.compare{border-radius:21px}
+      .brand strong{white-space:normal}
     }
   </style>
 </head>
-
 <body>
-  <main class="app">
+  <main class="page">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo">🐾</div>
+        <div>
+          <small>動物病院LINE診察券・受付管理DEMO</small>
+          <strong>DPRO PET CARE LINE</strong>
+        </div>
+      </div>
+
+      <nav class="top-actions" aria-label="主要画面">
+        <a class="pill" href="./system-check.html?v=step-vet-19">システム確認</a>
+        <a class="pill" href="./rich-menu.html?v=step-vet-19">リッチメニュー</a>
+        <a class="pill" href="./admin.html?v=step-vet-19">管理設定</a>
+      </nav>
+    </header>
+
     <section class="hero">
-      <div class="hero-top">
+      <div class="hero-inner">
         <div>
-          <div class="badge">🐾 動物病院向け LINE公式連携DEMO</div>
-          <h1>DPRO PET CARE LINE</h1>
-          <p>
-            LINE公式から使える、ペット診察券・QR受付・予防フォロー・再診フォローの営業DEMOです。<br>
-            飼い主さんのLINEに複数ペットの診察券をまとめ、受付・診察・フォローまで動物病院の運用につなげます。
+          <span class="badge">STEP VET-19｜営業DEMOトップ更新</span>
+          <h1>受付だけで終わらない。<br>LINE診察券から、順番・問診・予防まで。</h1>
+          <p class="lead">
+            高額な順番待ちシステムまでは不要。でも、LINE診察券・今日の順番受付・後日の優先受付予約・お薬予防受付・来院前問診・混雑目安は欲しい。
+            小さな動物病院でも始めやすい、低コストのLINE受付管理システムです。
           </p>
+
           <div class="hero-actions">
-            <a class="btn white" id="heroMemberLink" href="#">🎫 ペット診察券を見る</a>
-            <a class="btn white" id="heroSystemCheckLink" href="#">✅ 全体チェックを開く</a>
-            <button class="btn warn" id="refreshStatusBtn" type="button">API状態を再確認</button>
+            <a class="btn btn-main" href="./waiting.html?demo=true&v=step-vet-19">飼い主受付DEMOを開く</a>
+            <a class="btn btn-sub" href="./member.html?demo=true&v=step-vet-19">ペット診察券を開く</a>
+            <a class="btn" href="./owner.html?v=step-vet-19">オーナー画面を開く</a>
           </div>
         </div>
 
-        <aside class="hero-side">
-          <div class="status-card">
-            <div class="status-row">
-              <strong>Worker</strong>
-              <span class="status-value"><span class="dot" id="workerDot"></span><span id="workerStatus">確認中</span></span>
+        <div class="phone" aria-label="LINEリッチメニュー表示イメージ">
+          <div class="phone-screen">
+            <div class="line-head">
+              <div>DPROどうぶつ病院<small>LINE公式アカウント</small></div>
+              <div>LINE</div>
             </div>
-            <div class="status-row">
-              <strong>Supabase</strong>
-              <span class="status-value"><span class="dot" id="clinicDot"></span><span id="clinicStatus">確認中</span></span>
+            <div class="chat">
+              <div class="bubble">ペット診察券・受付・混雑状況はこちらから確認できます。</div>
+              <div class="bubble">今日行く場合は「今日の順番受付」、後日の朝一・午後一は「優先受付予約」からお進みください。</div>
             </div>
-            <div class="status-row">
-              <strong>診察券API</strong>
-              <span class="status-value"><span class="dot" id="cardDot"></span><span id="cardStatus">確認中</span></span>
+            <div class="rich">
+              <div class="rich-cell"><span>🐶</span>ペット<br>診察券</div>
+              <div class="rich-cell"><span>🏥</span>今日の<br>順番受付</div>
+              <div class="rich-cell"><span>🌅</span>優先受付<br>予約</div>
+              <div class="rich-cell"><span>💊</span>お薬・予防<br>受付</div>
+              <div class="rich-cell"><span>📊</span>混雑<br>目安</div>
+              <div class="rich-cell"><span>📍</span>診療時間<br>MAP</div>
             </div>
-            <div class="status-row">
-              <strong>clinic_code</strong>
-              <span id="clinicCodeText">dpro_vet_demo</span>
-            </div>
-          </div>
-          <div class="notice warn" style="margin-top:0;">
-            <div>🔐</div>
-            <div>
-              管理画面・受付・獣医師・オーナー画面は管理コードが必要です。<br>
-              管理コードはGitHubには保存せず、Cloudflare Worker Secretで管理します。
-            </div>
-          </div>
-        </aside>
-      </div>
-    </section>
-
-    <section class="section">
-      <div class="section-head">
-        <div>
-          <h2>営業時に見せるメイン画面</h2>
-          <p>まずは左上から順番に見せると、飼い主側から院内運用まで伝わりやすいです。</p>
-        </div>
-      </div>
-
-      <div class="grid cards">
-        <article class="card gold">
-          <div>
-            <div class="icon">🎫</div>
-            <h3>飼い主側<br>ペット診察券</h3>
-            <p>LINEから複数ペットの診察券を表示。QR受付・予防予定・次回来院予定まで確認できます。</p>
-          </div>
-          <a class="btn" id="memberLink" href="#">開く</a>
-        </article>
-
-        <article class="card">
-          <div>
-            <div class="icon">📱</div>
-            <h3>受付iPad<br>QR受付</h3>
-            <p>ペット診察券QRを読み取り、来院受付を登録。本日の受付一覧にも即反映します。</p>
-          </div>
-          <a class="btn" id="scanLink" href="#">開く</a>
-        </article>
-
-        <article class="card blue">
-          <div>
-            <div class="icon">🩺</div>
-            <h3>獣医師用<br>診察画面</h3>
-            <p>受付済みペットを確認し、診察開始・メモ保存・診察完了・LINE文面コピーまで行えます。</p>
-          </div>
-          <a class="btn blue" id="doctorLink" href="#">開く</a>
-        </article>
-
-        <article class="card">
-          <div>
-            <div class="icon">📊</div>
-            <h3>オーナー管理<br>今日やること</h3>
-            <p>受付状況・予防予定・再診フォロー・LINE未連携をまとめて確認できます。</p>
-          </div>
-          <a class="btn" id="ownerLink" href="#">開く</a>
-        </article>
-
-        <article class="card">
-          <div>
-            <div class="icon">⚙️</div>
-            <h3>管理設定<br>飼い主・ペット管理</h3>
-            <p>病院情報、診療時間、休診日、飼い主登録、ペット追加、診察券再発行を行います。</p>
-          </div>
-          <a class="btn" id="adminLink" href="#">開く</a>
-        </article>
-
-        <article class="card red">
-          <div>
-            <div class="icon">✅</div>
-            <h3>全体チェック<br>営業前確認</h3>
-            <p>API・Supabase・各画面の接続状態を一括確認。NGなしなら営業DEMO準備OKです。</p>
-          </div>
-          <a class="btn red" id="systemCheckLink" href="#">開く</a>
-        </article>
-      </div>
-    </section>
-
-    <section class="section">
-      <div class="section-head">
-        <div>
-          <h2>このDEMOで伝える価値</h2>
-          <p>単なる診察券ではなく、LINE公式を「再来院・予防・フォローの入口」にします。</p>
-        </div>
-      </div>
-
-      <div class="grid flow">
-        <div class="flow-card">
-          <div class="flow-no">1</div>
-          <strong>飼い主のLINEに診察券</strong>
-          <span>紙カード忘れを減らし、多頭飼いでもペットごとの情報を確認できます。</span>
-        </div>
-        <div class="flow-card">
-          <div class="flow-no">2</div>
-          <strong>受付がQRで早くなる</strong>
-          <span>受付iPadで読み取り、誰のどのペットかをすぐ確認。注意メモも見られます。</span>
-        </div>
-        <div class="flow-card">
-          <div class="flow-no">3</div>
-          <strong>診察内容をフォローへつなげる</strong>
-          <span>獣医師メモを保存し、LINE返信用の文面コピーまで行えます。</span>
-        </div>
-        <div class="flow-card">
-          <div class="flow-no">4</div>
-          <strong>予防・再診を逃しにくい</strong>
-          <span>ワクチン、フィラリア、健診、再診フォローを管理画面で確認できます。</span>
-        </div>
-      </div>
-    </section>
-
-    <section class="panel">
-      <div class="panel-head">
-        <div>
-          <h2>営業DEMOの見せ方</h2>
-          <small>この順番で開くと分かりやすいです</small>
-        </div>
-      </div>
-      <div class="panel-body">
-        <div class="demo-script">
-          <div class="demo-step">
-            <div class="num">1</div>
-            <div>
-              <strong>ペット診察券を見せる</strong>
-              <span>田中美咲さんのココ・モモ・ハナが切り替え表示されることを見せます。</span>
-            </div>
-            <a class="btn secondary" id="demoStepMember" href="#">開く</a>
-          </div>
-          <div class="demo-step">
-            <div class="num">2</div>
-            <div>
-              <strong>受付iPadでココを受付する</strong>
-              <span>DEMOボタンの「ココ」を押し、「このペットを受付する」で本日の受付へ登録します。</span>
-            </div>
-            <a class="btn secondary" id="demoStepScan" href="#">開く</a>
-          </div>
-          <div class="demo-step">
-            <div class="num">3</div>
-            <div>
-              <strong>獣医師画面で診察完了まで行う</strong>
-              <span>受付済みペットを選び、診察開始・メモ保存・診察完了・LINE文面コピーを見せます。</span>
-            </div>
-            <a class="btn secondary" id="demoStepDoctor" href="#">開く</a>
-          </div>
-          <div class="demo-step">
-            <div class="num">4</div>
-            <div>
-              <strong>オーナー画面で全体を確認する</strong>
-              <span>今日の受付、予防予定、再診フォロー、LINE未連携がまとまることを見せます。</span>
-            </div>
-            <a class="btn secondary" id="demoStepOwner" href="#">開く</a>
-          </div>
-          <div class="demo-step">
-            <div class="num">5</div>
-            <div>
-              <strong>管理設定と全体チェックを見せる</strong>
-              <span>休診日、飼い主/ペット登録、診察券再発行、全体チェックNGなしを確認します。</span>
-            </div>
-            <a class="btn secondary" id="demoStepAdmin" href="#">開く</a>
-          </div>
-        </div>
-
-        <div class="notice">
-          <div>💡</div>
-          <div>
-            営業前に `system-check.html` で「全チェック実行」を押し、NGなしを確認してから見せるのがおすすめです。
-            DEMOデータが崩れた場合も system-check または admin から安全にリセットできます。
           </div>
         </div>
       </div>
     </section>
 
-    <section class="panel">
-      <div class="panel-head">
-        <div>
-          <h2>公開URL一覧</h2>
-          <small>営業中にすぐ開けるリンク</small>
+    <div class="section-title">
+      <div>
+        <h2>DEMO画面を開く</h2>
+      </div>
+      <p>営業時は、上から順番に見せると流れが伝わりやすいです。</p>
+    </div>
+
+    <section class="grid">
+      <article class="card">
+        <div class="icon">🐶</div>
+        <h3>ペット診察券</h3>
+        <p>QR診察券、登録ペット、多頭管理、予防予定、次回来院予定を表示します。</p>
+        <div class="card-actions">
+          <a class="btn btn-main" href="./member.html?demo=true&v=step-vet-19">開く</a>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="icon">🏥</div>
+        <h3>飼い主受付</h3>
+        <p>今日の順番受付、優先受付予約、お薬・予防受付、ケア処置相談を登録します。</p>
+        <div class="card-actions">
+          <a class="btn btn-main" href="./waiting.html?demo=true&v=step-vet-19">開く</a>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="icon">📱</div>
+        <h3>受付iPad</h3>
+        <p>waiting.htmlから入った受付を確認し、院内受付済み・診察中・完了に変更します。</p>
+        <div class="card-actions">
+          <a class="btn btn-main" href="./scan-ipad.html?v=step-vet-19">開く</a>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="icon">🩺</div>
+        <h3>獣医師画面</h3>
+        <p>来院前問診を診察前に確認。診察メモ、診察後LINE文面コピーもできます。</p>
+        <div class="card-actions">
+          <a class="btn btn-main" href="./doctor.html?v=step-vet-19">開く</a>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="icon">📊</div>
+        <h3>オーナー画面</h3>
+        <p>通常診察・お薬予防・ケア・優先受付を分類管理。混雑目安の手動切替もできます。</p>
+        <div class="card-actions">
+          <a class="btn btn-main" href="./owner.html?v=step-vet-19">開く</a>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="icon">⚙️</div>
+        <h3>管理設定・確認</h3>
+        <p>病院設定、飼い主・ペット管理、休診日、システムチェックを確認します。</p>
+        <div class="card-actions">
+          <a class="btn btn-sub" href="./admin.html?v=step-vet-19">管理設定</a>
+          <a class="btn" href="./system-check.html?v=step-vet-19">確認</a>
+        </div>
+      </article>
+    </section>
+
+    <div class="section-title">
+      <div>
+        <h2>現在のAPI状態</h2>
+      </div>
+      <p>Worker・Supabase・混雑目安APIを自動確認します。</p>
+    </div>
+
+    <section class="card">
+      <div class="status-grid">
+        <div class="metric">
+          <small>Worker</small>
+          <b id="workerStatus">-</b>
+          <span id="workerVersion">未確認</span>
+        </div>
+        <div class="metric">
+          <small>通常診察</small>
+          <b id="generalExamCount">-</b>
+          <span>診察・再診の待ち</span>
+        </div>
+        <div class="metric">
+          <small>お薬・予防</small>
+          <b id="medicineCount">-</b>
+          <span>薬・フード・予防</span>
+        </div>
+        <div class="metric">
+          <small>混雑目安</small>
+          <b id="levelLabel">-</b>
+          <span id="currentNumber">現在診察中：-</span>
         </div>
       </div>
-      <div class="panel-body">
-        <div class="links-grid" id="urlList"></div>
+      <div id="apiNotice" class="notice">API状態を確認中です。</div>
+    </section>
+
+    <div class="section-title">
+      <div>
+        <h2>営業時に伝える流れ</h2>
+      </div>
+      <p>ソトマチ対抗として、受付だけでなく“その後”まで見せます。</p>
+    </div>
+
+    <section class="flow">
+      <div class="step">
+        <b>01</b>
+        <strong>LINE診察券</strong>
+        <span>ペットごとに診察券・QR・予防予定を確認。</span>
+      </div>
+      <div class="step">
+        <b>02</b>
+        <strong>今日の順番受付</strong>
+        <span>今日行きたい場合は受付番号を発行。</span>
+      </div>
+      <div class="step">
+        <b>03</b>
+        <strong>優先受付予約</strong>
+        <span>後日の午前1番・午後1番を取れる。</span>
+      </div>
+      <div class="step">
+        <b>04</b>
+        <strong>問診・分類</strong>
+        <span>診察・薬・予防・ケアを分けて受付。</span>
+      </div>
+      <div class="step">
+        <b>05</b>
+        <strong>院内管理</strong>
+        <span>受付iPad・獣医師・オーナー画面に反映。</span>
       </div>
     </section>
 
-    <details class="debug">
-      <summary>API確認データ</summary>
-      <pre id="debugJson">{}</pre>
-    </details>
+    <div class="section-title">
+      <div>
+        <h2>ソトマチ対抗の見せ方</h2>
+      </div>
+      <p>全部入り競争ではなく、低コストで使いやすい導線に寄せます。</p>
+    </div>
+
+    <section class="comparison">
+      <div class="compare">
+        <h3>一般的な順番待ちシステムで分かりにくい点</h3>
+        <ul>
+          <li>診察・薬・予防・処置・手術などが合計人数に見えやすい</li>
+          <li>「ただいま17人」の意味が飼い主さんに伝わりにくい</li>
+          <li>今日の順番受付中心だと、後日朝一・午後一を取りたい人に弱い</li>
+          <li>受付後の問診・診察後フォロー・予防管理までは別運用になりやすい</li>
+        </ul>
+      </div>
+
+      <div class="compare strong">
+        <h3>DPRO PET CARE LINE の強み</h3>
+        <ul>
+          <li>通常診察・お薬予防・ケア処置・優先受付を分けて表示</li>
+          <li>今日の順番受付と、後日の午前1番・午後1番の優先受付予約を両立</li>
+          <li>問診内容を獣医師画面に表示し、診察前に確認できる</li>
+          <li>ペット診察券、予防予定、診察後LINE文面までつながる</li>
+        </ul>
+      </div>
+    </section>
+
+    <div class="footer">
+      STEP VET-19 は、営業用DEMOトップの更新版です。ここから各画面へ進めば、飼い主側から病院側までの一連の流れを説明できます。
+    </div>
   </main>
 
   <script>
-    (function () {
-      "use strict";
+    const CONFIG = window.DPRO_CONFIG || {};
+    const API_BASE_URL = (CONFIG.API_BASE_URL || "https://dpro-vet-qr-api.dpromstk2000.workers.dev").replace(/\/$/, "");
+    const CLINIC_CODE = CONFIG.CLINIC_CODE || CONFIG.DEFAULT_CLINIC_CODE || "dpro_vet_demo";
 
-      const CONFIG = window.DPRO_VET_CONFIG || window.DPRO_CONFIG || {};
-      const state = { health: null, clinic: null, cards: null };
+    function todayString(){
+      const d = new Date();
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return `${y}-${m}-${day}`;
+    }
 
-      const $ = (id) => document.getElementById(id);
-
-      document.addEventListener("DOMContentLoaded", init);
-
-      function init() {
-        $("clinicCodeText").textContent = getClinicCode();
-        setupLinks();
-        renderUrlList();
-        $("refreshStatusBtn").addEventListener("click", refreshStatus);
-        refreshStatus();
+    async function apiGet(path, params = {}){
+      const url = new URL(API_BASE_URL + path);
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== "") url.searchParams.set(key, value);
+      });
+      const res = await fetch(url.toString());
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.ok === false) {
+        throw new Error(data.message || data.error || `API Error ${res.status}`);
       }
+      return data;
+    }
 
-      function getClinicCode() {
-        return (CONFIG.clinic && CONFIG.clinic.clinicCode) ||
-          (CONFIG.demo && CONFIG.demo.clinicCode) ||
-          "dpro_vet_demo";
+    async function loadStatus(){
+      const notice = document.getElementById("apiNotice");
+      try{
+        const [health, queue] = await Promise.all([
+          apiGet("/api/health"),
+          apiGet("/api/public/queue/summary", { clinic_code: CLINIC_CODE, date: todayString() })
+        ]);
+
+        const s = queue.summary || (queue.items && queue.items[0]) || {};
+
+        document.getElementById("workerStatus").textContent = "OK";
+        document.getElementById("workerVersion").textContent = health.version || "health ok";
+        document.getElementById("generalExamCount").textContent = Number(s.general_exam_count || 0) + "組";
+        document.getElementById("medicineCount").textContent = Number(s.medicine_prevention_count || 0) + "件";
+        document.getElementById("levelLabel").textContent = s.display_level_label || "確認OK";
+        document.getElementById("currentNumber").textContent = "現在診察中：" + (s.current_exam_number ? s.current_exam_number + "番" : "-");
+
+        notice.className = "notice ok";
+        notice.textContent = s.display_message || "Worker・Supabase・混雑目安APIは正常に取得できています。";
+      }catch(error){
+        document.getElementById("workerStatus").textContent = "NG";
+        notice.className = "notice ng";
+        notice.textContent = "API確認に失敗しました：" + (error.message || error);
       }
+    }
 
-      function getApiBase() {
-        return (CONFIG.api && CONFIG.api.baseUrl) || "https://dpro-vet-qr-api.dpromstk2000.workers.dev";
-      }
-
-      function getSiteBase() {
-        return (CONFIG.urls && CONFIG.urls.siteBaseUrl) || "https://dpromstk2000-lab.github.io/DPRO-VET-QR";
-      }
-
-      function pageUrl(key, file, params) {
-        const base = CONFIG.urls && CONFIG.urls[key] ? CONFIG.urls[key] : `${getSiteBase()}/${file}`;
-        const url = new URL(base, location.href);
-        url.searchParams.set("clinic_code", getClinicCode());
-        Object.entries(params || {}).forEach(([k, v]) => url.searchParams.set(k, v));
-        return url.toString();
-      }
-
-      function setupLinks() {
-        const urls = {
-          index: pageUrl("index", "index.html"),
-          member: pageUrl("member", "member.html", { demo: "true" }),
-          scan: pageUrl("scanIpad", "scan-ipad.html"),
-          doctor: pageUrl("doctor", "doctor.html"),
-          owner: pageUrl("owner", "owner.html"),
-          admin: pageUrl("admin", "admin.html"),
-          system: pageUrl("systemCheck", "system-check.html")
-        };
-
-        setHref("heroMemberLink", urls.member);
-        setHref("heroSystemCheckLink", urls.system);
-        setHref("memberLink", urls.member);
-        setHref("scanLink", urls.scan);
-        setHref("doctorLink", urls.doctor);
-        setHref("ownerLink", urls.owner);
-        setHref("adminLink", urls.admin);
-        setHref("systemCheckLink", urls.system);
-
-        setHref("demoStepMember", urls.member);
-        setHref("demoStepScan", urls.scan);
-        setHref("demoStepDoctor", urls.doctor);
-        setHref("demoStepOwner", urls.owner);
-        setHref("demoStepAdmin", urls.admin);
-      }
-
-      function setHref(id, href) {
-        const el = $(id);
-        if (el) el.href = href;
-      }
-
-      function renderUrlList() {
-        const items = [
-          ["トップ", pageUrl("index", "index.html"), "DEMO入口"],
-          ["ペット診察券", pageUrl("member", "member.html", { demo: "true" }), "飼い主LINE側"],
-          ["受付iPad", pageUrl("scanIpad", "scan-ipad.html"), "受付・QR読み取り"],
-          ["獣医師画面", pageUrl("doctor", "doctor.html"), "診察開始・完了"],
-          ["オーナー管理", pageUrl("owner", "owner.html"), "今日やること"],
-          ["管理設定", pageUrl("admin", "admin.html"), "飼い主・ペット管理"],
-          ["全体チェック", pageUrl("systemCheck", "system-check.html"), "営業前チェック"],
-          ["Worker health", `${getApiBase()}/api/health`, "API稼働確認"]
-        ];
-
-        const root = $("urlList");
-        root.innerHTML = "";
-        items.forEach(([title, url, note]) => {
-          const a = document.createElement("a");
-          a.className = "mini-link";
-          a.href = url;
-          a.target = title.includes("Worker") ? "_blank" : "_self";
-          a.rel = "noopener";
-          a.innerHTML = `
-            <div>
-              <strong>${escapeHtml(title)}</strong>
-              <span>${escapeHtml(url)}</span>
-            </div>
-            <span class="tag ${title.includes("チェック") ? "warn" : "ok"}">${escapeHtml(note)}</span>
-          `;
-          root.appendChild(a);
-        });
-      }
-
-      async function refreshStatus() {
-        setStatus("worker", "確認中", "pending");
-        setStatus("clinic", "確認中", "pending");
-        setStatus("card", "確認中", "pending");
-
-        try {
-          state.health = await apiGet("/api/health", {});
-          setStatus("worker", "OK", "ok");
-        } catch (error) {
-          state.health = { error: error.message };
-          setStatus("worker", "NG", "ng");
-        }
-
-        try {
-          state.clinic = await apiGet("/api/public/clinic", { clinic_code: getClinicCode() });
-          if (state.clinic && state.clinic.clinic && state.clinic.clinic.clinic_name) {
-            $("clinicPill") && ($("clinicPill").textContent = state.clinic.clinic.clinic_name);
-          }
-          setStatus("clinic", "OK", "ok");
-        } catch (error) {
-          state.clinic = { error: error.message };
-          setStatus("clinic", "NG", "ng");
-        }
-
-        try {
-          state.cards = await apiGet("/api/member/pet-cards", { clinic_code: getClinicCode(), demo: "true" });
-          const count = Array.isArray(state.cards.cards) ? state.cards.cards.length : 0;
-          setStatus("card", `${count}件`, count > 0 ? "ok" : "ng");
-        } catch (error) {
-          state.cards = { error: error.message };
-          setStatus("card", "NG", "ng");
-        }
-
-        $("debugJson").textContent = JSON.stringify(state, null, 2);
-      }
-
-      function setStatus(key, text, status) {
-        const dot = $(`${key}Dot`);
-        const label = $(`${key}Status`);
-        if (label) label.textContent = text;
-        if (dot) {
-          dot.classList.remove("ok", "ng");
-          if (status === "ok") dot.classList.add("ok");
-          if (status === "ng") dot.classList.add("ng");
-        }
-      }
-
-      async function apiGet(path, params) {
-        const url = new URL(`${getApiBase()}${path}`);
-        Object.entries(params || {}).forEach(([key, value]) => {
-          if (value !== undefined && value !== null && String(value).trim() !== "") {
-            url.searchParams.set(key, String(value));
-          }
-        });
-
-        const res = await fetch(url.toString(), {
-          method: "GET",
-          headers: { "Accept": "application/json" }
-        });
-
-        const data = await res.json().catch(() => null);
-        if (!res.ok || !data || data.ok === false) {
-          throw new Error((data && (data.message || data.error)) || `APIエラー status=${res.status}`);
-        }
-        return data;
-      }
-
-      function escapeHtml(value) {
-        return String(value ?? "")
-          .replaceAll("&", "&amp;")
-          .replaceAll("<", "&lt;")
-          .replaceAll(">", "&gt;")
-          .replaceAll('"', "&quot;")
-          .replaceAll("'", "&#039;");
-      }
-    })();
+    loadStatus();
   </script>
 </body>
 </html>
