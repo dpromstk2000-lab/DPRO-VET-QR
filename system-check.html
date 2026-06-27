@@ -99,16 +99,16 @@
       <div class="brand">
         <div class="logo">✅</div>
         <div>
-          <small>STEP VET-27A｜管理コード自動保存版</small>
+          <small>STEP VET-28｜営業前DEMOリセット対応版</small>
           <strong>DPRO PET CARE LINE</strong>
         </div>
       </div>
       <nav class="nav">
-        <a class="pill" href="./index.html?v=step-vet-27a">管理トップ</a>
-        <a class="pill" href="./rich-menu.html?v=step-vet-27a">LINE入口</a>
-        <a class="pill" href="./scan-pc.html?v=step-vet-27a">受付PC</a>
-        <a class="pill" href="./doctor.html?v=step-vet-27a">ドクター</a>
-        <a class="pill" href="./owner.html?v=step-vet-27a">オーナー</a>
+        <a class="pill" href="./index.html?v=step-vet-28">管理トップ</a>
+        <a class="pill" href="./rich-menu.html?v=step-vet-28">LINE入口</a>
+        <a class="pill" href="./scan-pc.html?v=step-vet-28">受付PC</a>
+        <a class="pill" href="./doctor.html?v=step-vet-28">ドクター</a>
+        <a class="pill" href="./owner.html?v=step-vet-28">オーナー</a>
       </nav>
     </header>
 
@@ -155,7 +155,7 @@
     <nav class="quick-nav">
       <div class="nav-card" data-scroll="#urlSetPanel"><strong>1. URLセット</strong><span>端末別URLを作る</span></div>
       <div class="nav-card" data-scroll="#apiPanel"><strong>2. API・件数</strong><span>主要APIを確認</span></div>
-      <div class="nav-card" data-scroll="#rolePanel"><strong>3. 役割別確認</strong><span>受付/先生/オーナー</span></div>
+      <div class="nav-card" data-scroll="#demoResetPanel"><strong>3. DEMOリセット</strong><span>営業前に再生成</span></div>
       <div class="nav-card" data-scroll="#debugPanel"><strong>4. 黒ログ</strong><span>NGの原因を見る</span></div>
       <div class="nav-card" data-scroll="#latestLinksPanel"><strong>5. 最新リンク</strong><span>営業前に開くURL</span></div>
     </nav>
@@ -227,6 +227,31 @@
       </div>
     </section>
 
+
+    <section class="panel" id="demoResetPanel">
+      <div class="panel-head">
+        <div>
+          <h2>営業前DEMOリセット</h2>
+          <div class="small">営業前にボタン1つで、今日基準の受付・診察中・診療済み・LINEフォロー・予防案内を再作成します。</div>
+        </div>
+        <div class="button-row" style="margin:0;">
+          <button class="btn btn-dark" id="demoResetButton" type="button">営業前DEMOリセット実行</button>
+          <button class="btn btn-sub" id="demoResetCheckButton" type="button">リセット後チェック</button>
+        </div>
+      </div>
+
+      <div class="metric-row">
+        <div class="metric"><span>対象clinic_code</span><b id="demoClinicCode">-</b></div>
+        <div class="metric"><span>本日の受付</span><b id="demoQueueCount">-</b></div>
+        <div class="metric"><span>LINEフォロー</span><b id="demoFollowCount">-</b></div>
+        <div class="metric"><span>予防案内</span><b id="demoPreventionCount">-</b></div>
+      </div>
+
+      <div id="demoResetStatus" class="status-box info">
+        まだ実行していません。dpro_vet_demo の時だけ実行できます。
+      </div>
+    </section>
+
     <section class="panel" id="rolePanel">
       <div class="panel-head">
         <div>
@@ -271,7 +296,7 @@
     </section>
 
     <div class="footer">
-      DPRO PET CARE LINE / 動物病院LINE受付・診察券・フォロー管理 / system-check.html STEP VET-27A<br />
+      DPRO PET CARE LINE / 動物病院LINE受付・診察券・フォロー管理 / system-check.html STEP VET-28<br />
       この画面には Supabase Service Role Key は書き出していません。
     </div>
   </div>
@@ -289,18 +314,18 @@
     const CORRECT_DEMO_TOKEN = "DPRO-VET-2026-PETCARE-9147";
 
     const VERSION = {
-      index:"step-vet-27",
-      richMenu:"step-vet-27",
-      systemCheck:"step-vet-27a",
+      index:"step-vet-28",
+      richMenu:"step-vet-28",
+      systemCheck:"step-vet-28",
       debug:"step-vet-26",
-      member:"step-vet-27",
-      waiting:"step-vet-27",
-      scanPc:"step-vet-27",
-      scanIpad:"step-vet-27",
-      doctor:"step-vet-27",
-      owner:"step-vet-27",
-      admin:"step-vet-27",
-      adminQueue:"step-vet-27"
+      member:"step-vet-28",
+      waiting:"step-vet-28",
+      scanPc:"step-vet-28",
+      scanIpad:"step-vet-28",
+      doctor:"step-vet-28",
+      owner:"step-vet-28",
+      admin:"step-vet-28",
+      adminQueue:"step-vet-28"
     };
 
     const tests = [
@@ -413,6 +438,42 @@
       if(debug) log("info",`REQUEST GET ${safeUrl}`);
       const started=performance.now();
       const res=await fetch(url.toString(),{method:"GET",headers:needsAuth?authHeaders():{"Accept":"application/json"},cache:"no-store"});
+      const text=await res.text();
+      let data=null;
+      try{data=text?JSON.parse(text):null;}catch{data={raw:text};}
+      const ms=Math.round(performance.now()-started);
+      if(debug) log(res.ok?"ok":"ng",`RESPONSE ${res.status} ${res.statusText} / ${ms}ms`,data);
+      if(!res.ok || data?.ok===false){
+        const message=data?.message||data?.error||data?.raw||text||`HTTP ${res.status}`;
+        const error=new Error(message);
+        error.status=res.status;
+        error.data=data;
+        error.url=safeUrl;
+        throw error;
+      }
+      return data;
+    }
+    async function apiPost(path,body={},needsAuth=true,debug=false){
+      const url=buildUrl(path,{},false);
+      const safeUrl=url.toString().replaceAll(adminCode(),"***ADMIN***");
+      const payload={
+        clinic_code:clinicCode(),
+        staff_name:staffName(),
+        source_screen:"system-check-step-vet-28",
+        ...body
+      };
+      if(debug) log("info",`REQUEST POST ${safeUrl}`,payload);
+      const started=performance.now();
+      const res=await fetch(url.toString(),{
+        method:"POST",
+        headers:{
+          ...(needsAuth?authHeaders():{"Accept":"application/json"}),
+          "Content-Type":"application/json",
+          "Accept":"application/json"
+        },
+        body:JSON.stringify(payload),
+        cache:"no-store"
+      });
       const text=await res.text();
       let data=null;
       try{data=text?JSON.parse(text):null;}catch{data={raw:text};}
@@ -619,6 +680,59 @@
       renderApiChecks([{id:"health",label:"Worker health",area:"公開",status:lastResults.health?"pass":"fail",message:lastResults.health?"Worker起動OK":"Worker NG"},...results]);
       setStatus("debugSummary", "APIチェックを実行しました。NGがある場合は下のログにURL・ステータス・レスポンスが残っています。", results.some(x=>statusTone(x.status)==="fail")?"ng":"ok");
     }
+
+    function renderDemoCountsFromOwner(owner){
+      const queue=Array.isArray(owner?.queue_entries)?owner.queue_entries:[];
+      const follow=Array.isArray(owner?.followup_todos)?owner.followup_todos:[];
+      const prev=Array.isArray(owner?.prevention_todos)?owner.prevention_todos:[];
+      setText("demoClinicCode",clinicCode());
+      setText("demoQueueCount",queue.length+"件");
+      setText("demoFollowCount",follow.length+"件");
+      setText("demoPreventionCount",prev.length+"件");
+    }
+    async function runDemoReset(){
+      try{
+        autoSaveAdminCodeFromInput();
+        ensureAdminCode();
+        if(clinicCode()!==DEMO_CLINIC_CODE){
+          setStatus("demoResetStatus","安全ガード：営業前DEMOリセットは dpro_vet_demo のみ実行できます。本番 clinic_code では実行しません。","ng");
+          return;
+        }
+        const ok=confirm("営業前DEMOリセットを実行します。dpro_vet_demo のDEMOデータを今日基準で再作成します。よろしいですか？");
+        if(!ok)return;
+
+        setStatus("demoResetStatus","営業前DEMOリセット実行中です...","info");
+        const data=await apiPost("/api/admin/demo/sales-setup",{
+          confirm_text:"DEMO医院だけ実行",
+          reset_type:"step_vet_28_sales_demo_reset_final"
+        },true,true);
+
+        log("ok","営業前DEMOリセット OK",data);
+        setStatus("demoResetStatus",data.message || "営業前DEMOリセットを実行しました。リセット後チェックを実行してください。","ok");
+
+        const owner=await apiGet("/api/owner/today",{date:todayString()},true,true);
+        lastResults.ownerToday=owner;
+        renderDemoCountsFromOwner(owner);
+        await checkApiCounts(false);
+      }catch(e){
+        setStatus("demoResetStatus",e.message || "営業前DEMOリセットに失敗しました。","ng");
+        log("ng","営業前DEMOリセット NG",{message:e.message,status:e.status,url:e.url,data:e.data});
+      }
+    }
+    async function checkDemoResetResult(){
+      try{
+        autoSaveAdminCodeFromInput();
+        ensureAdminCode();
+        const owner=await apiGet("/api/owner/today",{date:todayString()},true,true);
+        lastResults.ownerToday=owner;
+        renderDemoCountsFromOwner(owner);
+        setStatus("demoResetStatus","リセット後チェックOKです。owner/today から受付・フォロー・予防案内を取得できました。","ok");
+        await checkApiCounts(false);
+      }catch(e){
+        setStatus("demoResetStatus",e.message || "リセット後チェックに失敗しました。","ng");
+        log("ng","リセット後チェック NG",{message:e.message,status:e.status,url:e.url,data:e.data});
+      }
+    }
     async function runAllChecks(){
       autoSaveAdminCodeFromInput();
       updateConfigStatus();
@@ -681,6 +795,8 @@
     function bindEvents(){
       $("runAllButton").addEventListener("click",runAllChecks);
       $("runDebugButton").addEventListener("click",runDebugChecks);
+      $("demoResetButton").addEventListener("click",runDemoReset);
+      $("demoResetCheckButton").addEventListener("click",checkDemoResetResult);
       $("saveAdminButton").addEventListener("click",saveAdminCode);
       $("forgetAdminButton").addEventListener("click",forgetAdminCode);
       $("generateUrlsButton").addEventListener("click",renderUrls);
@@ -701,9 +817,10 @@
       applyQueryParams();
       bindEvents();
       updateConfigStatus();
+      setText("demoClinicCode", clinicCode());
       renderUrls();
       renderLatestLinks();
-      log("info","system-check STEP VET-27A を起動しました。");
+      log("info","system-check STEP VET-28 を起動しました。");
     }
     init();
   </script>
