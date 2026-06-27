@@ -3,34 +3,64 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-<title>DPRO PET CARE LINE｜system-check STEP VET-25</title>
+<title>DPRO PET CARE LINE｜system-check STEP VET-25A</title>
 <script src="./config.js"></script>
 
 <style>
-:root{--bg:#f4f1ea;--card:#fff;--ink:#22302c;--muted:#6f7b75;--line:#d9d2c4;--main:#1f8f65;--main-dark:#223b34;--green-soft:#e8f7ef;--blue-soft:#edf5ff;--blue:#2d68a6;--amber:#8a621f;--amber-soft:#fff6de;--red:#b84a4a;--red-soft:#fff0ef;--shadow:0 18px 46px rgba(34,48,44,.12);--radius:24px}
+:root{--bg:#f4f1ea;--card:#fff;--ink:#22302c;--muted:#6f7b75;--line:#d9d2c4;--main:#1f8f65;--green-soft:#e8f7ef;--blue-soft:#edf5ff;--amber:#8a621f;--amber-soft:#fff6de;--red:#b84a4a;--red-soft:#fff0ef;--shadow:0 18px 46px rgba(34,48,44,.12);--radius:24px}
 *{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Yu Gothic","YuGothic","Noto Sans JP",Meiryo,sans-serif;color:var(--ink);background:radial-gradient(circle at top left,rgba(31,143,101,.17),transparent 35%),radial-gradient(circle at 88% 10%,rgba(231,151,36,.12),transparent 28%),linear-gradient(180deg,#fbfaf6 0%,var(--bg) 100%);line-height:1.7}
-a{color:inherit}button,input{font:inherit}.page{width:min(1260px,calc(100% - 28px));margin:0 auto;padding:22px 0 54px}.topbar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:18px}.brand{display:flex;align-items:center;gap:12px;min-width:0}.logo{width:52px;height:52px;border-radius:18px;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,#1f8f65,#83c99f);box-shadow:0 14px 26px rgba(31,143,101,.23);font-size:26px;flex:0 0 auto}.brand small{display:block;color:var(--muted);font-weight:950;font-size:12px;letter-spacing:.08em}.brand strong{display:block;font-size:clamp(19px,2.4vw,30px);line-height:1.12;letter-spacing:-.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px}
-.pill,.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1px solid var(--line);border-radius:999px;padding:9px 13px;background:rgba(255,255,255,.86);color:var(--ink);text-decoration:none;font-size:13px;font-weight:950;line-height:1.15;transition:.15s transform,.15s box-shadow,.15s background}.pill:hover,.btn:hover{transform:translateY(-1px);box-shadow:0 10px 22px rgba(34,48,44,.11);background:#fff}.btn-main{border-color:transparent;background:var(--main);color:#fff;box-shadow:0 14px 28px rgba(31,143,101,.24)}.btn-sub{border-color:#bfe3cc;background:var(--green-soft);color:#11704c}.btn-warn{border-color:#efd89e;background:var(--amber-soft);color:var(--amber)}.btn-danger{border-color:#ecc0bc;background:var(--red-soft);color:#9f3939}
-.hero{display:grid;grid-template-columns:1.05fr .95fr;gap:18px;align-items:stretch;margin-bottom:18px}.hero-card{position:relative;overflow:hidden;border-radius:32px;background:linear-gradient(135deg,rgba(34,59,52,.98),rgba(31,143,101,.92)),radial-gradient(circle at 86% 10%,rgba(255,255,255,.22),transparent 24%);color:#fff;padding:clamp(22px,3.6vw,42px);box-shadow:var(--shadow)}.hero-card::after{content:"PET";position:absolute;right:-8px;bottom:-42px;font-size:clamp(90px,15vw,190px);font-weight:1000;letter-spacing:.06em;opacity:.06;pointer-events:none}.card{border:1px solid rgba(217,210,196,.88);border-radius:var(--radius);background:rgba(255,255,255,.92);box-shadow:var(--shadow);padding:clamp(18px,2.5vw,28px)}.badge{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:8px 12px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.24);color:#fff;font-size:12px;font-weight:950;letter-spacing:.04em;margin-bottom:14px}.badge-dark{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:7px 11px;background:var(--green-soft);color:#11704c;font-size:12px;font-weight:950;margin-bottom:12px}
-h1{position:relative;z-index:1;margin:0 0 14px;font-size:clamp(32px,4.8vw,62px);line-height:1.06;letter-spacing:-.06em}h2{margin:0 0 12px;font-size:clamp(22px,2.8vw,34px);line-height:1.2;letter-spacing:-.03em}h3{margin:0 0 8px;font-size:20px;line-height:1.3}.lead{position:relative;z-index:1;margin:0;color:rgba(255,255,255,.88);font-size:clamp(14px,1.7vw,17px);font-weight:770;line-height:1.9}.plain-lead{margin:0;color:#5a6862;font-size:14px;font-weight:780;line-height:1.8}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.role{display:flex;gap:12px;align-items:flex-start;border:1px solid rgba(217,210,196,.86);border-radius:20px;background:#fffdf9;padding:16px;text-decoration:none;min-height:150px}.role:hover{transform:translateY(-2px);box-shadow:0 14px 28px rgba(34,48,44,.11)}.role-icon{width:48px;height:48px;border-radius:17px;display:grid;place-items:center;background:var(--green-soft);font-size:27px;flex:0 0 auto}.role strong{display:block;font-size:18px;line-height:1.25;margin-bottom:4px}.role p{margin:0;color:#61706a;font-size:12px;font-weight:820;line-height:1.6}.tagline{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}.tag{display:inline-flex;border-radius:999px;background:#f6f2e9;color:#79623d;padding:3px 8px;font-size:11px;font-weight:950}.tag.green{background:var(--green-soft);color:#11704c}.tag.blue{background:var(--blue-soft);color:#2d68a6}.tag.red{background:var(--red-soft);color:#9f3939}
-.status-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px}.metric{border:1px solid rgba(217,210,196,.86);border-radius:18px;background:#fffdf9;padding:13px;min-height:84px}.metric small{display:block;color:var(--muted);font-weight:950;font-size:12px}.metric b{display:block;font-size:26px;line-height:1.2;letter-spacing:-.04em;margin-top:2px}.metric span{display:block;color:#62706a;font-size:12px;font-weight:850;margin-top:2px}
-.section-title{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin:26px 0 12px}.section-title h2{margin:0}.section-title p{margin:0;color:var(--muted);text-align:right;font-size:13px;font-weight:850}.notice{border-radius:16px;padding:12px;margin-top:12px;font-size:13px;font-weight:850;line-height:1.65;background:var(--amber-soft);border:1px solid #efd89e;color:var(--amber)}.notice.ok{background:var(--green-soft);border-color:#bfe3cc;color:#11704c}.notice.ng{background:var(--red-soft);border-color:#ecc0bc;color:#9f3939}.notice.info{background:var(--blue-soft);border-color:#bdd5ef;color:#2d68a6}
-input{width:100%;border:1px solid #d8d0c0;border-radius:15px;padding:11px 12px;background:#fff;color:var(--ink);font-size:14px;font-weight:800;outline:none}.auth-box{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;margin-top:14px}.check-list{display:grid;gap:10px}.check{border:1px solid rgba(217,210,196,.86);border-radius:18px;background:#fffdf9;padding:13px;display:grid;grid-template-columns:54px 1fr auto;gap:12px;align-items:center}.check-mark{width:48px;height:48px;border-radius:17px;display:grid;place-items:center;background:#f6f2e9;font-weight:1000}.check.ok .check-mark{background:var(--green-soft);color:#11704c}.check.ng .check-mark{background:var(--red-soft);color:#9f3939}.check.run .check-mark{background:var(--blue-soft);color:#2d68a6}.check h4{margin:0;font-size:15px}.check p{margin:2px 0 0;color:#61706a;font-size:12px;font-weight:800}.footer-note{margin-top:18px;border:1px solid rgba(217,210,196,.88);background:rgba(255,255,255,.78);border-radius:22px;padding:14px;color:#56645e;font-size:13px;font-weight:780;line-height:1.7}
-@media(max-width:980px){.hero,.grid,.grid2{grid-template-columns:1fr}.status-grid{grid-template-columns:repeat(2,1fr)}.section-title{align-items:flex-start;flex-direction:column}.section-title p{text-align:left}.check{grid-template-columns:54px 1fr}.check .btn{grid-column:1/-1;justify-self:start}}
-@media(max-width:640px){.topbar{align-items:flex-start;flex-direction:column}.actions{justify-content:flex-start}.auth-box,.status-grid{grid-template-columns:1fr}.brand strong{white-space:normal}.hero-card,.card{border-radius:22px}}
+a{color:inherit}button,input{font:inherit}.page{width:min(1180px,calc(100% - 28px));margin:0 auto;padding:22px 0 54px}.topbar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:18px}.brand{display:flex;align-items:center;gap:12px;min-width:0}.logo{width:52px;height:52px;border-radius:18px;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,#1f8f65,#83c99f);box-shadow:0 14px 26px rgba(31,143,101,.23);font-size:26px;flex:0 0 auto}.brand small{display:block;color:var(--muted);font-weight:950;font-size:12px;letter-spacing:.08em}.brand strong{display:block;font-size:clamp(19px,2.4vw,30px);line-height:1.12;letter-spacing:-.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px}
+.pill,.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1px solid var(--line);border-radius:999px;padding:9px 13px;background:rgba(255,255,255,.86);color:var(--ink);text-decoration:none;font-size:13px;font-weight:950;line-height:1.15}.btn-main{border-color:transparent;background:var(--main);color:#fff;box-shadow:0 14px 28px rgba(31,143,101,.24)}.btn-danger{border-color:#ecc0bc;background:var(--red-soft);color:#9f3939}
+.hero{display:grid;grid-template-columns:1.05fr .95fr;gap:18px;align-items:stretch;margin-bottom:18px}.hero-card{position:relative;overflow:hidden;border-radius:32px;background:linear-gradient(135deg,rgba(34,59,52,.98),rgba(31,143,101,.92)),radial-gradient(circle at 86% 10%,rgba(255,255,255,.22),transparent 24%);color:#fff;padding:clamp(22px,3.6vw,42px);box-shadow:var(--shadow)}.hero-card::after{content:"OK";position:absolute;right:12px;bottom:-42px;font-size:clamp(90px,15vw,190px);font-weight:1000;letter-spacing:.06em;opacity:.06;pointer-events:none}.card{border:1px solid rgba(217,210,196,.88);border-radius:var(--radius);background:rgba(255,255,255,.92);box-shadow:var(--shadow);padding:clamp(18px,2.5vw,28px)}.badge{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:8px 12px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.24);color:#fff;font-size:12px;font-weight:950;letter-spacing:.04em;margin-bottom:14px}.badge-dark{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:7px 11px;background:var(--green-soft);color:#11704c;font-size:12px;font-weight:950;margin-bottom:12px}
+h1{position:relative;z-index:1;margin:0 0 14px;font-size:clamp(32px,4.8vw,62px);line-height:1.06;letter-spacing:-.06em}h2{margin:0 0 12px;font-size:clamp(22px,2.8vw,34px);line-height:1.2;letter-spacing:-.03em}.lead{position:relative;z-index:1;margin:0;color:rgba(255,255,255,.88);font-size:clamp(14px,1.7vw,17px);font-weight:770;line-height:1.9}.plain-lead{margin:0;color:#5a6862;font-size:14px;font-weight:780;line-height:1.8}
+.notice{border-radius:16px;padding:12px;margin-top:12px;font-size:13px;font-weight:850;line-height:1.65;background:var(--amber-soft);border:1px solid #efd89e;color:var(--amber)}.notice.ok{background:var(--green-soft);border-color:#bfe3cc;color:#11704c}.notice.ng{background:var(--red-soft);border-color:#ecc0bc;color:#9f3939}.notice.info{background:var(--blue-soft);border-color:#bdd5ef;color:#2d68a6}
+input{width:100%;border:1px solid #d8d0c0;border-radius:15px;padding:11px 12px;background:#fff;color:var(--ink);font-size:14px;font-weight:800;outline:none}.auth-box{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;margin-top:14px}.check-list{display:grid;gap:10px}.check{border:1px solid rgba(217,210,196,.86);border-radius:18px;background:#fffdf9;padding:13px;display:grid;grid-template-columns:54px 1fr auto;gap:12px;align-items:center}.check-mark{width:48px;height:48px;border-radius:17px;display:grid;place-items:center;background:#f6f2e9;font-weight:1000}.check.ok .check-mark{background:var(--green-soft);color:#11704c}.check.ng .check-mark{background:var(--red-soft);color:#9f3939}.check.run .check-mark{background:var(--blue-soft);color:#2d68a6}.check h4{margin:0;font-size:15px}.check p{margin:2px 0 0;color:#61706a;font-size:12px;font-weight:800}.tag{display:inline-flex;border-radius:999px;background:#f6f2e9;color:#79623d;padding:3px 8px;font-size:11px;font-weight:950}.tag.green{background:var(--green-soft);color:#11704c}.tag.red{background:var(--red-soft);color:#9f3939}.footer-note{margin-top:18px;border:1px solid rgba(217,210,196,.88);background:rgba(255,255,255,.78);border-radius:22px;padding:14px;color:#56645e;font-size:13px;font-weight:780;line-height:1.7}
+@media(max-width:900px){.hero{grid-template-columns:1fr}.check{grid-template-columns:54px 1fr}.check .tag{grid-column:1/-1;width:max-content}.topbar{align-items:flex-start;flex-direction:column}.actions{justify-content:flex-start}.auth-box{grid-template-columns:1fr}.brand strong{white-space:normal}.hero-card,.card{border-radius:22px}}
 </style>
 
 </head>
 <body>
 <main class="page">
-<header class="topbar"><div class="brand"><div class="logo">✅</div><div><small>STEP VET-25｜最新システム確認</small><strong>DPRO PET CARE LINE</strong></div></div><nav class="actions"><a class="pill" href="./index.html?v=step-vet-25">管理トップ</a><a class="pill" href="./scan-pc.html?v=step-vet-25">受付PC</a><a class="pill" href="./doctor.html?v=step-vet-25">ドクター</a><a class="pill" href="./owner.html?v=step-vet-25">オーナー</a></nav></header>
+<header class="topbar">
+  <div class="brand"><div class="logo">✅</div><div><small>STEP VET-25A｜管理コード互換修正版</small><strong>DPRO PET CARE LINE</strong></div></div>
+  <nav class="actions">
+    <a class="pill" href="./index.html?v=step-vet-25a">管理トップ</a>
+    <a class="pill" href="./scan-pc.html?v=step-vet-25a">受付PC</a>
+    <a class="pill" href="./doctor.html?v=step-vet-25a">ドクター</a>
+    <a class="pill" href="./owner.html?v=step-vet-25a">オーナー</a>
+  </nav>
+</header>
+
 <section class="hero">
-  <div class="hero-card"><span class="badge">営業前・本番前チェック</span><h1>NGなしなら、<br>営業DEMOに進めます。</h1><p class="lead">Worker、Supabase、診察券、QR受付、順番受付、ドクター、オーナー、LINEフォロー、予防案内の主要APIを確認します。</p></div>
-  <div class="card"><span class="badge-dark">管理コード</span><p class="plain-lead">QR受付・owner/doctor・フォロー系の確認には管理コードが必要です。</p><div id="authStatus" class="notice">管理コード確認中</div><div class="auth-box"><input id="adminTokenInput" type="password" placeholder="管理コードを入力" autocomplete="off" /><button class="btn btn-main" id="saveAdminTokenBtn" type="button">保存</button><button class="btn btn-danger" id="clearAdminTokenBtn" type="button">削除</button></div><div class="button-row" style="margin-top:12px"><button class="btn btn-main" id="runBtn" type="button">全チェック実行</button></div></div>
+  <div class="hero-card">
+    <span class="badge">営業前・本番前チェック</span>
+    <h1>管理コードを<br>URLにも付けて確認。</h1>
+    <p class="lead">直接URLで owner/today がOKだったため、WorkerとADMIN_TOKENは正常です。この版は管理コードをヘッダーだけでなく admin_code パラメータにも付けて確認します。</p>
+  </div>
+  <div class="card">
+    <span class="badge-dark">管理コード</span>
+    <p class="plain-lead">管理系チェックには管理コードが必要です。保存後に全チェック実行してください。</p>
+    <div id="authStatus" class="notice">管理コード確認中</div>
+    <div class="auth-box">
+      <input id="adminTokenInput" type="password" placeholder="管理コードを入力" autocomplete="off" />
+      <button class="btn btn-main" id="saveAdminTokenBtn" type="button">保存</button>
+      <button class="btn btn-danger" id="clearAdminTokenBtn" type="button">削除</button>
+    </div>
+    <div style="margin-top:12px">
+      <button class="btn btn-main" id="runBtn" type="button">全チェック実行</button>
+    </div>
+  </div>
 </section>
-<section class="card"><h2>確認結果</h2><div id="summary" class="notice info">まだ実行していません。</div><div id="checkList" class="check-list" style="margin-top:14px"></div></section>
-<div class="footer-note">このチェックは基本的に読み取り中心です。データを作成するテストは、各画面で実際に操作して確認してください。</div>
+
+<section class="card">
+  <h2>確認結果</h2>
+  <div id="summary" class="notice info">まだ実行していません。</div>
+  <div id="checkList" class="check-list" style="margin-top:14px"></div>
+</section>
+
+<div class="footer-note">
+  STEP VET-25A：前回のNG原因は「管理コードが間違い」ではなく、system-check側の送信形式でした。この版は現在のWorkerに合わせて admin_code でも送ります。
+</div>
 </main>
 
 <script>
@@ -38,18 +68,63 @@ const CONFIG = window.DPRO_CONFIG || {};
 const API_BASE_URL = (CONFIG.API_BASE_URL || "https://dpro-vet-qr-api.dpromstk2000.workers.dev").replace(/\/$/, "");
 const CLINIC_CODE = CONFIG.CLINIC_CODE || CONFIG.DEFAULT_CLINIC_CODE || "dpro_vet_demo";
 const ADMIN_TOKEN_KEYS = ["dpro_vet_admin_code", "DPRO_VET_ADMIN_CODE", "DPRO_VET_ADMIN_TOKEN", "dpro_vet_admin_token", "DPRO_ADMIN_TOKEN", "dpro_admin_token"];
-function todayString(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;}
-function getAdminToken(){if(typeof CONFIG.getAdminToken==="function"){const v=CONFIG.getAdminToken();if(v)return String(v).trim();}for(const k of ADMIN_TOKEN_KEYS){const v=localStorage.getItem(k)||sessionStorage.getItem(k);if(v&&String(v).trim())return String(v).trim();}return "";}
-function saveAdminToken(token){const v=String(token||"").trim();if(!v)return;if(typeof CONFIG.setAdminToken==="function")CONFIG.setAdminToken(v,true);ADMIN_TOKEN_KEYS.forEach(k=>{localStorage.setItem(k,v);sessionStorage.setItem(k,v);});}
-function clearAdminToken(){if(typeof CONFIG.clearAdminToken==="function")CONFIG.clearAdminToken();ADMIN_TOKEN_KEYS.forEach(k=>{localStorage.removeItem(k);sessionStorage.removeItem(k);});}
-function headers(admin=false){const h={};const t=getAdminToken();if(admin&&t){h["X-DPRO-Admin-Code"]=t;h["x-dpro-admin-code"]=t;h["x-admin-token"]=t;h["X-Admin-Token"]=t;h["Authorization"]="Bearer "+t;}return h;}
-async function apiGet(path, params={}, admin=false){const url=new URL(API_BASE_URL+path);Object.entries({clinic_code:CLINIC_CODE,...params}).forEach(([k,v])=>{if(v!==undefined&&v!==null&&v!=="")url.searchParams.set(k,v);});const res=await fetch(url.toString(),{method:"GET",headers:headers(admin)});const data=await res.json().catch(()=>({}));if(!res.ok||data.ok===false)throw new Error(data.message||data.error||`API Error ${res.status}`);return data;}
-function renderAuthStatus(){const box=document.getElementById("authStatus");if(!box)return;const ok=!!getAdminToken();box.className=ok?"notice ok":"notice";box.textContent=ok?"管理コード保存済みです。管理画面・QR確認が使えます。":"管理コード未保存です。管理系チェックには保存してください。";}
-function setupAuth(){renderAuthStatus();document.getElementById("saveAdminTokenBtn")?.addEventListener("click",()=>{const i=document.getElementById("adminTokenInput");saveAdminToken(i?.value);if(i)i.value="";renderAuthStatus();});document.getElementById("clearAdminTokenBtn")?.addEventListener("click",()=>{clearAdminToken();renderAuthStatus();});}
-</script>
 
-<script>
-setupAuth();
+function todayString(){
+  const d=new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+}
+function getAdminToken(){
+  if(typeof CONFIG.getAdminToken==="function"){const v=CONFIG.getAdminToken();if(v)return String(v).trim();}
+  for(const k of ADMIN_TOKEN_KEYS){const v=localStorage.getItem(k)||sessionStorage.getItem(k);if(v&&String(v).trim())return String(v).trim();}
+  return "";
+}
+function saveAdminToken(token){
+  const v=String(token||"").trim();
+  if(!v)return;
+  if(typeof CONFIG.setAdminToken==="function")CONFIG.setAdminToken(v,true);
+  ADMIN_TOKEN_KEYS.forEach(k=>{localStorage.setItem(k,v);sessionStorage.setItem(k,v);});
+}
+function clearAdminToken(){
+  if(typeof CONFIG.clearAdminToken==="function")CONFIG.clearAdminToken();
+  ADMIN_TOKEN_KEYS.forEach(k=>{localStorage.removeItem(k);sessionStorage.removeItem(k);});
+}
+function headers(admin=false){
+  const h={};
+  const t=getAdminToken();
+  if(admin&&t){
+    h["X-DPRO-Admin-Code"]=t;
+    h["x-dpro-admin-code"]=t;
+    h["x-admin-token"]=t;
+    h["X-Admin-Token"]=t;
+    h["X-Admin-Code"]=t;
+    h["Authorization"]="Bearer "+t;
+  }
+  return h;
+}
+async function apiGet(path, params={}, admin=false){
+  const url=new URL(API_BASE_URL+path);
+  Object.entries({clinic_code:CLINIC_CODE,...params}).forEach(([k,v])=>{if(v!==undefined&&v!==null&&v!=="")url.searchParams.set(k,v);});
+  const t=getAdminToken();
+  if(admin&&t){
+    url.searchParams.set("admin_code", t);
+    url.searchParams.set("admin_token", t);
+  }
+  const res=await fetch(url.toString(),{method:"GET",headers:headers(admin)});
+  const data=await res.json().catch(()=>({}));
+  if(!res.ok||data.ok===false)throw new Error(data.message||data.error||`API Error ${res.status}`);
+  return data;
+}
+function renderAuthStatus(){
+  const box=document.getElementById("authStatus");
+  const ok=!!getAdminToken();
+  box.className=ok?"notice ok":"notice";
+  box.textContent=ok?"管理コード保存済みです。管理系チェックが使えます。":"管理コード未保存です。保存してください。";
+}
+function setupAuth(){
+  renderAuthStatus();
+  document.getElementById("saveAdminTokenBtn").addEventListener("click",()=>{const i=document.getElementById("adminTokenInput");saveAdminToken(i.value);i.value="";renderAuthStatus();});
+  document.getElementById("clearAdminTokenBtn").addEventListener("click",()=>{clearAdminToken();renderAuthStatus();});
+}
 
 const checks = [
   {id:"health", name:"Worker health", detail:"APIが起動しているか", admin:false, run:()=>apiGet("/api/health", {}, false)},
@@ -61,10 +136,9 @@ const checks = [
   {id:"ownerToday", name:"オーナー今日やること", detail:"受付・フォロー・予防・未連携", admin:true, run:()=>apiGet("/api/owner/today", {date:todayString()}, true)},
   {id:"doctorQueue", name:"ドクター受付一覧", detail:"doctor.htmlで使う受付一覧", admin:true, run:()=>apiGet("/api/doctor/queue/today", {date:todayString()}, true)},
   {id:"queueSettings", name:"受付ルール設定", detail:"admin-queue.htmlの設定取得", admin:true, run:()=>apiGet("/api/admin/queue/settings", {}, true)},
-  {id:"ownerFollowups", name:"LINEフォロー一覧", detail:"受付が送るLINEフォロー", admin:true, run:()=>apiGet("/api/owner/followups", {limit:20}, true)},
-  {id:"preventions", name:"予防案内一覧", detail:"予防・お薬フォロー", admin:true, run:()=>apiGet("/api/admin/prevention-schedules", {limit:20}, true)},
-  {id:"lineUnlinked", name:"LINE未連携一覧", detail:"LINE連携案内対象", admin:true, run:()=>apiGet("/api/owner/line-unlinked-guardians", {limit:20}, true)},
-  {id:"safety", name:"安全チェック", detail:"管理系安全確認", admin:true, run:()=>apiGet("/api/admin/safety-check", {}, true)}
+  {id:"followupsInOwner", name:"LINEフォロー確認", detail:"owner/today内のfollowup_todosを確認", admin:true, run:async(ctx)=>{const data=ctx.ownerToday||await apiGet("/api/owner/today", {date:todayString()}, true);return {items:data.followup_todos||[]};}},
+  {id:"preventionsInOwner", name:"予防案内確認", detail:"owner/today内のprevention_todosを確認", admin:true, run:async(ctx)=>{const data=ctx.ownerToday||await apiGet("/api/owner/today", {date:todayString()}, true);return {items:data.prevention_todos||[]};}},
+  {id:"unlinkedInOwner", name:"LINE未連携確認", detail:"owner/today内のline_unlinked_guardiansを確認", admin:true, run:async(ctx)=>{const data=ctx.ownerToday||await apiGet("/api/owner/today", {date:todayString()}, true);return {items:data.line_unlinked_guardians||[]};}}
 ];
 
 const list = document.getElementById("checkList");
@@ -77,45 +151,43 @@ function renderInitial(){
     </div>
   `).join("");
 }
-function setCheck(id, status, msg){
-  const node = document.getElementById("check-"+id);
+function setCheck(id,status,msg){
+  const node=document.getElementById("check-"+id);
   if(!node)return;
   node.classList.remove("ok","ng","run");
   node.classList.add(status);
-  node.querySelector(".check-mark").textContent = status==="ok" ? "OK" : status==="ng" ? "NG" : "...";
-  node.querySelector("p").textContent = msg;
+  node.querySelector(".check-mark").textContent=status==="ok"?"OK":status==="ng"?"NG":"...";
+  node.querySelector("p").textContent=msg;
 }
 async function runChecks(){
   renderAuthStatus();
-  const summary = document.getElementById("summary");
-  summary.className = "notice info";
-  summary.textContent = "チェック実行中です。";
-  const ctx = {};
-  let ok=0, ng=0;
+  const summary=document.getElementById("summary");
+  summary.className="notice info";
+  summary.textContent="チェック実行中です。";
+  const ctx={};
+  let ok=0,ng=0;
 
   for(const c of checks){
-    if(c.admin && !getAdminToken()){
-      setCheck(c.id,"ng","管理コードが未保存です。");
-      ng++;
-      continue;
-    }
+    if(c.admin&&!getAdminToken()){setCheck(c.id,"ng","管理コードが未保存です。");ng++;continue;}
     setCheck(c.id,"run","確認中...");
     try{
-      const data = await c.run(ctx);
-      ctx[c.id] = data;
-      const count = Array.isArray(data.items) ? data.items.length : Array.isArray(data.cards) ? data.cards.length : Array.isArray(data.queue_entries) ? data.queue_entries.length : "";
-      setCheck(c.id,"ok", count !== "" ? `取得OK：${count}件` : "取得OK");
+      const data=await c.run(ctx);
+      ctx[c.id]=data;
+      const count=Array.isArray(data.items)?data.items.length:Array.isArray(data.cards)?data.cards.length:Array.isArray(data.queue_entries)?data.queue_entries.length:"";
+      setCheck(c.id,"ok",count!==""?`取得OK：${count}件`:"取得OK");
       ok++;
     }catch(e){
-      setCheck(c.id,"ng", e.message || "エラー");
+      setCheck(c.id,"ng",e.message||"エラー");
       ng++;
     }
   }
-  summary.className = ng ? "notice ng" : "notice ok";
-  summary.textContent = ng ? `チェック完了：OK ${ok} / NG ${ng}` : `NGなし：OK ${ok}`;
+  summary.className=ng?"notice ng":"notice ok";
+  summary.textContent=ng?`チェック完了：OK ${ok} / NG ${ng}`:`NGなし：OK ${ok}`;
 }
+
+setupAuth();
 renderInitial();
-document.getElementById("runBtn").addEventListener("click", runChecks);
+document.getElementById("runBtn").addEventListener("click",runChecks);
 </script>
 </body>
 </html>
