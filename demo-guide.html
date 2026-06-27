@@ -2,562 +2,353 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>DPRO SHOP | STEP 30-31 営業デモ手順書</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>DPRO PET CARE LINE｜営業デモガイド STEP VET-29</title>
+  <script src="./config.js"></script>
   <style>
-    :root {
-      --line: #06c755;
-      --line-dark: #03a846;
-      --ink: #0f172a;
-      --muted: #64748b;
-      --soft: #f8fafc;
-      --card: #ffffff;
-      --border: #e2e8f0;
-      --blue: #2563eb;
-      --amber: #d97706;
-      --rose: #e11d48;
-      --green-soft: #f0fdf4;
-      --blue-soft: #eff6ff;
-      --amber-soft: #fffbeb;
-      --shadow: 0 18px 50px rgba(15, 23, 42, 0.08);
-      --radius: 26px;
+    :root{
+      --bg:#f4f1ea; --panel:#fff; --ink:#22302c; --muted:#6f7b75; --line:#d9d2c4;
+      --main:#1f8f65; --main-dark:#223b34; --green:#18a765; --green-soft:#e8f7ef;
+      --blue:#2d68a6; --blue-soft:#edf5ff; --amber:#8a621f; --amber-soft:#fff6de;
+      --red:#b84a4a; --red-soft:#fff0ef; --gold:#b9924b; --gold-soft:#fff7e6;
+      --shadow:0 24px 72px rgba(34,48,44,.13); --radius:24px;
     }
-
-    * {
-      box-sizing: border-box;
+    *{box-sizing:border-box}
+    body{
+      margin:0; min-height:100vh; color:var(--ink);
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Yu Gothic","YuGothic","Noto Sans JP",Meiryo,sans-serif;
+      background:radial-gradient(circle at 10% 0%,rgba(31,143,101,.16),transparent 32%),
+      radial-gradient(circle at 88% 8%,rgba(231,151,36,.13),transparent 30%),
+      linear-gradient(180deg,#fbfaf6 0%,var(--bg) 100%);
+      line-height:1.75;
     }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      color: var(--ink);
-      background:
-        radial-gradient(circle at 8% 2%, rgba(6, 199, 85, 0.13), transparent 28%),
-        radial-gradient(circle at 90% 12%, rgba(37, 99, 235, 0.10), transparent 28%),
-        linear-gradient(180deg, #ffffff, #f8fafc 52%, #eef2ff);
+    a{color:inherit} button,input,textarea{font:inherit}
+    .wrap{width:min(1280px,calc(100% - 28px));margin:18px auto 54px}
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:14px}
+    .brand{display:flex;align-items:center;gap:12px;min-width:0}
+    .logo{width:52px;height:52px;border-radius:18px;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,#1f8f65,#83c99f);box-shadow:0 14px 26px rgba(31,143,101,.23);font-size:24px;font-weight:1000;flex:0 0 auto}
+    .brand small{display:block;color:var(--muted);font-weight:950;font-size:12px;letter-spacing:.08em}
+    .brand strong{display:block;font-size:clamp(19px,2.4vw,30px);line-height:1.12;letter-spacing:-.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .nav{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px}
+    .pill,.btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1px solid var(--line);
+      border-radius:999px;padding:9px 13px;background:rgba(255,255,255,.86);color:var(--ink);text-decoration:none;
+      font-size:13px;font-weight:950;line-height:1.15;cursor:pointer;transition:.15s transform,.15s box-shadow,.15s background;
     }
-
-    a {
-      color: inherit;
-      text-decoration: none;
+    .pill:hover,.btn:hover{transform:translateY(-1px);box-shadow:0 10px 22px rgba(34,48,44,.11);background:#fff}
+    .btn-main{border-color:transparent;background:var(--main);color:#fff;box-shadow:0 14px 28px rgba(31,143,101,.24)}
+    .btn-sub{border-color:#bfe3cc;background:var(--green-soft);color:#11704c}
+    .btn-warn{border-color:#efd89e;background:var(--amber-soft);color:var(--amber)}
+    .btn-danger{border-color:#ecc0bc;background:var(--red-soft);color:#9f3939}
+    .btn-dark{border-color:#234038;background:#07100d;color:#eafff4}
+    .hero{display:grid;grid-template-columns:1.05fr .95fr;gap:16px;align-items:stretch;margin-bottom:16px}
+    .hero-card{
+      position:relative;overflow:hidden;border-radius:32px;background:linear-gradient(135deg,rgba(34,59,52,.98),rgba(31,143,101,.92));
+      color:#fff;padding:clamp(22px,3.6vw,42px);box-shadow:var(--shadow);
     }
-
-    .page {
-      width: min(1180px, calc(100% - 28px));
-      margin: 0 auto;
-      padding: 28px 0 52px;
-    }
-
-    .hero {
-      border-radius: 34px;
-      background:
-        linear-gradient(135deg, rgba(255,255,255,0.96), rgba(240,253,244,0.92)),
-        radial-gradient(circle at right top, rgba(6,199,85,0.18), transparent 38%);
-      border: 1px solid rgba(226, 232, 240, 0.9);
-      box-shadow: var(--shadow);
-      padding: 28px;
-      display: grid;
-      gap: 18px;
-      overflow: hidden;
-      position: relative;
-    }
-
-    .hero::after {
-      content: "";
-      position: absolute;
-      right: -90px;
-      top: -90px;
-      width: 260px;
-      height: 260px;
-      border-radius: 999px;
-      background: rgba(6, 199, 85, 0.12);
-    }
-
-    .badge {
-      display: inline-flex;
-      width: fit-content;
-      align-items: center;
-      gap: 8px;
-      border-radius: 999px;
-      background: #dcfce7;
-      color: #166534;
-      padding: 8px 13px;
-      font-size: 12px;
-      line-height: 1;
-      font-weight: 900;
-      position: relative;
-      z-index: 1;
-    }
-
-    h1 {
-      margin: 0;
-      font-size: clamp(30px, 4vw, 54px);
-      line-height: 1.08;
-      letter-spacing: -0.07em;
-      font-weight: 950;
-      position: relative;
-      z-index: 1;
-    }
-
-    .lead {
-      margin: 0;
-      color: #334155;
-      font-size: clamp(15px, 1.8vw, 19px);
-      line-height: 1.9;
-      font-weight: 780;
-      max-width: 860px;
-      position: relative;
-      z-index: 1;
-    }
-
-    .hero-actions {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 12px;
-      position: relative;
-      z-index: 1;
-    }
-
-    .hero-link {
-      border-radius: 22px;
-      padding: 16px;
-      min-height: 118px;
-      display: grid;
-      align-content: space-between;
-      background: #ffffff;
-      border: 1px solid var(--border);
-      box-shadow: 0 12px 32px rgba(15,23,42,0.06);
-      transition: transform 0.16s ease, box-shadow 0.16s ease;
-    }
-
-    .hero-link:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 18px 44px rgba(15,23,42,0.12);
-    }
-
-    .hero-link b {
-      display: block;
-      font-size: 17px;
-      line-height: 1.35;
-      font-weight: 950;
-      letter-spacing: -0.04em;
-    }
-
-    .hero-link span {
-      display: block;
-      margin-top: 8px;
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.55;
-      font-weight: 800;
-    }
-
-    .section {
-      margin-top: 22px;
-      display: grid;
-      gap: 14px;
-    }
-
-    .section-title {
-      margin: 0;
-      font-size: 24px;
-      line-height: 1.35;
-      letter-spacing: -0.06em;
-      font-weight: 950;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 14px;
-    }
-
-    .card {
-      border-radius: var(--radius);
-      background: rgba(255, 255, 255, 0.96);
-      border: 1px solid var(--border);
-      box-shadow: 0 10px 36px rgba(15,23,42,0.06);
-      padding: 18px;
-      display: grid;
-      gap: 12px;
-    }
-
-    .card h2,
-    .card h3 {
-      margin: 0;
-      font-size: 19px;
-      line-height: 1.45;
-      letter-spacing: -0.05em;
-      font-weight: 950;
-    }
-
-    .card p {
-      margin: 0;
-      color: #475569;
-      font-size: 13px;
-      line-height: 1.85;
-      font-weight: 760;
-    }
-
-    .flow {
-      counter-reset: flow;
-      display: grid;
-      gap: 12px;
-    }
-
-    .flow-item {
-      counter-increment: flow;
-      border-radius: 24px;
-      background: #ffffff;
-      border: 1px solid var(--border);
-      box-shadow: 0 8px 28px rgba(15,23,42,0.05);
-      padding: 16px;
-      display: grid;
-      grid-template-columns: 54px 1fr auto;
-      gap: 14px;
-      align-items: center;
-    }
-
-    .flow-num {
-      width: 48px;
-      height: 48px;
-      border-radius: 18px;
-      display: grid;
-      place-items: center;
-      background: var(--green-soft);
-      color: #166534;
-      font-size: 18px;
-      font-weight: 950;
-    }
-
-    .flow-num::before {
-      content: counter(flow);
-    }
-
-    .flow-item h3 {
-      margin: 0;
-      font-size: 18px;
-      line-height: 1.45;
-      letter-spacing: -0.04em;
-      font-weight: 950;
-    }
-
-    .flow-item p {
-      margin: 4px 0 0;
-      color: #475569;
-      font-size: 13px;
-      line-height: 1.75;
-      font-weight: 760;
-    }
-
-    .button {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 999px;
-      padding: 11px 14px;
-      background: var(--line);
-      color: #ffffff;
-      font-size: 13px;
-      line-height: 1;
-      font-weight: 950;
-      white-space: nowrap;
-      box-shadow: 0 10px 24px rgba(6,199,85,0.22);
-    }
-
-    .button.secondary {
-      background: #0f172a;
-      box-shadow: 0 10px 24px rgba(15,23,42,0.18);
-    }
-
-    .talk {
-      background: #0f172a;
-      color: #ffffff;
-      border-radius: 30px;
-      padding: 22px;
-      display: grid;
-      gap: 12px;
-      box-shadow: var(--shadow);
-    }
-
-    .talk h2 {
-      margin: 0;
-      font-size: 24px;
-      line-height: 1.35;
-      letter-spacing: -0.06em;
-      font-weight: 950;
-    }
-
-    .talk p {
-      margin: 0;
-      color: #cbd5e1;
-      font-size: 14px;
-      line-height: 1.9;
-      font-weight: 760;
-    }
-
-    .script-box {
-      border-radius: 20px;
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.16);
-      padding: 14px;
-      color: #f8fafc;
-      font-size: 14px;
-      line-height: 1.9;
-      font-weight: 820;
-      white-space: pre-wrap;
-    }
-
-    .checklist {
-      display: grid;
-      gap: 9px;
-    }
-
-    .check {
-      display: grid;
-      grid-template-columns: 24px 1fr;
-      gap: 8px;
-      align-items: start;
-      color: #334155;
-      font-size: 13px;
-      line-height: 1.75;
-      font-weight: 790;
-    }
-
-    .check::before {
-      content: "✓";
-      width: 22px;
-      height: 22px;
-      border-radius: 8px;
-      display: grid;
-      place-items: center;
-      background: #dcfce7;
-      color: #166534;
-      font-size: 13px;
-      font-weight: 950;
-      margin-top: 1px;
-    }
-
-    .notice {
-      border-radius: 24px;
-      border: 1px solid #fed7aa;
-      background: #fff7ed;
-      color: #9a3412;
-      padding: 16px;
-      font-size: 13px;
-      line-height: 1.8;
-      font-weight: 800;
-    }
-
-    .notice strong {
-      display: block;
-      color: #0f172a;
-      font-size: 15px;
-      line-height: 1.45;
-      font-weight: 950;
-      margin-bottom: 4px;
-    }
-
-    .small {
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.7;
-      font-weight: 760;
-    }
-
-    @media (max-width: 900px) {
-      .hero-actions,
-      .grid {
-        grid-template-columns: 1fr 1fr;
-      }
-
-      .flow-item {
-        grid-template-columns: 46px 1fr;
-      }
-
-      .flow-item .button {
-        grid-column: 1 / -1;
-      }
-    }
-
-    @media (max-width: 560px) {
-      .hero {
-        padding: 22px;
-      }
-
-      .hero-actions,
-      .grid {
-        grid-template-columns: 1fr;
-      }
-
-      .flow-item {
-        grid-template-columns: 1fr;
-      }
-
-      .flow-num {
-        width: 42px;
-        height: 42px;
-      }
-    }
+    .hero-card::after{content:"DEMO";position:absolute;right:-30px;bottom:-46px;font-size:clamp(78px,14vw,180px);font-weight:1000;letter-spacing:.06em;opacity:.06;pointer-events:none}
+    .badge{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:8px 12px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.24);color:#fff;font-size:12px;font-weight:950;letter-spacing:.04em;margin-bottom:14px}
+    .badge-dark{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:7px 11px;background:var(--green-soft);color:#11704c;font-size:12px;font-weight:950;margin-bottom:12px}
+    h1{position:relative;z-index:1;margin:0 0 14px;font-size:clamp(31px,4.5vw,60px);line-height:1.08;letter-spacing:-.055em}
+    h2{margin:0 0 10px;font-size:clamp(22px,2.6vw,32px);line-height:1.2;letter-spacing:-.03em}
+    h3{margin:0 0 8px;font-size:19px;line-height:1.35}
+    .lead{position:relative;z-index:1;margin:0;color:rgba(255,255,255,.88);font-size:clamp(14px,1.7vw,17px);font-weight:770;line-height:1.9}
+    .plain-lead{margin:0;color:#5a6862;font-size:14px;font-weight:780;line-height:1.8}
+    .panel{border:1px solid rgba(217,210,196,.88);border-radius:var(--radius);background:rgba(255,255,255,.92);box-shadow:var(--shadow);padding:clamp(18px,2.5vw,28px);margin:16px 0}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+    .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+    .summary-card{background:#fff;border:1px solid rgba(217,210,196,.9);border-radius:20px;padding:15px;box-shadow:0 12px 36px rgba(34,48,44,.06)}
+    .summary-card strong{display:block;font-size:18px;line-height:1.25;margin-bottom:6px}
+    .summary-card p{margin:0;color:var(--muted);font-size:12px;font-weight:850;line-height:1.6}
+    .summary-card.green{background:#f0fbf5;border-color:#bfe3cc}.summary-card.gold{background:#fffaf0;border-color:#efd89e}.summary-card.blue{background:#f4f9ff;border-color:#bdd5ef}.summary-card.red{background:#fff5f3;border-color:#ecc0bc}
+    .route{display:grid;grid-template-columns:48px 1fr auto;gap:12px;align-items:center;border:1px solid rgba(217,210,196,.9);background:#fff;border-radius:18px;padding:13px;margin-top:10px}
+    .route-no{width:48px;height:48px;border-radius:16px;display:grid;place-items:center;background:var(--green-soft);color:#11704c;font-weight:1000;font-size:18px}
+    .route h3{font-size:16px;margin:0 0 2px}.route p{font-size:12px;margin:0;color:#61706a;font-weight:850}.route-actions{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}
+    .script-box{background:#07100d;color:#eafff4;border-radius:22px;padding:18px;border:1px solid #234038;box-shadow:inset 0 0 0 1px rgba(255,255,255,.02)}
+    .script-box h3{color:#43e886}.script-box p{color:#d3f3e7;margin:0 0 12px;font-size:13px;font-weight:780}
+    textarea.copy-box{width:100%;min-height:190px;background:#07100d;color:#eafff4;border:1px solid #234038;border-radius:16px;padding:14px;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:12px;line-height:1.65;resize:vertical}
+    .checklist{display:grid;gap:9px}
+    .check{display:grid;grid-template-columns:34px 1fr;gap:10px;align-items:start;border:1px solid rgba(217,210,196,.9);background:#fffdf9;border-radius:16px;padding:12px}
+    .check span:first-child{width:34px;height:34px;border-radius:12px;display:grid;place-items:center;background:var(--green-soft);color:#11704c;font-weight:1000}
+    .check b{display:block;font-size:14px;line-height:1.35}.check small{display:block;color:#61706a;font-size:12px;font-weight:850;margin-top:3px}
+    .talk{border:1px solid rgba(217,210,196,.9);background:#fff;border-radius:18px;padding:14px}
+    .talk .q{font-weight:1000;color:#22302c}.talk .a{margin-top:6px;color:#56645e;font-size:13px;font-weight:820}
+    .note{border-radius:18px;padding:14px;font-size:13px;font-weight:850;line-height:1.7;background:var(--amber-soft);border:1px solid #efd89e;color:var(--amber);margin-top:12px}
+    .note.ok{background:var(--green-soft);border-color:#bfe3cc;color:#11704c}.note.ng{background:var(--red-soft);border-color:#ecc0bc;color:#9f3939}.note.info{background:var(--blue-soft);border-color:#bdd5ef;color:#2d68a6}
+    .tabs{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.tab{border:1px solid var(--line);background:#fff;border-radius:999px;padding:9px 13px;font-size:13px;font-weight:950;cursor:pointer}.tab.active{background:var(--main);border-color:var(--main);color:#fff}
+    .tab-panel{display:none}.tab-panel.active{display:block}
+    .footer{text-align:center;color:var(--muted);font-size:12px;margin-top:28px;font-weight:850}
+    @media(max-width:980px){.hero,.grid2,.grid3,.grid4{grid-template-columns:1fr}.route{grid-template-columns:48px 1fr}.route-actions{grid-column:1/-1;justify-content:flex-start}.topbar{align-items:flex-start;flex-direction:column}.nav{justify-content:flex-start}}
+    @media(max-width:620px){.wrap{width:min(100% - 18px,1280px);margin-top:10px}.hero-card,.panel{border-radius:22px}.btn,.pill{width:100%}.route{grid-template-columns:1fr}.route-no{width:42px;height:42px}}
   </style>
 </head>
+
 <body>
-  <main class="page">
+  <main class="wrap">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo">🎬</div>
+        <div>
+          <small>STEP VET-29｜営業デモガイド</small>
+          <strong>DPRO PET CARE LINE</strong>
+        </div>
+      </div>
+      <nav class="nav">
+        <a class="pill" href="./index.html?v=step-vet-29">管理トップ</a>
+        <a class="pill" href="./system-check.html?v=step-vet-29">システム確認</a>
+        <a class="pill" href="./rich-menu.html?v=step-vet-29">LINE入口</a>
+        <a class="pill" href="./owner.html?v=step-vet-29">オーナー</a>
+      </nav>
+    </header>
+
     <section class="hero">
-      <div class="badge">STEP 30-31 / 営業デモ手順書</div>
-      <h1>歯科デジタルQR診察券<br>最新デモの見せ方</h1>
-      <p class="lead">
-        受付iPad・先生用・管理トップ・管理画面を、本番API連動版の流れに合わせて説明するための手順書です。
-        QRリーダー受付から診療済み、LINEフォロー、家族診察券までを一連の流れで見せます。
-      </p>
-
-      <div class="hero-actions">
-        <a class="hero-link" href="scan-ipad.html?v=3029b">
-          <b>受付iPad</b>
-          <span>QRリーダー / カメラ / 手入力で受付</span>
-        </a>
-        <a class="hero-link" href="doctor.html?v=3027g">
-          <b>先生用</b>
-          <span>本日の患者・診療待ち・診療済み</span>
-        </a>
-        <a class="hero-link" href="owner.html?v=3027e">
-          <b>管理トップ</b>
-          <span>今日の数字・LINEフォロー確認</span>
-        </a>
-        <a class="hero-link" href="admin.html?v=3024b">
-          <b>管理画面</b>
-          <span>患者登録・家族診察券・LINE連携</span>
-        </a>
+      <div class="hero-card">
+        <span class="badge">3分で伝える営業デモ台本</span>
+        <h1>順番待ちだけではなく、<br>受付の前後までつながる。</h1>
+        <p class="lead">
+          DPRO PET CARE LINEの営業デモは、機能を全部説明するのではなく、
+          「飼い主がLINEで受付 → 受付がQR確認 → 先生が問診確認 → 受付がLINEフォロー → オーナーが未対応ゼロ確認」
+          の流れで見せます。
+        </p>
       </div>
-    </section>
 
-    <section class="section">
-      <h2 class="section-title">まず見せる順番</h2>
-      <div class="flow">
-        <div class="flow-item">
-          <div class="flow-num"></div>
-          <div>
-            <h3>受付iPadでQRリーダー受付</h3>
-            <p>「受付ではQRリーダーでピッと読むだけです。カメラも予備で使えます」と説明します。読み取り後、患者情報を表示して受付済みにします。</p>
-          </div>
-          <a class="button" href="scan-ipad.html?v=3029b">受付を開く</a>
+      <div class="panel" style="margin:0;">
+        <span class="badge-dark">営業前の必須確認</span>
+        <div class="checklist">
+          <div class="check"><span>1</span><div><b>system-check.html を開く</b><small>営業前DEMOリセット → リセット後チェック → 一括チェック</small></div></div>
+          <div class="check"><span>2</span><div><b>お客スマホ画面を開く</b><small>rich-menu.html / member.html / waiting.html</small></div></div>
+          <div class="check"><span>3</span><div><b>院内画面を開く</b><small>scan-pc.html / doctor.html / owner.html</small></div></div>
+          <div class="check"><span>4</span><div><b>見せる順番を守る</b><small>順番受付 → QR受付 → 診察 → フォロー → オーナー管理</small></div></div>
         </div>
-
-        <div class="flow-item">
-          <div class="flow-num"></div>
-          <div>
-            <h3>先生用で診療待ちを確認</h3>
-            <p>先生用は未受付管理ではなく、診療に集中する画面です。「本日の患者」「診療待ち」「診療済み」「LINEフォロー」を見せます。</p>
-          </div>
-          <a class="button" href="doctor.html?v=3027g">先生用を開く</a>
-        </div>
-
-        <div class="flow-item">
-          <div class="flow-num"></div>
-          <div>
-            <h3>診療済みにしてLINE文面をコピー</h3>
-            <p>診療後にLINEフォロー文面を作り、編集してコピーします。自動送信ではなく、LINE公式チャットに貼り付ける安全な運用として説明します。</p>
-          </div>
-          <a class="button secondary" href="doctor.html?v=3027g">LINE文面へ</a>
-        </div>
-
-        <div class="flow-item">
-          <div class="flow-num"></div>
-          <div>
-            <h3>管理トップで数字が揃うことを確認</h3>
-            <p>受付済み・診療済み・LINEフォローが、Worker API / Supabase 経由で管理トップにも反映されることを見せます。</p>
-          </div>
-          <a class="button" href="owner.html?v=3027e">管理トップ</a>
-        </div>
-
-        <div class="flow-item">
-          <div class="flow-num"></div>
-          <div>
-            <h3>家族診察券とLINE連携の価値を説明</h3>
-            <p>お母さんのLINEに家族分の診察券をまとめられること、紙の診察券忘れを減らせることを説明します。</p>
-          </div>
-          <a class="button" href="admin.html?v=3024b">管理画面</a>
+        <div class="button-row" style="margin-top:14px;">
+          <a class="btn btn-main" href="./system-check.html?v=step-vet-29">営業前チェックへ</a>
+          <a class="btn btn-sub" href="./rich-menu.html?v=step-vet-29">LINE入口を開く</a>
         </div>
       </div>
     </section>
 
-    <section class="section">
-      <h2 class="section-title">営業で伝えるポイント</h2>
-      <div class="grid">
-        <div class="card">
-          <h3>受付が速くなる</h3>
-          <p>診察券を探す・名前を聞く・紙を確認する手間を減らし、QR読み取りで受付確認に進めます。</p>
+    <section class="grid4">
+      <div class="summary-card green"><strong>お客さん</strong><p>LINE診察券、順番受付、優先受付、お薬・予防受付、問診。</p></div>
+      <div class="summary-card blue"><strong>受付</strong><p>QR読み取り、来院確認、受付番号、LINEフォロー送信。</p></div>
+      <div class="summary-card gold"><strong>ドクター</strong><p>問診確認、診察メモ、診療済み、フォロー指示。</p></div>
+      <div class="summary-card red"><strong>オーナー</strong><p>今日やること、未対応、予防案内、LINE未連携を確認。</p></div>
+    </section>
+
+    <section class="panel">
+      <h2>営業デモの見せる順番</h2>
+      <p class="plain-lead">この順番で見せると、動物病院オーナーに「現場で使うイメージ」が伝わります。</p>
+
+      <div id="routeList">
+        <div class="route">
+          <div class="route-no">1</div>
+          <div><h3>システム確認・営業前DEMOリセット</h3><p>まず system-check でOK状態を見せます。信頼感を作る入口です。</p></div>
+          <div class="route-actions"><a class="btn btn-main" href="./system-check.html?v=step-vet-29">開く</a></div>
         </div>
-        <div class="card">
-          <h3>家族分をまとめられる</h3>
-          <p>お子さんの診察券を保護者のLINEにまとめられるので、家族来院の多い歯科医院と相性が良いです。</p>
+        <div class="route">
+          <div class="route-no">2</div>
+          <div><h3>お客スマホ：LINE入口</h3><p>飼い主さんがLINEから迷わず使える入口を見せます。</p></div>
+          <div class="route-actions"><a class="btn btn-main" href="./rich-menu.html?v=step-vet-29">開く</a></div>
         </div>
-        <div class="card">
-          <h3>LINEフォローにつながる</h3>
-          <p>診療後の注意事項、次回来院案内、定期検診案内をLINEで送りやすくなります。</p>
+        <div class="route">
+          <div class="route-no">3</div>
+          <div><h3>お客スマホ：ペット診察券</h3><p>QR診察券、多頭管理、予防予定を見せます。歯科版から引き継いだ強みです。</p></div>
+          <div class="route-actions"><a class="btn btn-main" href="./member.html?demo=true&v=step-vet-29">開く</a></div>
+        </div>
+        <div class="route">
+          <div class="route-no">4</div>
+          <div><h3>お客スマホ：今日の順番受付</h3><p>受付番号と来院前問診を見せます。ここで「ただの順番待ちではない」と伝えます。</p></div>
+          <div class="route-actions"><a class="btn btn-main" href="./waiting.html?demo=true&mode=today_queue&v=step-vet-29">開く</a></div>
+        </div>
+        <div class="route">
+          <div class="route-no">5</div>
+          <div><h3>受付PC：QRリーダー受付</h3><p>来院時にQRを読んで、ペット確認・来院受付・受付番号に入れる流れを見せます。</p></div>
+          <div class="route-actions"><a class="btn btn-main" href="./scan-pc.html?v=step-vet-29">開く</a></div>
+        </div>
+        <div class="route">
+          <div class="route-no">6</div>
+          <div><h3>ドクター：問診確認とフォロー指示</h3><p>先生はLINE送信しません。診察メモとフォロー指示だけを残します。</p></div>
+          <div class="route-actions"><a class="btn btn-main" href="./doctor.html?v=step-vet-29">開く</a></div>
+        </div>
+        <div class="route">
+          <div class="route-no">7</div>
+          <div><h3>オーナー：今日やること確認</h3><p>未対応、LINEフォロー、予防案内、LINE未連携を一画面で見せます。</p></div>
+          <div class="route-actions"><a class="btn btn-main" href="./owner.html?v=step-vet-29">開く</a></div>
         </div>
       </div>
     </section>
 
-    <section class="section">
-      <div class="talk">
-        <h2>そのまま使える説明トーク</h2>
-        <p>受付でQR診察券を読んでから、先生用・管理トップまで流れを見せる時の説明です。</p>
-        <div class="script-box">こちらは、LINEで使えるデジタルQR診察券のデモです。
+    <section class="panel">
+      <h2>営業トーク台本</h2>
+      <div class="tabs">
+        <button class="tab active" data-tab="short">30秒版</button>
+        <button class="tab" data-tab="normal">3分版</button>
+        <button class="tab" data-tab="owner">オーナー向け</button>
+        <button class="tab" data-tab="staff">受付スタッフ向け</button>
+      </div>
 
-患者さんは紙の診察券を探さずに、スマホのLINEから診察券を開けます。
-受付ではQRリーダーでピッと読み取るだけなので、受付確認がスムーズになります。
+      <div class="tab-panel active" id="tab-short">
+        <div class="script-box">
+          <h3>30秒版</h3>
+          <p>最初に短く伝える用です。</p>
+          <textarea class="copy-box" id="copyShort" readonly>DPRO PET CARE LINEは、動物病院のLINE公式を、ただのお知らせ配信ではなく、診察券・受付・問診・フォロー管理まで使える仕組みに変えるサービスです。
 
-さらに、お子さんの診察券も保護者のLINEにまとめられます。
-家族で通院される患者さんが多い歯科医院では、診察券忘れや確認の手間を減らしやすいです。
+飼い主さんはLINEから診察券を出し、順番受付やお薬・予防受付ができます。
+受付ではQRを読んで来院確認、先生は問診を見て診察、診察後は受付がLINEフォローを送ります。
+オーナーは今日の未対応や予防案内漏れを一画面で確認できます。</textarea>
+          <div class="button-row"><button class="btn btn-sub" data-copy-target="copyShort">コピー</button></div>
+        </div>
+      </div>
 
-受付後は先生用画面にも反映され、診療後はLINEフォロー文面を作れます。
-紙の診察券をデジタル化するだけではなく、LINE公式を活かした再来院・定期検診フォローにつなげる仕組みです。</div>
+      <div class="tab-panel" id="tab-normal">
+        <div class="script-box">
+          <h3>3分版</h3>
+          <p>実際の営業デモで読みながら使えます。</p>
+          <textarea class="copy-box" id="copyNormal" readonly>まず、飼い主さん側はLINEから使います。
+ペット診察券を開くと、ペットごとのQR診察券と予防予定が見られます。
+そこから今日の順番受付、優先受付予約、お薬・予防受付に進めます。
+
+次に、受付側です。
+来院した飼い主さんのQR診察券を受付PCやタブレットで読むと、飼い主名、ペット名、注意メモが表示されます。
+そのまま来院受付に入れるので、先生の画面やオーナー画面に反映されます。
+
+先生は診察室で、来院前問診を見ながら診察できます。
+先生がやるのは、診察メモ、診療済み、3日後の様子確認や1週間後の再診案内などのフォロー指示です。
+LINEを送る作業は先生ではなく受付に回します。
+
+最後にオーナー画面です。
+今日の受付、LINEフォロー待ち、予防案内待ち、LINE未連携の飼い主が一画面で見えます。
+順番待ちだけでなく、受付の前後までLINEでつながることが、このシステムの強みです。</textarea>
+          <div class="button-row"><button class="btn btn-sub" data-copy-target="copyNormal">コピー</button></div>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="tab-owner">
+        <div class="script-box">
+          <h3>オーナー向け</h3>
+          <p>院長・オーナーに刺さる説明です。</p>
+          <textarea class="copy-box" id="copyOwner" readonly>このシステムで一番大事なのは、受付を増やすことよりも、取りこぼしを減らすことです。
+
+診察後の様子確認、再診案内、ワクチンやフィラリアなどの予防案内は、忙しい現場ではどうしても漏れやすいです。
+DPRO PET CARE LINEでは、先生がフォロー指示を残し、受付がLINE文面をコピーして送信、オーナーが未対応を確認できます。
+
+売上管理より先に、現場の混乱を減らし、フォロー漏れ・予防案内漏れ・LINE未連携を見える化することを重視しています。
+小さな動物病院でも始めやすい、LINE公式を活かした受付・診察券・フォロー管理です。</textarea>
+          <div class="button-row"><button class="btn btn-sub" data-copy-target="copyOwner">コピー</button></div>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="tab-staff">
+        <div class="script-box">
+          <h3>受付スタッフ向け</h3>
+          <p>現場スタッフが不安にならない説明です。</p>
+          <textarea class="copy-box" id="copyStaff" readonly>受付スタッフさんに新しい作業を増やすというより、今やっている受付・案内・LINE送信を整理するイメージです。
+
+来院したらQRを読む。
+受付内容を選ぶ。
+診察が終わったら、先生の指示から作られたLINE文面をコピーして送る。
+送ったら送信済みにする。
+
+難しい設定や電子カルテ入力を増やすものではありません。
+受付で「次に何をすればいいか」が見えるようにするための画面です。</textarea>
+          <div class="button-row"><button class="btn btn-sub" data-copy-target="copyStaff">コピー</button></div>
+        </div>
       </div>
     </section>
 
-    <section class="section">
-      <h2 class="section-title">デモ前チェック</h2>
-      <div class="grid">
-        <div class="card">
-          <h3>画面リンク</h3>
-          <div class="checklist">
-            <div class="check">受付iPadは <b>scan-ipad.html?v=3029b</b> を開く</div>
-            <div class="check">先生用は <b>doctor.html?v=3027g</b> を開く</div>
-            <div class="check">管理トップは <b>owner.html?v=3027e</b> を開く</div>
-            <div class="check">管理画面は <b>admin.html?v=3024b</b> を開く</div>
-          </div>
+    <section class="panel">
+      <h2>ソトマチ対抗の説明ポイント</h2>
+      <div class="grid3">
+        <div class="talk">
+          <div class="q">Q. 順番待ちシステムと何が違う？</div>
+          <div class="a">順番受付だけではなく、LINE診察券、QR来院受付、問診、診察後フォロー、予防案内までつながる点が違います。</div>
         </div>
-        <div class="card">
-          <h3>受付デモ</h3>
-          <div class="checklist">
-            <div class="check">受付状況を更新して数字が出るか確認</div>
-            <div class="check">QRリーダー入力欄にカーソルが合うか確認</div>
-            <div class="check">カメラ読み取りは予備として説明</div>
-            <div class="check">受付済みにした後、先生用・管理トップで確認</div>
-          </div>
+        <div class="talk">
+          <div class="q">Q. 待ち時間は出せる？</div>
+          <div class="a">正確な待ち時間はズレるとクレームになるので、DPROは「混雑目安」で安全に見せます。</div>
         </div>
-        <div class="card">
-          <h3>説明の注意</h3>
-          <div class="checklist">
-            <div class="check">LINE文面は自動送信ではなくコピー運用と説明</div>
-            <div class="check">本番ではQRリーダー利用が一番スムーズと説明</div>
-            <div class="check">家族診察券は保護者LINEにまとめられると説明</div>
-            <div class="check">紙をなくすだけでなくLINEフォローにつながると説明</div>
-          </div>
+        <div class="talk">
+          <div class="q">Q. 電子カルテですか？</div>
+          <div class="a">電子カルテを置き換えるものではありません。受付・問診・LINEフォローを軽く管理する仕組みです。</div>
+        </div>
+        <div class="talk">
+          <div class="q">Q. LINEは自動送信？</div>
+          <div class="a">初期版は文面コピー方式です。勝手に送らないので、病院側が内容を確認してから送れます。</div>
+        </div>
+        <div class="talk">
+          <div class="q">Q. 高齢の飼い主さんは？</div>
+          <div class="a">LINE受付ができない人は、受付でQRを読んでスタッフが来院受付できます。</div>
+        </div>
+        <div class="talk">
+          <div class="q">Q. 小さい病院でも使える？</div>
+          <div class="a">はい。複雑な予約・会計・電子カルテ連携は初期版に入れず、低コストで始めやすい構成です。</div>
         </div>
       </div>
     </section>
 
-    <section class="section">
-      <div class="notice">
-        <strong>本番前の確認ポイント</strong>
-        受付・先生用・管理トップは Worker API / Supabase の同じデータを見ます。
-        数字がずれた場合は、画面側ではなく、まず「Worker API が最新版か」「Supabaseに本日の受付予定があるか」「管理コードが正しいか」を確認します。
+    <section class="panel">
+      <h2>営業で言わない方がいいこと</h2>
+      <div class="grid2">
+        <div class="note ng">
+          <b>言わない：</b><br>
+          「正確な待ち時間が出ます」<br>
+          「電子カルテの代わりになります」<br>
+          「全部自動でLINE送信します」<br>
+          「時間予約を完全に管理できます」
+        </div>
+        <div class="note ok">
+          <b>言う：</b><br>
+          「混雑目安で安全に表示します」<br>
+          「電子カルテの前段階の受付・問診を整理します」<br>
+          「LINE文面を確認してから送れます」<br>
+          「優先受付枠として柔軟に運用できます」
+        </div>
       </div>
-      <p class="small">STEP 30-31 / DPRO SHOP Dental QR Demo Guide</p>
     </section>
+
+    <section class="panel">
+      <h2>営業後の確認・次アクション</h2>
+      <div class="grid3">
+        <div class="summary-card green"><strong>興味あり</strong><p>本番導入チェックリストへ。LINE公式、Supabase、Cloudflare、GitHubの所有者を決めます。</p></div>
+        <div class="summary-card gold"><strong>保留</strong><p>受付現場の困りごとを聞き直し、フォロー漏れ・予防案内漏れを中心に再提案します。</p></div>
+        <div class="summary-card blue"><strong>契約後</strong><p>demo clinic_codeを使わず、病院専用環境でSupabase・LINE LIFF・リッチメニューを設定します。</p></div>
+      </div>
+    </section>
+
+    <div class="footer">
+      DPRO PET CARE LINE / STEP VET-29 営業デモガイド<br>
+      営業時は system-check.html でリセット後、このページの順番通りに見せてください。
+    </div>
   </main>
+
+  <script>
+    async function copyText(text){
+      if(navigator.clipboard && window.isSecureContext){
+        await navigator.clipboard.writeText(text);
+      }else{
+        const t=document.createElement("textarea");
+        t.value=text; document.body.appendChild(t); t.select(); document.execCommand("copy"); t.remove();
+      }
+      alert("コピーしました。");
+    }
+
+    document.querySelectorAll("[data-copy-target]").forEach(btn=>{
+      btn.addEventListener("click",()=>{
+        const id=btn.getAttribute("data-copy-target");
+        const el=document.getElementById(id);
+        copyText(el ? el.value : "");
+      });
+    });
+
+    document.querySelectorAll(".tab").forEach(btn=>{
+      btn.addEventListener("click",()=>{
+        document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+        document.querySelectorAll(".tab-panel").forEach(x=>x.classList.remove("active"));
+        btn.classList.add("active");
+        const target=document.getElementById("tab-"+btn.dataset.tab);
+        if(target) target.classList.add("active");
+      });
+    });
+  </script>
 </body>
 </html>
