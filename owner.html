@@ -1,400 +1,382 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DPRO PET CARE LINE｜オーナー管理画面</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>DPRO PET CARE LINE｜owner STEP VET-24</title>
   <script src="./config.js"></script>
 
   <style>
-    :root {
-      --bg:#f4f1ea; --card:#fff; --ink:#22302c; --muted:#6f7b75; --line:#d9d2c4;
-      --green:#1f8f65; --green2:#e8f7ef; --blue:#3d74a8; --blue2:#edf5ff;
-      --orange:#e79724; --orange2:#fff5df; --red:#c65d4f; --red2:#fff0ed;
-      --shadow:0 16px 42px rgba(34,48,44,.11); --radius:22px;
+    :root{
+      --bg:#f4f1ea;--card:#fff;--ink:#22302c;--muted:#6f7b75;--line:#d9d2c4;
+      --main:#1f8f65;--main-dark:#223b34;--green-soft:#e8f7ef;--blue:#3d74a8;--blue-soft:#edf5ff;
+      --amber:#8a621f;--amber-soft:#fff6de;--red:#b84a4a;--red-soft:#fff0ef;--shadow:0 18px 46px rgba(34,48,44,.12);--radius:24px;
     }
     *{box-sizing:border-box}
-    body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic","YuGothic","Noto Sans JP",sans-serif;color:var(--ink);background:radial-gradient(circle at top left,rgba(31,143,101,.14),transparent 34%),linear-gradient(135deg,#fbfaf6 0%,var(--bg) 100%);line-height:1.7}
-    a{color:inherit}.page{width:min(1240px,calc(100% - 26px));margin:0 auto;padding:22px 0 54px}
+    body{margin:0;min-height:100vh;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Yu Gothic","YuGothic","Noto Sans JP",Meiryo,sans-serif;color:var(--ink);background:radial-gradient(circle at top left,rgba(31,143,101,.17),transparent 35%),radial-gradient(circle at 88% 10%,rgba(231,151,36,.12),transparent 28%),linear-gradient(180deg,#fbfaf6 0%,var(--bg) 100%);line-height:1.7}
+    a{color:inherit} button,input,select,textarea{font:inherit} button{cursor:pointer}
+    .page{width:min(1280px,calc(100% - 28px));margin:0 auto;padding:22px 0 54px}
     .topbar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:18px}
-    .brand{display:flex;align-items:center;gap:12px;min-width:0}.logo{width:50px;height:50px;display:grid;place-items:center;border-radius:17px;color:#fff;background:linear-gradient(135deg,#1f8f65,#83c99f);box-shadow:0 12px 24px rgba(31,143,101,.23);font-size:25px;flex:0 0 auto}
-    .brand small{display:block;color:var(--muted);font-weight:900;font-size:12px;letter-spacing:.08em}.brand strong{display:block;font-size:clamp(20px,2.4vw,30px);line-height:1.15;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px}.pill-link,.btn{border:1px solid var(--line);background:rgba(255,255,255,.84);border-radius:999px;padding:9px 13px;font-size:13px;font-weight:900;text-decoration:none;cursor:pointer;transition:transform .15s ease,box-shadow .15s ease,background .15s ease}.pill-link:hover,.btn:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(34,48,44,.11);background:#fff}
-    .btn-main{border-color:transparent;background:var(--green);color:#fff;box-shadow:0 12px 26px rgba(31,143,101,.23)}.btn-sub{border-color:rgba(31,143,101,.3);background:var(--green2);color:#11704c}.btn-warn{border-color:rgba(231,151,36,.32);background:var(--orange2);color:#8b5b0e}.btn-danger{border-color:rgba(198,93,79,.28);background:var(--red2);color:#a73f32}
-    .hero{display:grid;grid-template-columns:1.08fr .92fr;gap:18px;align-items:stretch;margin-bottom:18px}.card{background:rgba(255,255,255,.92);border:1px solid rgba(217,210,196,.86);border-radius:28px;box-shadow:var(--shadow);padding:clamp(18px,2.5vw,28px)}
-    h1{margin:0 0 12px;font-size:clamp(28px,4vw,50px);line-height:1.14;letter-spacing:-.035em}h2{margin:0 0 12px;font-size:clamp(22px,3vw,34px);letter-spacing:-.025em}h3{margin:0 0 8px;font-size:20px;line-height:1.3}
-    .lead{margin:0;color:#52615b;font-weight:800;font-size:clamp(14px,1.7vw,17px)}.badge{display:inline-flex;align-items:center;gap:8px;padding:7px 11px;border-radius:999px;background:var(--green2);color:#11704c;font-size:12px;font-weight:950;margin-bottom:12px}
-    .notice{background:#fff8e8;border:1px solid #eed8a5;color:#6f541c;border-radius:16px;padding:12px;font-size:12px;font-weight:850;margin-top:12px}.notice.red{background:var(--red2);border-color:#e7b8b1;color:#96382f}.notice.green{background:var(--green2);border-color:#bfe3cc;color:#0e6a48}
-    .status-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px}.status-box{background:#fffdf9;border:1px solid rgba(217,210,196,.86);border-radius:18px;padding:13px;min-height:82px}.status-box small{display:block;color:var(--muted);font-weight:900;font-size:12px}.status-box b{display:block;font-size:25px;line-height:1.25;letter-spacing:-.03em}.status-box .sub{color:#62706a;font-weight:800;font-size:12px}
-    .level{display:inline-flex;align-items:center;gap:7px;padding:8px 12px;border-radius:999px;font-size:13px;font-weight:950}.level.quiet{background:var(--green2);color:#11704c}.level.moderate{background:var(--orange2);color:#8b5b0e}.level.crowded{background:var(--red2);color:#a43e32}.level.reception_closed,.level.emergency,.level.closed{background:#f1f1f1;color:#3e4542}
-    .layout{display:grid;grid-template-columns:.9fr 1.1fr;gap:18px;align-items:start}.layout-wide{display:grid;grid-template-columns:1fr;gap:18px}.section-title{margin:26px 0 12px;display:flex;align-items:flex-end;justify-content:space-between;gap:12px}.section-title p{margin:0;color:var(--muted);font-weight:850;font-size:13px;text-align:right}
-    .auth-box{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;margin-top:14px}.auth-box input{width:100%;border:1px solid #d8d0c0;background:#fff;color:var(--ink);border-radius:999px;padding:10px 12px;font-size:14px;font-weight:800;outline:none}
-    .tab-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.tab{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 11px;cursor:pointer;font-size:12px;font-weight:950}.tab.active{background:var(--green);color:#fff;border-color:var(--green)}
-    .entry-list{display:grid;gap:10px}.entry{border:1px solid rgba(217,210,196,.84);background:#fffdf9;border-radius:18px;padding:13px;display:grid;grid-template-columns:58px 1fr auto;gap:11px;align-items:start}.entry-no{width:52px;height:52px;border-radius:17px;display:grid;place-items:center;background:var(--green2);color:#11704c;font-weight:950;font-size:19px}.entry.examining .entry-no{background:var(--orange2);color:#8b5b0e}.entry.completed,.entry.cancelled,.entry.no_show{opacity:.55}
-    .entry h4{margin:0 0 4px;font-size:16px;line-height:1.35}.entry p{margin:0;color:#61706a;font-size:12px;font-weight:800}.entry-actions{display:flex;flex-wrap:wrap;gap:7px;justify-content:flex-end;max-width:280px}.tagline{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}.tag{display:inline-flex;border-radius:999px;background:#f6f2e9;color:#79623d;padding:3px 7px;font-size:11px;font-weight:900}
-    .detail-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.info-row{display:flex;justify-content:space-between;gap:12px;border-bottom:1px dashed #dcd4c5;padding:8px 0;font-size:13px}.info-row span:first-child{color:var(--muted);font-weight:900}.info-row strong{text-align:right}
-    textarea,input,select{font-family:inherit}.memo{width:100%;border:1px solid #d8d0c0;background:#fff;border-radius:16px;padding:12px;font-size:14px;font-weight:760;min-height:88px;outline:none;resize:vertical}.empty{border:1px dashed #d5cbb9;border-radius:18px;padding:16px;color:var(--muted);font-weight:850;text-align:center;background:rgba(255,255,255,.62)}
-    .footer-note{margin-top:18px;border:1px solid rgba(217,210,196,.88);background:rgba(255,255,255,.8);border-radius:22px;padding:14px;color:#56645e;font-weight:800;font-size:13px}
-    @media (max-width:980px){.hero,.layout{grid-template-columns:1fr}.status-grid{grid-template-columns:repeat(2,1fr)}.section-title{flex-direction:column;align-items:flex-start}.section-title p{text-align:left}.entry{grid-template-columns:58px 1fr}.entry-actions{grid-column:1/-1;justify-content:flex-start;max-width:none}}
-    @media (max-width:640px){.topbar{flex-direction:column;align-items:flex-start}.actions{justify-content:flex-start}.status-grid,.detail-grid{grid-template-columns:1fr}.auth-box{grid-template-columns:1fr}.brand strong{white-space:normal}.card{border-radius:22px}}
+    .brand{display:flex;align-items:center;gap:12px;min-width:0}.logo{width:52px;height:52px;border-radius:18px;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,#1f8f65,#83c99f);box-shadow:0 14px 26px rgba(31,143,101,.23);font-size:26px;flex:0 0 auto}
+    .brand small{display:block;color:var(--muted);font-weight:950;font-size:12px;letter-spacing:.08em}.brand strong{display:block;font-size:clamp(19px,2.4vw,30px);line-height:1.12;letter-spacing:-.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px}
+    .pill,.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1px solid var(--line);border-radius:999px;padding:9px 13px;background:rgba(255,255,255,.86);color:var(--ink);text-decoration:none;font-size:13px;font-weight:950;line-height:1.15;transition:.15s transform,.15s box-shadow,.15s background}
+    .pill:hover,.btn:hover{transform:translateY(-1px);box-shadow:0 10px 22px rgba(34,48,44,.11);background:#fff}
+    .btn-main{border-color:transparent;background:var(--main);color:#fff;box-shadow:0 14px 28px rgba(31,143,101,.24)}.btn-sub{border-color:#bfe3cc;background:var(--green-soft);color:#11704c}.btn-warn{border-color:#efd89e;background:var(--amber-soft);color:var(--amber)}.btn-danger{border-color:#ecc0bc;background:var(--red-soft);color:#9f3939}.btn:disabled{opacity:.56;cursor:not-allowed;transform:none;box-shadow:none}
+    .hero{display:grid;grid-template-columns:1.04fr .96fr;gap:18px;align-items:stretch;margin-bottom:18px}.hero-card{position:relative;overflow:hidden;border-radius:32px;background:linear-gradient(135deg,rgba(34,59,52,.98),rgba(31,143,101,.92)),radial-gradient(circle at 86% 10%,rgba(255,255,255,.22),transparent 24%);color:#fff;padding:clamp(22px,3.6vw,42px);box-shadow:var(--shadow)}.hero-card::after{content:"LINE";position:absolute;right:-18px;bottom:-40px;font-size:clamp(72px,13vw,170px);font-weight:1000;letter-spacing:.06em;opacity:.06;pointer-events:none}
+    .card{border:1px solid rgba(217,210,196,.88);border-radius:var(--radius);background:rgba(255,255,255,.92);box-shadow:var(--shadow);padding:clamp(18px,2.5vw,28px)}
+    .badge{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:8px 12px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.24);color:#fff;font-size:12px;font-weight:950;letter-spacing:.04em;margin-bottom:14px}.badge-dark{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:7px 11px;background:var(--green-soft);color:#11704c;font-size:12px;font-weight:950;margin-bottom:12px}
+    h1{position:relative;z-index:1;margin:0 0 14px;font-size:clamp(31px,4.4vw,58px);line-height:1.08;letter-spacing:-.055em}h2{margin:0 0 12px;font-size:clamp(22px,2.8vw,34px);line-height:1.2;letter-spacing:-.03em}h3{margin:0 0 8px;font-size:20px;line-height:1.3}
+    .lead{position:relative;z-index:1;margin:0;color:rgba(255,255,255,.88);font-size:clamp(14px,1.7vw,17px);font-weight:770;line-height:1.9}.plain-lead{margin:0;color:#5a6862;font-size:14px;font-weight:780;line-height:1.8}
+    .auth-box{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;margin-top:14px}.section-title{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin:26px 0 12px}.section-title h2{margin:0}.section-title p{margin:0;color:var(--muted);text-align:right;font-size:13px;font-weight:850}
+    .layout{display:grid;grid-template-columns:.92fr 1.08fr;gap:16px;align-items:start}.layout3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;align-items:start}
+    .status-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px}.metric{border:1px solid rgba(217,210,196,.86);border-radius:18px;background:#fffdf9;padding:13px;min-height:84px}.metric small{display:block;color:var(--muted);font-weight:950;font-size:12px}.metric b{display:block;font-size:26px;line-height:1.2;letter-spacing:-.04em;margin-top:2px}.metric span{display:block;color:#62706a;font-size:12px;font-weight:850;margin-top:2px}
+    .notice{border-radius:16px;padding:12px;margin-top:12px;font-size:13px;font-weight:850;line-height:1.65;background:var(--amber-soft);border:1px solid #efd89e;color:var(--amber)}.notice.ok{background:var(--green-soft);border-color:#bfe3cc;color:#11704c}.notice.ng{background:var(--red-soft);border-color:#ecc0bc;color:#9f3939}.notice.info{background:var(--blue-soft);border-color:#bdd5ef;color:#2d68a6}
+    input,select,textarea{width:100%;border:1px solid #d8d0c0;border-radius:15px;padding:11px 12px;background:#fff;color:var(--ink);font-size:14px;font-weight:800;outline:none;transition:.15s border-color,.15s box-shadow}textarea{min-height:96px;resize:vertical;line-height:1.6}input:focus,select:focus,textarea:focus{border-color:rgba(31,143,101,.65);box-shadow:0 0 0 4px rgba(31,143,101,.11)}label{display:block;margin-bottom:6px;color:#46534d;font-size:13px;font-weight:950}
+    .form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.full{grid-column:1/-1}.button-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:12px}.hidden{display:none!important}
+    .entry-list{display:grid;gap:10px}.entry{border:1px solid rgba(217,210,196,.84);background:#fffdf9;border-radius:18px;padding:13px;display:grid;grid-template-columns:58px 1fr auto;gap:11px;align-items:start}.entry.selected{border-color:rgba(31,143,101,.65);background:#f1fbf6}.entry-no{width:52px;height:52px;border-radius:17px;display:grid;place-items:center;background:var(--green-soft);color:#11704c;font-weight:950;font-size:19px}.entry.examining .entry-no{background:var(--amber-soft);color:#8b5b0e}.entry.completed,.entry.cancelled,.entry.no_show{opacity:.58}.entry h4{margin:0 0 4px;font-size:16px;line-height:1.35}.entry p{margin:0;color:#61706a;font-size:12px;font-weight:800}.entry-actions{display:flex;flex-wrap:wrap;gap:7px;justify-content:flex-end;max-width:330px}
+    .empty{border:1px dashed #d5cbb9;border-radius:18px;padding:16px;color:var(--muted);font-weight:850;text-align:center;background:rgba(255,255,255,.62)}.tagline{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}.tag{display:inline-flex;border-radius:999px;background:#f6f2e9;color:#79623d;padding:3px 8px;font-size:11px;font-weight:950}.tag.red{background:var(--red-soft);color:#9f3939}.tag.green{background:var(--green-soft);color:#11704c}.tag.blue{background:var(--blue-soft);color:#2d68a6}
+    .detail-panel{border:1px solid rgba(31,143,101,.26);background:linear-gradient(180deg,#fff,#f1fbf6);border-radius:22px;padding:14px;margin-top:14px}.info-row{display:flex;justify-content:space-between;gap:12px;border-bottom:1px dashed #dcd4c5;padding:7px 0;font-size:13px}.info-row span:first-child{color:var(--muted);font-weight:900}.info-row strong{text-align:right}.footer-note{margin-top:18px;border:1px solid rgba(217,210,196,.88);background:rgba(255,255,255,.78);border-radius:22px;padding:14px;color:#56645e;font-size:13px;font-weight:780;line-height:1.7}
+    @media(max-width:1040px){.hero,.layout,.layout3{grid-template-columns:1fr}.status-grid{grid-template-columns:repeat(2,1fr)}.section-title{align-items:flex-start;flex-direction:column}.section-title p{text-align:left}.entry{grid-template-columns:58px 1fr}.entry-actions{grid-column:1/-1;justify-content:flex-start;max-width:none}}
+    @media(max-width:640px){.topbar{align-items:flex-start;flex-direction:column}.actions{justify-content:flex-start}.auth-box,.form-grid,.status-grid{grid-template-columns:1fr}.brand strong{white-space:normal}.hero-card,.card{border-radius:22px}}
   </style>
 
 </head>
 <body>
   <main class="page">
     <header class="topbar">
-      <div class="brand"><div class="logo">📊</div><div><small>オーナー管理画面</small><strong>DPRO PET CARE LINE</strong></div></div>
+      <div class="brand"><div class="logo">📊</div><div><small>オーナー管理PC・タブレット</small><strong>DPRO PET CARE LINE</strong></div></div>
       <nav class="actions">
-        <a class="pill-link" href="./waiting.html?demo=true&v=step-vet-22">飼い主受付</a>
-        <a class="pill-link" href="./scan-ipad.html?v=step-vet-22">受付iPad</a>
-        <a class="pill-link" href="./doctor.html?v=step-vet-22">獣医師画面</a>
-        <a class="pill-link" href="./admin-queue.html?v=step-vet-22">受付設定</a>
-        <a class="pill-link" href="./admin.html?v=step-vet-22">管理設定</a>
+        <a class="pill" href="./scan-pc.html?v=step-vet-24">受付PC</a>
+        <a class="pill" href="./scan-ipad.html?v=step-vet-24">受付タブレット</a>
+        <a class="pill" href="./doctor.html?v=step-vet-24">ドクター</a>
+        <a class="pill" href="./admin-queue.html?v=step-vet-24">受付設定</a>
+        <a class="pill" href="./system-check.html?v=step-vet-24">確認</a>
       </nav>
     </header>
 
     <section class="hero">
+      <div class="hero-card">
+        <span class="badge">STEP VET-24｜今日やること中心ダッシュボード</span>
+        <h1>オーナーが見るのは、<br>未対応が残っていないか。</h1>
+        <p class="lead">
+          今日の受付、診察状況、受付が送るLINEフォロー、予防案内、LINE未連携を一画面にまとめます。
+          売上より先に、現場の取りこぼし防止を優先します。
+        </p>
+      </div>
       <div class="card">
-        <span class="badge">STEP VET-22｜受付設定導線追加</span>
-        <h1>通常診察・お薬予防・ケアを分けて、混雑を見える化。</h1>
-        <p class="lead">ソトマチのように合計人数だけを見せるのではなく、診察負荷ごとに分けて管理します。受付終了・急患対応中などの手動表示もここから変更できます。</p>
+        <span class="badge-dark">管理コード</span>
+        <p class="plain-lead">未対応確認・送信済み処理には管理コードが必要です。</p>
         <div id="authStatus" class="notice">管理コード確認中</div>
         <div class="auth-box">
-          <input id="adminTokenInput" type="password" placeholder="管理コードを入力" />
+          <input id="adminTokenInput" type="password" placeholder="管理コードを入力" autocomplete="off" />
           <button class="btn btn-main" id="saveAdminTokenBtn" type="button">保存</button>
           <button class="btn btn-danger" id="clearAdminTokenBtn" type="button">削除</button>
         </div>
       </div>
-      <div class="card">
-        <span id="levelBadge" class="level quiet">読み込み中</span>
-        <div class="status-grid">
-          <div class="status-box"><small>通常診察</small><b id="generalExamCount">-</b><div class="sub">診察・再診</div></div>
-          <div class="status-box"><small>現在診察中</small><b id="currentExamNumber">-</b><div class="sub">受付番号</div></div>
-          <div class="status-box"><small>お薬・予防</small><b id="medicineCount">-</b><div class="sub">薬・フード等</div></div>
-          <div class="status-box"><small>ケア・予約枠</small><b id="careReserveCount">-</b><div class="sub">処置・優先受付</div></div>
-        </div>
-        <div id="summaryMessage" class="notice green">混雑状況を読み込み中です。</div>
-      </div>
     </section>
 
-    <section class="layout">
-      <div class="card">
-        <h2>混雑表示の手動切替</h2>
-        <p class="lead" style="font-size:14px;">受付終了・急患対応中など、飼い主画面に出す混雑目安を手動で上書きできます。</p>
-        <div class="detail-grid" style="margin-top:12px;">
-          <div>
-            <label style="font-weight:950;">表示レベル</label>
-            <select id="manualLevel" class="memo" style="min-height:auto;">
-              <option value="auto">自動判定</option>
-              <option value="quiet">空いています</option>
-              <option value="moderate">やや混雑</option>
-              <option value="crowded">混雑しています</option>
-              <option value="reception_closed">受付終了</option>
-              <option value="emergency">急患対応中</option>
-              <option value="closed">休診</option>
-            </select>
-          </div>
-          <div>
-            <label style="font-weight:950;">現在診察中番号</label>
-            <input id="currentNumberInput" class="memo" style="min-height:auto;" type="number" min="0" placeholder="例：5" />
-          </div>
-        </div>
-        <label style="display:block;margin-top:12px;font-weight:950;">表示メッセージ</label>
-        <textarea id="manualMessage" class="memo" placeholder="例：通常診察は混雑しています。急患の場合はお電話ください。"></textarea>
-        <div class="entry-actions" style="justify-content:flex-start;max-width:none;margin-top:12px;">
-          <button class="btn btn-main" id="saveCongestionBtn" type="button">混雑表示を保存</button>
-          <button class="btn btn-sub" id="autoCongestionBtn" type="button">自動判定に戻す</button>
-          <a class="btn btn-sub" href="./admin-queue.html?v=step-vet-22">受付ルール設定へ</a>
-          <button class="btn btn-warn" id="resetDemoBtn" type="button">DEMO受付リセット</button>
-        </div>
+    <section class="card">
+      <h2>今日の未対応サマリー</h2>
+      <div class="status-grid">
+        <div class="metric"><small>受付中</small><b id="activeQueueCount">-</b><span>LINE受付 + QR受付</span></div>
+        <div class="metric"><small>LINEフォロー待ち</small><b id="followupCount">-</b><span>診察後・再診</span></div>
+        <div class="metric"><small>予防案内待ち</small><b id="preventionCount">-</b><span>ワクチン・予防薬等</span></div>
+        <div class="metric"><small>LINE未連携</small><b id="unlinkedCount">-</b><span>案内対象</span></div>
       </div>
-
-      <div class="card">
-        <h2>今日やること</h2>
-        <div id="todoBox" class="entry-list"><div class="empty">読み込み中です。</div></div>
+      <div id="summaryNotice" class="notice info">読み込み中です。</div>
+      <div class="button-row">
+        <button class="btn btn-sub" id="refreshBtn" type="button">更新</button>
+        <a class="btn btn-main" href="./scan-pc.html?v=step-vet-24">受付PCを開く</a>
+        <a class="btn btn-sub" href="./doctor.html?v=step-vet-24">ドクター画面を開く</a>
       </div>
     </section>
 
     <div class="section-title">
-      <h2>受付分類別一覧</h2>
-      <p>通常診察・お薬予防・ケア・優先受付を分けて確認</p>
+      <h2>今日やること</h2>
+      <p>受付・フォロー・予防案内を上から順に処理します。</p>
+    </div>
+
+    <section class="layout3">
+      <div class="card">
+        <h3>1. 今日の受付状況</h3>
+        <div id="queueList" class="entry-list"><div class="empty">読み込み中です。</div></div>
+      </div>
+
+      <div class="card">
+        <h3>2. 受付が送るLINEフォロー</h3>
+        <div id="followupList" class="entry-list"><div class="empty">読み込み中です。</div></div>
+      </div>
+
+      <div class="card">
+        <h3>3. 予防・お薬案内</h3>
+        <div id="preventionList" class="entry-list"><div class="empty">読み込み中です。</div></div>
+      </div>
+    </section>
+
+    <div class="section-title">
+      <h2>LINE未連携の飼い主</h2>
+      <p>LINE診察券の価値を最大化するため、未連携も見える化します。</p>
     </div>
 
     <section class="card">
-      <div class="tab-row">
-        <button class="tab active" data-filter="active" type="button">受付中</button>
-        <button class="tab" data-filter="today_queue" type="button">通常診察</button>
-        <button class="tab" data-filter="medicine_prevention" type="button">お薬・予防</button>
-        <button class="tab" data-filter="care_consult" type="button">ケア処置</button>
-        <button class="tab" data-filter="priority_reservation" type="button">優先受付</button>
-        <button class="tab" data-filter="all" type="button">すべて</button>
-        <button class="btn btn-sub" id="refreshBtn" type="button">更新</button>
-      </div>
-      <div id="entryList" class="entry-list"><div class="empty">読み込み中です。</div></div>
+      <div id="unlinkedList" class="entry-list"><div class="empty">読み込み中です。</div></div>
     </section>
 
-    <div class="footer-note">STEP VET-22：オーナー画面から受付設定 admin-queue.html へ移動できるようにしました。</div>
+    <div class="footer-note">
+      STEP VET-24：オーナー画面は「今日やること」中心へ。受付がLINEフォローを送り、オーナーは未対応が残っていないか確認します。
+    </div>
   </main>
+
   <script>
 
     const CONFIG = window.DPRO_CONFIG || {};
     const API_BASE_URL = (CONFIG.API_BASE_URL || "https://dpro-vet-qr-api.dpromstk2000.workers.dev").replace(/\/$/, "");
     const CLINIC_CODE = CONFIG.CLINIC_CODE || CONFIG.DEFAULT_CLINIC_CODE || "dpro_vet_demo";
-    const ADMIN_TOKEN_KEYS = ["DPRO_VET_ADMIN_TOKEN", "dpro_vet_admin_token", "DPRO_ADMIN_TOKEN", "dpro_admin_token"];
+    const ADMIN_TOKEN_KEYS = ["dpro_vet_admin_code", "DPRO_VET_ADMIN_CODE", "DPRO_VET_ADMIN_TOKEN", "dpro_vet_admin_token", "DPRO_ADMIN_TOKEN", "dpro_admin_token"];
 
-    function todayString(){
-      const d=new Date(); const y=d.getFullYear(); const m=String(d.getMonth()+1).padStart(2,"0"); const day=String(d.getDate()).padStart(2,"0");
-      return `${y}-${m}-${day}`;
-    }
-
-    function escapeHtml(value){
-      return String(value ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
-    }
-
+    function todayString(){ const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; }
+    function addDaysString(days){ const d = new Date(); d.setDate(d.getDate()+Number(days||0)); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; }
+    function escapeHtml(v){ return String(v ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;"); }
     function getAdminToken(){
-      if (CONFIG.getAdminToken && typeof CONFIG.getAdminToken === "function") {
-        const v = CONFIG.getAdminToken();
-        if (v) return v;
-      }
-      for (const key of ADMIN_TOKEN_KEYS) {
-        const v = localStorage.getItem(key);
-        if (v) return v;
-      }
+      if (typeof CONFIG.getAdminToken === "function") { const v = CONFIG.getAdminToken(); if (v) return String(v).trim(); }
+      for (const key of ADMIN_TOKEN_KEYS) { const v = localStorage.getItem(key) || sessionStorage.getItem(key); if (v && String(v).trim()) return String(v).trim(); }
       return "";
     }
-
     function saveAdminToken(token){
-      const v = String(token || "").trim();
-      if (!v) return;
-      localStorage.setItem("DPRO_VET_ADMIN_TOKEN", v);
-      localStorage.setItem("dpro_vet_admin_token", v);
+      const v = String(token || "").trim(); if (!v) return;
+      if (typeof CONFIG.setAdminToken === "function") CONFIG.setAdminToken(v, true);
+      ADMIN_TOKEN_KEYS.forEach(key => { localStorage.setItem(key, v); sessionStorage.setItem(key, v); });
     }
-
     function clearAdminToken(){
-      ADMIN_TOKEN_KEYS.forEach(key => localStorage.removeItem(key));
+      if (typeof CONFIG.clearAdminToken === "function") CONFIG.clearAdminToken();
+      ADMIN_TOKEN_KEYS.forEach(key => { localStorage.removeItem(key); sessionStorage.removeItem(key); });
     }
-
     function headers(json=false, admin=false){
-      const h = {};
-      if (json) h["Content-Type"] = "application/json";
+      const h = {}; if (json) h["Content-Type"] = "application/json";
       const token = getAdminToken();
       if (admin && token) {
-        h["x-admin-token"] = token;
-        h["X-Admin-Token"] = token;
-        h["Authorization"] = "Bearer " + token;
+        h["X-DPRO-Admin-Code"] = token; h["x-dpro-admin-code"] = token; h["x-admin-token"] = token; h["X-Admin-Token"] = token; h["Authorization"] = "Bearer " + token;
       }
       return h;
     }
-
     async function apiGet(path, params={}, admin=false){
       const url = new URL(API_BASE_URL + path);
-      Object.entries({ clinic_code: CLINIC_CODE, ...params }).forEach(([key,value]) => {
-        if (value !== undefined && value !== null && value !== "") url.searchParams.set(key, value);
-      });
+      Object.entries({ clinic_code: CLINIC_CODE, ...params }).forEach(([k,v]) => { if (v !== undefined && v !== null && v !== "") url.searchParams.set(k, v); });
       const res = await fetch(url.toString(), { method:"GET", headers:headers(false, admin) });
       const data = await res.json().catch(() => ({}));
       if (!res.ok || data.ok === false) throw new Error(data.message || data.error || `API Error ${res.status}`);
       return data;
     }
-
     async function apiPost(path, body={}, admin=true){
-      const res = await fetch(API_BASE_URL + path, {
-        method:"POST",
-        headers:headers(true, admin),
-        body:JSON.stringify({ clinic_code: CLINIC_CODE, ...body })
-      });
+      const res = await fetch(API_BASE_URL + path, { method:"POST", headers:headers(true, admin), body:JSON.stringify({ clinic_code: CLINIC_CODE, ...body }) });
       const data = await res.json().catch(() => ({}));
       if (!res.ok || data.ok === false) throw new Error(data.message || data.error || `API Error ${res.status}`);
       return data;
     }
-
-    function statusLabel(status){
-      const map={reserved:"予約済み",waiting:"受付済み",checked_in:"院内受付済み",examining:"診察中",completed:"完了",cancelled:"キャンセル",no_show:"来院なし"};
-      return map[status] || status || "-";
-    }
-
-    function partLabel(part){ return part === "morning" ? "午前" : part === "afternoon" ? "午後" : "終日"; }
-
-    function buildTags(item){
-      const tags = [
-        item.entry_kind_label,
-        item.request_category_label,
-        item.status_label || statusLabel(item.status),
-        item.day_part_label || partLabel(item.day_part)
-      ].filter(Boolean);
-      return tags.map(tag => `<span class="tag">${escapeHtml(tag)}</span>`).join("");
-    }
-
-    function normalizeItems(data){
-      return data.items || data.entries || data.data || [];
-    }
-
-    function bestSummary(data){
-      const items = data.items || data.summaries || [];
-      return data.summary || items[0] || {};
-    }
-
-    function renderSummaryBox(summary){
-      const level = summary.display_level || "quiet";
-      const label = summary.display_level_label || "空いています";
-      document.getElementById("levelBadge").className = `level ${level}`;
-      document.getElementById("levelBadge").textContent = label;
-      document.getElementById("generalExamCount").textContent = Number(summary.general_exam_count || 0) + "組";
-      document.getElementById("currentExamNumber").textContent = summary.current_exam_number ? String(summary.current_exam_number) + "番" : "-";
-      document.getElementById("medicineCount").textContent = Number(summary.medicine_prevention_count || 0) + "件";
-      const careReserve = Number(summary.care_count || 0) + Number(summary.priority_reservation_count || 0) + Number(summary.grooming_surgery_count || 0);
-      document.getElementById("careReserveCount").textContent = careReserve + "件";
-      const msg = document.getElementById("summaryMessage");
-      msg.textContent = summary.display_message || "混雑状況を確認できます。";
-      msg.className = level === "crowded" || level === "reception_closed" || level === "emergency" ? "notice red" : "notice green";
-    }
-
-    function renderAuthBox(){
-      const status = document.getElementById("authStatus");
-      const input = document.getElementById("adminTokenInput");
-      if (!status || !input) return;
+    function renderAuthStatus(){
+      const box = document.getElementById("authStatus");
+      if (!box) return;
       const token = getAdminToken();
-      status.textContent = token ? "管理コード保存済み" : "管理コード未保存";
-      status.className = token ? "notice green" : "notice";
-      input.value = "";
+      box.className = token ? "notice ok" : "notice";
+      box.textContent = token ? "管理コード保存済みです。" : "管理コード未保存です。先に保存してください。";
     }
-
-    function setupAuthBox(){
-      const saveBtn = document.getElementById("saveAdminTokenBtn");
-      const clearBtn = document.getElementById("clearAdminTokenBtn");
+    function setupAuth(){
+      renderAuthStatus();
       const input = document.getElementById("adminTokenInput");
-      if (saveBtn) saveBtn.addEventListener("click", () => {
-        saveAdminToken(input.value);
-        renderAuthBox();
-        alert("管理コードを保存しました。");
-      });
-      if (clearBtn) clearBtn.addEventListener("click", () => {
-        clearAdminToken();
-        renderAuthBox();
-        alert("管理コードを削除しました。");
-      });
-      renderAuthBox();
+      document.getElementById("saveAdminTokenBtn")?.addEventListener("click", () => { saveAdminToken(input?.value); if (input) input.value = ""; renderAuthStatus(); loadAll?.(); });
+      document.getElementById("clearAdminTokenBtn")?.addEventListener("click", () => { clearAdminToken(); renderAuthStatus(); loadAll?.(); });
+    }
+    function statusLabel(s){ return ({reserved:"予約済み",waiting:"受付済み",checked_in:"院内受付済み",examining:"診察中",completed:"診療済み",cancelled:"取消",no_show:"来院なし"}[s] || s || "-"); }
+    function entryKindLabel(k){ return ({today_queue:"通常診察",priority_reservation:"優先受付",medicine_prevention:"お薬・予防",care_consult:"ケア処置",grooming_surgery_consult:"手術/トリミング相談"}[k] || k || "-"); }
+    function makeFollowMessage(item, type="follow"){
+      const guardian = item.guardian_name || "飼い主";
+      const pet = item.pet_name || "ペット";
+      if (item.line_message) return item.line_message;
+      if (type === "prevention") return `${guardian}様\n${pet}ちゃんの${item.title || "予防予定"}の時期が近づいています。\nご都合のよいタイミングでご相談ください。`;
+      return `${guardian}様\n${pet}ちゃんのその後の様子はいかがでしょうか。\n気になる変化がありましたらLINEでご相談ください。`;
+    }
+    async function copyText(text){ await navigator.clipboard.writeText(text); alert("LINE文面をコピーしました。"); }
+
+    const state = { queue: [], followups: [], preventions: [], unlinked: [] };
+
+    function activeQueue() {
+      return state.queue.filter(x => ["reserved","waiting","checked_in","examining"].includes(x.status));
     }
 
-    async function updateStatus(waitingEntryId, status, staffNote=""){
-      if (!getAdminToken()) {
-        alert("先に管理コードを保存してください。");
-        return;
-      }
-      await apiPost("/api/admin/queue/status", { waiting_entry_id: waitingEntryId, status, staff_note: staffNote }, true);
+    function renderSummary() {
+      const q = activeQueue().length;
+      const f = state.followups.filter(x => ["todo","copied","snoozed"].includes(x.status)).length;
+      const p = state.preventions.length;
+      const u = state.unlinked.length;
+
+      document.getElementById("activeQueueCount").textContent = q;
+      document.getElementById("followupCount").textContent = f;
+      document.getElementById("preventionCount").textContent = p;
+      document.getElementById("unlinkedCount").textContent = u;
+
+      const n = q + f + p + u;
+      const notice = document.getElementById("summaryNotice");
+      notice.className = n ? "notice" : "notice ok";
+      notice.textContent = n ? `未対応があります。受付・フォロー・予防案内を確認してください。` : "未対応はありません。";
     }
 
-    const state={ entries:[], filter:"active", summary:null };
-
-    function shouldShow(item){
-      if (state.filter === "all") return true;
-      if (state.filter === "active") return ["reserved","waiting","checked_in","examining"].includes(item.status);
-      return item.entry_kind === state.filter;
-    }
-
-    function renderTodos(){
-      const active = state.entries.filter(item => ["reserved","waiting","checked_in","examining"].includes(item.status));
-      const normal = active.filter(item => item.entry_kind === "today_queue").length;
-      const med = active.filter(item => item.entry_kind === "medicine_prevention").length;
-      const care = active.filter(item => item.entry_kind === "care_consult").length;
-      const priority = active.filter(item => item.entry_kind === "priority_reservation").length;
-      document.getElementById("todoBox").innerHTML = `
-        <article class="entry"><div class="entry-no">診</div><div><h4>通常診察：${normal}件</h4><p>体調不良・再診・一般診察を優先確認</p><div class="tagline"><span class="tag">診療負荷高</span></div></div></article>
-        <article class="entry"><div class="entry-no">薬</div><div><h4>お薬・予防：${med}件</h4><p>薬・フード・予防薬は通常診察と分けて準備</p><div class="tagline"><span class="tag">準備系</span></div></div></article>
-        <article class="entry"><div class="entry-no">処</div><div><h4>ケア処置：${care}件</h4><p>爪切り・耳そうじ・肛門腺など</p><div class="tagline"><span class="tag">短時間処置</span></div></div></article>
-        <article class="entry"><div class="entry-no">予</div><div><h4>優先受付：${priority}件</h4><p>後日の午前1番・午後1番予約も確認</p><div class="tagline"><span class="tag">後日枠</span></div></div></article>
-      `;
-    }
-
-    function renderEntries(){
-      const list = state.entries.filter(shouldShow);
-      const box = document.getElementById("entryList");
-      if (!list.length) { box.innerHTML = '<div class="empty">表示する受付はありません。</div>'; return; }
-      box.innerHTML = list.map(item => {
-        const no = item.queue_number || "-";
-        const title = `${item.pet_name || "ペット"}｜${item.purpose || item.request_category_label || "受付"}`;
+    function renderQueue() {
+      const list = activeQueue();
+      const box = document.getElementById("queueList");
+      if (!list.length) { box.innerHTML = '<div class="empty">受付中の患者はいません。</div>'; return; }
+      box.innerHTML = list.slice(0, 16).map(item => {
+        const id = item.waiting_entry_id || item.id;
         return `
           <article class="entry ${escapeHtml(item.status || "")}">
-            <div class="entry-no">${escapeHtml(no)}</div>
+            <div class="entry-no">${escapeHtml(item.queue_number || "-")}</div>
             <div>
-              <h4>${escapeHtml(title)}</h4>
-              <p>${escapeHtml(item.guardian_name || item.line_display_name || "飼い主")} / ${escapeHtml(item.target_date || "")} ${escapeHtml(item.day_part_label || partLabel(item.day_part))}</p>
-              ${item.symptoms_summary ? `<p>${escapeHtml(item.symptoms_summary)}</p>` : ""}
-              <div class="tagline">${buildTags(item)}</div>
+              <h4>${escapeHtml(item.pet_name || "ペット")}｜${escapeHtml(item.purpose || item.request_category_label || "受付")}</h4>
+              <p>${escapeHtml(item.guardian_name || item.line_display_name || "飼い主")} / ${escapeHtml(entryKindLabel(item.entry_kind))} / ${escapeHtml(statusLabel(item.status))}</p>
+              <div class="tagline"><span class="tag">${escapeHtml(item.day_part_label || item.day_part || "")}</span><span class="tag">${escapeHtml(item.request_category_label || "")}</span></div>
             </div>
             <div class="entry-actions">
-              <button class="btn btn-sub" data-action="checked_in" data-id="${escapeHtml(item.waiting_entry_id || item.id)}">院内受付</button>
-              <button class="btn btn-warn" data-action="examining" data-id="${escapeHtml(item.waiting_entry_id || item.id)}">診察中</button>
-              <button class="btn btn-main" data-action="completed" data-id="${escapeHtml(item.waiting_entry_id || item.id)}">完了</button>
+              <button class="btn btn-sub" data-status="checked_in" data-id="${escapeHtml(id)}">院内受付</button>
+              <button class="btn btn-warn" data-status="examining" data-id="${escapeHtml(id)}">診察中</button>
+              <button class="btn btn-main" data-status="completed" data-id="${escapeHtml(id)}">診療済み</button>
             </div>
           </article>
         `;
       }).join("");
-      box.querySelectorAll("[data-action]").forEach(btn => btn.addEventListener("click", async () => {
+
+      box.querySelectorAll("[data-status]").forEach(btn => btn.addEventListener("click", async () => {
         try {
-          await updateStatus(btn.dataset.id, btn.dataset.action, "オーナー画面で更新");
+          await apiPost("/api/admin/queue/status", { waiting_entry_id: btn.dataset.id, status: btn.dataset.status, staff_note:"owner.htmlで更新", staff_name:"owner.html" }, true);
           await loadAll();
-        } catch(e) { alert(e.message || "更新に失敗しました。"); }
+        } catch(e) { alert(e.message || "更新できませんでした。"); }
       }));
     }
 
-    async function saveCongestion(level, message, currentNumber){
-      if (!getAdminToken()) { alert("先に管理コードを保存してください。"); return; }
-      await apiPost("/api/admin/queue/congestion", {
-        target_date: todayString(),
-        day_part: "morning",
-        manual_override: level !== "auto",
-        manual_level: level,
-        manual_message: message || null,
-        current_exam_number: currentNumber ? Number(currentNumber) : null,
-        reception_closed: level === "reception_closed",
-        closed_reason: level === "reception_closed" ? (message || "本日の受付は終了しました。") : null
-      }, true);
-      await loadAll();
-    }
+    function renderFollowups() {
+      const box = document.getElementById("followupList");
+      if (!state.followups.length) { box.innerHTML = '<div class="empty">LINEフォロー待ちはありません。</div>'; return; }
+      box.innerHTML = state.followups.slice(0, 18).map(item => `
+        <article class="entry">
+          <div class="entry-no">送</div>
+          <div>
+            <h4>${escapeHtml(item.title || "LINEフォロー")}</h4>
+            <p>${escapeHtml(item.guardian_name || "")} / ${escapeHtml(item.pet_name || "")} / 予定日：${escapeHtml(item.due_date || "-")}</p>
+            <div class="tagline"><span class="tag ${item.priority === "high" ? "red" : ""}">${escapeHtml(item.priority || "normal")}</span><span class="tag">${escapeHtml(item.status || "todo")}</span></div>
+          </div>
+          <div class="entry-actions">
+            <button class="btn btn-sub" data-copy-follow="${escapeHtml(item.followup_id || item.id)}">文面コピー</button>
+            <button class="btn btn-main" data-done-follow="${escapeHtml(item.followup_id || item.id)}">送信済み</button>
+            <button class="btn btn-warn" data-snooze-follow="${escapeHtml(item.followup_id || item.id)}">3日後</button>
+          </div>
+        </article>
+      `).join("");
 
-    async function loadAll(){
-      const [summaryData, entryData] = await Promise.all([
-        apiGet("/api/public/queue/summary", { date: todayString() }),
-        apiGet("/api/public/queue/entries", { date: todayString(), limit: 300 })
-      ]);
-      state.summary = bestSummary(summaryData);
-      renderSummaryBox(state.summary);
-      state.entries = normalizeItems(entryData);
-      renderTodos();
-      renderEntries();
-      document.getElementById("manualLevel").value = state.summary.manual_level || "auto";
-      document.getElementById("manualMessage").value = state.summary.manual_message || "";
-      document.getElementById("currentNumberInput").value = state.summary.current_exam_number || "";
-    }
-
-    function init(){
-      setupAuthBox();
-      document.querySelectorAll(".tab").forEach(tab => tab.addEventListener("click", () => {
-        document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
-        tab.classList.add("active");
-        state.filter = tab.dataset.filter;
-        renderEntries();
+      box.querySelectorAll("[data-copy-follow]").forEach(btn => btn.addEventListener("click", async () => {
+        const item = state.followups.find(x => String(x.followup_id || x.id) === String(btn.dataset.copyFollow));
+        await copyText(makeFollowMessage(item, "follow"));
+        await apiPost("/api/owner/followups/update", { followup_id: btn.dataset.copyFollow, status:"copied" }, true);
+        await loadAll();
       }));
-      document.getElementById("refreshBtn").addEventListener("click", () => loadAll().catch(e => alert(e.message)));
-      document.getElementById("saveCongestionBtn").addEventListener("click", () => saveCongestion(
-        document.getElementById("manualLevel").value,
-        document.getElementById("manualMessage").value,
-        document.getElementById("currentNumberInput").value
-      ).catch(e => alert(e.message)));
-      document.getElementById("autoCongestionBtn").addEventListener("click", () => saveCongestion("auto", "", document.getElementById("currentNumberInput").value).catch(e => alert(e.message)));
-      document.getElementById("resetDemoBtn").addEventListener("click", async () => {
-        if (!confirm("STEP VET-14のDEMO受付データだけをリセットします。実行しますか？")) return;
+
+      box.querySelectorAll("[data-done-follow]").forEach(btn => btn.addEventListener("click", async () => {
         try {
-          await apiPost("/api/admin/queue/demo/reset", {}, true);
+          await apiPost("/api/owner/followups/update", { followup_id: btn.dataset.doneFollow, status:"done" }, true);
           await loadAll();
-        } catch(e) { alert(e.message || "リセットに失敗しました。"); }
-      });
-      loadAll().catch(e => {
-        document.getElementById("entryList").innerHTML = `<div class="empty">読み込みエラー：${escapeHtml(e.message)}</div>`;
-      });
+        } catch(e) { alert(e.message || "送信済みにできませんでした。"); }
+      }));
+
+      box.querySelectorAll("[data-snooze-follow]").forEach(btn => btn.addEventListener("click", async () => {
+        try {
+          await apiPost("/api/owner/followups/update", { followup_id: btn.dataset.snoozeFollow, status:"snoozed", snoozed_until:addDaysString(3) }, true);
+          await loadAll();
+        } catch(e) { alert(e.message || "後日にできませんでした。"); }
+      }));
     }
-    init();
+
+    function renderPreventions() {
+      const box = document.getElementById("preventionList");
+      if (!state.preventions.length) { box.innerHTML = '<div class="empty">予防・お薬案内待ちはありません。</div>'; return; }
+      box.innerHTML = state.preventions.slice(0, 18).map(item => `
+        <article class="entry">
+          <div class="entry-no">予</div>
+          <div>
+            <h4>${escapeHtml(item.title || "予防予定")}</h4>
+            <p>${escapeHtml(item.guardian_name || "")} / ${escapeHtml(item.pet_name || "")} / 予定日：${escapeHtml(item.due_date || "-")}</p>
+            <div class="tagline"><span class="tag">${escapeHtml(item.prevention_type || "")}</span><span class="tag">${escapeHtml(item.status || "")}</span></div>
+          </div>
+          <div class="entry-actions">
+            <button class="btn btn-sub" data-copy-prevention="${escapeHtml(item.prevention_id || item.id)}">文面コピー</button>
+            <button class="btn btn-main" data-done-prevention="${escapeHtml(item.prevention_id || item.id)}">案内済み</button>
+          </div>
+        </article>
+      `).join("");
+
+      box.querySelectorAll("[data-copy-prevention]").forEach(btn => btn.addEventListener("click", async () => {
+        const item = state.preventions.find(x => String(x.prevention_id || x.id) === String(btn.dataset.copyPrevention));
+        await copyText(makeFollowMessage(item, "prevention"));
+      }));
+
+      box.querySelectorAll("[data-done-prevention]").forEach(btn => btn.addEventListener("click", async () => {
+        try {
+          await apiPost("/api/admin/prevention-schedules/update", { prevention_id: btn.dataset.donePrevention, status:"notified" }, true);
+          await loadAll();
+        } catch(e) { alert(e.message || "案内済みにできませんでした。"); }
+      }));
+    }
+
+    function renderUnlinked() {
+      const box = document.getElementById("unlinkedList");
+      if (!state.unlinked.length) { box.innerHTML = '<div class="empty">LINE未連携の飼い主はいません。</div>'; return; }
+      box.innerHTML = state.unlinked.slice(0, 20).map(item => `
+        <article class="entry">
+          <div class="entry-no">未</div>
+          <div>
+            <h4>${escapeHtml(item.guardian_name || "飼い主")}</h4>
+            <p>${escapeHtml(item.phone || "")} / 連携状態：${escapeHtml(item.line_link_status || "-")}</p>
+            <div class="tagline"><span class="tag red">LINE未連携</span></div>
+          </div>
+          <div class="entry-actions">
+            <button class="btn btn-sub" data-copy-unlinked="${escapeHtml(item.guardian_name || "")}">案内文コピー</button>
+          </div>
+        </article>
+      `).join("");
+
+      box.querySelectorAll("[data-copy-unlinked]").forEach(btn => btn.addEventListener("click", () => {
+        const name = btn.dataset.copyUnlinked || "飼い主";
+        copyText(`${name}様\nLINE診察券をご利用いただくと、ペットの診察券・受付・予防案内をLINEから確認できます。次回来院時に受付までお声がけください。`);
+      }));
+    }
+
+    async function loadAll() {
+      if (!getAdminToken()) {
+        renderAuthStatus();
+        document.getElementById("queueList").innerHTML = '<div class="empty">管理コード保存後に表示します。</div>';
+        document.getElementById("followupList").innerHTML = '<div class="empty">管理コード保存後に表示します。</div>';
+        document.getElementById("preventionList").innerHTML = '<div class="empty">管理コード保存後に表示します。</div>';
+        document.getElementById("unlinkedList").innerHTML = '<div class="empty">管理コード保存後に表示します。</div>';
+        return;
+      }
+
+      try {
+        const data = await apiGet("/api/owner/today", { date: todayString() }, true);
+        state.queue = data.queue_entries || [];
+        state.followups = data.followup_todos || [];
+        state.preventions = data.prevention_todos || [];
+        state.unlinked = data.line_unlinked_guardians || [];
+        renderSummary();
+        renderQueue();
+        renderFollowups();
+        renderPreventions();
+        renderUnlinked();
+      } catch(e) {
+        document.getElementById("summaryNotice").className = "notice ng";
+        document.getElementById("summaryNotice").textContent = "読み込みエラー：" + (e.message || e);
+      }
+    }
+
+    document.getElementById("refreshBtn").addEventListener("click", loadAll);
+    setupAuth();
+    loadAll();
   </script>
 </body>
 </html>
