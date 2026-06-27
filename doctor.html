@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#273f5f">
-  <title>DPRO PET CARE LINE｜獣医師用画面</title>
+  <title>DPRO PET CARE LINE｜獣医師用画面 STEP VET-6A</title>
 
   <script src="./config.js"></script>
 
@@ -151,6 +151,59 @@
     }
 
     .auth-box strong{color:#6d501b}
+
+    .auth-status-bar{
+      margin-top:14px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      background:#ffffff;
+      border:1px solid rgba(217,225,232,.92);
+      border-radius:22px;
+      padding:13px 15px;
+      box-shadow:var(--shadow);
+    }
+
+    .auth-status-main{
+      display:flex;
+      flex-wrap:wrap;
+      align-items:center;
+      gap:8px;
+      color:var(--ink);
+      font-size:13px;
+      line-height:1.55;
+    }
+
+    .auth-ok{
+      display:inline-flex;
+      align-items:center;
+      gap:7px;
+      border-radius:999px;
+      padding:7px 10px;
+      background:var(--green-soft);
+      color:var(--green);
+      font-weight:950;
+      white-space:nowrap;
+    }
+
+    .auth-code-note{
+      color:var(--muted);
+      font-weight:850;
+    }
+
+    .auth-actions{
+      display:flex;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+      gap:8px;
+    }
+
+    .auth-actions .btn{
+      min-height:40px;
+      padding:9px 12px;
+      font-size:13px;
+    }
 
     .grid{
       display:grid;
@@ -587,6 +640,9 @@
       .header{border-radius:24px;padding:18px}
       h1{font-size:25px}
       .summary-cards{grid-template-columns:repeat(2,1fr)}
+
+      .auth-status-bar{display:block}
+      .auth-actions{justify-content:flex-start;margin-top:10px}
       .filters,.form-row,.form-row.three{grid-template-columns:1fr}
       .info-grid{grid-template-columns:1fr}
       .detail-hero{display:block}
@@ -605,7 +661,7 @@
           <h1>獣医師用画面</h1>
           <p>
             受付iPadで受付されたペットを確認し、診察開始・獣医師メモ保存・診察完了・LINEフォロー文面コピーまで行います。<br>
-            すべてCloudflare Worker API経由でSupabaseの <strong>vet_</strong> テーブルへ保存します。
+            すべてCloudflare Worker API経由でSupabaseの <strong>vet_</strong> テーブルへ保存します。管理コード認証の状態も画面上に表示します。
           </p>
         </div>
         <div class="status">
@@ -615,6 +671,18 @@
         </div>
       </div>
     </header>
+
+    <section id="authStatusBar" class="auth-status-bar hidden">
+      <div class="auth-status-main">
+        <span class="auth-ok">✅ 管理コード：認証済み</span>
+        <span class="auth-code-note">このブラウザに保存済みの管理コードで表示しています。</span>
+      </div>
+      <div class="auth-actions">
+        <button class="btn secondary" id="showAuthBoxBtn" type="button">管理コードを変更</button>
+        <button class="btn secondary" id="logoutAdminCodeBtn" type="button">保存コード削除</button>
+      </div>
+    </section>
+
 
     <section id="authBox" class="auth-box">
       <strong>管理コードを入力してください</strong>
@@ -854,6 +922,8 @@
 
         $("saveAdminCodeBtn").addEventListener("click", saveAdminCode);
         $("clearAdminCodeBtn").addEventListener("click", clearAdminCode);
+        $("showAuthBoxBtn").addEventListener("click", showAuthBoxForChange);
+        $("logoutAdminCodeBtn").addEventListener("click", clearAdminCode);
         $("reloadBtn").addEventListener("click", loadToday);
         $("statusFilter").addEventListener("change", renderList);
         $("searchInput").addEventListener("input", renderList);
@@ -868,9 +938,11 @@
         if (saved) {
           $("adminCodeInput").value = saved;
           $("authBox").classList.add("hidden");
+          $("authStatusBar").classList.remove("hidden");
           pingApi();
           loadToday();
         } else {
+          $("authStatusBar").classList.add("hidden");
           setApiStatus("管理コード未入力", false);
         }
       }
@@ -941,15 +1013,26 @@
 
         setAdminCode(code, $("saveAdminCode").checked);
         $("authBox").classList.add("hidden");
+        $("authStatusBar").classList.remove("hidden");
         toast("管理コードを保存しました。");
         pingApi();
         loadToday();
       }
 
+      function showAuthBoxForChange() {
+        $("adminCodeInput").value = getAdminCode();
+        $("authBox").classList.remove("hidden");
+        $("authStatusBar").classList.add("hidden");
+        $("adminCodeInput").focus();
+        toast("管理コードを変更できます。");
+      }
+
+
       function clearAdminCode() {
         clearStoredAdminCode();
         $("adminCodeInput").value = "";
         $("authBox").classList.remove("hidden");
+        $("authStatusBar").classList.add("hidden");
         state.items = [];
         state.selected = null;
         state.selectedId = "";
