@@ -99,16 +99,16 @@
       <div class="brand">
         <div class="logo">✅</div>
         <div>
-          <small>STEP VET-28｜営業前DEMOリセット対応版</small>
+          <small>STEP VET-28B｜営業前DEMOリセット確認欄追加版</small>
           <strong>DPRO PET CARE LINE</strong>
         </div>
       </div>
       <nav class="nav">
-        <a class="pill" href="./index.html?v=step-vet-28">管理トップ</a>
-        <a class="pill" href="./rich-menu.html?v=step-vet-28">LINE入口</a>
-        <a class="pill" href="./scan-pc.html?v=step-vet-28">受付PC</a>
-        <a class="pill" href="./doctor.html?v=step-vet-28">ドクター</a>
-        <a class="pill" href="./owner.html?v=step-vet-28">オーナー</a>
+        <a class="pill" href="./index.html?v=step-vet-28b">管理トップ</a>
+        <a class="pill" href="./rich-menu.html?v=step-vet-28b">LINE入口</a>
+        <a class="pill" href="./scan-pc.html?v=step-vet-28b">受付PC</a>
+        <a class="pill" href="./doctor.html?v=step-vet-28b">ドクター</a>
+        <a class="pill" href="./owner.html?v=step-vet-28b">オーナー</a>
       </nav>
     </header>
 
@@ -247,8 +247,19 @@
         <div class="metric"><span>予防案内</span><b id="demoPreventionCount">-</b></div>
       </div>
 
+      <div class="setup-grid" style="margin-top:12px;">
+        <div class="full">
+          <label for="demoConfirmInput">安全確認の文言</label>
+          <input id="demoConfirmInput" type="text" placeholder="DEMO動物病院だけ実行" autocomplete="off" />
+        </div>
+      </div>
+
+      <div class="button-row">
+        <button class="btn btn-sub" id="fillDemoConfirmButton" type="button">確認文言を入れる</button>
+      </div>
+
       <div id="demoResetStatus" class="status-box info">
-        まだ実行していません。dpro_vet_demo の時だけ実行できます。
+        まだ実行していません。dpro_vet_demo の時だけ実行できます。実行前に「DEMO動物病院だけ実行」と入力してください。
       </div>
     </section>
 
@@ -296,7 +307,7 @@
     </section>
 
     <div class="footer">
-      DPRO PET CARE LINE / 動物病院LINE受付・診察券・フォロー管理 / system-check.html STEP VET-28<br />
+      DPRO PET CARE LINE / 動物病院LINE受付・診察券・フォロー管理 / system-check.html STEP VET-28B<br />
       この画面には Supabase Service Role Key は書き出していません。
     </div>
   </div>
@@ -316,7 +327,7 @@
     const VERSION = {
       index:"step-vet-28",
       richMenu:"step-vet-28",
-      systemCheck:"step-vet-28",
+      systemCheck:"step-vet-28b",
       debug:"step-vet-26",
       member:"step-vet-28",
       waiting:"step-vet-28",
@@ -698,12 +709,20 @@
           setStatus("demoResetStatus","安全ガード：営業前DEMOリセットは dpro_vet_demo のみ実行できます。本番 clinic_code では実行しません。","ng");
           return;
         }
+
+        const confirmText = ($("demoConfirmInput")?.value || "").trim();
+        if(confirmText !== "DEMO動物病院だけ実行"){
+          setStatus("demoResetStatus","安全確認の文言が一致しません。下の入力欄に「DEMO動物病院だけ実行」と入力してから実行してください。","ng");
+          $("demoConfirmInput")?.focus();
+          return;
+        }
+
         const ok=confirm("営業前DEMOリセットを実行します。dpro_vet_demo のDEMOデータを今日基準で再作成します。よろしいですか？");
         if(!ok)return;
 
         setStatus("demoResetStatus","営業前DEMOリセット実行中です...","info");
         const data=await apiPost("/api/admin/demo/sales-setup",{
-          confirm_text:"DEMO医院だけ実行",
+          confirm_text:confirmText,
           reset_type:"step_vet_28_sales_demo_reset_final"
         },true,true);
 
@@ -797,6 +816,7 @@
       $("runDebugButton").addEventListener("click",runDebugChecks);
       $("demoResetButton").addEventListener("click",runDemoReset);
       $("demoResetCheckButton").addEventListener("click",checkDemoResetResult);
+      $("fillDemoConfirmButton").addEventListener("click",()=>{$("demoConfirmInput").value="DEMO動物病院だけ実行";});
       $("saveAdminButton").addEventListener("click",saveAdminCode);
       $("forgetAdminButton").addEventListener("click",forgetAdminCode);
       $("generateUrlsButton").addEventListener("click",renderUrls);
@@ -820,7 +840,7 @@
       setText("demoClinicCode", clinicCode());
       renderUrls();
       renderLatestLinks();
-      log("info","system-check STEP VET-28 を起動しました。");
+      log("info","system-check STEP VET-28B を起動しました。");
     }
     init();
   </script>
