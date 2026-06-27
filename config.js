@@ -1,7 +1,7 @@
 /* =========================================================
-  STEP VET-3C
+  STEP VET-21A
   DPRO PET CARE LINE
-  config.js 動物病院版 完全版
+  config.js 動物病院版 完全版 管理コード保存キー統一
 
   目的：
   ・GitHub Pages 側のHTMLが、動物病院版Worker dpro-vet-qr-api を参照する
@@ -28,7 +28,7 @@
   const API_BASE_URL = "https://dpro-vet-qr-api.dpromstk2000.workers.dev";
 
   const CONFIG = {
-    version: "step-vet-3c-api-url-fixed",
+    version: "step-vet-21a-admin-code-storage-unified",
     project: {
       repoName: "DPRO-VET-QR",
       serviceId: "dpro-pet-care-line",
@@ -58,6 +58,9 @@
       member: `${SITE_BASE_URL}/member.html`,
       owner: `${SITE_BASE_URL}/owner.html`,
       admin: `${SITE_BASE_URL}/admin.html`,
+      adminQueue: `${SITE_BASE_URL}/admin-queue.html`,
+      waiting: `${SITE_BASE_URL}/waiting.html`,
+      richMenu: `${SITE_BASE_URL}/rich-menu.html`,
       doctor: `${SITE_BASE_URL}/doctor.html`,
       scanIpad: `${SITE_BASE_URL}/scan-ipad.html`,
       scanPc: `${SITE_BASE_URL}/scan-pc.html`,
@@ -154,7 +157,7 @@
       enabled: false,
       liffId: "",
       liffUrl: "",
-      note: "STEP VET-3C時点ではLIFF未作成。LINE Developersで作成後にここへ設定する。"
+      note: "STEP VET-21A時点ではLIFF未作成。LINE Developersで作成後にここへ設定する。"
     },
 
     demo: {
@@ -179,7 +182,18 @@
       tokenStorageKey: "dpro_vet_admin_code",
       tokenHeaderName: "X-DPRO-Admin-Code",
       tokenQueryName: "admin_code",
-      warning: "管理コードはGitHubに保存しない。Cloudflare Worker Secretのみ。"
+      // STEP VET-21A：
+      // 旧画面・新画面で保存キーが混ざると「正しい管理コードなのに違う」と見えるため、
+      // ここで全画面共通の保存キーとして扱う。
+      tokenStorageKeys: [
+        "dpro_vet_admin_code",
+        "DPRO_VET_ADMIN_CODE",
+        "DPRO_VET_ADMIN_TOKEN",
+        "dpro_vet_admin_token",
+        "DPRO_ADMIN_TOKEN",
+        "dpro_admin_token"
+      ],
+      warning: "管理コードはGitHubに保存しない。Cloudflare Worker Secretのみ。ブラウザ保存はlocalStorage/sessionStorageのみ。"
     },
 
     richMenu: {
@@ -264,11 +278,28 @@
     return `${url}?${buildQuery(params)}`;
   }
 
+  function getAdminStorageKeys() {
+    return Array.from(new Set([
+      CONFIG.admin.tokenStorageKey,
+      ...(CONFIG.admin.tokenStorageKeys || [])
+    ].filter(Boolean)));
+  }
+
   function getAdminCode() {
     try {
-      return sessionStorage.getItem(CONFIG.admin.tokenStorageKey) ||
-        localStorage.getItem(CONFIG.admin.tokenStorageKey) ||
-        "";
+      const keys = getAdminStorageKeys();
+
+      for (const key of keys) {
+        const value = sessionStorage.getItem(key);
+        if (value && String(value).trim()) return String(value).trim();
+      }
+
+      for (const key of keys) {
+        const value = localStorage.getItem(key);
+        if (value && String(value).trim()) return String(value).trim();
+      }
+
+      return "";
     } catch (error) {
       return "";
     }
@@ -277,8 +308,18 @@
   function setAdminCode(value, persist) {
     const code = String(value || "").trim();
     try {
-      sessionStorage.setItem(CONFIG.admin.tokenStorageKey, code);
-      if (persist) localStorage.setItem(CONFIG.admin.tokenStorageKey, code);
+      const keys = getAdminStorageKeys();
+
+      if (!code) {
+        clearAdminCode();
+        return;
+      }
+
+      // sessionStorage は全キーに保存
+      keys.forEach((key) => sessionStorage.setItem(key, code));
+
+      // persist指定がない画面もあるため、localStorageにも保存して画面間で揃える
+      keys.forEach((key) => localStorage.setItem(key, code));
     } catch (error) {
       console.warn("管理コードの保存に失敗しました。", error);
     }
@@ -286,8 +327,9 @@
 
   function clearAdminCode() {
     try {
-      sessionStorage.removeItem(CONFIG.admin.tokenStorageKey);
-      localStorage.removeItem(CONFIG.admin.tokenStorageKey);
+      const keys = getAdminStorageKeys();
+      keys.forEach((key) => sessionStorage.removeItem(key));
+      keys.forEach((key) => localStorage.removeItem(key));
     } catch (error) {
       console.warn("管理コードの削除に失敗しました。", error);
     }
@@ -295,9 +337,17 @@
 
   function getAdminHeaders(extraHeaders) {
     const code = getAdminCode();
+
     return {
       "Content-Type": "application/json",
-      ...(code ? { [CONFIG.admin.tokenHeaderName]: code } : {}),
+      ...(code ? {
+        "X-DPRO-Admin-Code": code,
+        "x-dpro-admin-code": code,
+        "x-admin-token": code,
+        "X-Admin-Token": code,
+        "X-Admin-Code": code,
+        "Authorization": `Bearer ${code}`
+      } : {}),
       ...(extraHeaders || {})
     };
   }
@@ -342,6 +392,7 @@
   const helpers = {
     buildQuery,
     withClinic,
+    getAdminStorageKeys,
     getAdminCode,
     setAdminCode,
     clearAdminCode,
@@ -350,11 +401,21 @@
     apiPost
   };
 
+  // STEP VET-21A：
+  // 新しい画面は DPRO_CONFIG.getAdminToken を見るため、CONFIG直下にも互換関数を持たせる。
+  CONFIG.getAdminToken = getAdminCode;
+  CONFIG.getAdminCode = getAdminCode;
+  CONFIG.setAdminToken = setAdminCode;
+  CONFIG.setAdminCode = setAdminCode;
+  CONFIG.clearAdminToken = clearAdminCode;
+  CONFIG.clearAdminCode = clearAdminCode;
+  CONFIG.getAdminHeaders = getAdminHeaders;
+
   // 新しいHTML用
   window.DPRO_VET_CONFIG = CONFIG;
   window.DPRO_VET_HELPERS = helpers;
 
-  // 互換用：既存HTMLが DPRO_CONFIG を見ても動くようにする
+  // 互換用：既存HTMLが DPRO_CONFIG / DPRO_HELPERS を見ても動くようにする
   window.DPRO_CONFIG = CONFIG;
   window.DPRO_HELPERS = helpers;
 
