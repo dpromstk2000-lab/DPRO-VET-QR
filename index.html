@@ -3,32 +3,27 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>DPRO SHOP | STEP 30-36C 歯科デジタルQR診察券デモ</title>
-  <meta name="description" content="LINEで使える歯科デジタルQR診察券デモ。患者画面、受付iPad、PC受付リーダー、先生用、医院管理、患者管理をまとめた入口です。">
+  <title>DPRO PET CARE LINE | 動物病院向けペット診察券・予防フォローDEMO</title>
+  <meta name="description" content="LINE公式で使える、ペット診察券・QR受付・来院前問診・予防フォローをまとめた動物病院向け営業DEMOです。">
   <style>
     :root {
-      --bg1: #eaf2ff;
-      --bg2: #eefdf3;
-      --text: #0f172a;
-      --muted: #64748b;
-      --line: #e2e8f0;
+      --bg1: #eefdf4;
+      --bg2: #fff8ed;
+      --text: #12312a;
+      --muted: #64766d;
+      --line: #dce8df;
+      --green: #16a34a;
+      --green2: #15803d;
+      --brown: #8b5e34;
       --blue: #2563eb;
-      --blue2: #1d4ed8;
-      --green: #06c755;
-      --purple: #7c3aed;
       --amber: #f59e0b;
-      --card: rgba(255,255,255,0.92);
-      --shadow: 0 22px 70px rgba(15,23,42,0.10);
+      --card: rgba(255,255,255,0.94);
+      --shadow: 0 22px 70px rgba(18,49,42,0.10);
       --radius: 28px;
     }
 
-    * {
-      box-sizing: border-box;
-    }
-
-    html {
-      scroll-behavior: smooth;
-    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
 
     body {
       margin: 0;
@@ -41,15 +36,13 @@
         "Segoe UI",
         sans-serif;
       background:
-        radial-gradient(circle at 18% 0%, rgba(37,99,235,0.16), transparent 34%),
-        radial-gradient(circle at 92% 3%, rgba(6,199,85,0.16), transparent 38%),
-        linear-gradient(135deg, var(--bg1), #f8fbff 48%, var(--bg2));
+        radial-gradient(circle at 18% 0%, rgba(22,163,74,0.18), transparent 34%),
+        radial-gradient(circle at 92% 3%, rgba(139,94,52,0.13), transparent 38%),
+        linear-gradient(135deg, var(--bg1), #fbfffc 48%, var(--bg2));
       line-height: 1.65;
     }
 
-    a {
-      color: inherit;
-    }
+    a { color: inherit; }
 
     .page {
       width: min(1120px, calc(100% - 32px));
@@ -60,12 +53,12 @@
     .top-note {
       border-radius: 24px;
       border: 1px solid #bbf7d0;
-      background: rgba(240,253,244,0.92);
+      background: rgba(240,253,244,0.94);
       color: #166534;
       padding: 12px 15px;
       font-size: 13px;
       font-weight: 850;
-      box-shadow: 0 12px 32px rgba(15,23,42,0.055);
+      box-shadow: 0 12px 32px rgba(18,49,42,0.055);
       margin-bottom: 14px;
     }
 
@@ -74,9 +67,9 @@
       overflow: hidden;
       border-radius: 34px;
       background:
-        radial-gradient(circle at 88% 8%, rgba(37,99,235,0.12), transparent 30%),
-        linear-gradient(135deg, rgba(255,255,255,0.96), rgba(255,255,255,0.86));
-      border: 1px solid rgba(219,234,254,0.95);
+        radial-gradient(circle at 88% 8%, rgba(22,163,74,0.13), transparent 30%),
+        linear-gradient(135deg, rgba(255,255,255,0.97), rgba(255,255,255,0.88));
+      border: 1px solid rgba(187,247,208,0.95);
       box-shadow: var(--shadow);
       padding: 34px;
       display: grid;
@@ -87,7 +80,7 @@
     }
 
     .kicker {
-      color: var(--blue2);
+      color: var(--green2);
       font-size: 12px;
       line-height: 1;
       letter-spacing: 0.12em;
@@ -107,11 +100,11 @@
 
     .lead {
       margin: 18px 0 0;
-      color: #334155;
+      color: #335148;
       font-size: 15px;
       line-height: 1.9;
       font-weight: 760;
-      max-width: 670px;
+      max-width: 700px;
     }
 
     .hero-badges {
@@ -124,29 +117,32 @@
     .badge {
       border-radius: 999px;
       padding: 8px 11px;
-      background: #eff6ff;
-      color: #1d4ed8;
+      background: #f0fdf4;
+      color: #166534;
       font-size: 12px;
       line-height: 1;
       font-weight: 950;
-      border: 1px solid #bfdbfe;
+      border: 1px solid #86efac;
     }
 
-    .badge.green {
-      background: #dcfce7;
-      border-color: #86efac;
-      color: #166534;
+    .badge.brown {
+      background: #fff7ed;
+      border-color: #fed7aa;
+      color: #7c2d12;
     }
 
-    .hero-panel {
-      display: grid;
-      gap: 12px;
+    .badge.blue {
+      background: #eff6ff;
+      border-color: #bfdbfe;
+      color: #1d4ed8;
     }
+
+    .hero-panel { display: grid; gap: 12px; }
 
     .hero-step {
       border-radius: 22px;
-      border: 1px solid #e2e8f0;
-      background: rgba(255,255,255,0.88);
+      border: 1px solid #dce8df;
+      background: rgba(255,255,255,0.90);
       padding: 14px;
       display: grid;
       grid-template-columns: 42px minmax(0, 1fr);
@@ -160,8 +156,8 @@
       border-radius: 16px;
       display: grid;
       place-items: center;
-      background: #eff6ff;
-      color: var(--blue2);
+      background: #dcfce7;
+      color: #166534;
       font-weight: 950;
     }
 
@@ -172,7 +168,7 @@
       font-weight: 950;
     }
 
-    .hero-step span {
+    .hero-step span span {
       display: block;
       margin-top: 2px;
       color: var(--muted);
@@ -184,30 +180,24 @@
     .section-note {
       margin: 18px 0;
       border-radius: 24px;
-      border: 1px solid #bfdbfe;
-      background: rgba(239,246,255,0.94);
-      color: #1e3a8a;
+      border: 1px solid #fed7aa;
+      background: rgba(255,247,237,0.96);
+      color: #7c2d12;
       padding: 13px 16px;
       font-size: 13px;
       line-height: 1.75;
       font-weight: 830;
     }
 
-    .grid {
-      display: grid;
-      gap: 14px;
-    }
-
-    .role-grid {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
+    .grid { display: grid; gap: 14px; }
+    .role-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 
     .card {
       min-height: 196px;
       border-radius: 28px;
-      border: 1px solid rgba(226,232,240,0.95);
+      border: 1px solid rgba(220,232,223,0.98);
       background: var(--card);
-      box-shadow: 0 14px 42px rgba(15,23,42,0.07);
+      box-shadow: 0 14px 42px rgba(18,49,42,0.07);
       padding: 20px;
       display: grid;
       align-content: space-between;
@@ -218,44 +208,28 @@
 
     .card:hover {
       transform: translateY(-2px);
-      box-shadow: 0 22px 58px rgba(15,23,42,0.11);
-      border-color: #bfdbfe;
+      box-shadow: 0 22px 58px rgba(18,49,42,0.11);
+      border-color: #86efac;
     }
 
-    .card-head {
-      display: grid;
-      gap: 8px;
-    }
+    .card-head { display: grid; gap: 8px; }
 
     .pill {
       width: fit-content;
       border-radius: 999px;
       padding: 6px 9px;
-      background: #eff6ff;
-      color: var(--blue2);
+      background: #f0fdf4;
+      color: #166534;
       font-size: 11px;
       line-height: 1;
       font-weight: 950;
-      border: 1px solid #bfdbfe;
+      border: 1px solid #86efac;
     }
 
-    .pill.green {
-      background: #dcfce7;
-      color: #166534;
-      border-color: #86efac;
-    }
-
-    .pill.purple {
-      background: #ede9fe;
-      color: #6d28d9;
-      border-color: #ddd6fe;
-    }
-
-    .pill.amber {
-      background: #fffbeb;
-      color: #92400e;
-      border-color: #fde68a;
-    }
+    .pill.brown { background: #fff7ed; color: #7c2d12; border-color: #fed7aa; }
+    .pill.blue { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
+    .pill.amber { background: #fffbeb; color: #92400e; border-color: #fde68a; }
+    .pill.gray { background: #f8fafc; color: #475569; border-color: #e2e8f0; }
 
     .card h2 {
       margin: 0;
@@ -274,7 +248,7 @@
     }
 
     .url {
-      color: #0f172a;
+      color: #12312a;
       font-size: 11px;
       line-height: 1.45;
       font-weight: 900;
@@ -287,16 +261,14 @@
       gap: 8px;
     }
 
-    .actions.single {
-      grid-template-columns: 1fr;
-    }
+    .actions.single { grid-template-columns: 1fr; }
 
     .btn {
       min-height: 42px;
       border-radius: 999px;
-      border: 1px solid #bfdbfe;
+      border: 1px solid #86efac;
       background: #fff;
-      color: var(--blue2);
+      color: #166534;
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -305,27 +277,36 @@
       line-height: 1;
       font-weight: 950;
       padding: 10px 12px;
+      text-align: center;
     }
 
     .btn.primary {
-      background: var(--blue);
-      border-color: transparent;
-      color: #fff;
-      box-shadow: 0 12px 28px rgba(37,99,235,0.20);
-    }
-
-    .btn.green {
       background: var(--green);
       border-color: transparent;
       color: #fff;
-      box-shadow: 0 12px 28px rgba(6,199,85,0.20);
+      box-shadow: 0 12px 28px rgba(22,163,74,0.20);
     }
 
-    .btn.purple {
-      background: var(--purple);
+    .btn.brown {
+      background: var(--brown);
       border-color: transparent;
       color: #fff;
-      box-shadow: 0 12px 28px rgba(124,58,237,0.18);
+      box-shadow: 0 12px 28px rgba(139,94,52,0.18);
+    }
+
+    .btn.blue {
+      background: var(--blue);
+      border-color: transparent;
+      color: #fff;
+      box-shadow: 0 12px 28px rgba(37,99,235,0.18);
+    }
+
+    .btn.disabled {
+      pointer-events: none;
+      color: #94a3b8;
+      border-color: #e2e8f0;
+      background: #f8fafc;
+      box-shadow: none;
     }
 
     .flow-wrap {
@@ -337,15 +318,15 @@
 
     .panel {
       border-radius: 28px;
-      border: 1px solid rgba(226,232,240,0.95);
-      background: rgba(255,255,255,0.88);
-      box-shadow: 0 14px 42px rgba(15,23,42,0.06);
+      border: 1px solid rgba(220,232,223,0.98);
+      background: rgba(255,255,255,0.90);
+      box-shadow: 0 14px 42px rgba(18,49,42,0.06);
       overflow: hidden;
     }
 
     .panel-head {
       padding: 18px 20px;
-      border-bottom: 1px solid #e2e8f0;
+      border-bottom: 1px solid #dce8df;
       display: flex;
       align-items: center;
       gap: 10px;
@@ -357,8 +338,8 @@
       border-radius: 13px;
       display: grid;
       place-items: center;
-      color: var(--blue2);
-      background: #eff6ff;
+      color: #166534;
+      background: #dcfce7;
       font-size: 12px;
       font-weight: 950;
     }
@@ -371,15 +352,11 @@
       letter-spacing: -0.04em;
     }
 
-    .flow-list {
-      display: grid;
-      gap: 10px;
-      padding: 16px;
-    }
+    .flow-list { display: grid; gap: 10px; padding: 16px; }
 
     .flow-item {
       border-radius: 18px;
-      border: 1px solid #e2e8f0;
+      border: 1px solid #dce8df;
       background: #ffffff;
       padding: 13px;
       display: grid;
@@ -394,11 +371,14 @@
       border-radius: 13px;
       display: grid;
       place-items: center;
-      background: var(--blue);
+      background: var(--green);
       color: #fff;
       font-size: 13px;
       font-weight: 950;
     }
+
+    .num.brown { background: var(--brown); }
+    .num.check { background: #dcfce7; color: #166534; }
 
     .flow-item strong {
       display: block;
@@ -407,18 +387,13 @@
       font-weight: 950;
     }
 
-    .flow-item span {
+    .flow-item span span {
       display: block;
       margin-top: 2px;
       color: var(--muted);
       font-size: 11px;
       line-height: 1.5;
       font-weight: 760;
-    }
-
-    .check {
-      background: #dcfce7;
-      color: #166534;
     }
 
     .footer {
@@ -442,7 +417,7 @@
       border-radius: 999px;
       padding: 8px 11px;
       background: rgba(255,255,255,0.86);
-      border: 1px solid #e2e8f0;
+      border: 1px solid #dce8df;
       color: #475569;
       text-decoration: none;
       font-size: 12px;
@@ -451,13 +426,8 @@
 
     @media (max-width: 900px) {
       .hero,
-      .flow-wrap {
-        grid-template-columns: 1fr;
-      }
-
-      .role-grid {
-        grid-template-columns: 1fr 1fr;
-      }
+      .flow-wrap { grid-template-columns: 1fr; }
+      .role-grid { grid-template-columns: 1fr 1fr; }
     }
 
     @media (max-width: 620px) {
@@ -465,19 +435,9 @@
         width: min(100% - 20px, 1120px);
         padding-top: 14px;
       }
-
-      .hero {
-        padding: 22px;
-        border-radius: 28px;
-      }
-
-      .role-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .actions {
-        grid-template-columns: 1fr;
-      }
+      .hero { padding: 22px; border-radius: 28px; }
+      .role-grid { grid-template-columns: 1fr; }
+      .actions { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -485,68 +445,82 @@
 <body>
   <main class="page">
     <div class="top-note">
-      STEP 30-36C：上部の見にくい最新版入口を整理。営業先に見せる入口として、受付iPad・PC受付リーダー・先生用・管理画面を分かりやすく並べました。
+      STEP VET-1B：DPRO PET CARE LINE の営業DEMO入口です。この段階では、既存の歯科システム・歯科Worker・dental_qr_テーブルには触れていません。
     </div>
 
     <section class="hero">
       <div>
-        <div class="kicker">DPRO SHOP / DIGITAL-QR / STEP 30-36C</div>
-        <h1>LINEで使える<br>歯科デジタルQR診察券デモ</h1>
+        <div class="kicker">DPRO PET CARE LINE / DPRO-VET-QR / STEP VET-1B</div>
+        <h1>LINE公式で使える<br>ペット診察券・予防フォローDEMO</h1>
         <p class="lead">
-          患者さんのLINE診察券、受付iPad、PC受付リーダー、先生用画面、医院管理、患者管理をつなげて見せるトップページです。
-          営業先では、まずここから全体の流れを説明できます。
+          飼い主さんのLINEに複数ペットの診察券をまとめ、受付QR・獣医師用画面・オーナー管理・予防フォローまでつなげて見せる、動物病院向けの営業DEMO入口です。
+          LINE公式を「配信ツール」ではなく、診察券・受付・来院前問診・予防案内の入口として提案します。
         </p>
 
         <div class="hero-badges">
-          <span class="badge green">営業前DEMO設定は system-check</span>
-          <span class="badge">受付はiPad/PCどちらも対応</span>
-          <span class="badge">先生用・管理トップへ即反映</span>
+          <span class="badge">多頭飼いペット診察券</span>
+          <span class="badge brown">ワクチン・フィラリア予防フォロー</span>
+          <span class="badge blue">LINE公式リッチメニューDEMO対応予定</span>
         </div>
       </div>
 
       <div class="hero-panel">
         <div class="hero-step">
-          <span class="hero-step-icon">患</span>
+          <span class="hero-step-icon">飼</span>
           <span>
-            <strong>患者さんはLINEから診察券を表示</strong>
-            <span>お母さんのLINEに家族分の診察券をまとめて表示できます。</span>
+            <strong>飼い主さんはLINEからペット診察券を表示</strong>
+            <span>1人の飼い主さんに、犬・猫など複数ペットの診察券をまとめて表示できます。</span>
           </span>
         </div>
 
         <div class="hero-step">
           <span class="hero-step-icon">受</span>
           <span>
-            <strong>受付でQRを読み取り受付済みにする</strong>
-            <span>iPadでもPCのUSB QRリーダーでも受付できます。</span>
+            <strong>受付でQRを読み取り来院受付</strong>
+            <span>受付iPadまたはPC受付リーダーで、どのペットが来院したかを確認できます。</span>
           </span>
         </div>
 
         <div class="hero-step">
-          <span class="hero-step-icon">医</span>
+          <span class="hero-step-icon">予</span>
           <span>
-            <strong>先生用で今日やることを確認</strong>
-            <span>診療待ち、診療済み、LINEフォロー対象を確認できます。</span>
+            <strong>予防・再診フォロー対象を見える化</strong>
+            <span>ワクチン、フィラリア、ノミ・マダニ、再診案内の対象を管理画面で確認します。</span>
           </span>
         </div>
       </div>
     </section>
 
     <div class="section-note">
-      営業前は、まず <strong>営業前チェック</strong> を開いて「営業前DEMO設定」を押してください。
-      今日の日付で、山田家だけでなく背景患者も混ざった本日の診療データを作成します。
+      現在は <strong>STEP VET-1：画面文言変更フェーズ</strong> です。
+      Workerは今後 <strong>dpro-vet-qr-api</strong> として別作成し、Supabaseは <strong>vet_</strong> 系テーブルで新規構築します。
+      既存の歯科版リポジトリ・歯科Worker・dental_qr_系テーブルはそのまま残します。
     </div>
 
     <section class="grid role-grid" aria-label="画面入口">
       <article class="card">
         <div class="card-head">
-          <span class="pill green">患者さん・お母さん</span>
-          <h2>LINE家族診察券</h2>
-          <p>お母さんのLINEに、本人・子どもの診察券をまとめて表示します。</p>
-          <div class="url">member.html?t=demo-dental-patient-001</div>
+          <span class="pill">飼い主さん</span>
+          <h2>ペット診察券</h2>
+          <p>飼い主さんのLINEに、ココちゃん・モモちゃん・ハナちゃんなど複数ペットの診察券をまとめて表示します。</p>
+          <div class="url">member.html?t=demo-vet-coco</div>
         </div>
         <div class="actions">
-          <a class="btn primary" href="./member.html?t=demo-dental-patient-001">開く</a>
-          <a class="btn green" href="https://liff.line.me/2010491267-waXBAIje?t=demo-dental-patient-001">LIFF</a>
+          <a class="btn primary" href="./member.html?t=demo-vet-coco&v=vet1b">開く</a>
+          <a class="btn disabled" href="#">LIFFは後で設定</a>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-head">
+          <span class="pill brown">LINE公式DEMO</span>
+          <h2>リッチメニュー</h2>
+          <p>LINE公式の下部メニューから、診察券・予約受付・来院前問診・予防予定・アクセスへ誘導する見せ方を作ります。</p>
+          <div class="url">line-demo.html / STEP VET-8で追加予定</div>
+        </div>
+        <div class="actions">
+          <a class="btn disabled" href="#">準備中</a>
+          <a class="btn" href="./demo-guide.html?v=vet1b">構成を見る</a>
         </div>
       </article>
 
@@ -554,64 +528,89 @@
         <div class="card-head">
           <span class="pill">受付スタッフ</span>
           <h2>受付iPad</h2>
-          <p>タブレット受付用。QRリーダー入力、カメラ、手入力で受付できます。</p>
-          <div class="url">scan-ipad.html?v=3029b</div>
+          <p>タブレット受付用。ペット診察券のQRを読み取り、来院受付済みにする画面です。</p>
+          <div class="url">scan-ipad.html</div>
         </div>
         <div class="actions">
-          <a class="btn primary" href="./scan-ipad.html?v=3029b">開く</a>
-          <a class="btn" href="./doctor.html?v=3027g">先生用へ</a>
+          <a class="btn primary" href="./scan-ipad.html?v=vet1b">開く</a>
+          <a class="btn" href="./scan-pc.html?v=vet1b">PC受付へ</a>
         </div>
       </article>
 
       <article class="card">
         <div class="card-head">
-          <span class="pill">受付PC・USBリーダー</span>
+          <span class="pill blue">受付PC・USBリーダー</span>
           <h2>PC受付リーダー</h2>
-          <p>PCにUSB/Bluetooth QRリーダーを接続して、診察券QRを読み取ります。</p>
-          <div class="url">scan-pc.html?v=3036</div>
+          <p>PCにUSB/Bluetooth QRリーダーを接続して、ペット診察券QRを読み取る受付画面です。</p>
+          <div class="url">scan-pc.html</div>
         </div>
         <div class="actions">
-          <a class="btn primary" href="./scan-pc.html?v=3036">開く</a>
-          <a class="btn" href="./scan-ipad.html?v=3029b">iPad版へ</a>
+          <a class="btn primary" href="./scan-pc.html?v=vet1b">開く</a>
+          <a class="btn" href="./scan-ipad.html?v=vet1b">iPad版へ</a>
         </div>
       </article>
 
       <article class="card">
         <div class="card-head">
-          <span class="pill purple">先生・院長</span>
-          <h2>先生用画面</h2>
-          <p>今日の診療待ち、診療済み、診療後LINE文面の確認を行います。</p>
-          <div class="url">doctor.html?v=3027g</div>
+          <span class="pill brown">獣医師・院長</span>
+          <h2>獣医師用画面</h2>
+          <p>今日来院するペット、主訴、注意メモ、予防予定、再診フォローの確認に使う画面です。</p>
+          <div class="url">doctor.html</div>
         </div>
         <div class="actions">
-          <a class="btn primary" href="./doctor.html?v=3027g">開く</a>
-          <a class="btn" href="./owner.html?v=3036b">管理トップへ</a>
+          <a class="btn primary" href="./doctor.html?v=vet1b">開く</a>
+          <a class="btn" href="./owner.html?v=vet1b">管理トップへ</a>
         </div>
       </article>
 
       <article class="card">
         <div class="card-head">
-          <span class="pill purple">医院管理</span>
+          <span class="pill brown">動物病院オーナー</span>
           <h2>管理トップ</h2>
-          <p>受付・診療状況、LINEフォロー、未連携、患者管理への入口を確認します。</p>
-          <div class="url">owner.html?v=3036b</div>
+          <p>今日の受付、未受付、LINE未連携、ワクチン・フィラリア・再診フォロー対象を確認します。</p>
+          <div class="url">owner.html</div>
         </div>
         <div class="actions">
-          <a class="btn primary" href="./owner.html?v=3036b">開く</a>
-          <a class="btn purple" href="./owner.html?v=3036b#dailyStatus">状況</a>
+          <a class="btn primary" href="./owner.html?v=vet1b">開く</a>
+          <a class="btn brown" href="./owner.html?v=vet1b#followups">予防フォロー</a>
         </div>
       </article>
 
       <article class="card">
         <div class="card-head">
-          <span class="pill">患者登録・設定</span>
-          <h2>患者管理</h2>
-          <p>新規患者、家族診察券、LINE登録QR、患者検索を行います。</p>
-          <div class="url">admin.html?v=3035k</div>
+          <span class="pill">飼い主・ペット管理</span>
+          <h2>管理者画面</h2>
+          <p>飼い主登録、ペット追加、多頭飼い診察券、LINE連携、予防予定の設定を行う画面です。</p>
+          <div class="url">admin.html</div>
         </div>
         <div class="actions">
-          <a class="btn primary" href="./admin.html?v=3035k">開く</a>
-          <a class="btn" href="./owner.html?v=3036b">管理へ</a>
+          <a class="btn primary" href="./admin.html?v=vet1b">開く</a>
+          <a class="btn" href="./owner.html?v=vet1b">管理へ</a>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-head">
+          <span class="pill gray">営業前確認</span>
+          <h2>system-check</h2>
+          <p>公開URL、API接続、デモ設定、安全ガードを確認する画面です。VET版Worker作成後に本格的に使います。</p>
+          <div class="url">system-check.html</div>
+        </div>
+        <div class="actions">
+          <a class="btn primary" href="./system-check.html?v=vet1b">開く</a>
+          <a class="btn disabled" href="#">APIは後で作成</a>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-head">
+          <span class="pill amber">営業説明</span>
+          <h2>営業ガイド</h2>
+          <p>動物病院オーナーへ、LINE公式を診察券・受付・予防案内の入口として提案する流れを整理します。</p>
+          <div class="url">demo-guide.html</div>
+        </div>
+        <div class="actions single">
+          <a class="btn primary" href="./demo-guide.html?v=vet1b">開く</a>
         </div>
       </article>
     </section>
@@ -620,47 +619,47 @@
       <div class="panel">
         <div class="panel-head">
           <span class="panel-icon">順</span>
-          <h2 class="panel-title">営業で見せる流れ</h2>
+          <h2 class="panel-title">営業で見せる理想の流れ</h2>
         </div>
 
         <div class="flow-list">
           <div class="flow-item">
             <span class="num">1</span>
             <span>
-              <strong>営業前チェックでDEMO設定</strong>
-              <span>本日の患者6人、受付済み、診療待ち、診療済み、LINEフォローを作ります。</span>
+              <strong>LINE公式のリッチメニューを見せる</strong>
+              <span>ペット診察券、予約・受付、来院前問診、予防予定、アクセスを1画面で見せます。</span>
             </span>
           </div>
 
           <div class="flow-item">
             <span class="num">2</span>
             <span>
-              <strong>患者さんのLINE家族診察券</strong>
-              <span>お母さんのLINEに家族分の診察券がまとまることを見せます。</span>
+              <strong>多頭飼いペット診察券を開く</strong>
+              <span>飼い主さんのLINEに複数ペットの診察券がまとまることを見せます。</span>
             </span>
           </div>
 
           <div class="flow-item">
             <span class="num">3</span>
             <span>
-              <strong>受付iPadまたはPC受付で読み取り</strong>
-              <span>受付スタッフがQRを確認し、受付済みにできる流れを見せます。</span>
+              <strong>受付iPadまたはPC受付でQR読み取り</strong>
+              <span>受付スタッフがQRを確認し、来院受付済みにできる流れを見せます。</span>
             </span>
           </div>
 
           <div class="flow-item">
             <span class="num">4</span>
             <span>
-              <strong>先生用画面で診療待ちを確認</strong>
-              <span>受付済みの患者が先生画面に反映されるところを見せます。</span>
+              <strong>獣医師用画面で今日の診察を確認</strong>
+              <span>受付済みのペット、主訴、注意メモ、予防予定を確認します。</span>
             </span>
           </div>
 
           <div class="flow-item">
             <span class="num">5</span>
             <span>
-              <strong>管理トップで状況を確認</strong>
-              <span>今日の受付・診療状況とLINEフォロー対象を確認します。</span>
+              <strong>管理トップで予防・再診フォローを確認</strong>
+              <span>ワクチン、フィラリア、ノミ・マダニ、再診案内の対象を見える化します。</span>
             </span>
           </div>
         </div>
@@ -668,62 +667,63 @@
 
       <div class="panel">
         <div class="panel-head">
-          <span class="panel-icon">確</span>
-          <h2 class="panel-title">営業前チェック</h2>
+          <span class="panel-icon">核</span>
+          <h2 class="panel-title">動物病院版で刺さるポイント</h2>
         </div>
 
         <div class="flow-list">
           <div class="flow-item">
             <span class="num check">✓</span>
             <span>
-              <strong>営業前DEMO設定を押す</strong>
-              <span>山田家＋背景患者が混ざった本日の診療状態にします。</span>
+              <strong>多頭飼いでも診察券をまとめられる</strong>
+              <span>紙の診察券をペットごとに探す手間を減らします。</span>
             </span>
           </div>
 
           <div class="flow-item">
             <span class="num check">✓</span>
             <span>
-              <strong>受付iPad / PC受付リーダーが開ける</strong>
-              <span>受付端末に合わせてどちらかを使います。</span>
+              <strong>受付で名前探しを減らせる</strong>
+              <span>QR受付で、飼い主・ペットを素早く確認できます。</span>
             </span>
           </div>
 
           <div class="flow-item">
             <span class="num check">✓</span>
             <span>
-              <strong>先生用に診療待ちが出る</strong>
-              <span>受付済みの患者が先生用画面に表示されます。</span>
+              <strong>来院前問診へ誘導できる</strong>
+              <span>症状や相談内容を事前に把握し、受付・診察前の確認を楽にします。</span>
             </span>
           </div>
 
           <div class="flow-item">
             <span class="num check">✓</span>
             <span>
-              <strong>患者管理で検索できる</strong>
-              <span>山田、佐藤、田中などで検索できるか確認します。</span>
+              <strong>予防案内の取りこぼしを減らせる</strong>
+              <span>ワクチン・フィラリア・再診対象をLINEで案内しやすくします。</span>
             </span>
           </div>
 
           <div class="actions single" style="padding-top: 6px;">
-            <a class="btn green" href="./system-check.html?v=3036b">営業前チェックを開く</a>
+            <a class="btn primary" href="./system-check.html?v=vet1b">営業前チェックを開く</a>
           </div>
         </div>
       </div>
     </section>
 
     <div class="footer">
-      DPRO SHOP / DIGITAL-QR / STEP 30-36C<br>
-      歯科デジタルQR診察券デモのトップページです。営業時の入口として使用できます。
+      DPRO PET CARE LINE / DPRO-VET-QR / STEP VET-1B<br>
+      LINE公式で使える、ペット診察券・予防フォローシステムの営業DEMOトップページです。
 
       <div class="sub-links">
-        <a class="small-link" href="./demo-guide.html?v=3031">営業ガイド</a>
-        <a class="small-link" href="./system-check.html?v=3036b">system-check</a>
-        <a class="small-link" href="./scan-pc.html?v=3036">PC受付</a>
-        <a class="small-link" href="./scan-ipad.html?v=3029b">受付iPad</a>
-        <a class="small-link" href="./doctor.html?v=3027g">先生用</a>
-        <a class="small-link" href="./owner.html?v=3036b">管理トップ</a>
-        <a class="small-link" href="./admin.html?v=3035k">患者管理</a>
+        <a class="small-link" href="./demo-guide.html?v=vet1b">営業ガイド</a>
+        <a class="small-link" href="./system-check.html?v=vet1b">system-check</a>
+        <a class="small-link" href="./member.html?t=demo-vet-coco&v=vet1b">ペット診察券</a>
+        <a class="small-link" href="./scan-pc.html?v=vet1b">PC受付</a>
+        <a class="small-link" href="./scan-ipad.html?v=vet1b">受付iPad</a>
+        <a class="small-link" href="./doctor.html?v=vet1b">獣医師用</a>
+        <a class="small-link" href="./owner.html?v=vet1b">管理トップ</a>
+        <a class="small-link" href="./admin.html?v=vet1b">飼い主・ペット管理</a>
       </div>
     </div>
   </main>
