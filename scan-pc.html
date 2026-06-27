@@ -1,3174 +1,810 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <title>DPRO SHOP | STEP 30-39A PC受付QRリーダー 受付前確認・二重受付警告</title>
-
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#223b34" />
+  <title>DPRO PET CARE LINE｜受付PC・QRリーダー受付</title>
   <script src="./config.js"></script>
-  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-
   <style>
     :root {
-      --blue: #2563eb;
-      --blue-dark: #1d4ed8;
-      --line: #06c755;
-      --green: #16a34a;
-      --orange: #f59e0b;
-      --red: #dc2626;
-      --ink: #0f172a;
-      --muted: #64748b;
-      --border: #dbeafe;
-      --soft: #eff6ff;
-      --green-soft: #f0fdf4;
-      --orange-soft: #fffbeb;
-      --red-soft: #fef2f2;
-      --card: rgba(255,255,255,0.92);
-      --shadow: 0 18px 45px rgba(15, 23, 42, 0.10);
-      --radius: 28px;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    html {
-      min-height: 100%;
-      background: #f6f8fb;
-    }
-
-    body {
-      margin: 0;
-      min-height: 100%;
-      font-family:
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        "Hiragino Sans",
-        "Hiragino Kaku Gothic ProN",
-        "Yu Gothic",
-        Meiryo,
-        sans-serif;
-      color: var(--ink);
-      background:
-        radial-gradient(circle at 8% 4%, rgba(37, 99, 235, 0.16), transparent 30%),
-        radial-gradient(circle at 92% 10%, rgba(6, 199, 85, 0.13), transparent 28%),
-        linear-gradient(135deg, #edf4ff 0%, #f8fbff 55%, #eefdf5 100%);
-    }
-
-    button,
-    input,
-    textarea,
-    select {
-      font: inherit;
-    }
-
-    button {
-      cursor: pointer;
-    }
-
-    a {
-      color: inherit;
-      text-decoration: none;
-    }
-
-    .page {
-      width: min(1280px, calc(100% - 28px));
-      margin: 0 auto;
-      padding: 18px 0 36px;
-    }
-
-    .topbar {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 14px;
-      align-items: start;
-      margin-bottom: 14px;
-    }
-
-    .kicker {
-      color: #1d4ed8;
-      font-size: 12px;
-      font-weight: 950;
-      letter-spacing: 0.12em;
-    }
-
-    .title {
-      margin-top: 4px;
-      font-size: clamp(25px, 3.5vw, 42px);
-      line-height: 1.08;
-      font-weight: 950;
-      letter-spacing: -0.07em;
-    }
-
-    .subtitle {
-      margin-top: 7px;
-      color: #475569;
-      font-size: 14px;
-      line-height: 1.7;
-      font-weight: 760;
-    }
-
-    .top-actions {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-    }
-
-    .top-actions a,
-    .top-actions button {
-      min-height: 42px;
-      border-radius: 999px;
-      padding: 10px 13px;
-      border: 1px solid #bfdbfe;
-      background: rgba(255,255,255,0.78);
-      color: #1d4ed8;
-      font-size: 12px;
-      font-weight: 950;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .today-strip {
-      display: grid;
-      grid-template-columns: 1.2fr repeat(4, 1fr);
-      gap: 10px;
-      margin-bottom: 14px;
-    }
-
-    .today-main,
-    .stat {
-      border-radius: 24px;
-      background: var(--card);
-      border: 1px solid rgba(219, 234, 254, 0.95);
-      box-shadow: 0 12px 26px rgba(15, 23, 42, 0.06);
-      padding: 15px;
-    }
-
-    .today-date {
-      color: #64748b;
-      font-size: 12px;
-      font-weight: 950;
-      letter-spacing: 0.08em;
-    }
-
-    .today-task {
-      margin-top: 6px;
-      font-size: 20px;
-      line-height: 1.35;
-      font-weight: 950;
-      letter-spacing: -0.05em;
-    }
-
-    .today-note {
-      margin-top: 7px;
-      color: #475569;
-      font-size: 12px;
-      line-height: 1.6;
-      font-weight: 760;
-    }
-
-    .stat-label {
-      color: #64748b;
-      font-size: 12px;
-      font-weight: 950;
-    }
-
-    .stat-value {
-      margin-top: 7px;
-      font-size: 32px;
-      line-height: 1;
-      font-weight: 950;
-      letter-spacing: -0.06em;
-    }
-
-    .stat-note {
-      margin-top: 8px;
-      color: #64748b;
-      font-size: 11px;
-      line-height: 1.5;
-      font-weight: 750;
-    }
-
-    .layout {
-      display: grid;
-      grid-template-columns: minmax(360px, 0.82fr) minmax(0, 1.18fr);
-      gap: 14px;
-      align-items: start;
-    }
-
-    .card {
-      border-radius: var(--radius);
-      background: var(--card);
-      border: 1px solid rgba(219, 234, 254, 0.95);
-      box-shadow: var(--shadow);
-      overflow: hidden;
-    }
-
-    .card-head {
-      padding: 16px 18px;
-      border-bottom: 1px solid #e2e8f0;
-      background: linear-gradient(135deg, #ffffff, #f8fbff);
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      align-items: center;
-    }
-
-    .card-title {
-      font-size: 17px;
-      font-weight: 950;
-      letter-spacing: -0.04em;
-      display: flex;
-      align-items: center;
-      gap: 9px;
-    }
-
-    .icon {
-      width: 34px;
-      height: 34px;
-      border-radius: 13px;
-      display: grid;
-      place-items: center;
-      background: #dbeafe;
-      color: #1d4ed8;
-      font-size: 13px;
-      font-weight: 950;
-      flex: 0 0 auto;
-    }
-
-    .card-body {
-      padding: 16px 18px 18px;
-    }
-
-    .scanner-box {
-      border-radius: 24px;
-      background: #0f172a;
-      color: #ffffff;
-      min-height: 320px;
-      overflow: hidden;
-      display: grid;
-      place-items: center;
-      position: relative;
-      border: 1px solid rgba(15, 23, 42, 0.30);
-    }
-
-    #qrReader {
-      width: 100%;
-      min-height: 320px;
-      background: #0f172a;
-    }
-
-    .scanner-placeholder {
-      text-align: center;
-      padding: 24px;
-      color: rgba(255,255,255,0.82);
-    }
-
-    .scanner-placeholder strong {
-      display: block;
-      color: #ffffff;
-      font-size: 21px;
-      font-weight: 950;
-      margin-bottom: 8px;
-      letter-spacing: -0.04em;
-    }
-
-    .big-actions {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-top: 13px;
-    }
-
-    .btn {
-      border: 0;
-      border-radius: 18px;
-      min-height: 54px;
-      padding: 13px 16px;
-      font-size: 14px;
-      line-height: 1.35;
-      font-weight: 950;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      text-align: center;
-      white-space: normal;
-    }
-
-    .btn-primary {
-      color: #ffffff;
-      background: var(--blue);
-      box-shadow: 0 12px 24px rgba(37, 99, 235, 0.20);
-    }
-
-    .btn-line {
-      color: #ffffff;
-      background: var(--line);
-      box-shadow: 0 12px 24px rgba(6, 199, 85, 0.18);
-    }
-
-    .btn-green {
-      color: #ffffff;
-      background: var(--green);
-      box-shadow: 0 12px 24px rgba(22, 163, 74, 0.18);
-    }
-
-    .btn-orange {
-      color: #78350f;
-      background: #fffbeb;
-      border: 1px solid #fde68a;
-    }
-
-    .btn-light {
-      color: #1d4ed8;
-      background: #ffffff;
-      border: 1px solid #bfdbfe;
-    }
-
-    .btn-danger {
-      color: #991b1b;
-      background: #fef2f2;
-      border: 1px solid #fecaca;
-    }
-
-    .input-row {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 8px;
-      margin-top: 13px;
-    }
-
-    .input {
-      width: 100%;
-      min-height: 52px;
-      border-radius: 17px;
-      border: 1px solid #cbd5e1;
-      background: #ffffff;
-      padding: 12px 14px;
-      font-size: 15px;
-      color: #0f172a;
-      outline: none;
-    }
-
-    .input:focus,
-    textarea:focus {
-      border-color: #60a5fa;
-      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.10);
-    }
-
-    .demo-buttons {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      margin-top: 12px;
-    }
-
-    .demo-buttons button {
-      min-height: 50px;
-      border-radius: 16px;
-      border: 1px solid #bbf7d0;
-      background: #f0fdf4;
-      color: #064e3b;
-      font-size: 12px;
-      line-height: 1.35;
-      font-weight: 950;
-    }
-
-    .message {
-      display: none;
-      white-space: pre-wrap;
-      margin-top: 12px;
-      border-radius: 18px;
-      padding: 13px 14px;
-      font-size: 13px;
-      line-height: 1.65;
-      font-weight: 760;
-    }
-
-    .message.show {
-      display: block;
-    }
-
-    .message.info {
-      background: #eff6ff;
-      color: #1e3a8a;
-      border: 1px solid #bfdbfe;
-    }
-
-    .message.success {
-      background: #f0fdf4;
-      color: #14532d;
-      border: 1px solid #bbf7d0;
-    }
-
-    .message.warning {
-      background: #fffbeb;
-      color: #92400e;
-      border: 1px solid #fde68a;
-    }
-
-    .message.error {
-      background: #fef2f2;
-      color: #991b1b;
-      border: 1px solid #fecaca;
-    }
-
-    .settings {
-      margin-top: 14px;
-      display: grid;
-      gap: 8px;
-      border-radius: 20px;
-      border: 1px solid #e2e8f0;
-      background: #f8fafc;
-      padding: 12px;
-    }
-
-    .settings-title {
-      color: #334155;
-      font-size: 12px;
-      font-weight: 950;
-    }
-
-    .patient-hero {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 16px;
-      align-items: start;
-    }
-
-    .empty {
-      border-radius: 24px;
-      border: 2px dashed #bfdbfe;
-      background: #f8fbff;
-      padding: 26px;
-      text-align: center;
-      color: #475569;
-      font-weight: 820;
-      line-height: 1.8;
-    }
-
-    .patient-label {
-      color: #64748b;
-      font-size: 12px;
-      font-weight: 950;
-      letter-spacing: 0.08em;
-    }
-
-    .patient-name {
-      margin-top: 6px;
-      font-size: clamp(34px, 5vw, 58px);
-      line-height: 1.02;
-      font-weight: 950;
-      letter-spacing: -0.075em;
-    }
-
-    .patient-kana {
-      margin-top: 6px;
-      color: #64748b;
-      font-size: 14px;
-      font-weight: 850;
-    }
-
-    .patient-meta {
-      margin-top: 12px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .pill {
-      border-radius: 999px;
-      padding: 8px 11px;
-      background: #eff6ff;
-      color: #1e3a8a;
-      border: 1px solid #bfdbfe;
-      font-size: 12px;
-      line-height: 1.35;
-      font-weight: 950;
-    }
-
-    .pill.green {
-      background: #dcfce7;
-      color: #14532d;
-      border-color: #86efac;
-    }
-
-    .pill.orange {
-      background: #fffbeb;
-      color: #92400e;
-      border-color: #fde68a;
-    }
-
-    .pill.red {
-      background: #fef2f2;
-      color: #991b1b;
-      border-color: #fecaca;
-    }
-
-    .check-panel {
-      border-radius: 22px;
-      background: #f8fbff;
-      border: 1px solid #dbeafe;
-      padding: 14px;
-      min-width: 230px;
-    }
-
-    .check-title {
-      color: #334155;
-      font-size: 13px;
-      font-weight: 950;
-    }
-
-    .check-list {
-      margin-top: 10px;
-      display: grid;
-      gap: 8px;
-    }
-
-    .check-item {
-      display: grid;
-      grid-template-columns: 24px 1fr;
-      gap: 8px;
-      color: #334155;
-      font-size: 13px;
-      line-height: 1.45;
-      font-weight: 820;
-    }
-
-    .check-mark {
-      width: 24px;
-      height: 24px;
-      border-radius: 999px;
-      display: grid;
-      place-items: center;
-      color: #ffffff;
-      background: var(--green);
-      font-size: 12px;
-      font-weight: 950;
-    }
-
-    .check-mark.warn {
-      background: var(--orange);
-      color: #78350f;
-    }
-
-    .details-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      margin-top: 16px;
-    }
-
-    .detail {
-      border-radius: 19px;
-      background: #ffffff;
-      border: 1px solid #e2e8f0;
-      padding: 13px;
-      min-height: 92px;
-    }
-
-    .detail-label {
-      color: #64748b;
-      font-size: 11px;
-      font-weight: 950;
-    }
-
-    .detail-value {
-      margin-top: 6px;
-      color: #0f172a;
-      font-size: 14px;
-      line-height: 1.55;
-      font-weight: 860;
-      white-space: pre-wrap;
-    }
-
-    .family-list {
-      margin-top: 16px;
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-    }
-
-    .family-card {
-      border-radius: 20px;
-      background: #ffffff;
-      border: 1px solid #bbf7d0;
-      padding: 13px;
-      cursor: pointer;
-      min-height: 118px;
-    }
-
-    .family-card.active {
-      border-color: #06c755;
-      box-shadow: 0 0 0 4px rgba(6, 199, 85, 0.12);
-    }
-
-    .family-role {
-      color: #047857;
-      font-size: 11px;
-      font-weight: 950;
-    }
-
-    .family-name {
-      margin-top: 6px;
-      font-size: 18px;
-      line-height: 1.25;
-      font-weight: 950;
-      letter-spacing: -0.05em;
-    }
-
-    .family-no {
-      margin-top: 8px;
-      color: #64748b;
-      font-size: 12px;
-      font-weight: 800;
-    }
-
-    .reception-actions {
-      display: grid;
-      grid-template-columns: 1.1fr 0.95fr 1fr;
-      gap: 10px;
-      margin-top: 16px;
-    }
-
-    textarea {
-      width: 100%;
-      min-height: 98px;
-      border-radius: 18px;
-      border: 1px solid #cbd5e1;
-      background: #ffffff;
-      padding: 12px 14px;
-      font-size: 14px;
-      line-height: 1.65;
-      color: #0f172a;
-      outline: none;
-      resize: vertical;
-    }
-
-    .queue {
-      display: grid;
-      gap: 9px;
-    }
-
-    .queue-item {
-      border-radius: 18px;
-      background: #ffffff;
-      border: 1px solid #e2e8f0;
-      padding: 11px;
-      display: grid;
-      grid-template-columns: 64px 1fr auto;
-      gap: 10px;
-      align-items: center;
-    }
-
-    .queue-time {
-      color: #1d4ed8;
-      font-size: 14px;
-      font-weight: 950;
-    }
-
-    .queue-name {
-      color: #0f172a;
-      font-size: 14px;
-      font-weight: 950;
-      line-height: 1.35;
-    }
-
-    .queue-sub {
-      margin-top: 2px;
-      color: #64748b;
-      font-size: 11px;
-      line-height: 1.45;
-      font-weight: 760;
-    }
-
-    .queue-badge {
-      border-radius: 999px;
-      padding: 6px 8px;
-      font-size: 11px;
-      font-weight: 950;
-      background: #fffbeb;
-      color: #92400e;
-      border: 1px solid #fde68a;
-    }
-
-    .queue-badge.done {
-      background: #dcfce7;
-      color: #14532d;
-      border-color: #86efac;
-    }
-
-    .hidden {
-      display: none !important;
-    }
-
-    .small-note {
-      margin-top: 10px;
-      color: #64748b;
-      font-size: 12px;
-      line-height: 1.65;
-      font-weight: 740;
-    }
-
-    @media (max-width: 1100px) {
-      .today-strip {
-        grid-template-columns: repeat(2, 1fr);
-      }
-
-      .layout {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    @media (max-width: 760px) {
-      .page {
-        width: min(100% - 18px, 1280px);
-        padding-top: 12px;
-      }
-
-      .topbar,
-      .today-strip,
-      .patient-hero,
-      .details-grid,
-      .family-list,
-      .reception-actions {
-        grid-template-columns: 1fr;
-      }
-
-      .top-actions {
-        justify-content: flex-start;
-      }
-
-      .big-actions,
-      .input-row,
-      .demo-buttons {
-        grid-template-columns: 1fr;
-      }
-
-      .patient-name {
-        font-size: 36px;
-      }
-
-      .queue-item {
-        grid-template-columns: 1fr;
-      }
-    }
-  
-    .reload-status {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 38px;
-      border-radius: 999px;
-      padding: 8px 11px;
-      border: 1px solid #bbf7d0;
-      background: #f0fdf4;
-      color: #166534;
-      font-size: 11px;
-      line-height: 1.3;
-      font-weight: 950;
-      white-space: nowrap;
-    }
-
-    .reload-status.loading {
-      border-color: #bfdbfe;
-      background: #eff6ff;
-      color: #1d4ed8;
-    }
-
-    .reload-status.error {
-      border-color: #fecaca;
-      background: #fef2f2;
-      color: #991b1b;
-    }
-
-
-  
-    .version-check-badge {
-      margin-top: 10px;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      border-radius: 999px;
-      padding: 9px 13px;
-      background: #dcfce7;
-      border: 1px solid #86efac;
-      color: #166534;
-      font-size: 12px;
-      line-height: 1.4;
-      font-weight: 950;
-    }
-
-
-  
-    /* =========================================================
-       STEP 30-36 PRODUCTION API ONLY RECEPTION
-       PC受付も固定デモ/ローカル状態ではなくWorker API/Supabaseを正にする
-    ========================================================= */
-    .production-reception-note {
-      border-radius: 20px;
-      border: 1px solid #bbf7d0;
-      background: #f0fdf4;
-      color: #166534;
-      padding: 12px 13px;
-      font-size: 12px;
-      line-height: 1.65;
-      font-weight: 850;
-      margin: 0 0 14px;
-    }
-    .production-reception-note strong {
-      display: block;
-      color: #0f172a;
-      font-size: 14px;
-      line-height: 1.45;
-      font-weight: 950;
-      margin-bottom: 2px;
-    }
-    .api-empty-reception {
-      border-radius: 22px;
-      border: 1px dashed #bfdbfe;
-      background: #eff6ff;
-      color: #1d4ed8;
-      padding: 18px;
-      font-size: 13px;
-      line-height: 1.7;
-      font-weight: 850;
-    }
-    .api-empty-reception strong {
-      display: block;
-      color: #0f172a;
-      font-size: 16px;
-      line-height: 1.45;
-      font-weight: 950;
-      margin-bottom: 4px;
-    }
-
-  
-    /* =========================================================
-       STEP 30-36 HARDWARE QR READER MODE
-       USB/Bluetooth QRリーダーをキーボード入力として受ける
-    ========================================================= */
-
-    .reader-mode-card {
-      border-radius: 24px;
-      border: 1px solid #bbf7d0;
-      background:
-        radial-gradient(circle at 94% 10%, rgba(6,199,85,0.12), transparent 34%),
-        linear-gradient(135deg, #f0fdf4, #ffffff);
-      padding: 14px;
-      display: grid;
-      gap: 11px;
-      margin-bottom: 14px;
-    }
-
-    .reader-mode-title {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: #0f172a;
-      font-size: 17px;
-      line-height: 1.35;
-      font-weight: 950;
-      letter-spacing: -0.04em;
-    }
-
-    .reader-mode-icon {
-      width: 36px;
-      height: 36px;
-      border-radius: 14px;
-      display: grid;
-      place-items: center;
-      background: #dcfce7;
-      color: #166534;
-      font-size: 12px;
-      font-weight: 950;
-    }
-
-    .reader-mode-note {
-      color: #166534;
-      font-size: 12px;
-      line-height: 1.7;
-      font-weight: 820;
-    }
-
-    .reader-input {
-      width: 100%;
-      min-height: 58px;
-      border-radius: 18px;
-      border: 2px solid #22c55e;
-      background: #ffffff;
-      color: #0f172a;
-      padding: 13px 14px;
-      outline: none;
-      font-size: 18px;
-      line-height: 1.4;
-      font-weight: 900;
-      letter-spacing: 0.01em;
-    }
-
-    .reader-input:focus {
-      box-shadow: 0 0 0 5px rgba(34,197,94,0.16);
-      border-color: #16a34a;
-    }
-
-    .reader-actions {
-      display: grid;
-      grid-template-columns: 1.2fr 1fr 1fr;
-      gap: 8px;
-    }
-
-    .reader-status {
-      min-height: 22px;
-      color: #166534;
-      font-size: 12px;
-      line-height: 1.55;
-      font-weight: 900;
-      white-space: pre-wrap;
-    }
-
-    .camera-subtitle {
-      margin-top: 8px;
-      border-top: 1px solid #e2e8f0;
-      padding-top: 12px;
-      color: #64748b;
-      font-size: 12px;
-      line-height: 1.65;
-      font-weight: 800;
-    }
-
-    @media (max-width: 720px) {
-      .reader-actions {
-        grid-template-columns: 1fr;
-      }
-
-      .reader-input {
-        font-size: 16px;
-      }
-    }
-
-
-  
-    .demo-buttons {
-      display: none !important;
-    }
-
-  
-    /* =========================================================
-       STEP 30-36 DIRECT RELOAD BUTTON
-       受付状況を更新ボタンを必ず押せる・反応が出るようにする
-    ========================================================= */
-
-    #reloadDailyStatusButton {
-      position: relative;
-      z-index: 30;
-      pointer-events: auto;
-      cursor: pointer;
-    }
-
-    #reloadDailyStatusButton.is-force-loading {
-      opacity: 0.72;
-      cursor: wait;
-    }
-
-    .reload-direct-note {
-      border-radius: 18px;
-      border: 1px solid #bfdbfe;
-      background: #eff6ff;
-      color: #1d4ed8;
-      padding: 10px 12px;
-      font-size: 12px;
-      line-height: 1.65;
-      font-weight: 850;
-      margin: 10px 0 0;
-    }
-
-    .reload-direct-note strong {
-      display: block;
-      color: #0f172a;
-      font-size: 13px;
-      line-height: 1.45;
-      font-weight: 950;
-      margin-bottom: 2px;
-    }
-
-
-  
-    /* =========================================================
-       STEP 30-36 PC RECEPTION QR READER
-       PC受付・USB QRリーダー専用の見やすさ調整
-    ========================================================= */
-
-    .pc36-reception-note {
-      border-radius: 22px;
-      border: 1px solid #bfdbfe;
-      background:
-        radial-gradient(circle at 96% 8%, rgba(37,99,235,0.10), transparent 34%),
-        #eff6ff;
-      color: #1e3a8a;
-      padding: 14px 16px;
-      font-size: 13px;
-      line-height: 1.75;
-      font-weight: 830;
-      margin: 14px 0;
-    }
-
-    .pc36-reception-note strong {
-      display: block;
-      color: #0f172a;
-      font-size: 16px;
-      line-height: 1.45;
-      font-weight: 950;
-      margin-bottom: 3px;
-      letter-spacing: -0.04em;
-    }
-
-    .pc36-reader-focus {
-      border-radius: 24px;
-      border: 2px solid #22c55e;
-      background: #f0fdf4;
-      color: #166534;
-      padding: 12px 14px;
-      font-size: 13px;
-      line-height: 1.65;
-      font-weight: 900;
-      margin: 10px 0;
-    }
-
-    body.scan-pc36 input[type="text"],
-    body.scan-pc36 input[type="search"],
-    body.scan-pc36 input:not([type]) {
-      font-size: 20px;
-    }
-
-    body.scan-pc36 .app-shell,
-    body.scan-pc36 .page-shell,
-    body.scan-pc36 .wrap,
-    body.scan-pc36 .container {
-      max-width: 1180px;
-    }
-
-    @media (min-width: 980px) {
-      body.scan-pc36 .main-grid,
-      body.scan-pc36 .scan-grid,
-      body.scan-pc36 .content-grid {
-        grid-template-columns: minmax(0, 1.15fr) minmax(360px, 0.85fr);
-        gap: 18px;
-      }
-    }
-
-  
-
-    /* STEP 30-39B：受付ミス対策（受付前確認・二重受付警告・受付取消） */
-    .reception-safety-panel {
-      margin-top: 14px;
-      border-radius: 22px;
-      border: 1px solid #fed7aa;
-      background: linear-gradient(135deg, rgba(255, 251, 235, 0.96), rgba(255, 247, 237, 0.92));
-      padding: 14px;
-      box-shadow: 0 12px 24px rgba(245, 158, 11, 0.08);
-    }
-
-    .reception-safety-title {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: #9a3412;
-      font-size: 13px;
-      font-weight: 950;
-      letter-spacing: 0.04em;
-    }
-
-    .reception-safety-title::before {
-      content: "確認";
-      min-width: 42px;
-      height: 24px;
-      border-radius: 999px;
-      background: #f97316;
-      color: #fff;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 11px;
-      font-weight: 950;
-    }
-
-    .reception-safety-grid {
-      margin-top: 10px;
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 8px;
-    }
-
-    .reception-safety-item {
-      border-radius: 16px;
-      background: rgba(255, 255, 255, 0.74);
-      border: 1px solid rgba(251, 146, 60, 0.24);
-      padding: 10px;
-      min-height: 68px;
-    }
-
-    .reception-safety-label {
-      color: #9a3412;
-      font-size: 11px;
-      font-weight: 900;
-    }
-
-    .reception-safety-value {
-      margin-top: 4px;
-      color: #0f172a;
-      font-size: 16px;
-      line-height: 1.35;
-      font-weight: 950;
-      letter-spacing: -0.03em;
-      word-break: break-word;
-    }
-
-    .reception-safety-note {
-      margin-top: 10px;
-      border-radius: 16px;
-      background: rgba(255, 255, 255, 0.62);
-      border: 1px dashed rgba(154, 52, 18, 0.22);
-      color: #7c2d12;
-      font-size: 12px;
-      line-height: 1.6;
-      font-weight: 820;
-      padding: 10px;
-      white-space: pre-line;
-    }
-
-    .reception-safety-note.warn {
-      color: #991b1b;
-      border-color: rgba(220, 38, 38, 0.32);
-      background: rgba(254, 242, 242, 0.82);
-    }
-
-    .btn[disabled] {
-      cursor: not-allowed;
-      opacity: 0.62;
-      filter: grayscale(0.12);
-    }
-
-    @media (max-width: 760px) {
-      .reception-safety-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
+      --bg:#f4f1ea; --card:#fff; --ink:#22302c; --muted:#6f7b75; --line:#d9d2c4;
+      --main:#1f8f65; --main-dark:#223b34; --green-soft:#e8f7ef; --blue:#3d74a8; --blue-soft:#edf5ff;
+      --amber:#8a621f; --amber-soft:#fff6de; --red:#b84a4a; --red-soft:#fff0ef;
+      --shadow:0 18px 46px rgba(34,48,44,.12); --radius:24px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; min-height:100vh;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Yu Gothic","YuGothic","Noto Sans JP",Meiryo,sans-serif;
+      color:var(--ink);
+      background:radial-gradient(circle at top left,rgba(31,143,101,.17),transparent 35%),radial-gradient(circle at 88% 10%,rgba(231,151,36,.12),transparent 28%),linear-gradient(180deg,#fbfaf6 0%,var(--bg) 100%);
+      line-height:1.7;
+    }
+    a{color:inherit} button,input,select,textarea{font:inherit} button{cursor:pointer}
+    .page{width:min(1280px,calc(100% - 28px));margin:0 auto;padding:22px 0 54px}
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:18px}
+    .brand{display:flex;align-items:center;gap:12px;min-width:0}
+    .logo{width:52px;height:52px;border-radius:18px;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,#1f8f65,#83c99f);box-shadow:0 14px 26px rgba(31,143,101,.23);font-size:26px;flex:0 0 auto}
+    .brand small{display:block;color:var(--muted);font-weight:950;font-size:12px;letter-spacing:.08em}
+    .brand strong{display:block;font-size:clamp(19px,2.4vw,30px);line-height:1.12;letter-spacing:-.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px}
+    .pill,.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1px solid var(--line);border-radius:999px;padding:9px 13px;background:rgba(255,255,255,.86);color:var(--ink);text-decoration:none;font-size:13px;font-weight:950;line-height:1.15;transition:.15s transform,.15s box-shadow,.15s background}
+    .pill:hover,.btn:hover{transform:translateY(-1px);box-shadow:0 10px 22px rgba(34,48,44,.11);background:#fff}
+    .btn-main{border-color:transparent;background:var(--main);color:#fff;box-shadow:0 14px 28px rgba(31,143,101,.24)}
+    .btn-sub{border-color:#bfe3cc;background:var(--green-soft);color:#11704c}
+    .btn-warn{border-color:#efd89e;background:var(--amber-soft);color:var(--amber)}
+    .btn-danger{border-color:#ecc0bc;background:var(--red-soft);color:#9f3939}
+    .btn:disabled{opacity:.56;cursor:not-allowed;transform:none;box-shadow:none}
+    .hero{display:grid;grid-template-columns:1.02fr .98fr;gap:18px;align-items:stretch;margin-bottom:18px}
+    .hero-card{position:relative;overflow:hidden;border-radius:32px;background:linear-gradient(135deg,rgba(34,59,52,.98),rgba(31,143,101,.92)),radial-gradient(circle at 86% 10%,rgba(255,255,255,.22),transparent 24%);color:#fff;padding:clamp(22px,3.6vw,42px);box-shadow:var(--shadow)}
+    .hero-card::after{content:"QR";position:absolute;right:10px;bottom:-40px;font-size:clamp(92px,16vw,190px);font-weight:1000;letter-spacing:.06em;opacity:.07;pointer-events:none}
+    .card{border:1px solid rgba(217,210,196,.88);border-radius:var(--radius);background:rgba(255,255,255,.92);box-shadow:var(--shadow);padding:clamp(18px,2.5vw,28px)}
+    .badge{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:8px 12px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.24);color:#fff;font-size:12px;font-weight:950;letter-spacing:.04em;margin-bottom:14px}
+    .badge-dark{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:7px 11px;background:var(--green-soft);color:#11704c;font-size:12px;font-weight:950;margin-bottom:12px}
+    h1{position:relative;z-index:1;margin:0 0 14px;font-size:clamp(31px,4.4vw,58px);line-height:1.08;letter-spacing:-.055em}
+    h2{margin:0 0 12px;font-size:clamp(22px,2.8vw,34px);line-height:1.2;letter-spacing:-.03em}
+    h3{margin:0 0 8px;font-size:20px;line-height:1.3}
+    .lead{position:relative;z-index:1;margin:0;color:rgba(255,255,255,.88);font-size:clamp(14px,1.7vw,17px);font-weight:770;line-height:1.9}
+    .plain-lead{margin:0;color:#5a6862;font-size:14px;font-weight:780;line-height:1.8}
+    .auth-box{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;margin-top:14px}
+    .section-title{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin:26px 0 12px}
+    .section-title h2{margin:0}
+    .section-title p{margin:0;color:var(--muted);text-align:right;font-size:13px;font-weight:850}
+    .layout{display:grid;grid-template-columns:.9fr 1.1fr;gap:16px;align-items:start}
+    .status-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px}
+    .metric{border:1px solid rgba(217,210,196,.86);border-radius:18px;background:#fffdf9;padding:13px;min-height:84px}
+    .metric small{display:block;color:var(--muted);font-weight:950;font-size:12px}
+    .metric b{display:block;font-size:26px;line-height:1.2;letter-spacing:-.04em;margin-top:2px}
+    .metric span{display:block;color:#62706a;font-size:12px;font-weight:850;margin-top:2px}
+    .notice{border-radius:16px;padding:12px;margin-top:12px;font-size:13px;font-weight:850;line-height:1.65;background:var(--amber-soft);border:1px solid #efd89e;color:var(--amber)}
+    .notice.ok{background:var(--green-soft);border-color:#bfe3cc;color:#11704c}
+    .notice.ng{background:var(--red-soft);border-color:#ecc0bc;color:#9f3939}
+    .notice.info{background:var(--blue-soft);border-color:#bdd5ef;color:#2d68a6}
+    input,select,textarea{width:100%;border:1px solid #d8d0c0;border-radius:15px;padding:11px 12px;background:#fff;color:var(--ink);font-size:14px;font-weight:800;outline:none;transition:.15s border-color,.15s box-shadow}
+    textarea{min-height:84px;resize:vertical;line-height:1.6}
+    input:focus,select:focus,textarea:focus{border-color:rgba(31,143,101,.65);box-shadow:0 0 0 4px rgba(31,143,101,.11)}
+    label{display:block;margin-bottom:6px;color:#46534d;font-size:13px;font-weight:950}
+    .scan-input{font-size:17px;padding:14px 16px;border-radius:18px}
+    .button-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:12px}
+    .hidden{display:none!important}
+    .form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    .full{grid-column:1/-1}
+    .pet-panel{border:1px solid rgba(31,143,101,.26);background:linear-gradient(180deg,#fff,#f1fbf6);border-radius:22px;padding:14px;margin-top:14px}
+    .pet-main{display:grid;grid-template-columns:64px 1fr;gap:12px;align-items:start}
+    .pet-icon{width:64px;height:64px;border-radius:22px;display:grid;place-items:center;background:var(--green-soft);font-size:34px}
+    .pet-title{font-size:22px;font-weight:1000;line-height:1.25;letter-spacing:-.03em}
+    .pet-sub{color:#62706a;font-size:13px;font-weight:850;margin-top:3px}
+    .tagline{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
+    .tag{display:inline-flex;border-radius:999px;background:#f6f2e9;color:#79623d;padding:3px 8px;font-size:11px;font-weight:950}
+    .tag.red{background:var(--red-soft);color:#9f3939}
+    .tag.green{background:var(--green-soft);color:#11704c}
+    .entry-list{display:grid;gap:10px}
+    .entry{border:1px solid rgba(217,210,196,.84);background:#fffdf9;border-radius:18px;padding:13px;display:grid;grid-template-columns:58px 1fr auto;gap:11px;align-items:start}
+    .entry-no{width:52px;height:52px;border-radius:17px;display:grid;place-items:center;background:var(--green-soft);color:#11704c;font-weight:950;font-size:19px}
+    .entry.examining .entry-no{background:var(--amber-soft);color:#8b5b0e}
+    .entry.completed,.entry.cancelled,.entry.no_show{opacity:.58}
+    .entry h4{margin:0 0 4px;font-size:16px;line-height:1.35}
+    .entry p{margin:0;color:#61706a;font-size:12px;font-weight:800}
+    .entry-actions{display:flex;flex-wrap:wrap;gap:7px;justify-content:flex-end;max-width:300px}
+    .empty{border:1px dashed #d5cbb9;border-radius:18px;padding:16px;color:var(--muted);font-weight:850;text-align:center;background:rgba(255,255,255,.62)}
+    .camera-box{margin-top:12px;border-radius:20px;overflow:hidden;border:1px solid rgba(217,210,196,.88);background:#111}
+    video{display:block;width:100%;max-height:360px;object-fit:cover;background:#111}
+    .follow-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .follow-card{border:1px solid rgba(217,210,196,.88);border-radius:18px;background:#fffdf9;padding:13px}
+    .follow-card h4{margin:0 0 4px;font-size:15px}
+    .follow-card p{margin:0;color:#61706a;font-size:12px;font-weight:800}
+    .footer-note{margin-top:18px;border:1px solid rgba(217,210,196,.88);background:rgba(255,255,255,.78);border-radius:22px;padding:14px;color:#56645e;font-size:13px;font-weight:780;line-height:1.7}
+    @media(max-width:980px){.hero,.layout,.follow-grid{grid-template-columns:1fr}.status-grid{grid-template-columns:repeat(2,1fr)}.section-title{align-items:flex-start;flex-direction:column}.section-title p{text-align:left}.entry{grid-template-columns:58px 1fr}.entry-actions{grid-column:1/-1;justify-content:flex-start;max-width:none}}
+    @media(max-width:640px){.topbar{align-items:flex-start;flex-direction:column}.actions{justify-content:flex-start}.auth-box,.form-grid,.status-grid{grid-template-columns:1fr}.brand strong{white-space:normal}.hero-card,.card{border-radius:22px}.pet-main{grid-template-columns:1fr}}
   </style>
 </head>
 
-<body class="scan-pc36">
+<body>
   <main class="page">
     <header class="topbar">
-      <div>
-        <div class="kicker">DPRO SHOP / PC受付専用</div>
-        <div class="title">今日の受付を保存して先生用画面に反映する画面</div>
-        <div class="subtitle">
-          QRを読む → 患者確認 → LINE連携確認 → 受付済みにする。受付スタッフ向けに、操作を大きくシンプルにしています。
-        </div>
-        <div class="version-check-badge">
-          STEP 30-36B：受付状況更新ボタン直接反応修正
+      <div class="brand">
+        <div class="logo">📷</div>
+        <div>
+          <small>scan-pc.html</small>
+          <strong>DPRO PET CARE LINE</strong>
         </div>
       </div>
-
-      <div class="top-actions">
-        <a href="./member.html?t=demo-dental-patient-001">患者画面</a>
-        <a href="./scan.html">通常受付画面</a>
-        <a href="./owner.html">管理画面</a>
-        <a href="./admin.html">患者登録</a>
-      </div>
+      <nav class="actions" aria-label="関連画面">
+        <a class="pill" href="./index.html?v=step-vet-23">管理トップ</a>
+        <a class="pill" href="./waiting.html?demo=true&v=step-vet-23">飼い主受付</a>
+        <a class="pill" href="./doctor.html?v=step-vet-23">獣医師画面</a>
+        <a class="pill" href="./owner.html?v=step-vet-23">オーナー画面</a>
+        <a class="pill" href="./system-check.html?v=step-vet-23">システム確認</a>
+      </nav>
     </header>
 
-      <div class="pc36-reception-note">
-        <strong>PC受付・USB QRリーダー用</strong>
-        USB/BluetoothのQRリーダーはキーボード入力として動きます。
-        入力欄にカーソルを置いた状態で、診察券QRを読み取ると自動で患者さんを検索します。
-      </div>
-      <div class="pc36-reader-focus">
-        受付の流れ：QRをピッ → 患者確認 → 「受付済みにする」 → 先生用・管理トップへ反映
+    <section class="hero">
+      <div class="hero-card">
+        <span class="badge">STEP VET-23｜受付PC QRリーダー受付</span>
+        <h1>診察券QRを読んで、<br>そのまま来院受付。</h1>
+        <p class="lead">
+          USB QRリーダーで読み取り、来院受付・受付番号発行まで行います。
+          歯科QR診察券の良い所を引き継ぎ、ペット情報確認、受付番号発行、院内受付済み、診察中、診療済みまでつなげます。
+        </p>
       </div>
 
-
-    <section class="today-strip">
-      <div class="today-main">
-        <div class="today-date" id="todayDateLabel">TODAY</div>
-        <div class="today-task">今日やること：来院患者のQRを確認して受付済みにする</div>
-        <div class="today-note">
-          LINE未連携の患者さんには、受付でLINE登録QRの案内をします。
+      <div class="card">
+        <span class="badge-dark">管理コード</span>
+        <p class="plain-lead">QR受付・ステータス更新・LINEフォロー送信済み処理には管理コードが必要です。</p>
+        <div id="authStatus" class="notice">管理コード確認中</div>
+        <div class="auth-box">
+          <input id="adminTokenInput" type="password" placeholder="管理コードを入力" autocomplete="off" />
+          <button class="btn btn-main" id="saveAdminTokenBtn" type="button">保存</button>
+          <button class="btn btn-danger" id="clearAdminTokenBtn" type="button">削除</button>
         </div>
-      </div>
-
-      <div class="stat">
-        <div class="stat-label">本日の予定</div>
-        <div class="stat-value" id="statSchedule">3</div>
-        <div class="stat-note">デモ予定を表示</div>
-      </div>
-
-      <div class="stat">
-        <div class="stat-label">受付済み</div>
-        <div class="stat-value" id="statReceived">0</div>
-        <div class="stat-note">このiPadで受付済み</div>
-      </div>
-
-      <div class="stat">
-        <div class="stat-label">未受付</div>
-        <div class="stat-value" id="statWaiting">3</div>
-        <div class="stat-note">まだ受付していない人</div>
-      </div>
-
-      <div class="stat">
-        <div class="stat-label">LINE未連携</div>
-        <div class="stat-value" id="statLineUnlinked">0</div>
-        <div class="stat-note">案内が必要な人</div>
       </div>
     </section>
 
     <section class="layout">
-      <aside class="card">
-        <div class="card-head">
-          <div class="card-title"><span class="icon">QR</span>受付QR読み取り</div>
+      <div class="card">
+        <h2>QR読み取り受付</h2>
+        <p class="plain-lead">診察券QRを読み取るか、QRのURL/tokenを貼り付けてEnterを押してください。</p>
+
+        <label for="qrInput" style="margin-top:14px;">QR URL / token / card_no</label>
+        <input id="qrInput" class="scan-input" type="text" placeholder="QRリーダーで読み取り、または貼り付け" autocomplete="off" autofocus />
+
+        <div class="button-row">
+          <button class="btn btn-main" id="lookupBtn" type="button">ペット確認</button>
+          <button class="btn btn-sub" id="clearScanBtn" type="button">クリア</button>
+
         </div>
 
-        <div class="card-body">
 
-          <div class="reader-mode-card">
-            <div class="reader-mode-title">
-              <span class="reader-mode-icon">読</span>
-              QRリーダー受付
-            </div>
-            <div class="reader-mode-note">
-              USB/Bluetooth QRリーダーを使う場合は、この入力欄を選択した状態でQR診察券を読み取ります。リーダー側は「読み取り後にEnter/改行を送る」設定がおすすめです。
-            </div>
 
-            <input
-              class="reader-input"
-              id="readerInput"
-              type="text"
-              inputmode="text"
-              autocomplete="off"
-              autocapitalize="off"
-              spellcheck="false"
-              placeholder="ここにカーソルを合わせて、QRリーダーでピッと読み取る"
-            />
+        <div id="lookupStatus" class="notice info">QR待機中です。</div>
+        <div id="petPanel" class="hidden"></div>
+      </div>
 
-            <div class="reader-actions">
-              <button class="btn btn-primary" id="readerFocusButton" type="button">USB QRリーダー待機</button>
-              <button class="btn btn-light" id="readerSearchButton" type="button">読み取った内容で検索</button>
-              <button class="btn btn-light" id="readerClearButton" type="button">入力クリア</button>
-            </div>
+      <div class="card">
+        <h2>来院受付</h2>
+        <p class="plain-lead">QRで確認したペットを、今日の受付番号に入れます。</p>
 
-            <div class="reader-status" id="readerStatus">USB QRリーダー待機ボタンを押すと、読み取り入力欄にカーソルが合います。</div>
+        <div class="form-grid" style="margin-top:14px;">
+          <div>
+            <label for="entryKind">受付種別</label>
+            <select id="entryKind">
+              <option value="today_queue">通常診察・再診</option>
+              <option value="medicine_prevention">お薬・予防受付</option>
+              <option value="care_consult">ケア処置相談</option>
+            </select>
           </div>
-
-          <div class="camera-subtitle">
-            カメラ読み取り（予備）は予備です。受付PCやPC受付にQRリーダーを接続できる場合は、上の「QRリーダー受付」をメインに使うとスムーズです。
+          <div>
+            <label for="requestCategory">来院目的</label>
+            <select id="requestCategory">
+              <option value="general_exam">通常診察</option>
+              <option value="recheck">再診</option>
+              <option value="vaccination">予防接種</option>
+              <option value="prevention_medicine">予防薬</option>
+              <option value="medicine_food">お薬・フード</option>
+              <option value="hygiene_care">衛生処置</option>
+              <option value="health_check">健康診断</option>
+              <option value="other">その他</option>
+            </select>
           </div>
-
-          <div class="scanner-box">
-            <div id="qrReader">
-              <div class="scanner-placeholder">
-                <strong>QR診察券を読み取ります</strong>
-                「カメラ開始」を押して、患者さんのスマホQRをかざしてください。
-              </div>
-            </div>
+          <div>
+            <label for="dayPart">時間帯</label>
+            <select id="dayPart">
+              <option value="morning">午前</option>
+              <option value="afternoon">午後</option>
+            </select>
           </div>
-
-          <div class="big-actions">
-            <button class="btn btn-primary" id="startScanButton" type="button">カメラ開始</button>
-            <button class="btn btn-danger" id="stopScanButton" type="button">カメラ停止</button>
+          <div>
+            <label for="purpose">受付メモ</label>
+            <input id="purpose" type="text" placeholder="例：来院QR受付、皮膚再診、フィラリア薬" />
           </div>
-
-          <div class="big-actions">
-            <button class="btn btn-light" id="reloadDailyStatusButton" type="button" onclick="DPRO_scanIpadReloadDailyStatus(event)">受付状況を更新</button>
-            <span class="reload-status" id="dailyStatusReloadStatus">未更新</span>
-            <button class="btn btn-light" id="openDoctorButton" type="button">先生用画面を開く</button>
-          </div>
-
-          <div class="input-row">
-            <input class="input" id="manualInput" type="text" placeholder="手入力（予備）検索：診察券番号・名前・QRトークンを入力" value="" />
-            <button class="btn btn-light" id="manualSearchButton" type="button">検索</button>
-          </div>
-
-          <div class="demo-buttons">
-            <button type="button" data-demo-token="demo-dental-patient-001">山田 花子</button>
-            <button type="button" data-demo-token="demo-dental-child-taro">山田 太郎</button>
-            <button type="button" data-demo-token="demo-dental-child-sakura">山田 さくら</button>
-          </div>
-
-          
-        <div class="production-reception-note">
-          <strong>本番API受付モード</strong>
-          今日の来院予定・受付待ち・受付済みは、Worker API / Supabase から取得した同じ結果だけで表示します。受付済み保存後もAPIから再読込します。
-        </div>
-
-          <div class="message" id="scanMessage"></div>
-
-          <div class="settings">
-            <div class="settings-title">管理設定</div>
-            <div class="input-row">
-              <input class="input" id="adminCodeInput" type="password" placeholder="管理コード" />
-              <button class="btn btn-light" id="saveAdminCodeButton" type="button">保存</button>
-            </div>
-            <input class="input" id="staffNameInput" type="text" placeholder="受付スタッフ名" />
-            <div class="small-note">
-              管理コードはこのiPad内に保存します。通常は <strong>dpro-dental-2026</strong> を使います。
-            </div>
-          </div>
-        </div>
-      </aside>
-
-      <section class="main-area">
-        <div class="card">
-          <div class="card-head">
-            <div class="card-title"><span class="icon">患</span>患者確認</div>
-            <button class="btn btn-light" id="clearButton" type="button">表示をクリア</button>
-          </div>
-
-          <div class="card-body">
-            <div class="empty" id="emptyPanel">
-              まだ患者さんを表示していません。<br>
-              QRを読み取るか、左のデモ患者ボタンを押してください。
-            </div>
-
-            <div id="patientPanel" class="hidden">
-              <div class="patient-hero">
-                <div>
-                  <div class="patient-label" id="patientRoleLabel">PATIENT</div>
-                  <div class="patient-name" id="patientName">---</div>
-                  <div class="patient-kana" id="patientKana"></div>
-                  <div class="patient-meta" id="patientMeta"></div>
-                </div>
-
-                <div class="check-panel">
-                  <div class="check-title">受付で見るところ</div>
-                  <div class="check-list" id="checkList"></div>
-                </div>
-              </div>
-
-              <div class="details-grid">
-                <div class="detail">
-                  <div class="detail-label">次回予約・本日の内容</div>
-                  <div class="detail-value" id="nextAppointment">---</div>
-                </div>
-
-                <div class="detail">
-                  <div class="detail-label">LINE連携</div>
-                  <div class="detail-value" id="lineStatus">---</div>
-                </div>
-
-                <div class="detail">
-                  <div class="detail-label">受付メモ</div>
-                  <div class="detail-value" id="patientMemo">---</div>
-                </div>
-              </div>
-
-              <div class="family-list" id="familyList"></div>
-
-              <div class="reception-safety-panel" id="receptionSafetyPanel">
-                <div class="reception-safety-title">受付済みにする前に、ここだけ確認してください</div>
-                <div class="reception-safety-grid">
-                  <div class="reception-safety-item">
-                    <div class="reception-safety-label">患者名</div>
-                    <div class="reception-safety-value" id="confirmPatientName">---</div>
-                  </div>
-                  <div class="reception-safety-item">
-                    <div class="reception-safety-label">診察券番号</div>
-                    <div class="reception-safety-value" id="confirmMemberNo">---</div>
-                  </div>
-                  <div class="reception-safety-item">
-                    <div class="reception-safety-label">本日の予定</div>
-                    <div class="reception-safety-value" id="confirmSchedule">---</div>
-                  </div>
-                </div>
-                <div class="reception-safety-note" id="receptionSafetyNote">
-                  受付済みにする前に、患者名・診察券番号・本日の予定を確認します。
-                </div>
-              </div>
-
-
-              <div class="reception-actions">
-                <button class="btn btn-green" id="markReceivedButton" type="button">
-                  受付済みにする
-                </button>
-                <button class="btn btn-danger hidden" id="cancelCheckInButton" type="button">
-                  受付取消
-                </button>
-                <button class="btn btn-orange" id="copyLineGuideButton" type="button">
-                  LINE登録案内をコピー
-                </button>
-              </div>
-
-              <div class="message" id="patientMessage"></div>
-
-              <div class="detail" style="margin-top: 14px;">
-                <div class="detail-label">先生へ引き継ぎメモ</div>
-                <textarea id="handoffMemo" placeholder="例：初診。右下奥歯がしみる。お母さん同席。"></textarea>
-                <div class="big-actions">
-                  <button class="btn btn-light" id="saveMemoButton" type="button">このiPadにメモ保存</button>
-                  <button class="btn btn-light" id="copyMemoButton" type="button">メモをコピー</button>
-                </div>
-              </div>
-            </div>
+          <div class="full">
+            <label for="receptionMemo">受付メモ・注意</label>
+            <textarea id="receptionMemo" placeholder="受付で気づいたこと、飼い主さんからの補足など"></textarea>
           </div>
         </div>
 
-        <div class="card" style="margin-top: 14px;">
-          <div class="card-head">
-            <div class="card-title"><span class="icon">今</span>今日の受付リスト</div>
-            <button class="btn btn-light" id="resetReceptionButton" type="button">受付リストをリセット</button>
-          </div>
-
-          <div class="card-body">
-            <div class="queue" id="todayQueue"></div>
-            <div class="small-note">
-              このリストはPC受付用の見やすいデモ表示です。実運用では、この画面から来院記録保存・診療室共有へ拡張します。
-            </div>
-          </div>
+        <div class="button-row">
+          <button class="btn btn-main" id="createReceptionBtn" type="button">QR来院受付する</button>
+          <button class="btn btn-sub" id="refreshBtn" type="button">一覧更新</button>
         </div>
-      </section>
+
+        <div id="createStatus" class="notice">ペット確認後に受付できます。</div>
+      </div>
     </section>
+
+    <div class="section-title">
+      <h2>本日の受付状況</h2>
+      <p>QR受付・LINE受付の両方を同じ一覧で確認できます。</p>
+    </div>
+
+    <section class="card">
+      <div class="status-grid">
+        <div class="metric"><small>通常診察</small><b id="generalExamCount">-</b><span>診察・再診</span></div>
+        <div class="metric"><small>現在診察中</small><b id="currentExamNumber">-</b><span>受付番号</span></div>
+        <div class="metric"><small>お薬・予防</small><b id="medicineCount">-</b><span>薬・フード等</span></div>
+        <div class="metric"><small>ケア・優先枠</small><b id="careReserveCount">-</b><span>処置・後日予約</span></div>
+      </div>
+      <div id="summaryMessage" class="notice info">混雑状況を読み込み中です。</div>
+      <div id="entryList" class="entry-list" style="margin-top:14px;"><div class="empty">読み込み中です。</div></div>
+    </section>
+
+    <div class="section-title">
+      <h2>受付が送るLINEフォロー</h2>
+      <p>先生・システムが作った文面を、受付がコピーして送信済みにします。</p>
+    </div>
+
+    <section class="card">
+      <div class="follow-grid">
+        <div>
+          <h3>診察後・再診フォロー</h3>
+          <div id="followupList" class="entry-list"><div class="empty">読み込み中です。</div></div>
+        </div>
+        <div>
+          <h3>予防・お薬フォロー</h3>
+          <div id="preventionList" class="entry-list"><div class="empty">読み込み中です。</div></div>
+        </div>
+      </div>
+    </section>
+
+    <div class="footer-note">
+      STEP VET-23：PC・受付タブレット両対応のQR来院受付です。LINE受付で先に番号を取った人も、来院時に受付スタッフが「院内受付済み」へ変更できます。
+    </div>
   </main>
 
   <script>
-    (function () {
-      "use strict";
+    const CONFIG = window.DPRO_CONFIG || {};
+    const API_BASE_URL = (CONFIG.API_BASE_URL || "https://dpro-vet-qr-api.dpromstk2000.workers.dev").replace(/\/$/, "");
+    const CLINIC_CODE = CONFIG.CLINIC_CODE || CONFIG.DEFAULT_CLINIC_CODE || "dpro_vet_demo";
+    const ADMIN_TOKEN_KEYS = ["dpro_vet_admin_code", "DPRO_VET_ADMIN_CODE", "DPRO_VET_ADMIN_TOKEN", "dpro_vet_admin_token", "DPRO_ADMIN_TOKEN", "dpro_admin_token"];
 
-      const CONFIG = window.DPRO_DENTAL_QR_CONFIG || window.DPRO_CONFIG || {};
+    const state = {
+      selected: null,
+      entries: [],
+      cameraStream: null,
+      detectTimer: null
+    };
 
-      // STEP 30-36:
-      // 本番環境に寄せるため、固定デモ患者では受付一覧を表示しない。
-      // 受付一覧と数字は Worker API / Supabase から取得した daily_status rows のみで作る。
-      const DEMO_PATIENTS = [];
+    const el = {
+      qrInput: document.getElementById("qrInput"),
+      lookupBtn: document.getElementById("lookupBtn"),
+      clearScanBtn: document.getElementById("clearScanBtn"),
+      lookupStatus: document.getElementById("lookupStatus"),
+      petPanel: document.getElementById("petPanel"),
+      entryKind: document.getElementById("entryKind"),
+      requestCategory: document.getElementById("requestCategory"),
+      dayPart: document.getElementById("dayPart"),
+      purpose: document.getElementById("purpose"),
+      receptionMemo: document.getElementById("receptionMemo"),
+      createReceptionBtn: document.getElementById("createReceptionBtn"),
+      createStatus: document.getElementById("createStatus"),
+      refreshBtn: document.getElementById("refreshBtn"),
+      entryList: document.getElementById("entryList"),
+      followupList: document.getElementById("followupList"),
+      preventionList: document.getElementById("preventionList"),
+      authStatus: document.getElementById("authStatus"),
+      adminTokenInput: document.getElementById("adminTokenInput")
+    };
 
-      const FAMILY_CONTEXT = {
-        family: {
-          family_code: "FAM-DEMO-YAMADA",
-          family_name: "山田家",
-          primary_guardian_name: "山田 花子",
-          line_user_id: "demo-line-mother-yamada",
-          line_display_name: "山田花子（お母さん）",
-          line_link_status: "linked",
-          line_link_source: "demo"
-        },
-        cards: []
-      };
+    function todayString(){
+      const d = new Date();
+      const y = d.getFullYear();
+      const m = String(d.getMonth()+1).padStart(2,"0");
+      const day = String(d.getDate()).padStart(2,"0");
+      return `${y}-${m}-${day}`;
+    }
 
-      const state = {
-        scanner: null,
-        scannerRunning: false,
-        currentPatient: null,
-        currentFamily: null,
-        currentFamilyCards: [],
-        lastScanText: "",
-        localReceptions: [],
-        dbStatuses: [],
-        dbAvailable: false
-      };
+    function defaultDayPart(){
+      const h = new Date().getHours();
+      return h >= 13 ? "afternoon" : "morning";
+    }
 
-      const $ = (id) => document.getElementById(id);
+    function escapeHtml(value){
+      return String(value ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
+    }
 
-      const els = {
-        todayDateLabel: $("todayDateLabel"),
-        statSchedule: $("statSchedule"),
-        statReceived: $("statReceived"),
-        statWaiting: $("statWaiting"),
-        statLineUnlinked: $("statLineUnlinked"),
-
-        readerInput: $("readerInput"),
-        readerFocusButton: $("readerFocusButton"),
-        readerSearchButton: $("readerSearchButton"),
-        readerClearButton: $("readerClearButton"),
-        readerStatus: $("readerStatus"),
-                qrReader: $("qrReader"),
-        startScanButton: $("startScanButton"),
-        stopScanButton: $("stopScanButton"),
-        reloadDailyStatusButton: $("reloadDailyStatusButton"),
-        dailyStatusReloadStatus: $("dailyStatusReloadStatus"),
-        openDoctorButton: $("openDoctorButton"),
-        manualInput: $("manualInput"),
-        manualSearchButton: $("manualSearchButton"),
-        scanMessage: $("scanMessage"),
-
-        adminCodeInput: $("adminCodeInput"),
-        saveAdminCodeButton: $("saveAdminCodeButton"),
-        staffNameInput: $("staffNameInput"),
-
-        emptyPanel: $("emptyPanel"),
-        patientPanel: $("patientPanel"),
-        patientRoleLabel: $("patientRoleLabel"),
-        patientName: $("patientName"),
-        patientKana: $("patientKana"),
-        patientMeta: $("patientMeta"),
-        confirmPatientName: $("confirmPatientName"),
-        confirmMemberNo: $("confirmMemberNo"),
-        confirmSchedule: $("confirmSchedule"),
-        receptionSafetyNote: $("receptionSafetyNote"),
-        checkList: $("checkList"),
-        nextAppointment: $("nextAppointment"),
-        lineStatus: $("lineStatus"),
-        patientMemo: $("patientMemo"),
-        familyList: $("familyList"),
-        markReceivedButton: $("markReceivedButton"),
-        cancelCheckInButton: $("cancelCheckInButton"),
-        copyLineGuideButton: $("copyLineGuideButton"),
-        patientMessage: $("patientMessage"),
-        handoffMemo: $("handoffMemo"),
-        saveMemoButton: $("saveMemoButton"),
-        copyMemoButton: $("copyMemoButton"),
-        clearButton: $("clearButton"),
-
-        todayQueue: $("todayQueue"),
-        resetReceptionButton: $("resetReceptionButton")
-      };
-
-      function getConfigValue(path, fallback = "") {
-        const keys = String(path || "").split(".");
-        let current = CONFIG;
-
-        for (const key of keys) {
-          if (!current || typeof current !== "object" || !(key in current)) return fallback;
-          current = current[key];
-        }
-
-        return current === undefined || current === null ? fallback : current;
+    function getAdminToken(){
+      if (typeof CONFIG.getAdminToken === "function") {
+        const v = CONFIG.getAdminToken();
+        if (v) return String(v).trim();
       }
-
-      function getTodayJST() {
-        const now = new Date();
-        const jst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
-        return jst.toISOString().slice(0, 10);
+      for (const key of ADMIN_TOKEN_KEYS) {
+        const v = localStorage.getItem(key) || sessionStorage.getItem(key);
+        if (v && String(v).trim()) return String(v).trim();
       }
+      return "";
+    }
 
-      function formatTodayLabel() {
-        const today = new Date(getTodayJST() + "T00:00:00+09:00");
-        const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
-        return `${today.getFullYear()}年${today.getMonth() + 1}月${today.getDate()}日（${weekdays[today.getDay()]}）`;
+    function saveAdminToken(token){
+      const v = String(token || "").trim();
+      if (!v) return;
+      if (typeof CONFIG.setAdminToken === "function") CONFIG.setAdminToken(v, true);
+      ADMIN_TOKEN_KEYS.forEach(key => {
+        localStorage.setItem(key, v);
+        sessionStorage.setItem(key, v);
+      });
+    }
+
+    function clearAdminToken(){
+      if (typeof CONFIG.clearAdminToken === "function") CONFIG.clearAdminToken();
+      ADMIN_TOKEN_KEYS.forEach(key => {
+        localStorage.removeItem(key);
+        sessionStorage.removeItem(key);
+      });
+    }
+
+    function headers(json=false, admin=false){
+      const h = {};
+      if (json) h["Content-Type"] = "application/json";
+      const token = getAdminToken();
+      if (admin && token) {
+        h["X-DPRO-Admin-Code"] = token;
+        h["x-dpro-admin-code"] = token;
+        h["x-admin-token"] = token;
+        h["X-Admin-Token"] = token;
+        h["Authorization"] = "Bearer " + token;
       }
-
-      function formatDate(value) {
-        if (!value) return "";
-        const d = new Date(String(value).includes("T") ? value : value + "T00:00:00+09:00");
-        if (Number.isNaN(d.getTime())) return value;
-        return `${d.getMonth() + 1}/${d.getDate()}`;
-      }
-
-      function escapeHtml(value) {
-        return String(value ?? "")
-          .replaceAll("&", "&amp;")
-          .replaceAll("<", "&lt;")
-          .replaceAll(">", "&gt;")
-          .replaceAll('"', "&quot;")
-          .replaceAll("'", "&#039;");
-      }
-
-      function getAdminCode() {
-        try {
-          return localStorage.getItem(getConfigValue("STORAGE_KEYS.ADMIN_CODE", "dpro_dental_qr_admin_code")) || "";
-        } catch (error) {
-          return "";
-        }
-      }
-
-      function setAdminCode(value) {
-        try {
-          localStorage.setItem(getConfigValue("STORAGE_KEYS.ADMIN_CODE", "dpro_dental_qr_admin_code"), value || "");
-        } catch (error) {
-          console.warn(error);
-        }
-      }
-
-      function getStaffName() {
-        try {
-          return localStorage.getItem(getConfigValue("STORAGE_KEYS.STAFF_NAME", "dpro_dental_qr_staff_name")) || "受付スタッフ";
-        } catch (error) {
-          return "受付スタッフ";
-        }
-      }
-
-      function setStaffName(value) {
-        try {
-          localStorage.setItem(getConfigValue("STORAGE_KEYS.STAFF_NAME", "dpro_dental_qr_staff_name"), value || "受付スタッフ");
-        } catch (error) {
-          console.warn(error);
-        }
-      }
-
-      function apiUrl(endpoint) {
-        const base = String(getConfigValue("API.BASE_URL", "https://dpro-dental-qr-api.dpromstk2000.workers.dev")).replace(/\/+$/, "");
-        const path = String(endpoint || "").startsWith("/") ? String(endpoint) : "/" + String(endpoint || "");
-        return base + path;
-      }
-
-      async function apiFetch(endpoint, options = {}) {
-        const method = options.method || "GET";
-        const params = options.params || {};
-        const url = new URL(apiUrl(endpoint));
-
-        Object.entries(params).forEach(([key, value]) => {
-          if (value !== undefined && value !== null && value !== "") {
-            url.searchParams.set(key, String(value));
-          }
-        });
-
-        const headers = {
-          "Accept": "application/json",
-          "Content-Type": "application/json"
-        };
-
-        const adminCode = getAdminCode();
-        if (adminCode) {
-          headers["x-dpro-admin-code"] = adminCode;
-          headers["x-admin-token"] = adminCode;
-        }
-
-        const response = await fetch(url.toString(), {
-          method,
-          headers,
-          body: method === "GET" ? undefined : JSON.stringify(options.body || {})
-        });
-
-        const text = await response.text();
-        let data = null;
-
-        try {
-          data = text ? JSON.parse(text) : {};
-        } catch (error) {
-          data = { ok: false, message: text || "JSONを読み込めませんでした。" };
-        }
-
-        if (!response.ok) {
-          throw new Error(data.message || data.error || `HTTP ${response.status}`);
-        }
-
-        return data;
-      }
-
-      function formatNowTime() {
-        return new Date().toLocaleTimeString("ja-JP", {
-          hour: "2-digit",
-          minute: "2-digit"
-        });
-      }
-
-      function setDailyStatusReloadStatus(type, text) {
-        if (!els.dailyStatusReloadStatus) return;
-
-        els.dailyStatusReloadStatus.className = `reload-status ${type || ""}`.trim();
-        els.dailyStatusReloadStatus.textContent = text || "";
-      }
-
-      function setDailyStatusReloadLoading(isLoading) {
-        if (!els.reloadDailyStatusButton) return;
-
-        els.reloadDailyStatusButton.disabled = Boolean(isLoading);
-        els.reloadDailyStatusButton.textContent = isLoading ? "更新中..." : "受付状況を更新";
-      }
-
-
-      function showMessage(element, type, text) {
-        if (!element) return;
-        element.className = `message show ${type || "info"}`;
-        element.textContent = text || "";
-      }
-
-      function clearMessage(element) {
-        if (!element) return;
-        element.className = "message";
-        element.textContent = "";
-      }
-
-      function parseScanText(input) {
-        const raw = String(input || "").trim();
-
-        if (!raw) return { raw: "", token: "", member_no: "", q: "" };
-
-        try {
-          const url = new URL(raw);
-          const token = url.searchParams.get("t") || url.searchParams.get("token") || url.searchParams.get("qr_token") || "";
-          if (token) return { raw, token, member_no: "", q: token };
-        } catch (error) {
-          // URLでない場合
-        }
-
-        if (/^D\d+/i.test(raw)) {
-          return { raw, token: "", member_no: raw, q: raw };
-        }
-
-        return { raw, token: raw, member_no: "", q: raw };
-      }
-
-      function normalizePatient(root, sourceText) {
-        const parsed = parseScanText(sourceText);
-        const patient =
-          root.patient ||
-          root.card ||
-          root.member ||
-          root.data?.patient ||
-          root.data?.card ||
-          root.data?.member ||
-          root.data ||
-          root ||
-          {};
-
-        const familyContext =
-          root.family_context ||
-          root.data?.family_context ||
-          root.family ||
-          null;
-
-        return {
-          patient: {
-            id: patient.id || patient.patient_id || "",
-            clinic_id: patient.clinic_id || "",
-            qr_token: patient.qr_token || patient.token || parsed.token || "",
-            member_no: patient.member_no || patient.card_no || patient.memberNo || parsed.member_no || "---",
-            patient_name: patient.patient_name || patient.name || patient.patientName || "患者さま",
-            patient_name_kana: patient.patient_name_kana || patient.kana || "",
-            patient_kind: patient.patient_kind || "adult",
-            school_grade: patient.school_grade || "",
-            guardian_name: patient.guardian_name || "",
-            guardian_phone: patient.guardian_phone || "",
-            phone: patient.phone || "",
-            line_display_name: patient.line_display_name || "",
-            line_user_id: patient.line_user_id || "",
-            next_appointment_date: patient.next_appointment_date || "",
-            next_appointment_time: patient.next_appointment_time || "",
-            next_appointment_memo: patient.next_appointment_memo || "",
-            patient_memo: patient.patient_memo || "",
-            internal_memo: patient.internal_memo || "",
-            status: patient.status || "active",
-            card_enabled: patient.card_enabled !== false
-          },
-          family_context: familyContext && familyContext.cards ? familyContext : null
-        };
-      }
-
-      function getDemoPatient(tokenOrQuery) {
-        const q = String(tokenOrQuery || "").trim();
-        const lower = q.toLowerCase();
-
-        return DEMO_PATIENTS.find((p) => {
-          return (
-            p.token === q ||
-            p.member_no === q ||
-            p.patient_name.includes(q) ||
-            p.patient_name_kana.includes(q) ||
-            lower === "demo"
-          );
-        }) || DEMO_PATIENTS[0];
-      }
-
-      function makeDemoData(tokenOrQuery) {
-        const p = getDemoPatient(tokenOrQuery);
-        const today = getTodayJST();
-
-        return {
-          patient: {
-            id: "demo-" + p.token,
-            clinic_id: "demo-clinic-id",
-            qr_token: p.token,
-            member_no: p.member_no,
-            patient_name: p.patient_name,
-            patient_name_kana: p.patient_name_kana,
-            patient_kind: p.patient_kind,
-            school_grade: p.school_grade || "",
-            guardian_name: p.guardian_name || "",
-            guardian_phone: p.guardian_phone || "",
-            phone: p.phone || p.guardian_phone || "",
-            line_display_name: FAMILY_CONTEXT.family.line_display_name,
-            line_user_id: FAMILY_CONTEXT.family.line_user_id,
-            next_appointment_date: today,
-            next_appointment_time: p.next_appointment_time,
-            next_appointment_memo: p.next_appointment_memo,
-            patient_memo: p.patient_memo,
-            internal_memo: p.internal_memo,
-            status: "active",
-            card_enabled: true
-          },
-          family_context: FAMILY_CONTEXT
-        };
-      }
-
-      function normalizeDailyStatusRow(row) {
-        const raw = row || {};
-
-        return {
-          daily_status_id: raw.daily_status_id || raw.id || "",
-          patient_id: raw.patient_id || "",
-          qr_token: raw.qr_token || raw.token || "",
-          member_no: raw.member_no || raw.card_no || "",
-          patient_name: raw.patient_name || raw.name || "患者さま",
-          patient_name_kana: raw.patient_name_kana || "",
-          patient_kind: raw.patient_kind || "adult",
-          school_grade: raw.school_grade || "",
-          guardian_name: raw.guardian_name || raw.primary_guardian_name || "",
-          guardian_phone: raw.guardian_phone || raw.primary_guardian_phone || "",
-          scheduled_time: raw.scheduled_time || "",
-          scheduled_label: raw.scheduled_label || "",
-          task_summary: raw.task_summary || "",
-          reception_status: raw.reception_status || "scheduled",
-          received_at: raw.received_at || "",
-          received_by_staff: raw.received_by_staff || "",
-          reception_memo: raw.reception_memo || "",
-          exam_status: raw.exam_status || "waiting",
-          doctor_memo: raw.doctor_memo || "",
-          handoff_memo: raw.handoff_memo || "",
-          line_follow_status: raw.line_follow_status || "none",
-          line_follow_message: raw.line_follow_message || "",
-          family_name: raw.family_name || "山田家",
-          family_code: raw.family_code || "FAM-DEMO-YAMADA",
-          family_line_user_id: raw.family_line_user_id || raw.line_user_id_snapshot || "",
-          family_line_display_name: raw.family_line_display_name || raw.line_display_name_snapshot || "",
-          family_line_link_status: raw.family_line_link_status || raw.line_link_status_snapshot || "",
-          family_display_label: raw.family_display_label || "",
-          family_relationship: raw.family_relationship || "",
-          internal_memo: raw.internal_memo || raw.doctor_memo || raw.task_summary || "",
-          patient_memo: raw.patient_memo || raw.reception_memo || ""
-        };
-      }
-
-      function getDailyStatusByToken(tokenOrMemberNo) {
-        const q = String(tokenOrMemberNo || "").trim();
-
-        if (!q || !Array.isArray(state.dbStatuses)) return null;
-
-        return state.dbStatuses.find((row) => {
-          return row.qr_token === q || row.member_no === q || row.patient_name === q;
-        }) || null;
-      }
-
-      function statusRowToPatientData(statusRow) {
-        const row = normalizeDailyStatusRow(statusRow);
-
-        const family = {
-          family_code: row.family_code || "FAM-DEMO-YAMADA",
-          family_name: row.family_name || "山田家",
-          primary_guardian_name: row.guardian_name || "山田 花子",
-          primary_guardian_phone: row.guardian_phone || "",
-          line_user_id: row.family_line_user_id || "demo-line-mother-yamada",
-          line_display_name: row.family_line_display_name || "山田花子（お母さん）",
-          line_link_status: row.family_line_link_status || "linked",
-          line_link_source: "daily_status"
-        };
-
-        return {
-          patient: {
-            id: row.patient_id || "",
-            clinic_id: "from-daily-status",
-            qr_token: row.qr_token,
-            member_no: row.member_no,
-            patient_name: row.patient_name,
-            patient_name_kana: row.patient_name_kana,
-            patient_kind: row.patient_kind,
-            school_grade: row.school_grade,
-            guardian_name: row.guardian_name,
-            guardian_phone: row.guardian_phone,
-            phone: row.guardian_phone || "",
-            line_display_name: row.family_line_display_name,
-            line_user_id: row.family_line_user_id,
-            next_appointment_date: getTodayJST(),
-            next_appointment_time: String(row.scheduled_time || "").slice(0, 5),
-            next_appointment_memo: row.scheduled_label || row.task_summary,
-            patient_memo: row.patient_memo,
-            internal_memo: row.internal_memo || row.task_summary,
-            status: "active",
-            card_enabled: true
-          },
-          family_context: {
-            family,
-            cards: state.currentFamilyCards && state.currentFamilyCards.length
-              ? state.currentFamilyCards
-              : FAMILY_CONTEXT.cards
-          }
-        };
-      }
-
-      async function loadDailyStatuses(showResultMessage = false) {
-        if (!getAdminCode()) {
-          state.dbAvailable = false;
-          setDailyStatusReloadLoading(false);
-          setDailyStatusReloadStatus("error", "管理コード未設定");
-
-          if (showResultMessage) {
-            showMessage(els.scanMessage, "warning", "受付状態の更新には管理コードが必要です。左下で管理コードを保存してください。");
-          }
-
-          updateStats();
-          renderQueue();
-          return;
-        }
-
-        setDailyStatusReloadLoading(true);
-        setDailyStatusReloadStatus("loading", "更新中...");
-
-        if (showResultMessage) {
-          showMessage(els.scanMessage, "info", "今日の受付状況をWorker API / Supabaseから確認しています...");
-        }
-
-        try {
-          const result = await apiFetch("/api/scan/today", {
-            method: "GET",
-            params: {
-              visit_date: getTodayJST(),
-              date: getTodayJST(),
-              limit: 100
-            }
-          });
-
-          const rows = Array.isArray(result.rows)
-            ? result.rows
-            : Array.isArray(result.items)
-              ? result.items
-              : Array.isArray(result.statuses)
-                ? result.statuses
-                : Array.isArray(result.daily_statuses)
-                  ? result.daily_statuses
-                  : [];
-
-          // STEP 30-36:
-          // 固定デモ/ローカル受付ではなく、API結果のみを画面の正にする。
-          state.dbStatuses = rows.map(normalizeDailyStatusRow);
-          state.dbAvailable = true;
-
-          updateStats();
-          renderQueue();
-
-          const updatedAt = formatNowTime();
-          setDailyStatusReloadStatus("", `更新完了 ${updatedAt}`);
-
-          if (showResultMessage) {
-            showMessage(
-              els.scanMessage,
-              "success",
-              `今日の受付状況を更新しました。\n最終更新：${updatedAt}\n表示が変わらない場合は、受付状況に変更がない状態です。`
-            );
-          }
-        } catch (error) {
-          console.error(error);
-          state.dbAvailable = false;
-          state.dbStatuses = [];
-          setDailyStatusReloadStatus("error", "更新失敗");
-
-          if (showResultMessage) {
-            showMessage(
-              els.scanMessage,
-              "error",
-              "受付状況の更新に失敗しました。\n\n" +
-              "確認すること：\n" +
-              "・受付・診療ステータス用SQLが完了しているか\n" +
-              "・連携APIが最新版か\n" +
-              "・管理コードが正しいか\n\n" +
-              "詳細：" + (error.message || error)
-            );
-          }
-
-          updateStats();
-          renderQueue();
-        } finally {
-          setDailyStatusReloadLoading(false);
-        }
-      }
-
-
-      function getReceptionStorageKey() {
-        return "dpro_dental_ipad_receptions_" + getTodayJST();
-      }
-
-      function loadLocalReceptions() {
-        // STEP 30-36:
-        // 本番環境では受付状態の正を localStorage にしない。
-        // 受付済み状態は Worker API / Supabase から読み込む。
-        state.localReceptions = [];
-      }
-
-      function saveLocalReceptions() {
-        // STEP 30-36:
-        // 本番環境では受付済み状態を localStorage に保存しない。
-        // Worker API / Supabase への保存成功後、API再読込で反映する。
-      }
-
-      function isReceived(token) {
-        const dbRow = getDailyStatusByToken(token);
-        return Boolean(dbRow && dbRow.reception_status === "checked_in");
-      }
-
-      function getLineUnlinkedCount() {
-        if (!Array.isArray(state.dbStatuses)) return 0;
-        return state.dbStatuses.filter((row) => {
-          const userId = row.family_line_user_id || "";
-          const status = row.family_line_link_status || row.line_link_status || "";
-          return !userId || status === "unlinked" || status === "not_linked";
-        }).length;
-      }
-
-      function updateStats() {
-        // STEP 30-36:
-        // PC受付の数字も Worker API / Supabase の結果だけで集計する。
-        const rows = Array.isArray(state.dbStatuses) ? state.dbStatuses : [];
-        const schedule = rows.length;
-        const received = rows.filter((row) => row.reception_status === "checked_in").length;
-        const waiting = Math.max(schedule - received, 0);
-        const lineUnlinked = rows.filter((row) => {
-          const userId = row.family_line_user_id || "";
-          const status = row.family_line_link_status || row.line_link_status || "";
-          return !userId || status === "unlinked" || status === "not_linked";
-        }).length;
-
-        els.statSchedule.textContent = String(schedule);
-        els.statReceived.textContent = String(received);
-        els.statWaiting.textContent = String(waiting);
-        els.statLineUnlinked.textContent = String(lineUnlinked);
-      }
-
-      function renderQueue() {
-        const apiRows = Array.isArray(state.dbStatuses) ? state.dbStatuses : [];
-
-        if (!apiRows.length) {
-          els.queueList.innerHTML = `
-            <div class="api-empty-reception">
-              <strong>本日の受付予定がありません</strong>
-              固定デモ患者では表示しません。右上の「受付状況を更新」で Worker API / Supabase から本日の受付予定を取得してください。
-            </div>
-          `;
-          return;
-        }
-
-        const sourceRows = apiRows.map((row) => ({
-          token: row.qr_token,
-          member_no: row.member_no,
-          patient_name: row.patient_name,
-          role: row.family_display_label || row.family_relationship || (row.patient_kind === "child" ? "子ども診察券" : "本人診察券"),
-          next_appointment_time: String(row.scheduled_time || "").slice(0, 5),
-          next_appointment_memo: row.scheduled_label || row.task_summary,
-          done: row.reception_status === "checked_in",
-          source: "api"
-        }));
-
-        const rows = sourceRows.map((p) => {
-          return `
-            <div class="queue-item" data-token="${escapeHtml(p.token || p.member_no)}">
-              <div class="queue-time">${escapeHtml(p.next_appointment_time || "--:--")}</div>
-              <div>
-                <div class="queue-name">${escapeHtml(p.patient_name)}</div>
-                <div class="queue-sub">${escapeHtml(p.role)} / ${escapeHtml(p.next_appointment_memo)}</div>
+      return h;
+    }
+
+    function renderAuthStatus(){
+      const token = getAdminToken();
+      el.authStatus.className = token ? "notice ok" : "notice";
+      el.authStatus.textContent = token ? "管理コード保存済みです。QR受付できます。" : "管理コード未保存です。先に保存してください。";
+    }
+
+    async function apiGet(path, params={}, admin=false){
+      const url = new URL(API_BASE_URL + path);
+      Object.entries({ clinic_code: CLINIC_CODE, ...params }).forEach(([key,value]) => {
+        if (value !== undefined && value !== null && value !== "") url.searchParams.set(key, value);
+      });
+      const res = await fetch(url.toString(), { method:"GET", headers:headers(false, admin) });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.ok === false) throw new Error(data.message || data.error || `API Error ${res.status}`);
+      return data;
+    }
+
+    async function apiPost(path, body={}, admin=true){
+      const res = await fetch(API_BASE_URL + path, {
+        method:"POST",
+        headers:headers(true, admin),
+        body:JSON.stringify({ clinic_code: CLINIC_CODE, ...body })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.ok === false) throw new Error(data.message || data.error || `API Error ${res.status}`);
+      return data;
+    }
+
+    function parseQrValue(value){
+      const raw = String(value || "").trim();
+      if (!raw) return {};
+
+      try {
+        const url = new URL(raw);
+        const token = url.searchParams.get("token") || url.searchParams.get("qr_token") || url.searchParams.get("t") || "";
+        const cardNo = url.searchParams.get("card_no") || "";
+        if (token) return { qr_token: token, raw };
+        if (cardNo) return { card_no: cardNo, raw };
+      } catch (_) {}
+
+      if (/^VET-/.test(raw)) return { card_no: raw, raw };
+      return { qr_token: raw, raw };
+    }
+
+    function petEmoji(card){
+      const s = String(card?.species || card?.species_label || "").toLowerCase();
+      if (s.includes("cat") || s.includes("猫")) return "🐱";
+      if (s.includes("rabbit") || s.includes("うさ")) return "🐰";
+      return "🐶";
+    }
+
+    function renderPet(data){
+      const card = data.card || {};
+      const guardian = data.guardian || {};
+      const pet = data.pet || {};
+      const caution = card.caution_memo || pet.caution_memo || card.allergies || pet.allergies || "";
+
+      el.petPanel.classList.remove("hidden");
+      el.petPanel.innerHTML = `
+        <div class="pet-panel">
+          <div class="pet-main">
+            <div class="pet-icon">${petEmoji(card)}</div>
+            <div>
+              <div class="pet-title">${escapeHtml(card.pet_name || pet.pet_name || "ペット")}</div>
+              <div class="pet-sub">${escapeHtml(card.species_label || pet.species_label || card.species || "")} / ${escapeHtml(card.breed || pet.breed || "")}</div>
+              <div class="pet-sub">飼い主：${escapeHtml(card.guardian_name || guardian.guardian_name || "-")} / 診察券：${escapeHtml(card.card_no || "-")}</div>
+              <div class="tagline">
+                <span class="tag green">${card.card_enabled === false ? "無効診察券" : "診察券確認OK"}</span>
+                ${caution ? `<span class="tag red">注意：${escapeHtml(caution)}</span>` : ""}
+                ${data.today_checkin ? `<span class="tag">本日受付履歴あり</span>` : ""}
               </div>
-              <div class="queue-badge ${p.done ? "done" : ""}">${p.done ? "受付済み" : "未受付"}</div>
             </div>
-          `;
-        }).join("");
-
-        els.todayQueue.innerHTML = rows || '<div class="empty">本日の予定はありません。</div>';
-
-        Array.from(els.todayQueue.querySelectorAll(".queue-item")).forEach((row) => {
-          row.addEventListener("click", () => {
-            lookupPatient(row.getAttribute("data-token"), "queue");
-          });
-        });
-      }
-
-      function buildMeta(patient, family) {
-        const parts = [];
-
-        parts.push(`<span class="pill">診察券番号：${escapeHtml(patient.member_no || "---")}</span>`);
-
-        if (patient.patient_kind === "child") {
-          parts.push(`<span class="pill orange">子ども診察券</span>`);
-        } else {
-          parts.push(`<span class="pill">本人診察券</span>`);
-        }
-
-        if (family && family.family_name) {
-          parts.push(`<span class="pill green">${escapeHtml(family.family_name)}</span>`);
-        }
-
-        if (isReceived(patient.qr_token)) {
-          parts.push(`<span class="pill green">受付済み</span>`);
-        } else {
-          parts.push(`<span class="pill orange">未受付</span>`);
-        }
-
-        return parts.join("");
-      }
-
-      function getLineStatusText(family, patient) {
-        const linked = Boolean(family?.line_user_id || patient.line_user_id);
-        if (!linked) return "未連携\n受付でLINE登録QRをご案内してください。";
-
-        return [
-          "LINE連携済み",
-          `LINE名：${family?.line_display_name || patient.line_display_name || "取得済み"}`,
-          `LINE userId：${family?.line_user_id || patient.line_user_id || "---"}`,
-          `診察券枚数：${state.currentFamilyCards.length || 1}枚`
-        ].join("\n");
-      }
-
-      function getNextText(patient) {
-        const date = formatDate(patient.next_appointment_date);
-        const time = patient.next_appointment_time || "";
-        const memo = patient.next_appointment_memo || "";
-
-        return [
-          `${date ? date + " " : ""}${time || "時間未設定"}`,
-          memo || "内容未設定"
-        ].join("\n");
-      }
-
-      function renderCheckList(patient, family) {
-        const lineLinked = Boolean(family?.line_user_id || patient.line_user_id);
-        const received = isReceived(patient.qr_token);
-
-        const checks = [
-          {
-            mark: "✓",
-            warn: false,
-            text: "患者名と診察券番号を確認"
-          },
-          {
-            mark: lineLinked ? "✓" : "!",
-            warn: !lineLinked,
-            text: lineLinked ? "LINE連携済み" : "LINE未連携。登録QRを案内"
-          },
-          {
-            mark: received ? "✓" : "!",
-            warn: !received,
-            text: received ? "受付済み" : "まだ未受付。受付済みにする"
-          }
-        ];
-
-        els.checkList.innerHTML = checks.map((item) => `
-          <div class="check-item">
-            <div class="check-mark ${item.warn ? "warn" : ""}">${escapeHtml(item.mark)}</div>
-            <div>${escapeHtml(item.text)}</div>
           </div>
-        `).join("");
+        </div>
+      `;
+    }
+
+    async function lookupQr(){
+      if (!getAdminToken()) {
+        alert("先に管理コードを保存してください。");
+        return;
+      }
+      const parsed = parseQrValue(el.qrInput.value);
+      if (!parsed.qr_token && !parsed.card_no) {
+        el.lookupStatus.className = "notice ng";
+        el.lookupStatus.textContent = "QR URL / token / card_no を入力してください。";
+        return;
       }
 
-      function renderFamilyCards(patient, cards) {
-        const safeCards = Array.isArray(cards) && cards.length ? cards : FAMILY_CONTEXT.cards;
-
-        els.familyList.innerHTML = safeCards.map((card) => {
-          const active = (card.qr_token || card.token) === patient.qr_token || card.member_no === patient.member_no;
-          return `
-            <div class="family-card ${active ? "active" : ""}" data-token="${escapeHtml(card.qr_token || card.token || "")}">
-              <div class="family-role">${escapeHtml(card.role_label || card.relationship_label || "家族")}</div>
-              <div class="family-name">${escapeHtml(card.patient_name || "患者さま")}</div>
-              <div class="family-no">${escapeHtml(card.member_no || "---")}</div>
-            </div>
-          `;
-        }).join("");
-
-        Array.from(els.familyList.querySelectorAll(".family-card")).forEach((card) => {
-          card.addEventListener("click", () => {
-            const token = card.getAttribute("data-token");
-            if (token) lookupPatient(token, "family");
-          });
-        });
-      }
-
-      function renderPatient(data) {
-        const patient = data.patient;
-        const familyContext = data.family_context || FAMILY_CONTEXT;
-        const family = familyContext.family || FAMILY_CONTEXT.family;
-        const cards = Array.isArray(familyContext.cards) && familyContext.cards.length
-          ? familyContext.cards
-          : FAMILY_CONTEXT.cards;
-
-        state.currentPatient = patient;
-        state.currentFamily = family;
-        state.currentFamilyCards = cards;
-
-        els.emptyPanel.classList.add("hidden");
-        els.patientPanel.classList.remove("hidden");
-
-        const currentCard = cards.find((card) => {
-          return card.qr_token === patient.qr_token || card.member_no === patient.member_no;
-        });
-
-        els.patientRoleLabel.textContent = currentCard?.role_label || (patient.patient_kind === "child" ? "CHILD CARD" : "PATIENT CARD");
-        els.patientName.textContent = patient.patient_name || "患者さま";
-        els.patientKana.textContent = patient.patient_name_kana || "";
-        els.patientMeta.innerHTML = buildMeta(patient, family);
-
-        els.nextAppointment.textContent = getNextText(patient);
-        els.lineStatus.textContent = getLineStatusText(family, patient);
-        els.patientMemo.textContent = patient.internal_memo || patient.patient_memo || "特記事項なし";
-
-        els.handoffMemo.value = loadHandoffMemo(patient) || buildDefaultHandoffMemo(patient, family);
-
-        renderCheckList(patient, family);
-        renderFamilyCards(patient, cards);
-        updateReceptionSafetyPanel(patient);
-
-        updateStats();
-        renderQueue();
-      }
-
-
-
-      // STEP 30-39B：受付ミス対策
-      function getDailyRowsForPatient(patient) {
-        if (!patient || !Array.isArray(state.dbStatuses)) return [];
-
-        const patientId = String(patient.id || "").trim();
-        const qrToken = String(patient.qr_token || "").trim();
-        const memberNo = String(patient.member_no || "").trim();
-        const name = String(patient.patient_name || "").trim();
-
-        return state.dbStatuses.filter((row) => {
-          return (
-            (patientId && String(row.patient_id || "") === patientId) ||
-            (qrToken && String(row.qr_token || "") === qrToken) ||
-            (memberNo && String(row.member_no || "") === memberNo) ||
-            (name && String(row.patient_name || "") === name)
-          );
-        });
-      }
-
-      function getPrimaryDailyRowForPatient(patient) {
-        if (!patient) return null;
-        return getDailyStatusByToken(patient.qr_token) ||
-          getDailyStatusByToken(patient.member_no) ||
-          getDailyRowsForPatient(patient)[0] ||
-          null;
-      }
-
-      function formatScheduleTextFromRow(row, patient) {
-        const time = String(row?.scheduled_time || patient?.next_appointment_time || "").slice(0, 5);
-        const label = row?.scheduled_label || row?.task_summary || patient?.next_appointment_memo || "本日の予定";
-        if (time && label) return `${time}　${label}`;
-        if (time) return `${time}`;
-        return label || "本日の予定未確認";
-      }
-
-      function buildReceptionSafetyStatus(patient) {
-        const row = getPrimaryDailyRowForPatient(patient);
-        const rows = getDailyRowsForPatient(patient);
-        const checkedRows = rows.filter((item) => item.reception_status === "checked_in");
-        const pendingRows = rows.filter((item) => item.reception_status !== "checked_in");
-        const already = checkedRows.length > 0 || isReceived(patient?.qr_token);
-        const isTodayScheduled = Boolean(row);
-        const scheduleText = formatScheduleTextFromRow(row, patient);
-
-        let level = "ok";
-        const notes = [];
-
-        if (already) {
-          level = "warn";
-          notes.push("この患者さんは本日すでに受付済みです。二重受付を防ぐため、通常はもう一度受付済みにしません。");
-        } else {
-          notes.push("この内容で間違いなければ、下の「受付済みにする」を押してください。押した後に確認ダイアログが出ます。");
-        }
-
-        if (!isTodayScheduled) {
-          level = "warn";
-          notes.push("本日の受付予定一覧には見つかっていません。予定外来院の場合だけ受付してください。");
-        }
-
-        if (rows.length > 1) {
-          level = "warn";
-          notes.push(`同じ患者さんの本日予定が ${rows.length} 件あります。受付する予定時間が正しいか確認してください。`);
-        }
-
-        if (pendingRows.length > 1) {
-          level = "warn";
-          notes.push("未受付の予定が複数あります。間違った予約枠で受付しないように注意してください。");
-        }
-
-        return {
-          row,
-          rows,
-          checkedRows,
-          pendingRows,
-          already,
-          isTodayScheduled,
-          scheduleText,
-          level,
-          note: notes.join("\n")
+      el.lookupStatus.className = "notice info";
+      el.lookupStatus.textContent = "ペット診察券を確認中...";
+      try {
+        const data = await apiGet("/api/scan/lookup", parsed, true);
+        state.selected = {
+          ...data,
+          parsed
         };
+        renderPet(data);
+        el.lookupStatus.className = "notice ok";
+        el.lookupStatus.textContent = "ペット診察券を確認しました。受付種別を選んで来院受付してください。";
+        if (!el.purpose.value) el.purpose.value = "QR来院受付";
+      } catch (error) {
+        state.selected = null;
+        el.petPanel.classList.add("hidden");
+        el.lookupStatus.className = "notice ng";
+        el.lookupStatus.textContent = error.message || "診察券が見つかりません。";
+      }
+    }
+
+    async function createReception(){
+      if (!getAdminToken()) {
+        alert("先に管理コードを保存してください。");
+        return;
+      }
+      if (!state.selected?.card) {
+        alert("先にQRを読み取ってペットを確認してください。");
+        return;
       }
 
-      function updateReceptionSafetyPanel(patient) {
-        if (!patient) return;
-
-        const status = buildReceptionSafetyStatus(patient);
-
-        if (els.confirmPatientName) els.confirmPatientName.textContent = patient.patient_name || "患者さま";
-        if (els.confirmMemberNo) els.confirmMemberNo.textContent = patient.member_no || "---";
-        if (els.confirmSchedule) els.confirmSchedule.textContent = status.scheduleText || "---";
-
-        if (els.receptionSafetyNote) {
-          els.receptionSafetyNote.textContent = status.note;
-          els.receptionSafetyNote.classList.toggle("warn", status.level === "warn");
-        }
-
-        if (els.markReceivedButton) {
-          if (status.already) {
-            els.markReceivedButton.textContent = "本日受付済み";
-            els.markReceivedButton.disabled = true;
-          } else {
-            els.markReceivedButton.textContent = "受付済みにする";
-            els.markReceivedButton.disabled = false;
-          }
-        }
-
-        if (els.cancelCheckInButton) {
-          const canCancel = Boolean(status.already);
-          els.cancelCheckInButton.classList.toggle("hidden", !canCancel);
-          els.cancelCheckInButton.disabled = !canCancel;
-          els.cancelCheckInButton.textContent = "受付取消";
-        }
-      }
-
-      function buildReceptionConfirmText(patient) {
-        const status = buildReceptionSafetyStatus(patient);
-        const warnings = [];
-
-        if (!status.isTodayScheduled) warnings.push("・本日の受付予定一覧にない患者です");
-        if (status.rows.length > 1) warnings.push(`・同じ患者さんの本日予定が ${status.rows.length} 件あります`);
-        if (status.checkedRows.length > 0) warnings.push("・すでに受付済みの記録があります");
-
-        const warningText = warnings.length
-          ? "\n\n注意：\n" + warnings.join("\n")
-          : "";
-
-        return [
-          "この患者さんを受付済みにしますか？",
-          "",
-          `患者名：${patient.patient_name || "---"}`,
-          `診察券番号：${patient.member_no || "---"}`,
-          `本日の予定：${status.scheduleText || "---"}`,
-          `受付スタッフ：${getStaffName() || "受付スタッフ"}`,
-          warningText,
-          "",
-          "OKを押すと、Worker API → Supabase に保存し、先生用画面・管理トップへ反映します。"
-        ].join("\n");
-      }
-
-      function setMarkReceivedButtonLoading(isLoading) {
-        if (!els.markReceivedButton) return;
-        els.markReceivedButton.disabled = Boolean(isLoading);
-        if (isLoading) {
-          els.markReceivedButton.dataset.originalText = els.markReceivedButton.textContent || "受付済みにする";
-          els.markReceivedButton.textContent = "保存中...";
-        } else {
-          els.markReceivedButton.textContent = els.markReceivedButton.dataset.originalText || "受付済みにする";
-          delete els.markReceivedButton.dataset.originalText;
-          if (state.currentPatient) updateReceptionSafetyPanel(state.currentPatient);
-        }
-      }
-
-      function setCancelCheckInButtonLoading(isLoading) {
-        if (!els.cancelCheckInButton) return;
-        els.cancelCheckInButton.disabled = Boolean(isLoading);
-        if (isLoading) {
-          els.cancelCheckInButton.dataset.originalText = els.cancelCheckInButton.textContent || "受付取消";
-          els.cancelCheckInButton.textContent = "取消中...";
-        } else {
-          els.cancelCheckInButton.textContent = els.cancelCheckInButton.dataset.originalText || "受付取消";
-          delete els.cancelCheckInButton.dataset.originalText;
-          if (state.currentPatient) updateReceptionSafetyPanel(state.currentPatient);
-        }
-      }
-
-      function buildCancelCheckInConfirmText(patient) {
-        const status = buildReceptionSafetyStatus(patient);
-        const row = status.row || getPrimaryDailyRowForPatient(patient) || {};
-        const examStatus = String(row.exam_status || "");
-        const examLabel = examStatus === "completed" ? "診療済み" : examStatus === "in_treatment" ? "診療中" : "診療前";
-
-        return [
-          "この患者さんの受付済みを取消しますか？",
-          "",
-          `患者名：${patient.patient_name || "---"}`,
-          `診察券番号：${patient.member_no || "---"}`,
-          `本日の予定：${status.scheduleText || "---"}`,
-          `現在の診療状態：${examLabel}`,
-          `操作スタッフ：${getStaffName() || "受付スタッフ"}`,
-          "",
-          "OKを押すと、Worker API → Supabase に保存し、先生用画面・管理トップにも取消後の状態を反映します。"
-        ].join("\n");
-      }
-
-      function buildDefaultHandoffMemo(patient, family) {
-        const role = patient.patient_kind === "child" ? `保護者：${patient.guardian_name || family?.primary_guardian_name || "未登録"}` : "本人来院";
-        return `${patient.patient_name} 様\n${role}\n本日の内容：${patient.next_appointment_memo || "未設定"}\nLINE連携：${family?.line_user_id ? "済み" : "未連携"}`;
-      }
-
-      function getMemoStorageKey(patient) {
-        return "dpro_dental_ipad_handoff_" + getTodayJST() + "_" + (patient?.qr_token || patient?.member_no || "unknown");
-      }
-
-      function loadHandoffMemo(patient) {
-        try {
-          return localStorage.getItem(getMemoStorageKey(patient)) || "";
-        } catch (error) {
-          return "";
-        }
-      }
-
-      function saveHandoffMemo() {
-        const patient = state.currentPatient;
-        if (!patient) {
-          showMessage(els.patientMessage, "warning", "先に患者さんを表示してください。");
-          return;
-        }
-
-        try {
-          localStorage.setItem(getMemoStorageKey(patient), els.handoffMemo.value || "");
-          showMessage(els.patientMessage, "success", "先生へ引き継ぎメモをこのiPadに保存しました。");
-        } catch (error) {
-          showMessage(els.patientMessage, "error", "メモ保存に失敗しました。" + (error.message || error));
-        }
-      }
-
-      async function copyText(text, successMessage) {
-        try {
-          await navigator.clipboard.writeText(text);
-          showMessage(els.patientMessage, "success", successMessage || "コピーしました。");
-        } catch (error) {
-          showMessage(els.patientMessage, "warning", "コピーできない場合は、手動で選択してコピーしてください。");
-        }
-      }
-
-      async function logScan(raw, result, patient) {
-        if (!getAdminCode()) return;
-
-        try {
-          await apiFetch("/api/scan/log", {
-            method: "POST",
-            body: {
-              clinic_code: getConfigValue("CLINIC.CLINIC_CODE", "dpro_dental_demo"),
-              qr_token: parseScanText(raw).token || "",
-              scan_result: result || "success",
-              source_screen: "scan-pc.html",
-              scanned_by_staff: getStaffName(),
-              user_agent: navigator.userAgent,
-              patient_id: patient?.id || null
-            }
-          });
-        } catch (error) {
-          console.warn("スキャンログ保存失敗", error);
-        }
-      }
-
-
-      function setReaderStatus(message) {
-        if (els.readerStatus) {
-          els.readerStatus.textContent = message || "";
-        }
-      }
-
-      function focusReaderInput(selectAll = true) {
-        if (!els.readerInput) return;
-
-        try {
-          els.readerInput.focus({ preventScroll: true });
-        } catch (error) {
-          els.readerInput.focus();
-        }
-
-        if (selectAll) {
-          try {
-            els.readerInput.select();
-          } catch (error) {
-            // ignore
-          }
-        }
-
-        setReaderStatus("USB QRリーダー待機中です。QR診察券を読み取ってください。");
-      }
-
-      async function searchFromReaderInput() {
-        if (!els.readerInput) return;
-
-        const value = String(els.readerInput.value || "").trim();
-
-        if (!value) {
-          setReaderStatus("読み取り内容が空です。QRリーダーで読み取るか、手入力（予備）してください。");
-          focusReaderInput(false);
-          return;
-        }
-
-        setReaderStatus("読み取りました。患者情報を確認しています...");
-        await lookupPatient(value, "reader");
-
-        if (els.readerInput) {
-          els.readerInput.value = "";
-        }
-
-        setTimeout(() => focusReaderInput(false), 250);
-      }
-
-      function setupReaderInputMode() {
-        if (!els.readerInput) return;
-
-        els.readerInput.addEventListener("focus", () => {
-          setReaderStatus("USB QRリーダー待機中です。読み取り後Enterで自動検索します。");
-        });
-
-        els.readerInput.addEventListener("keydown", async (event) => {
-          if (event.key === "Enter") {
-            event.preventDefault();
-            await searchFromReaderInput();
-          }
-        });
-
-        if (els.readerFocusButton) {
-          els.readerFocusButton.addEventListener("click", () => focusReaderInput(true));
-        }
-
-        if (els.readerSearchButton) {
-          els.readerSearchButton.addEventListener("click", () => searchFromReaderInput());
-        }
-
-        if (els.readerClearButton) {
-          els.readerClearButton.addEventListener("click", () => {
-            els.readerInput.value = "";
-            setReaderStatus("入力をクリアしました。USB QRリーダー待機中です。");
-            focusReaderInput(false);
-          });
-        }
-      }
-
-      async function lookupPatient(inputText, source) {
-        const parsed = parseScanText(inputText);
-
-        if (!parsed.raw) {
-          showMessage(els.scanMessage, "warning", "検索内容が空です。");
-          return;
-        }
-
-        state.lastScanText = parsed.raw;
-        clearMessage(els.patientMessage);
-        showMessage(els.scanMessage, "info", source === "reader" ? "QRリーダーの読み取り内容を確認しています..." : "患者情報を確認しています...");
-
-        try {
-          const dbRow = getDailyStatusByToken(parsed.token || parsed.member_no || parsed.raw);
-
-          if (dbRow) {
-            const data = statusRowToPatientData(dbRow);
-            renderPatient(data);
-            await logScan(parsed.raw, "db_daily_status_success", data.patient);
-            showMessage(els.scanMessage, "success", source === "reader" ? "QRリーダーで患者さんを表示しました。" : "今日の受付予定から患者さんを表示しました。");
-            return;
-          }
-
-          // STEP 30-36:
-          // 本番寄せのため、固定デモ患者へのフォールバック表示は行わない。
-          // 今日の受付予定にいない患者は、SCAN_LOOKUP API で確認する。
-
-          if (!getAdminCode()) {
-            showMessage(els.scanMessage, "warning", "実データ検索には管理コードが必要です。左下の管理設定に管理コードを保存してください。");
-            return;
-          }
-
-          const result = await apiFetch(getConfigValue("API.ENDPOINTS.SCAN_LOOKUP", "/api/scan/lookup"), {
-            method: "GET",
-            params: {
-              q: parsed.q,
-              t: parsed.token,
-              token: parsed.token,
-              qr_token: parsed.token,
-              member_no: parsed.member_no
-            }
-          });
-
-          if (result && result.ok === false) {
-            throw new Error(result.message || result.error || "患者情報を取得できませんでした。");
-          }
-
-          const data = normalizePatient(result, parsed.raw);
-
-          if (!data.patient || !data.patient.patient_name) {
-            await logScan(parsed.raw, "not_found", null);
-            showMessage(els.scanMessage, "warning", "該当する患者が見つかりませんでした。");
-            return;
-          }
-
-          renderPatient(data);
-          await logScan(parsed.raw, "success", data.patient);
-          showMessage(els.scanMessage, "success", "患者情報を表示しました。");
-        } catch (error) {
-          console.error(error);
-          showMessage(
-            els.scanMessage,
-            "error",
-            "患者情報の確認に失敗しました。\n\n" +
-            "確認すること：\n" +
-            "・管理コードが保存されているか\n" +
-            "・Workerが最新か\n" +
-            "・ネット接続があるか\n\n" +
-            "詳細：" + (error.message || error)
-          );
-        }
-      }
-
-      async function startScanner() {
-        clearMessage(els.scanMessage);
-
-        if (!window.Html5Qrcode) {
-          showMessage(els.scanMessage, "error", "QR読み取りライブラリを読み込めませんでした。手入力（予備）検索を使ってください。");
-          return;
-        }
-
-        if (state.scannerRunning) {
-          showMessage(els.scanMessage, "info", "すでにカメラ読み取り（予備）中です。");
-          return;
-        }
-
-        try {
-          state.scanner = state.scanner || new Html5Qrcode("qrReader");
-
-          await state.scanner.start(
-            { facingMode: "environment" },
-            {
-              fps: 10,
-              qrbox: { width: 280, height: 280 },
-              aspectRatio: 1.0
-            },
-            async (decodedText) => {
-              if (!decodedText || decodedText === state.lastScanText) return;
-
-              state.lastScanText = decodedText;
-              showMessage(els.scanMessage, "success", "QRを読み取りました。患者情報を確認します。");
-
-              try {
-                await stopScanner(false);
-              } catch (error) {
-                console.warn(error);
-              }
-
-              await lookupPatient(decodedText, "scan");
-            },
-            () => {}
-          );
-
-          state.scannerRunning = true;
-          showMessage(els.scanMessage, "info", "カメラ読み取り（予備）中です。QR診察券をカメラに向けてください。");
-        } catch (error) {
-          console.error(error);
-          showMessage(
-            els.scanMessage,
-            "error",
-            "カメラを開始できませんでした。\n\n" +
-            "・iPadでカメラ許可をしてください。\n" +
-            "・HTTPSのGitHub Pagesで開いてください。\n" +
-            "・うまくいかない場合は手入力（予備）検索を使ってください。\n\n" +
-            "詳細：" + (error.message || error)
-          );
-        }
-      }
-
-      async function stopScanner(showDoneMessage = true) {
-        if (!state.scanner || !state.scannerRunning) {
-          if (showDoneMessage) showMessage(els.scanMessage, "info", "カメラは起動していません。");
-          return;
-        }
-
-        try {
-          await state.scanner.stop();
-          await state.scanner.clear();
-        } catch (error) {
-          console.warn("カメラ停止時の警告", error);
-        } finally {
-          state.scannerRunning = false;
-        }
-
-        if (showDoneMessage) showMessage(els.scanMessage, "success", "カメラ読み取り（予備）を停止しました。");
-      }
-
-      async function markReceived() {
-        const patient = state.currentPatient;
-
-        if (!patient || !patient.qr_token) {
-          showMessage(els.patientMessage, "warning", "先に患者さんを表示してください。");
-          return;
-        }
-
-        const status = buildReceptionSafetyStatus(patient);
-
-        if (status.already) {
-          showMessage(
-            els.patientMessage,
-            "warning",
-            "この患者さんは本日すでに受付済みです。\n二重受付を防ぐため、もう一度受付済みにはしません。\n間違えて受付済みにした場合は、下の「受付取消」を押してください。"
-          );
-          updateReceptionSafetyPanel(patient);
-          return;
-        }
-
-        if (!getAdminCode()) {
-          showMessage(els.patientMessage, "warning", "受付済みを共有するには管理コードが必要です。左下で管理コードを保存してください。");
-          return;
-        }
-
-        const ok = window.confirm(buildReceptionConfirmText(patient));
-        if (!ok) {
-          showMessage(els.patientMessage, "info", "受付済み操作をキャンセルしました。患者名・診察券番号・予定時間を確認してください。");
-          return;
-        }
-
-        setMarkReceivedButtonLoading(true);
-        showMessage(els.patientMessage, "info", "受付済みを保存しています...\nWorker API → Supabase に保存後、受付状況を再読込します。");
-
-        try {
-          const result = await apiFetch("/api/scan/check-in", {
-            method: "POST",
-            body: {
-              clinic_code: getConfigValue("CLINIC.CLINIC_CODE", "dpro_dental_demo"),
-              visit_date: getTodayJST(),
-              qr_token: patient.qr_token,
-              member_no: patient.member_no,
-              staff_name: getStaffName(),
-              received_by_staff: getStaffName(),
-              reception_memo: els.handoffMemo.value || patient.internal_memo || patient.patient_memo || "",
-              source_screen: "scan-pc.html"
-            }
-          });
-
-          if (result && result.ok === false) {
-            throw new Error(result.message || result.error || "受付保存に失敗しました。");
-          }
-
-          // STEP 30-39A:
-          // ローカル保存ではなく、API保存成功後にSupabaseから再読込して、先生用画面へ反映されたか確認する。
-          await loadDailyStatuses(false);
-          setTimeout(() => focusReaderInput(false), 400);
-
-          const dbRow = getDailyStatusByToken(patient.qr_token) || getDailyStatusByToken(patient.member_no);
-          const reflected = Boolean(dbRow && dbRow.reception_status === "checked_in");
-
-          showMessage(
-            els.patientMessage,
-            reflected ? "success" : "warning",
-            reflected
-              ? `${patient.patient_name} 様を受付済みにしました。\nSupabaseに保存しました。先生用画面・管理トップにも受付済みとして反映済みです。`
-              : `${patient.patient_name} 様の受付保存は完了しましたが、再読込結果で受付済み状態を確認できませんでした。受付状況を更新して確認してください。`
-          );
-
-          if (dbRow) {
-            renderPatient(statusRowToPatientData(dbRow));
-          } else {
-            renderPatient({
-              patient,
-              family_context: {
-                family: state.currentFamily,
-                cards: state.currentFamilyCards
-              }
-            });
-          }
-        } catch (error) {
-          console.error(error);
-          showMessage(
-            els.patientMessage,
-            "error",
-            "受付済みの保存に失敗しました。\n\n" +
-            "確認すること：\n" +
-            "・Worker API が最新版か\n" +
-            "・Supabase の受付ステータステーブルがあるか\n" +
-            "・管理コードが正しいか\n\n" +
-            "詳細：" + (error.message || error)
-          );
-        } finally {
-          setMarkReceivedButtonLoading(false);
-        }
-      }
-
-
-      async function cancelCheckIn() {
-        const patient = state.currentPatient;
-
-        if (!patient || !patient.qr_token) {
-          showMessage(els.patientMessage, "warning", "先に患者さんを表示してください。");
-          return;
-        }
-
-        const status = buildReceptionSafetyStatus(patient);
-        const row = status.row || getPrimaryDailyRowForPatient(patient) || {};
-        const examStatus = String(row.exam_status || "");
-
-        if (!status.already) {
-          showMessage(els.patientMessage, "info", "この患者さんは現在、受付済みではありません。受付取消は不要です。");
-          updateReceptionSafetyPanel(patient);
-          return;
-        }
-
-        if (examStatus === "in_treatment" || examStatus === "completed") {
-          showMessage(
-            els.patientMessage,
-            "warning",
-            "この患者さんは診療中または診療済みです。受付画面からは取消せません。先生用画面・管理画面で確認してください。"
-          );
-          return;
-        }
-
-        if (!getAdminCode()) {
-          showMessage(els.patientMessage, "warning", "受付取消には管理コードが必要です。左下で管理コードを保存してください。");
-          return;
-        }
-
-        const ok = window.confirm(buildCancelCheckInConfirmText(patient));
-        if (!ok) {
-          showMessage(els.patientMessage, "info", "受付取消を中止しました。");
-          return;
-        }
-
-        const cancelMemo = window.prompt("受付取消理由を入力してください。", "受付ミスのため取消");
-        if (cancelMemo === null) {
-          showMessage(els.patientMessage, "info", "受付取消を中止しました。");
-          return;
-        }
-
-        setCancelCheckInButtonLoading(true);
-        showMessage(els.patientMessage, "info", "受付取消を保存しています...\nWorker API → Supabase に保存後、受付状況を再読込します。");
-
-        try {
-          const result = await apiFetch("/api/scan/check-in/cancel", {
-            method: "POST",
-            body: {
-              clinic_code: getConfigValue("CLINIC.CLINIC_CODE", "dpro_dental_demo"),
-              visit_date: getTodayJST(),
-              qr_token: patient.qr_token,
-              member_no: patient.member_no,
-              staff_name: getStaffName(),
-              cancelled_by_staff: getStaffName(),
-              cancel_memo: cancelMemo || "受付ミスのため取消",
-              confirm_text: "受付取消",
-              source_screen: "scan-pc.html"
-            }
-          });
-
-          if (result && result.ok === false) {
-            throw new Error(result.message || result.error || "受付取消に失敗しました。");
-          }
-
-          await loadDailyStatuses(false);
-          setTimeout(() => focusReaderInput(false), 400);
-
-          const dbRow = getDailyStatusByToken(patient.qr_token) || getDailyStatusByToken(patient.member_no);
-          const reflected = Boolean(dbRow && dbRow.reception_status !== "checked_in");
-
-          showMessage(
-            els.patientMessage,
-            reflected ? "success" : "warning",
-            reflected
-              ? `${patient.patient_name} 様の受付済みを取消しました。\nSupabaseに保存しました。先生用画面・管理トップにも未受付として反映済みです。`
-              : `${patient.patient_name} 様の受付取消は完了しましたが、再読込結果で未受付状態を確認できませんでした。受付状況を更新して確認してください。`
-          );
-
-          if (dbRow) {
-            renderPatient(statusRowToPatientData(dbRow));
-          } else {
-            renderPatient({
-              patient,
-              family_context: {
-                family: state.currentFamily,
-                cards: state.currentFamilyCards
-              }
-            });
-          }
-        } catch (error) {
-          console.error(error);
-          showMessage(
-            els.patientMessage,
-            "error",
-            "受付取消の保存に失敗しました。\n\n" +
-            "確認すること：\n" +
-            "・Worker API がSTEP 30-39Bか\n" +
-            "・管理コードが正しいか\n" +
-            "・診療中/診療済みではないか\n\n" +
-            "詳細：" + (error.message || error)
-          );
-        } finally {
-          setCancelCheckInButtonLoading(false);
-        }
-      }
-
-
-      function copyLineGuide() {
-        const patient = state.currentPatient;
-        if (!patient) {
-          showMessage(els.patientMessage, "warning", "先に患者さんを表示してください。");
-          return;
-        }
-
-        const text =
-`受付よりご案内です。
-
-次回から、LINE公式のメニューにある「診察券」からQR診察券を表示できます。
-
-お母さん・保護者様のLINEに、ご家族分の診察券もまとめて表示できます。
-未登録の場合は、受付でLINE診察券登録QRをご案内します。`;
-
-        copyText(text, "LINE登録案内文をコピーしました。");
-      }
-
-      function copyMemo() {
-        const text = els.handoffMemo.value || "";
-        if (!text.trim()) {
-          showMessage(els.patientMessage, "warning", "コピーするメモがありません。");
-          return;
-        }
-
-        copyText(text, "先生へ引き継ぎメモをコピーしました。");
-      }
-
-      function clearPatient() {
-        state.currentPatient = null;
-        state.currentFamily = null;
-        state.currentFamilyCards = [];
-
-        els.patientPanel.classList.add("hidden");
-        els.emptyPanel.classList.remove("hidden");
-        els.manualInput.value = "";
-        clearMessage(els.patientMessage);
-        showMessage(els.scanMessage, "info", "表示をクリアしました。");
-      }
-
-      function resetReceptionList() {
-        if (!confirm("今日の受付済みリストをこのiPad上でリセットしますか？")) return;
-
-        state.localReceptions = [];
-        saveLocalReceptions();
-        updateStats();
-        renderQueue();
-
-        if (state.currentPatient) {
-          renderPatient({
-            patient: state.currentPatient,
-            family_context: {
-              family: state.currentFamily,
-              cards: state.currentFamilyCards
-            }
-          });
-        }
-
-        showMessage(els.scanMessage, "success", "このiPad内の受付済みリストをリセットしました。共有されている受付状態は変更していません。");
-      }
-
-
-      let reloadDirectRunId = 0;
-
-      window.DPRO_scanIpadReloadDailyStatus = async function(event, options = {}) {
-        if (event && typeof event.preventDefault === "function") {
-          event.preventDefault();
-        }
-
-        if (event && typeof event.stopPropagation === "function") {
-          event.stopPropagation();
-        }
-
-        const runId = ++reloadDirectRunId;
-        const button = els.reloadDailyStatusButton;
-        const showResultMessage = options.showResultMessage !== false;
-
-        if (button) {
-          button.disabled = true;
-          button.classList.add("is-force-loading");
-          button.textContent = "更新中...";
-        }
-
-        setDailyStatusReloadStatus("loading", "更新中...");
-
-        if (showResultMessage) {
-          showMessage(
-            els.scanMessage,
-            "info",
-            "受付状況を更新中です。Worker API / Supabase から本日の受付予定を取得しています。"
-          );
-        }
-
-        const timeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error("更新がタイムアウトしました。通信状況またはWorker APIを確認してください。")), 12000);
-        });
-
-        try {
-          await Promise.race([
-            loadDailyStatuses(showResultMessage),
-            timeoutPromise
-          ]);
-
-          setTimeout(() => {
-            if (runId !== reloadDirectRunId) return;
-            if (button) {
-              button.disabled = false;
-              button.classList.remove("is-force-loading");
-              button.textContent = "受付状況を更新";
-            }
-            setDailyStatusReloadStatus("", "更新完了 " + formatNowTime());
-            focusReaderInput(false);
-          }, 120);
-        } catch (error) {
-          if (runId !== reloadDirectRunId) return;
-
-          state.dbAvailable = false;
-          state.dbStatuses = [];
-          updateStats();
-          renderQueue();
-
-          if (button) {
-            button.disabled = false;
-            button.classList.remove("is-force-loading");
-            button.textContent = "受付状況を更新";
-          }
-
-          setDailyStatusReloadStatus("error", "更新失敗");
-          showMessage(
-            els.scanMessage,
-            "error",
-            "受付状況の更新に失敗しました。\n\n" +
-            "確認すること：\n" +
-            "・Worker API が最新版か\n" +
-            "・管理コードが正しいか\n" +
-            "・Supabase に本日の受付予定があるか\n\n" +
-            "詳細：" + (error.message || error)
-          );
-
-          focusReaderInput(false);
-        }
+      const card = state.selected.card;
+      const token = state.selected.parsed?.qr_token || card.qr_token || "";
+      const body = {
+        qr_token: token,
+        card_id: card.card_id,
+        guardian_id: card.guardian_id,
+        pet_id: card.pet_id,
+        entry_kind: el.entryKind.value,
+        request_category: el.requestCategory.value,
+        target_date: todayString(),
+        day_part: el.dayPart.value,
+        purpose: el.purpose.value || "QR来院受付",
+        symptoms_summary: el.receptionMemo.value || el.purpose.value || "QR来院受付",
+        desired_contact: "line",
+        source: "qr_reception",
+        actor_name: "受付PC",
+        staff_name: "受付PC"
       };
 
-      function bindEvents() {
-        els.startScanButton.addEventListener("click", startScanner);
-        els.stopScanButton.addEventListener("click", () => stopScanner(true));
+      el.createReceptionBtn.disabled = true;
+      el.createReceptionBtn.textContent = "受付中...";
+      el.createStatus.className = "notice info";
+      el.createStatus.textContent = "受付番号を発行しています...";
 
-        if (els.reloadDailyStatusButton) {
-          els.reloadDailyStatusButton.disabled = false;
-          els.reloadDailyStatusButton.onclick = window.DPRO_scanIpadReloadDailyStatus;
-          els.reloadDailyStatusButton.addEventListener("click", window.DPRO_scanIpadReloadDailyStatus);
+      try {
+        const data = await apiPost("/api/admin/queue/create", body, true);
+        const entryId = data.entry?.waiting_entry_id || data.entry?.id || data.result?.waiting_entry_id;
+        if (entryId) {
+          await apiPost("/api/admin/queue/status", {
+            waiting_entry_id: entryId,
+            status: "checked_in",
+            staff_note: el.receptionMemo.value || "QR来院受付",
+            staff_name: "受付PC"
+          }, true);
         }
 
-        if (els.openDoctorButton) {
-          els.openDoctorButton.addEventListener("click", () => {
-            window.open("./doctor.html", "_blank", "noopener,noreferrer");
-          });
-        }
-
-        setupReaderInputMode();
-
-        els.manualSearchButton.addEventListener("click", () => lookupPatient(els.manualInput.value, "manual"));
-        els.manualInput.addEventListener("keydown", (event) => {
-          if (event.key === "Enter") lookupPatient(els.manualInput.value, "manual");
-        });
-
-        Array.from(document.querySelectorAll("[data-demo-token]")).forEach((button) => {
-          button.addEventListener("click", () => lookupPatient(button.getAttribute("data-demo-token"), "demo"));
-        });
-
-        els.saveAdminCodeButton.addEventListener("click", () => {
-          setAdminCode(els.adminCodeInput.value.trim());
-          setStaffName(els.staffNameInput.value.trim() || "受付スタッフ");
-          showMessage(els.scanMessage, "success", "管理コードとスタッフ名を保存しました。受付状況を更新します。");
-          window.DPRO_scanIpadReloadDailyStatus(null, { showResultMessage: true });
-        });
-
-        els.staffNameInput.addEventListener("change", () => {
-          setStaffName(els.staffNameInput.value.trim() || "受付スタッフ");
-        });
-
-        els.markReceivedButton.addEventListener("click", markReceived);
-        if (els.cancelCheckInButton) els.cancelCheckInButton.addEventListener("click", cancelCheckIn);
-        els.copyLineGuideButton.addEventListener("click", copyLineGuide);
-        els.saveMemoButton.addEventListener("click", saveHandoffMemo);
-        els.copyMemoButton.addEventListener("click", copyMemo);
-        els.clearButton.addEventListener("click", clearPatient);
-        els.resetReceptionButton.addEventListener("click", resetReceptionList);
+        const num = data.entry?.queue_number || data.result?.queue_number || "-";
+        el.createStatus.className = "notice ok";
+        el.createStatus.textContent = `QR来院受付が完了しました。受付番号：${num}`;
+        await loadAll();
+      } catch (error) {
+        el.createStatus.className = "notice ng";
+        el.createStatus.textContent = error.message || "受付に失敗しました。";
+      } finally {
+        el.createReceptionBtn.disabled = false;
+        el.createReceptionBtn.textContent = "QR来院受付する";
       }
+    }
 
-      function init() {
-        els.todayDateLabel.textContent = formatTodayLabel();
-        els.adminCodeInput.value = getAdminCode();
-        els.staffNameInput.value = getStaffName();
-
-        loadLocalReceptions();
-        updateStats();
-        renderQueue();
-        bindEvents();
-
-        if (getAdminCode()) {
-          showMessage(els.scanMessage, "info", "PC受付画面を開きました。今日の受付状況を更新します。");
-          setTimeout(() => {
-            window.DPRO_scanIpadReloadDailyStatus(null, { showResultMessage: false });
-          }, 250);
-        } else {
-          showMessage(els.scanMessage, "info", "PC受付画面を開きました。受付状態の共有には左下で管理コードを保存してください。");
-          if (els.reloadDailyStatusButton) {
-            els.reloadDailyStatusButton.disabled = false;
-            els.reloadDailyStatusButton.textContent = "受付状況を更新";
-          }
-        }
-      }
-
-      document.addEventListener("DOMContentLoaded", init);
-    })();
-  </script>
-
-  <script>
-    (function () {
-      "use strict";
-
-      function focusPcQrInput() {
-        const ids = [
-          "qrReaderInput",
-          "qrInput",
-          "manualTokenInput",
-          "memberTokenInput",
-          "scanInput",
-          "tokenInput"
-        ];
-
-        for (const id of ids) {
-          const el = document.getElementById(id);
-          if (el && typeof el.focus === "function") {
-            try {
-              el.focus();
-              if (typeof el.select === "function") el.select();
-              return;
-            } catch (error) {}
-          }
-        }
-
-        const input = document.querySelector('input[type="text"], input[type="search"], input:not([type])');
-        if (input && typeof input.focus === "function") {
-          try {
-            input.focus();
-            if (typeof input.select === "function") input.select();
-          } catch (error) {}
-        }
-      }
-
-      function keepPcQrInputReady() {
-        document.querySelectorAll("button, a").forEach((button) => {
-          button.addEventListener("click", () => {
-            setTimeout(focusPcQrInput, 450);
-          });
-        });
-
-        document.addEventListener("keydown", (event) => {
-          if (event.key === "Escape") {
-            focusPcQrInput();
-          }
-        });
-      }
-
-      if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", () => {
-          setTimeout(focusPcQrInput, 300);
-          keepPcQrInputReady();
-        });
+    function updateCategoryByKind(){
+      if (el.entryKind.value === "medicine_prevention") {
+        el.requestCategory.value = "medicine_food";
+        if (!el.purpose.value || el.purpose.value === "QR来院受付") el.purpose.value = "お薬・予防受付";
+      } else if (el.entryKind.value === "care_consult") {
+        el.requestCategory.value = "hygiene_care";
+        if (!el.purpose.value || el.purpose.value === "QR来院受付") el.purpose.value = "ケア処置相談";
       } else {
-        setTimeout(focusPcQrInput, 300);
-        keepPcQrInputReady();
+        el.requestCategory.value = "general_exam";
+        if (!el.purpose.value) el.purpose.value = "QR来院受付";
+      }
+    }
+
+    function statusLabel(status){
+      const map = { reserved:"予約済み", waiting:"受付済み", checked_in:"院内受付済み", examining:"診察中", completed:"診療済み", cancelled:"取消", no_show:"来院なし" };
+      return map[status] || status || "-";
+    }
+
+    function entryKindLabel(kind){
+      const map = { today_queue:"通常診察", priority_reservation:"優先受付", medicine_prevention:"お薬・予防", care_consult:"ケア処置", grooming_surgery_consult:"手術/トリミング相談" };
+      return map[kind] || kind || "-";
+    }
+
+    function renderSummary(summary){
+      summary = summary || {};
+      document.getElementById("generalExamCount").textContent = Number(summary.general_exam_count || 0) + "組";
+      document.getElementById("currentExamNumber").textContent = summary.current_exam_number ? String(summary.current_exam_number) + "番" : "-";
+      document.getElementById("medicineCount").textContent = Number(summary.medicine_prevention_count || 0) + "件";
+      const careReserve = Number(summary.care_count || 0) + Number(summary.priority_reservation_count || 0) + Number(summary.grooming_surgery_count || 0);
+      document.getElementById("careReserveCount").textContent = careReserve + "件";
+      const msg = document.getElementById("summaryMessage");
+      msg.className = "notice ok";
+      msg.textContent = summary.display_message || "混雑状況を確認できます。";
+    }
+
+    function renderEntries(){
+      if (!state.entries.length) {
+        el.entryList.innerHTML = '<div class="empty">本日の受付はありません。</div>';
+        return;
       }
 
-      window.focusPcQrInput = focusPcQrInput;
-    })();
-  </script>
+      el.entryList.innerHTML = state.entries.map(item => {
+        const id = item.waiting_entry_id || item.id;
+        return `
+          <article class="entry ${escapeHtml(item.status || "")}">
+            <div class="entry-no">${escapeHtml(item.queue_number || "-")}</div>
+            <div>
+              <h4>${escapeHtml(item.pet_name || "ペット")}｜${escapeHtml(item.purpose || item.request_category_label || "受付")}</h4>
+              <p>${escapeHtml(item.guardian_name || item.line_display_name || "飼い主")} / ${escapeHtml(entryKindLabel(item.entry_kind))} / ${escapeHtml(statusLabel(item.status))}</p>
+              ${item.symptoms_summary ? `<p>${escapeHtml(item.symptoms_summary)}</p>` : ""}
+              <div class="tagline">
+                <span class="tag">${escapeHtml(item.day_part_label || item.day_part || "")}</span>
+                <span class="tag">${escapeHtml(item.request_category_label || "")}</span>
+              </div>
+            </div>
+            <div class="entry-actions">
+              <button class="btn btn-sub" data-status="checked_in" data-id="${escapeHtml(id)}">院内受付</button>
+              <button class="btn btn-warn" data-status="examining" data-id="${escapeHtml(id)}">診察中</button>
+              <button class="btn btn-main" data-status="completed" data-id="${escapeHtml(id)}">診療済み</button>
+              <button class="btn btn-danger" data-status="cancelled" data-id="${escapeHtml(id)}">取消</button>
+            </div>
+          </article>
+        `;
+      }).join("");
 
+      el.entryList.querySelectorAll("[data-status]").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          try {
+            await apiPost("/api/admin/queue/status", {
+              waiting_entry_id: btn.dataset.id,
+              status: btn.dataset.status,
+              staff_note: "受付PCで更新",
+              staff_name: "受付PC"
+            }, true);
+            await loadAll();
+          } catch (error) {
+            alert(error.message || "更新に失敗しました。");
+          }
+        });
+      });
+    }
+
+    function makeFollowMessage(item, type){
+      if (item.line_message) return item.line_message;
+      const guardian = item.guardian_name || "飼い主";
+      const pet = item.pet_name || "ペット";
+      if (type === "prevention") {
+        return `${guardian}様\n${pet}ちゃんの${item.title || "予防予定"}の時期が近づいています。ご都合のよいタイミングでご相談ください。`;
+      }
+      return `${guardian}様\n${pet}ちゃんのその後の様子はいかがでしょうか。気になる変化がありましたらLINEでご相談ください。`;
+    }
+
+    function renderFollowups(items){
+      if (!items.length) {
+        el.followupList.innerHTML = '<div class="empty">診察後・再診フォローはありません。</div>';
+        return;
+      }
+      el.followupList.innerHTML = items.slice(0, 12).map(item => `
+        <div class="follow-card">
+          <h4>${escapeHtml(item.title || "再診フォロー")}</h4>
+          <p>${escapeHtml(item.guardian_name || "")} / ${escapeHtml(item.pet_name || "")} / 予定日：${escapeHtml(item.due_date || "-")}</p>
+          <div class="button-row">
+            <button class="btn btn-sub" data-copy-follow="${escapeHtml(item.followup_id || item.id)}">文面コピー</button>
+            <button class="btn btn-main" data-done-follow="${escapeHtml(item.followup_id || item.id)}">送信済み</button>
+          </div>
+        </div>
+      `).join("");
+
+      el.followupList.querySelectorAll("[data-copy-follow]").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const item = items.find(x => String(x.followup_id || x.id) === String(btn.dataset.copyFollow));
+          await navigator.clipboard.writeText(makeFollowMessage(item, "follow"));
+          alert("LINEフォロー文面をコピーしました。");
+        });
+      });
+      el.followupList.querySelectorAll("[data-done-follow]").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          try {
+            await apiPost("/api/owner/followups/update", { followup_id: btn.dataset.doneFollow, status:"copied" }, true);
+            await loadAll();
+          } catch(e) { alert(e.message || "送信済みにできませんでした。"); }
+        });
+      });
+    }
+
+    function renderPreventions(items){
+      if (!items.length) {
+        el.preventionList.innerHTML = '<div class="empty">予防・お薬フォローはありません。</div>';
+        return;
+      }
+      el.preventionList.innerHTML = items.slice(0, 12).map(item => `
+        <div class="follow-card">
+          <h4>${escapeHtml(item.title || "予防予定")}</h4>
+          <p>${escapeHtml(item.guardian_name || "")} / ${escapeHtml(item.pet_name || "")} / 予定日：${escapeHtml(item.due_date || "-")}</p>
+          <div class="button-row">
+            <button class="btn btn-sub" data-copy-prevention="${escapeHtml(item.prevention_id || item.id)}">文面コピー</button>
+            <button class="btn btn-main" data-done-prevention="${escapeHtml(item.prevention_id || item.id)}">案内済み</button>
+          </div>
+        </div>
+      `).join("");
+
+      el.preventionList.querySelectorAll("[data-copy-prevention]").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const item = items.find(x => String(x.prevention_id || x.id) === String(btn.dataset.copyPrevention));
+          await navigator.clipboard.writeText(makeFollowMessage(item, "prevention"));
+          alert("予防案内文面をコピーしました。");
+        });
+      });
+
+      el.preventionList.querySelectorAll("[data-done-prevention]").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          try {
+            await apiPost("/api/admin/prevention-schedules/update", { prevention_id: btn.dataset.donePrevention, status:"notified" }, true);
+            await loadAll();
+          } catch(e) { alert(e.message || "案内済みにできませんでした。"); }
+        });
+      });
+    }
+
+    async function loadAll(){
+      try {
+        const [summaryData, entriesData] = await Promise.all([
+          apiGet("/api/public/queue/summary", { date: todayString() }, false),
+          apiGet("/api/public/queue/entries", { date: todayString(), limit: 200 }, false)
+        ]);
+        renderSummary(summaryData.summary || summaryData.items?.[0] || {});
+        state.entries = entriesData.items || [];
+        renderEntries();
+      } catch (error) {
+        el.entryList.innerHTML = `<div class="empty">受付一覧の読み込みエラー：${escapeHtml(error.message)}</div>`;
+      }
+
+      if (getAdminToken()) {
+        try {
+          const ownerData = await apiGet("/api/owner/today", { date: todayString() }, true);
+          renderFollowups(ownerData.followup_todos || []);
+          renderPreventions(ownerData.prevention_todos || []);
+        } catch (error) {
+          el.followupList.innerHTML = `<div class="empty">フォロー読み込みエラー：${escapeHtml(error.message)}</div>`;
+          el.preventionList.innerHTML = `<div class="empty">予防フォロー読み込みエラー：${escapeHtml(error.message)}</div>`;
+        }
+      } else {
+        el.followupList.innerHTML = '<div class="empty">管理コード保存後に表示します。</div>';
+        el.preventionList.innerHTML = '<div class="empty">管理コード保存後に表示します。</div>';
+      }
+    }
+
+    function clearScan(){
+      state.selected = null;
+      el.qrInput.value = "";
+      el.lookupStatus.className = "notice info";
+      el.lookupStatus.textContent = "QR待機中です。";
+      el.petPanel.classList.add("hidden");
+      el.createStatus.className = "notice";
+      el.createStatus.textContent = "ペット確認後に受付できます。";
+      el.qrInput.focus();
+    }
+
+    async function startCamera(){
+      const cameraBox = document.getElementById("cameraBox");
+      const video = document.getElementById("qrVideo");
+      const cameraBtn = document.getElementById("cameraBtn");
+      const stopBtn = document.getElementById("stopCameraBtn");
+      if (!cameraBox || !video) return;
+
+      if (!("BarcodeDetector" in window)) {
+        alert("このブラウザではカメラQR読み取りに対応していません。QRリーダーまたは手入力を使ってください。");
+        return;
+      }
+
+      try {
+        state.cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio:false });
+        video.srcObject = state.cameraStream;
+        await video.play();
+        cameraBox.classList.remove("hidden");
+        cameraBtn.classList.add("hidden");
+        stopBtn.classList.remove("hidden");
+
+        const detector = new BarcodeDetector({ formats:["qr_code"] });
+        state.detectTimer = setInterval(async () => {
+          try {
+            const codes = await detector.detect(video);
+            if (codes && codes[0]?.rawValue) {
+              el.qrInput.value = codes[0].rawValue;
+              stopCamera();
+              await lookupQr();
+            }
+          } catch (_) {}
+        }, 700);
+      } catch (error) {
+        alert("カメラを開始できませんでした。権限を確認してください。");
+      }
+    }
+
+    function stopCamera(){
+      const cameraBox = document.getElementById("cameraBox");
+      const cameraBtn = document.getElementById("cameraBtn");
+      const stopBtn = document.getElementById("stopCameraBtn");
+      if (state.detectTimer) clearInterval(state.detectTimer);
+      state.detectTimer = null;
+      if (state.cameraStream) {
+        state.cameraStream.getTracks().forEach(track => track.stop());
+      }
+      state.cameraStream = null;
+      if (cameraBox) cameraBox.classList.add("hidden");
+      if (cameraBtn) cameraBtn.classList.remove("hidden");
+      if (stopBtn) stopBtn.classList.add("hidden");
+    }
+
+    function init(){
+      el.dayPart.value = defaultDayPart();
+      renderAuthStatus();
+      el.saveAdminTokenBtn = document.getElementById("saveAdminTokenBtn");
+      el.clearAdminTokenBtn = document.getElementById("clearAdminTokenBtn");
+
+      el.saveAdminTokenBtn.addEventListener("click", () => {
+        saveAdminToken(el.adminTokenInput.value);
+        el.adminTokenInput.value = "";
+        renderAuthStatus();
+        loadAll();
+      });
+
+      el.clearAdminTokenBtn.addEventListener("click", () => {
+        clearAdminToken();
+        renderAuthStatus();
+        loadAll();
+      });
+
+      el.lookupBtn.addEventListener("click", lookupQr);
+      el.clearScanBtn.addEventListener("click", clearScan);
+      el.createReceptionBtn.addEventListener("click", createReception);
+      el.refreshBtn.addEventListener("click", loadAll);
+      el.entryKind.addEventListener("change", updateCategoryByKind);
+      el.qrInput.addEventListener("keydown", event => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          lookupQr();
+        }
+      });
+
+      const cameraBtn = document.getElementById("cameraBtn");
+      const stopBtn = document.getElementById("stopCameraBtn");
+      if (cameraBtn) cameraBtn.addEventListener("click", startCamera);
+      if (stopBtn) stopBtn.addEventListener("click", stopCamera);
+
+      loadAll();
+      setTimeout(() => el.qrInput.focus(), 300);
+    }
+
+    init();
+  </script>
 </body>
 </html>
