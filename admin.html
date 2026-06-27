@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#243b35">
-  <title>DPRO PET CARE LINE｜管理設定 STEP VET-8</title>
+  <title>DPRO PET CARE LINE｜管理設定 STEP VET-22</title>
 
   <script src="./config.js"></script>
 
@@ -585,7 +585,7 @@
           <div class="badge">⚙️ DPRO PET CARE LINE</div>
           <h1>管理設定</h1>
           <p>
-            病院情報・診療時間・休診日・飼い主/ペット管理・診察券再発行・LINE連携・DEMOリセットを行います。<br>
+            病院情報・診療時間・休診日・飼い主/ペット管理・診察券再発行・LINE連携・DEMOリセットを行います。受付ルールは「受付設定」画面で調整します。<br>
             GitHub側には管理コードを書かず、Cloudflare Worker Secretで認証します。
           </p>
         </div>
@@ -629,6 +629,7 @@
       <a class="nav-card" id="memberLink" href="#"><strong>🎫 診察券</strong><span>飼い主LINE側の表示</span></a>
       <a class="nav-card" id="scanLink" href="#"><strong>📱 受付iPad</strong><span>QR受付画面</span></a>
       <a class="nav-card" id="doctorLink" href="#"><strong>🩺 獣医師</strong><span>診察開始・完了</span></a>
+      <a class="nav-card" id="adminQueueLink" href="#"><strong>⚙️ 受付設定</strong><span>順番受付・優先受付ルール</span></a>
       <a class="nav-card" id="indexLink" href="#"><strong>🏠 トップ</strong><span>DEMO入口へ戻る</span></a>
     </section>
 
@@ -1059,11 +1060,20 @@
         setLink("memberLink", "member", { demo: "true" });
         setLink("scanLink", "scanIpad", {});
         setLink("doctorLink", "doctor", {});
+        setLink("adminQueueLink", "adminQueue", {});
         setLink("indexLink", "index", {});
       }
 
       function setLink(id, key, extra) {
-        const base = CONFIG.urls && CONFIG.urls[key] ? CONFIG.urls[key] : `./${key}.html`;
+        const fallbackMap = {
+          scanIpad: "./scan-ipad.html",
+          adminQueue: "./admin-queue.html",
+          owner: "./owner.html",
+          member: "./member.html",
+          doctor: "./doctor.html",
+          index: "./index.html"
+        };
+        const base = CONFIG.urls && CONFIG.urls[key] ? CONFIG.urls[key] : (fallbackMap[key] || `./${key}.html`);
         const url = new URL(base, location.href);
         url.searchParams.set("clinic_code", getClinicCode());
         Object.entries(extra || {}).forEach(([k, v]) => url.searchParams.set(k, v));
