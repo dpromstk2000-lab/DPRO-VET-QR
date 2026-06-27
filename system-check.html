@@ -99,16 +99,16 @@
       <div class="brand">
         <div class="logo">✅</div>
         <div>
-          <small>STEP VET-27｜system-check 統合版</small>
+          <small>STEP VET-27A｜管理コード自動保存版</small>
           <strong>DPRO PET CARE LINE</strong>
         </div>
       </div>
       <nav class="nav">
-        <a class="pill" href="./index.html?v=step-vet-27">管理トップ</a>
-        <a class="pill" href="./rich-menu.html?v=step-vet-27">LINE入口</a>
-        <a class="pill" href="./scan-pc.html?v=step-vet-27">受付PC</a>
-        <a class="pill" href="./doctor.html?v=step-vet-27">ドクター</a>
-        <a class="pill" href="./owner.html?v=step-vet-27">オーナー</a>
+        <a class="pill" href="./index.html?v=step-vet-27a">管理トップ</a>
+        <a class="pill" href="./rich-menu.html?v=step-vet-27a">LINE入口</a>
+        <a class="pill" href="./scan-pc.html?v=step-vet-27a">受付PC</a>
+        <a class="pill" href="./doctor.html?v=step-vet-27a">ドクター</a>
+        <a class="pill" href="./owner.html?v=step-vet-27a">オーナー</a>
       </nav>
     </header>
 
@@ -207,7 +207,7 @@
       <div class="panel-head">
         <div>
           <h2>API・件数チェック</h2>
-          <div class="small">公開系と管理系を分けて確認します。NG時は診断ログにURL・ステータス・JSONが残ります。</div>
+          <div class="small">公開系と管理系を分けて確認します。NG時は診断ログにURL・ステータス・JSONが残ります。管理コード欄に入力されていれば、ボタン実行時に自動保存してから確認します。</div>
         </div>
         <div class="button-row" style="margin:0;">
           <button class="btn btn-main" id="apiCheckButton" type="button">APIチェック</button>
@@ -271,7 +271,7 @@
     </section>
 
     <div class="footer">
-      DPRO PET CARE LINE / 動物病院LINE受付・診察券・フォロー管理 / system-check.html STEP VET-27<br />
+      DPRO PET CARE LINE / 動物病院LINE受付・診察券・フォロー管理 / system-check.html STEP VET-27A<br />
       この画面には Supabase Service Role Key は書き出していません。
     </div>
   </div>
@@ -291,7 +291,7 @@
     const VERSION = {
       index:"step-vet-27",
       richMenu:"step-vet-27",
-      systemCheck:"step-vet-27",
+      systemCheck:"step-vet-27a",
       debug:"step-vet-26",
       member:"step-vet-27",
       waiting:"step-vet-27",
@@ -327,7 +327,24 @@
 
     function apiBase(){ return ($("apiBaseInput").value.trim() || DEFAULTS.apiBase).replace(/\/+$/, ""); }
     function clinicCode(){ return $("clinicCodeInput").value.trim() || DEFAULTS.clinicCode; }
-    function adminCode(){ return $("adminCodeInput").value.trim() || sessionStorage.getItem(DEFAULTS.adminStorageKey) || ""; }
+    function adminCode(){
+      const inputValue = ($("adminCodeInput")?.value || "").trim();
+      const sessionValue = sessionStorage.getItem(DEFAULTS.adminStorageKey) || "";
+      const localValue = localStorage.getItem(DEFAULTS.adminStorageKey) || "";
+      return inputValue || sessionValue || localValue || "";
+    }
+    function autoSaveAdminCodeFromInput(){
+      const input = $("adminCodeInput");
+      const value = (input?.value || "").trim();
+      if (value) {
+        sessionStorage.setItem(DEFAULTS.adminStorageKey, value);
+        localStorage.setItem(DEFAULTS.adminStorageKey, value);
+        return value;
+      }
+      const saved = sessionStorage.getItem(DEFAULTS.adminStorageKey) || localStorage.getItem(DEFAULTS.adminStorageKey) || "";
+      if (saved && input && !input.value) input.value = saved;
+      return saved;
+    }
     function staffName(){ return $("staffNameInput").value.trim() || "管理スタッフ"; }
     function todayString(){
       const d = new Date();
@@ -412,31 +429,37 @@
       return data;
     }
     function ensureAdminCode(){
-      if(!adminCode()){
+      const code = autoSaveAdminCodeFromInput();
+      if(!code){
         setSummary("sumAdmin","未入力","fail");
+        setStatus("configStatus","管理コードが未入力です。上の管理コード欄に入力してから実行してください。","ng");
         $("adminCodeInput").focus();
         throw new Error("管理コードが未入力です。");
       }
+      setSummary("sumAdmin","保存済み","pass");
+      return code;
     }
     function saveAdminCode(){
-      const code=$("adminCodeInput").value.trim();
+      const code=autoSaveAdminCodeFromInput();
       if(!code){ alert("管理コードを入力してください。"); $("adminCodeInput").focus(); return; }
-      sessionStorage.setItem(DEFAULTS.adminStorageKey,code);
       sessionStorage.setItem(DEFAULTS.staffStorageKey,staffName());
-      setStatus("configStatus",`管理コードをこのタブに保存しました。文字数 ${code.length} / 末尾 ${code.slice(-4)}`,"ok");
+      localStorage.setItem(DEFAULTS.staffStorageKey,staffName());
+      setStatus("configStatus",`管理コードを保存しました。文字数 ${code.length} / 末尾 ${code.slice(-4)}\nこの状態で一括チェックできます。`,"ok");
       setSummary("sumAdmin","保存済み","pass");
-      log("ok","管理コードをsessionStorageへ保存しました。");
+      log("ok","管理コードを保存しました。");
     }
     function forgetAdminCode(){
       sessionStorage.removeItem(DEFAULTS.adminStorageKey);
       sessionStorage.removeItem(DEFAULTS.staffStorageKey);
+      localStorage.removeItem(DEFAULTS.adminStorageKey);
+      localStorage.removeItem(DEFAULTS.staffStorageKey);
       $("adminCodeInput").value="";
       setStatus("configStatus","管理コードを削除しました。","warn");
       setSummary("sumAdmin","未入力","fail");
       log("warn","管理コードを削除しました。");
     }
     function updateConfigStatus(){
-      const code=adminCode();
+      const code=autoSaveAdminCodeFromInput();
       const api=apiBase();
       const clinic=clinicCode();
       const codeInfo=code?`保存/入力あり：文字数 ${code.length} / 末尾 ${code.slice(-4)}`:"未入力";
@@ -580,6 +603,8 @@
       return data;
     }
     async function checkApiCounts(debug=false){
+      autoSaveAdminCodeFromInput();
+      updateConfigStatus();
       const results=[];
       try{
         await checkHealth(debug);
@@ -595,11 +620,13 @@
       setStatus("debugSummary", "APIチェックを実行しました。NGがある場合は下のログにURL・ステータス・レスポンスが残っています。", results.some(x=>statusTone(x.status)==="fail")?"ng":"ok");
     }
     async function runAllChecks(){
+      autoSaveAdminCodeFromInput();
       updateConfigStatus();
       renderUrls();
       await checkApiCounts(false);
     }
     async function runDebugChecks(){
+      autoSaveAdminCodeFromInput();
       logs=[];
       renderLog();
       updateConfigStatus();
@@ -609,6 +636,7 @@
       log("info","===== DEBUG END =====");
     }
     async function runDebugAdminOnly(){
+      autoSaveAdminCodeFromInput();
       logs=[];
       renderLog();
       updateConfigStatus();
@@ -645,8 +673,8 @@
     function restoreSession(){
       $("apiBaseInput").value=DEFAULTS.apiBase;
       $("clinicCodeInput").value=DEFAULTS.clinicCode;
-      const code=sessionStorage.getItem(DEFAULTS.adminStorageKey);
-      const staff=sessionStorage.getItem(DEFAULTS.staffStorageKey);
+      const code=sessionStorage.getItem(DEFAULTS.adminStorageKey) || localStorage.getItem(DEFAULTS.adminStorageKey);
+      const staff=sessionStorage.getItem(DEFAULTS.staffStorageKey) || localStorage.getItem(DEFAULTS.staffStorageKey);
       if(code){ $("adminCodeInput").value=code; setSummary("sumAdmin","保存済み","pass"); }
       if(staff) $("staffNameInput").value=staff;
     }
@@ -675,7 +703,7 @@
       updateConfigStatus();
       renderUrls();
       renderLatestLinks();
-      log("info","system-check STEP VET-27 を起動しました。");
+      log("info","system-check STEP VET-27A を起動しました。");
     }
     init();
   </script>
