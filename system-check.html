@@ -1,257 +1,683 @@
 <!doctype html>
 <html lang="ja">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-<title>DPRO PET CARE LINE｜system-check STEP VET-25C</title>
-<script src="./config.js"></script>
-
-<style>
-:root{--bg:#f4f1ea;--card:#fff;--ink:#22302c;--muted:#6f7b75;--line:#d9d2c4;--main:#1f8f65;--green-soft:#e8f7ef;--blue-soft:#edf5ff;--amber:#8a621f;--amber-soft:#fff6de;--red:#b84a4a;--red-soft:#fff0ef;--shadow:0 18px 46px rgba(34,48,44,.12);--radius:24px}
-*{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Yu Gothic","YuGothic","Noto Sans JP",Meiryo,sans-serif;color:var(--ink);background:radial-gradient(circle at top left,rgba(31,143,101,.17),transparent 35%),radial-gradient(circle at 88% 10%,rgba(231,151,36,.12),transparent 28%),linear-gradient(180deg,#fbfaf6 0%,var(--bg) 100%);line-height:1.7}
-a{color:inherit}button,input{font:inherit}.page{width:min(1180px,calc(100% - 28px));margin:0 auto;padding:22px 0 54px}.topbar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:18px}.brand{display:flex;align-items:center;gap:12px;min-width:0}.logo{width:52px;height:52px;border-radius:18px;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,#1f8f65,#83c99f);box-shadow:0 14px 26px rgba(31,143,101,.23);font-size:26px;flex:0 0 auto}.brand small{display:block;color:var(--muted);font-weight:950;font-size:12px;letter-spacing:.08em}.brand strong{display:block;font-size:clamp(19px,2.4vw,30px);line-height:1.12;letter-spacing:-.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px}
-.pill,.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1px solid var(--line);border-radius:999px;padding:9px 13px;background:rgba(255,255,255,.86);color:var(--ink);text-decoration:none;font-size:13px;font-weight:950;line-height:1.15}.btn-main{border-color:transparent;background:var(--main);color:#fff;box-shadow:0 14px 28px rgba(31,143,101,.24)}.btn-sub{border-color:#bfe3cc;background:var(--green-soft);color:#11704c}.btn-danger{border-color:#ecc0bc;background:var(--red-soft);color:#9f3939}
-.hero{display:grid;grid-template-columns:1.05fr .95fr;gap:18px;align-items:stretch;margin-bottom:18px}.hero-card{position:relative;overflow:hidden;border-radius:32px;background:linear-gradient(135deg,rgba(34,59,52,.98),rgba(31,143,101,.92));color:#fff;padding:clamp(22px,3.6vw,42px);box-shadow:var(--shadow)}.hero-card::after{content:"FIX";position:absolute;right:12px;bottom:-42px;font-size:clamp(90px,15vw,190px);font-weight:1000;letter-spacing:.06em;opacity:.06;pointer-events:none}.card{border:1px solid rgba(217,210,196,.88);border-radius:var(--radius);background:rgba(255,255,255,.92);box-shadow:var(--shadow);padding:clamp(18px,2.5vw,28px)}.badge{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:8px 12px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.24);color:#fff;font-size:12px;font-weight:950;letter-spacing:.04em;margin-bottom:14px}.badge-dark{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:7px 11px;background:var(--green-soft);color:#11704c;font-size:12px;font-weight:950;margin-bottom:12px}
-h1{position:relative;z-index:1;margin:0 0 14px;font-size:clamp(32px,4.8vw,62px);line-height:1.06;letter-spacing:-.06em}h2{margin:0 0 12px;font-size:clamp(22px,2.8vw,34px);line-height:1.2;letter-spacing:-.03em}.lead{position:relative;z-index:1;margin:0;color:rgba(255,255,255,.88);font-size:clamp(14px,1.7vw,17px);font-weight:770;line-height:1.9}.plain-lead{margin:0;color:#5a6862;font-size:14px;font-weight:780;line-height:1.8}
-.notice{border-radius:16px;padding:12px;margin-top:12px;font-size:13px;font-weight:850;line-height:1.65;background:var(--amber-soft);border:1px solid #efd89e;color:var(--amber)}.notice.ok{background:var(--green-soft);border-color:#bfe3cc;color:#11704c}.notice.ng{background:var(--red-soft);border-color:#ecc0bc;color:#9f3939}.notice.info{background:var(--blue-soft);border-color:#bdd5ef;color:#2d68a6}
-input{width:100%;border:1px solid #d8d0c0;border-radius:15px;padding:11px 12px;background:#fff;color:var(--ink);font-size:14px;font-weight:800;outline:none}.auth-box{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;margin-top:14px}.button-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.check-list{display:grid;gap:10px}.check{border:1px solid rgba(217,210,196,.86);border-radius:18px;background:#fffdf9;padding:13px;display:grid;grid-template-columns:54px 1fr auto;gap:12px;align-items:center}.check-mark{width:48px;height:48px;border-radius:17px;display:grid;place-items:center;background:#f6f2e9;font-weight:1000}.check.ok .check-mark{background:var(--green-soft);color:#11704c}.check.ng .check-mark{background:var(--red-soft);color:#9f3939}.check.run .check-mark{background:var(--blue-soft);color:#2d68a6}.check h4{margin:0;font-size:15px}.check p{margin:2px 0 0;color:#61706a;font-size:12px;font-weight:800}.tag{display:inline-flex;border-radius:999px;background:#f6f2e9;color:#79623d;padding:3px 8px;font-size:11px;font-weight:950}.tag.green{background:var(--green-soft);color:#11704c}.tag.red{background:var(--red-soft);color:#9f3939}.footer-note{margin-top:18px;border:1px solid rgba(217,210,196,.88);background:rgba(255,255,255,.78);border-radius:22px;padding:14px;color:#56645e;font-size:13px;font-weight:780;line-height:1.7}
-@media(max-width:900px){.hero{grid-template-columns:1fr}.check{grid-template-columns:54px 1fr}.check .tag{grid-column:1/-1;width:max-content}.topbar{align-items:flex-start;flex-direction:column}.actions{justify-content:flex-start}.auth-box{grid-template-columns:1fr}.brand strong{white-space:normal}.hero-card,.card{border-radius:22px}}
-</style>
-
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>DPRO PET CARE LINE｜system-check STEP VET-27</title>
+  <script src="./config.js"></script>
+  <style>
+    :root{
+      --bg:#f4f1ea; --panel:#ffffff; --ink:#22302c; --muted:#6f7b75; --line:#d9d2c4;
+      --main:#1f8f65; --main-dark:#223b34; --green:#18a765; --green-soft:#e8f7ef;
+      --blue:#2d68a6; --blue-soft:#edf5ff; --amber:#8a621f; --amber-soft:#fff6de;
+      --red:#b84a4a; --red-soft:#fff0ef; --black:#07100d; --shadow:0 24px 72px rgba(34,48,44,.13);
+      --radius:24px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; min-height:100vh; color:var(--ink);
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Yu Gothic","YuGothic","Noto Sans JP",Meiryo,sans-serif;
+      background:radial-gradient(circle at 10% 0%,rgba(31,143,101,.16),transparent 32%),
+      radial-gradient(circle at 88% 8%,rgba(231,151,36,.13),transparent 30%),
+      linear-gradient(180deg,#fbfaf6 0%,var(--bg) 100%);
+      line-height:1.7;
+    }
+    a{color:inherit} button,input{font:inherit}
+    .wrap{width:min(1280px,calc(100% - 28px));margin:18px auto 54px}
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:14px}
+    .brand{display:flex;align-items:center;gap:12px;min-width:0}
+    .logo{width:52px;height:52px;border-radius:18px;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,#1f8f65,#83c99f);box-shadow:0 14px 26px rgba(31,143,101,.23);font-size:26px;flex:0 0 auto}
+    .brand small{display:block;color:var(--muted);font-weight:950;font-size:12px;letter-spacing:.08em}
+    .brand strong{display:block;font-size:clamp(19px,2.4vw,30px);line-height:1.12;letter-spacing:-.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .nav{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px}
+    .pill,.btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1px solid var(--line);
+      border-radius:999px;padding:9px 13px;background:rgba(255,255,255,.86);color:var(--ink);text-decoration:none;
+      font-size:13px;font-weight:950;line-height:1.15;cursor:pointer;transition:.15s transform,.15s box-shadow,.15s background;
+    }
+    .pill:hover,.btn:hover{transform:translateY(-1px);box-shadow:0 10px 22px rgba(34,48,44,.11);background:#fff}
+    .btn-main{border-color:transparent;background:var(--main);color:#fff;box-shadow:0 14px 28px rgba(31,143,101,.24)}
+    .btn-sub{border-color:#bfe3cc;background:var(--green-soft);color:#11704c}
+    .btn-warn{border-color:#efd89e;background:var(--amber-soft);color:var(--amber)}
+    .btn-danger{border-color:#ecc0bc;background:var(--red-soft);color:#9f3939}
+    .btn-dark{border-color:#234038;background:#07100d;color:#eafff4}
+    .hero{
+      display:grid;grid-template-columns:1.06fr .94fr;gap:16px;align-items:stretch;margin-bottom:16px;
+    }
+    .hero-card{
+      position:relative;overflow:hidden;border-radius:32px;background:linear-gradient(135deg,rgba(34,59,52,.98),rgba(31,143,101,.92));
+      color:#fff;padding:clamp(22px,3.6vw,42px);box-shadow:var(--shadow);
+    }
+    .hero-card::after{content:"CHECK";position:absolute;right:-26px;bottom:-42px;font-size:clamp(76px,13vw,170px);font-weight:1000;letter-spacing:.06em;opacity:.06;pointer-events:none}
+    .badge{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:8px 12px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.24);color:#fff;font-size:12px;font-weight:950;letter-spacing:.04em;margin-bottom:14px}
+    .badge-dark{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:7px 11px;background:var(--green-soft);color:#11704c;font-size:12px;font-weight:950;margin-bottom:12px}
+    h1{position:relative;z-index:1;margin:0 0 14px;font-size:clamp(31px,4.5vw,60px);line-height:1.08;letter-spacing:-.055em}
+    h2{margin:0 0 10px;font-size:clamp(22px,2.6vw,32px);line-height:1.2;letter-spacing:-.03em}
+    h3{margin:0 0 8px;font-size:18px}
+    .lead{position:relative;z-index:1;margin:0;color:rgba(255,255,255,.88);font-size:clamp(14px,1.7vw,17px);font-weight:770;line-height:1.9}
+    .plain-lead{margin:0;color:#5a6862;font-size:14px;font-weight:780;line-height:1.8}
+    .panel{border:1px solid rgba(217,210,196,.88);border-radius:var(--radius);background:rgba(255,255,255,.92);box-shadow:var(--shadow);padding:clamp(18px,2.5vw,28px);margin:16px 0}
+    .setup-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .full{grid-column:1/-1}
+    label{display:block;margin-bottom:6px;color:#46534d;font-size:13px;font-weight:950}
+    input{width:100%;border:1px solid #d8d0c0;border-radius:15px;padding:11px 12px;background:#fff;color:var(--ink);font-size:14px;font-weight:800;outline:none}
+    input:focus{border-color:rgba(31,143,101,.65);box-shadow:0 0 0 4px rgba(31,143,101,.11)}
+    .button-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;align-items:center}
+    .quick-nav{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:16px 0}
+    .nav-card{background:rgba(255,255,255,.88);border:1px solid rgba(217,210,196,.9);border-radius:18px;padding:14px;cursor:pointer;min-height:84px;transition:.15s ease}
+    .nav-card:hover{transform:translateY(-1px);box-shadow:0 12px 26px rgba(34,48,44,.09)}
+    .nav-card strong{display:block;font-size:15px;margin-bottom:4px}.nav-card span{color:var(--muted);font-size:12px;font-weight:850;line-height:1.45}
+    .summary-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:16px 0}
+    .summary-card{background:#fff;border:1px solid rgba(217,210,196,.9);border-radius:20px;padding:14px;box-shadow:0 12px 36px rgba(34,48,44,.06)}
+    .summary-card .label{font-size:12px;color:var(--muted);font-weight:950}.summary-card .value{font-size:24px;font-weight:1000;letter-spacing:-.04em;margin-top:3px}
+    .summary-card.pass{border-color:#bfe3cc;background:#f0fbf5}.summary-card.warn{border-color:#efd89e;background:#fffaf0}.summary-card.fail{border-color:#ecc0bc;background:#fff5f3}.summary-card.info{border-color:#bdd5ef;background:#f4f9ff}
+    .panel-head{display:flex;gap:16px;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+    .small{color:var(--muted);font-size:12px;font-weight:850}
+    .status-box{border:1px solid #e1d8c9;border-radius:16px;background:#fffdf9;padding:12px 14px;font-size:13px;font-weight:850;white-space:pre-wrap}
+    .status-box.ok{border-color:#bfe3cc;background:#f0fbf5;color:#11704c}.status-box.warn{border-color:#efd89e;background:#fffaf0;color:#8a621f}.status-box.ng{border-color:#ecc0bc;background:#fff5f3;color:#9f3939}.status-box.info{border-color:#bdd5ef;background:#f4f9ff;color:#2d68a6}
+    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .metric-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0}
+    .metric{background:#fff;border:1px solid rgba(217,210,196,.9);border-radius:16px;padding:12px}.metric span{display:block;color:var(--muted);font-size:11px;font-weight:950}.metric b{display:block;font-size:18px;margin-top:4px}
+    .check-list{display:grid;gap:8px;margin-top:12px}.check-item{display:grid;grid-template-columns:78px 210px minmax(0,1fr);gap:12px;align-items:start;border:1px solid rgba(217,210,196,.9);border-radius:14px;background:#fff;padding:10px 12px;font-size:13px}
+    .mini-pill{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;padding:5px 9px;font-size:11px;font-weight:1000;white-space:nowrap;background:#f4f0e8;color:#645443}
+    .mini-pill.pass{background:#dcfce7;color:#166534}.mini-pill.warn{background:#fef3c7;color:#92400e}.mini-pill.fail{background:#fee2e2;color:#991b1b}.mini-pill.info{background:#dbeafe;color:#1d4ed8}
+    .url-list{display:grid;gap:9px;margin-top:12px}.url-row{display:grid;grid-template-columns:170px minmax(0,1fr) auto auto;gap:8px;align-items:center;background:#fff;border:1px solid rgba(217,210,196,.9);border-radius:14px;padding:10px}.url-title{font-weight:1000;font-size:13px}.url-desc{color:var(--muted);font-size:11px;font-weight:850}.url-value{background:#fbfaf6;border:1px solid rgba(217,210,196,.9);border-radius:12px;padding:9px;font-size:12px;font-weight:800;color:#166534;word-break:break-all}
+    textarea.copy-box{width:100%;min-height:170px;margin-top:12px;background:#07100d;color:#eafff4;border:0;border-radius:16px;padding:14px;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:12px;line-height:1.65;resize:vertical}
+    details{border:1px solid rgba(217,210,196,.9);border-radius:18px;background:#fff;margin:14px 0;overflow:hidden}summary{cursor:pointer;padding:14px 16px;font-weight:1000;color:var(--ink);background:#fbfaf6}details .detail-body{padding:14px 16px;border-top:1px solid rgba(217,210,196,.9)}
+    pre.log{background:#07100d;color:#eafff4;border-radius:18px;padding:16px;overflow:auto;max-height:540px;font-size:12px;line-height:1.55;white-space:pre-wrap}
+    .debug-card{background:#07100d;color:#eafff4;border:1px solid #234038;border-radius:20px;padding:14px}.debug-card h3{color:#43e886}.debug-card .status-box{background:#0b1513;border-color:#234038;color:#cce8dc}
+    .hidden{display:none!important}
+    .footer{text-align:center;color:var(--muted);font-size:12px;margin-top:28px;font-weight:850}
+    @media(max-width:980px){.hero,.two-col{grid-template-columns:1fr}.quick-nav{grid-template-columns:1fr 1fr}.summary-grid,.metric-row{grid-template-columns:1fr 1fr}.url-row{grid-template-columns:1fr}.check-item{grid-template-columns:1fr}.setup-grid{grid-template-columns:1fr}}
+    @media(max-width:620px){.wrap{width:min(100% - 18px,1280px);margin-top:10px}.hero-card,.panel{border-radius:22px}.quick-nav,.summary-grid,.metric-row{grid-template-columns:1fr}.topbar{align-items:flex-start;flex-direction:column}.nav{justify-content:flex-start}.btn,.pill{width:100%}}
+  </style>
 </head>
+
 <body>
-<main class="page">
-<header class="topbar">
-  <div class="brand"><div class="logo">✅</div><div><small>STEP VET-25C｜管理コード完全固定版</small><strong>DPRO PET CARE LINE</strong></div></div>
-  <nav class="actions">
-    <a class="pill" href="./index.html?v=step-vet-25c">管理トップ</a>
-    <a class="pill" href="./scan-pc.html?v=step-vet-25c">受付PC</a>
-    <a class="pill" href="./doctor.html?v=step-vet-25c">ドクター</a>
-    <a class="pill" href="./owner.html?v=step-vet-25c">オーナー</a>
-  </nav>
-</header>
+  <div class="wrap">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo">✅</div>
+        <div>
+          <small>STEP VET-27｜system-check 統合版</small>
+          <strong>DPRO PET CARE LINE</strong>
+        </div>
+      </div>
+      <nav class="nav">
+        <a class="pill" href="./index.html?v=step-vet-27">管理トップ</a>
+        <a class="pill" href="./rich-menu.html?v=step-vet-27">LINE入口</a>
+        <a class="pill" href="./scan-pc.html?v=step-vet-27">受付PC</a>
+        <a class="pill" href="./doctor.html?v=step-vet-27">ドクター</a>
+        <a class="pill" href="./owner.html?v=step-vet-27">オーナー</a>
+      </nav>
+    </header>
 
-<section class="hero">
-  <div class="hero-card">
-    <span class="badge">営業前・本番前チェック</span>
-    <h1>config.jsの古い保存値を<br>完全に無視。</h1>
-    <p class="lead">前回は「保存済み」と出ても、config.js側の古い管理コードを優先して送っている可能性がありました。この版はsystem-check専用キーだけを使います。</p>
+    <section class="hero">
+      <div class="hero-card">
+        <span class="badge">通常チェック + 黒画面デバッグ統合</span>
+        <h1>NGの場所まで<br>この画面で分かる。</h1>
+        <p class="lead">
+          歯科版のように、上から順に確認できる system-check に整理しました。
+          Worker、診察券、順番受付、QR受付、ドクター、オーナー、LINEフォロー、予防案内を確認し、NG時は黒い診断ログで原因を見ます。
+        </p>
+        <div class="button-row">
+          <button class="btn btn-main" id="runAllButton" type="button">一括チェック</button>
+          <button class="btn btn-dark" id="runDebugButton" type="button">黒ログ付きチェック</button>
+          <button class="btn btn-sub" id="saveAdminButton" type="button">管理コード保存</button>
+          <button class="btn btn-danger" id="forgetAdminButton" type="button">管理コード削除</button>
+        </div>
+      </div>
+
+      <div class="panel" style="margin:0;">
+        <span class="badge-dark">基本設定</span>
+        <div class="setup-grid">
+          <div class="full">
+            <label for="apiBaseInput">Worker API URL</label>
+            <input id="apiBaseInput" autocomplete="off" />
+          </div>
+          <div>
+            <label for="clinicCodeInput">clinic_code</label>
+            <input id="clinicCodeInput" autocomplete="off" />
+          </div>
+          <div>
+            <label for="adminCodeInput">管理コード</label>
+            <input id="adminCodeInput" type="text" placeholder="DPRO-VET-2026-PETCARE-9147" autocomplete="off" spellcheck="false" />
+          </div>
+          <div class="full">
+            <label for="staffNameInput">スタッフ名</label>
+            <input id="staffNameInput" value="管理スタッフ" autocomplete="off" />
+          </div>
+        </div>
+        <div id="configStatus" class="status-box info" style="margin-top:12px;">設定確認中です。</div>
+      </div>
+    </section>
+
+    <nav class="quick-nav">
+      <div class="nav-card" data-scroll="#urlSetPanel"><strong>1. URLセット</strong><span>端末別URLを作る</span></div>
+      <div class="nav-card" data-scroll="#apiPanel"><strong>2. API・件数</strong><span>主要APIを確認</span></div>
+      <div class="nav-card" data-scroll="#rolePanel"><strong>3. 役割別確認</strong><span>受付/先生/オーナー</span></div>
+      <div class="nav-card" data-scroll="#debugPanel"><strong>4. 黒ログ</strong><span>NGの原因を見る</span></div>
+      <div class="nav-card" data-scroll="#latestLinksPanel"><strong>5. 最新リンク</strong><span>営業前に開くURL</span></div>
+    </nav>
+
+    <section class="summary-grid">
+      <div class="summary-card info"><div class="label">Worker</div><div class="value" id="sumWorker">未確認</div></div>
+      <div class="summary-card info"><div class="label">公開API</div><div class="value" id="sumPublic">未確認</div></div>
+      <div class="summary-card info"><div class="label">管理API</div><div class="value" id="sumAdmin">未確認</div></div>
+      <div class="summary-card info"><div class="label">フォロー</div><div class="value" id="sumFollow">未確認</div></div>
+      <div class="summary-card info"><div class="label">総合判定</div><div class="value" id="sumTotal">未確認</div></div>
+    </section>
+
+    <section class="panel" id="urlSetPanel">
+      <div class="panel-head">
+        <div>
+          <h2>端末別URLセット</h2>
+          <div class="small">お客スマホ、受付PC、受付タブレット、ドクター、オーナーのURLをまとめます。</div>
+        </div>
+        <div class="button-row" style="margin:0;">
+          <button class="btn btn-main" id="generateUrlsButton" type="button">URLセット生成</button>
+          <button class="btn btn-sub" id="copyUrlsButton" type="button">URL一覧コピー</button>
+        </div>
+      </div>
+
+      <div class="metric-row">
+        <div class="metric"><span>clinic_code</span><b id="urlClinicCode">-</b></div>
+        <div class="metric"><span>GitHub Pages</span><b>DPRO-VET-QR</b></div>
+        <div class="metric"><span>Worker</span><b>VET API</b></div>
+        <div class="metric"><span>状態</span><b id="urlState">未生成</b></div>
+      </div>
+
+      <div id="urlWarning" class="status-box warn">
+        DEMOでは dpro_vet_demo を使います。本番医院では契約後の病院専用 clinic_code に変更します。
+      </div>
+
+      <div class="url-list" id="urlList">
+        <div class="status-box info">URLセットを生成すると、ここに各画面のフルURLが表示されます。</div>
+      </div>
+
+      <details>
+        <summary>コピペ用URL一覧を開く</summary>
+        <div class="detail-body">
+          <textarea id="urlCopyBox" class="copy-box" readonly>まだ生成していません。</textarea>
+        </div>
+      </details>
+    </section>
+
+    <section class="panel" id="apiPanel">
+      <div class="panel-head">
+        <div>
+          <h2>API・件数チェック</h2>
+          <div class="small">公開系と管理系を分けて確認します。NG時は診断ログにURL・ステータス・JSONが残ります。</div>
+        </div>
+        <div class="button-row" style="margin:0;">
+          <button class="btn btn-main" id="apiCheckButton" type="button">APIチェック</button>
+          <button class="btn btn-dark" id="apiDebugButton" type="button">黒ログ付き実行</button>
+        </div>
+      </div>
+
+      <div class="metric-row">
+        <div class="metric"><span>ペット診察券</span><b id="memberCount">-</b></div>
+        <div class="metric"><span>本日の受付</span><b id="queueCount">-</b></div>
+        <div class="metric"><span>LINEフォロー</span><b id="followCount">-</b></div>
+        <div class="metric"><span>予防案内</span><b id="preventionCount">-</b></div>
+      </div>
+
+      <div class="check-list" id="apiChecks">
+        <div class="status-box info">まだAPIチェックを実行していません。</div>
+      </div>
+    </section>
+
+    <section class="panel" id="rolePanel">
+      <div class="panel-head">
+        <div>
+          <h2>役割別チェック</h2>
+          <div class="small">画面ごとに何ができる状態かを確認します。</div>
+        </div>
+      </div>
+      <div class="two-col">
+        <div class="status-box" id="roleStatusBox">まだ確認していません。</div>
+        <div class="status-box" id="roleNextBox">確認後に次の作業を表示します。</div>
+      </div>
+    </section>
+
+    <section class="panel" id="debugPanel">
+      <div class="panel-head">
+        <div>
+          <h2>黒画面デバッグ統合</h2>
+          <div class="small">歯科版の診断ログと同じ役割です。APIごとのURL・HTTPステータス・レスポンスJSONを表示します。</div>
+        </div>
+        <div class="button-row" style="margin:0;">
+          <button class="btn btn-dark" id="debugAdminButton" type="button">管理系だけ黒ログ</button>
+          <button class="btn btn-sub" id="copyLogButton" type="button">ログコピー</button>
+          <button class="btn btn-danger" id="clearLogButton" type="button">ログ消去</button>
+        </div>
+      </div>
+
+      <div class="debug-card">
+        <h3>診断ログ</h3>
+        <div id="debugSummary" class="status-box">まだ実行していません。</div>
+        <pre class="log" id="logBox">まだログはありません。</pre>
+      </div>
+    </section>
+
+    <section class="panel" id="latestLinksPanel">
+      <div class="panel-head">
+        <div>
+          <h2>最新版画面リンク</h2>
+          <div class="small">営業前に開く画面です。上から順に確認すると流れが伝わります。</div>
+        </div>
+      </div>
+      <div class="url-list" id="latestLinks"></div>
+    </section>
+
+    <div class="footer">
+      DPRO PET CARE LINE / 動物病院LINE受付・診察券・フォロー管理 / system-check.html STEP VET-27<br />
+      この画面には Supabase Service Role Key は書き出していません。
+    </div>
   </div>
-  <div class="card">
-    <span class="badge-dark">管理コード</span>
-    <p class="plain-lead">ここに入れた管理コードだけを使ってチェックします。古い保存値は使いません。</p>
-    <div id="authStatus" class="notice">管理コード確認中</div>
-    <div class="auth-box">
-      <input id="adminTokenInput" type="text" inputmode="text" placeholder="DPRO-VET-2026-PETCARE-9147" autocomplete="off" spellcheck="false" />
-      <button class="btn btn-main" id="saveAdminTokenBtn" type="button">保存</button>
-      <button class="btn btn-danger" id="clearAdminTokenBtn" type="button">全削除</button>
-    </div>
-    <div class="button-row">
-      <button class="btn btn-sub" id="fillBtn" type="button">正しいコードを入力欄に入れる</button>
-      <button class="btn btn-main" id="runBtn" type="button">全チェック実行</button>
-    </div>
-    <div id="debugStatus" class="notice info">この画面専用の保存キーを使用します。</div>
-  </div>
-</section>
 
-<section class="card">
-  <h2>確認結果</h2>
-  <div id="summary" class="notice info">まだ実行していません。</div>
-  <div id="checkList" class="check-list" style="margin-top:14px"></div>
-</section>
+  <script>
+    const CONFIG = window.DPRO_CONFIG || {};
+    const DEFAULTS = {
+      apiBase: (CONFIG.API_BASE_URL || "https://dpro-vet-qr-api.dpromstk2000.workers.dev").replace(/\/$/, ""),
+      clinicCode: CONFIG.CLINIC_CODE || CONFIG.DEFAULT_CLINIC_CODE || "dpro_vet_demo",
+      adminStorageKey: "dpro_vet_system_check_admin_code_step27",
+      staffStorageKey: "dpro_vet_system_check_staff_name_step27"
+    };
+    const GITHUB_BASE = "https://dpromstk2000-lab.github.io/DPRO-VET-QR";
+    const DEMO_CLINIC_CODE = "dpro_vet_demo";
+    const CORRECT_DEMO_TOKEN = "DPRO-VET-2026-PETCARE-9147";
 
-<div class="footer-note">
-  STEP VET-25C：管理コードの取得に config.js の getAdminToken を使いません。この画面専用の保存値だけを送ります。
-</div>
-</main>
+    const VERSION = {
+      index:"step-vet-27",
+      richMenu:"step-vet-27",
+      systemCheck:"step-vet-27",
+      debug:"step-vet-26",
+      member:"step-vet-27",
+      waiting:"step-vet-27",
+      scanPc:"step-vet-27",
+      scanIpad:"step-vet-27",
+      doctor:"step-vet-27",
+      owner:"step-vet-27",
+      admin:"step-vet-27",
+      adminQueue:"step-vet-27"
+    };
 
-<script>
-const CONFIG = window.DPRO_CONFIG || {};
-const API_BASE_URL = (CONFIG.API_BASE_URL || "https://dpro-vet-qr-api.dpromstk2000.workers.dev").replace(/\/$/, "");
-const CLINIC_CODE = CONFIG.CLINIC_CODE || CONFIG.DEFAULT_CLINIC_CODE || "dpro_vet_demo";
-const CORRECT_TOKEN = "DPRO-VET-2026-PETCARE-9147";
-const SYSTEM_CHECK_KEY = "DPRO_VET_SYSTEM_CHECK_ADMIN_CODE_STEP25C";
-const OLD_KEYS = [
-  "dpro_vet_admin_code",
-  "DPRO_VET_ADMIN_CODE",
-  "DPRO_VET_ADMIN_TOKEN",
-  "dpro_vet_admin_token",
-  "DPRO_ADMIN_TOKEN",
-  "dpro_admin_token",
-  "DPRO_VET_SYSTEM_CHECK_ADMIN_CODE_V25C",
-  "DPRO_VET_SYSTEM_CHECK_ADMIN_CODE_STEP25C"
-];
+    const tests = [
+      {id:"health", label:"Worker health", area:"公開", admin:false, path:"/api/health", okHint:"Worker起動OK"},
+      {id:"clinic", label:"病院情報", area:"公開", admin:false, path:"/api/public/clinic", okHint:"病院情報OK"},
+      {id:"member", label:"ペット診察券", area:"公開", admin:false, path:"/api/member/pet-cards", params:{demo:"true"}, okHint:"診察券OK"},
+      {id:"queueSummary", label:"混雑目安", area:"公開", admin:false, path:"/api/public/queue/summary", params:()=>({date:todayString()}), okHint:"混雑目安OK"},
+      {id:"queueEntries", label:"本日の受付一覧", area:"公開", admin:false, path:"/api/public/queue/entries", params:()=>({date:todayString(),limit:30}), okHint:"受付一覧OK"},
+      {id:"ownerToday", label:"オーナー今日やること", area:"管理", admin:true, path:"/api/owner/today", params:()=>({date:todayString()}), okHint:"owner.html API OK"},
+      {id:"scanLookup", label:"QR診察券 lookup", area:"管理", admin:true, path:"/api/scan/lookup", params:{qr_token:"vet_demo_coco_qr_token"}, okHint:"QR受付入口OK"},
+      {id:"doctorQueue", label:"ドクター受付一覧", area:"管理", admin:true, path:"/api/doctor/queue/today", params:()=>({date:todayString()}), okHint:"doctor.html API OK"},
+      {id:"queueSettings", label:"受付ルール設定", area:"管理", admin:true, path:"/api/admin/queue/settings", okHint:"受付設定OK"},
+      {id:"followupsStandalone", label:"LINEフォロー単独API", area:"管理", admin:true, path:"/api/owner/followups", params:{limit:20}, okHint:"LINEフォローOK", optional:true},
+      {id:"preventionsStandalone", label:"予防案内単独API", area:"管理", admin:true, path:"/api/admin/prevention-schedules", params:{limit:20}, okHint:"予防案内OK", optional:true},
+      {id:"unlinkedStandalone", label:"LINE未連携単独API", area:"管理", admin:true, path:"/api/owner/line-unlinked-guardians", params:{limit:20}, okHint:"LINE未連携OK", optional:true},
+      {id:"safetyCheck", label:"安全チェック", area:"管理", admin:true, path:"/api/admin/safety-check", okHint:"安全チェックOK", optional:true}
+    ];
 
-function todayString(){
-  const d=new Date();
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
-}
+    let lastUrls = [];
+    let lastResults = {};
+    let logs = [];
 
-function getAdminToken(){
-  return String(localStorage.getItem(SYSTEM_CHECK_KEY) || sessionStorage.getItem(SYSTEM_CHECK_KEY) || "").trim();
-}
+    const $ = (id) => document.getElementById(id);
 
-function saveAdminToken(token){
-  const v = String(token || "").trim();
-  if (!v) return false;
-  localStorage.setItem(SYSTEM_CHECK_KEY, v);
-  sessionStorage.setItem(SYSTEM_CHECK_KEY, v);
-  return true;
-}
-
-function clearAdminToken(){
-  OLD_KEYS.forEach(k => {
-    localStorage.removeItem(k);
-    sessionStorage.removeItem(k);
-  });
-  localStorage.removeItem(SYSTEM_CHECK_KEY);
-  sessionStorage.removeItem(SYSTEM_CHECK_KEY);
-}
-
-function tokenInfo(){
-  const t = getAdminToken();
-  if (!t) return "未保存";
-  const tail = t.length >= 4 ? t.slice(-4) : t;
-  return `保存済み：文字数 ${t.length} / 末尾 ${tail}`;
-}
-
-function renderAuthStatus(){
-  const t = getAdminToken();
-  const box = document.getElementById("authStatus");
-  box.className = t ? "notice ok" : "notice";
-  box.textContent = t ? "管理コード保存済みです。この画面専用コードを送信します。" : "管理コード未保存です。";
-  const debug = document.getElementById("debugStatus");
-  debug.className = t === CORRECT_TOKEN ? "notice ok" : (t ? "notice ng" : "notice info");
-  debug.textContent = t ? (t === CORRECT_TOKEN ? `正しい管理コードです。${tokenInfo()}` : `保存されていますが、想定コードと違います。${tokenInfo()}`) : "未保存です。";
-}
-
-function headers(admin=false){
-  const h = {};
-  const t = getAdminToken();
-  if (admin && t) {
-    h["X-DPRO-Admin-Code"] = t;
-    h["x-dpro-admin-code"] = t;
-    h["X-Admin-Token"] = t;
-    h["x-admin-token"] = t;
-    h["X-Admin-Code"] = t;
-    h["Authorization"] = "Bearer " + t;
-  }
-  return h;
-}
-
-async function apiGet(path, params={}, admin=false){
-  const url = new URL(API_BASE_URL + path);
-  Object.entries({clinic_code: CLINIC_CODE, ...params}).forEach(([k,v]) => {
-    if(v !== undefined && v !== null && v !== "") url.searchParams.set(k, v);
-  });
-  const t = getAdminToken();
-  if (admin && t) {
-    url.searchParams.set("admin_code", t);
-    url.searchParams.set("admin_token", t);
-    url.searchParams.set("token", t);
-  }
-  const res = await fetch(url.toString(), { method:"GET", headers: headers(admin), cache:"no-store" });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok || data.ok === false) throw new Error(data.message || data.error || `API Error ${res.status}`);
-  return data;
-}
-
-const checks = [
-  {id:"health", name:"Worker health", detail:"APIが起動しているか", admin:false, run:()=>apiGet("/api/health", {}, false)},
-  {id:"clinic", name:"病院情報", detail:"DPROどうぶつ病院の取得", admin:false, run:()=>apiGet("/api/public/clinic", {}, false)},
-  {id:"member", name:"ペット診察券", detail:"member.htmlで使う診察券データ", admin:false, run:()=>apiGet("/api/member/pet-cards", {demo:"true"}, false)},
-  {id:"queueSummary", name:"混雑目安・順番受付サマリー", detail:"public queue summary", admin:false, run:()=>apiGet("/api/public/queue/summary", {date:todayString()}, false)},
-  {id:"queueEntries", name:"本日の受付一覧", detail:"public queue entries", admin:false, run:()=>apiGet("/api/public/queue/entries", {date:todayString(),limit:20}, false)},
-  {id:"ownerToday", name:"オーナー今日やること", detail:"管理コード直接確認。ここがOKなら管理コードは通っています。", admin:true, run:()=>apiGet("/api/owner/today", {date:todayString()}, true)},
-  {id:"scanLookup", name:"QR診察券 lookup", detail:"scan-pc / scan-ipad のQR確認", admin:true, run:async(ctx)=>{const cards=ctx.member?.cards||ctx.member?.items||[];const first=cards[0]||{};const token=first.qr_token||first.card?.qr_token||"vet_demo_coco_qr_token";return apiGet("/api/scan/lookup", {qr_token:token}, true);}},
-  {id:"doctorQueue", name:"ドクター受付一覧", detail:"doctor.htmlで使う受付一覧", admin:true, run:()=>apiGet("/api/doctor/queue/today", {date:todayString()}, true)},
-  {id:"queueSettings", name:"受付ルール設定", detail:"admin-queue.htmlの設定取得", admin:true, run:()=>apiGet("/api/admin/queue/settings", {}, true)},
-  {id:"followupsInOwner", name:"LINEフォロー確認", detail:"owner/today内のfollowup_todosを確認", admin:true, run:async(ctx)=>{const data=ctx.ownerToday||await apiGet("/api/owner/today", {date:todayString()}, true);return {items:data.followup_todos||[]};}},
-  {id:"preventionsInOwner", name:"予防案内確認", detail:"owner/today内のprevention_todosを確認", admin:true, run:async(ctx)=>{const data=ctx.ownerToday||await apiGet("/api/owner/today", {date:todayString()}, true);return {items:data.prevention_todos||[]};}},
-  {id:"unlinkedInOwner", name:"LINE未連携確認", detail:"owner/today内のline_unlinked_guardiansを確認", admin:true, run:async(ctx)=>{const data=ctx.ownerToday||await apiGet("/api/owner/today", {date:todayString()}, true);return {items:data.line_unlinked_guardians||[]};}}
-];
-
-const list = document.getElementById("checkList");
-
-function renderInitial(){
-  list.innerHTML = checks.map(c => `
-    <div class="check" id="check-${c.id}">
-      <div class="check-mark">-</div>
-      <div><h4>${c.name}</h4><p>${c.detail}</p></div>
-      <span class="tag ${c.admin ? "red" : "green"}">${c.admin ? "管理コード" : "公開"}</span>
-    </div>
-  `).join("");
-}
-
-function setCheck(id, status, msg){
-  const node = document.getElementById("check-" + id);
-  if (!node) return;
-  node.classList.remove("ok","ng","run");
-  node.classList.add(status);
-  node.querySelector(".check-mark").textContent = status === "ok" ? "OK" : status === "ng" ? "NG" : "...";
-  node.querySelector("p").textContent = msg;
-}
-
-async function runChecks(){
-  renderAuthStatus();
-  const summary = document.getElementById("summary");
-  summary.className = "notice info";
-  summary.textContent = "チェック実行中です。";
-  const ctx = {};
-  let ok = 0, ng = 0;
-
-  for (const c of checks) {
-    if (c.admin && !getAdminToken()) {
-      setCheck(c.id, "ng", "管理コードが未保存です。");
-      ng++;
-      continue;
+    function apiBase(){ return ($("apiBaseInput").value.trim() || DEFAULTS.apiBase).replace(/\/+$/, ""); }
+    function clinicCode(){ return $("clinicCodeInput").value.trim() || DEFAULTS.clinicCode; }
+    function adminCode(){ return $("adminCodeInput").value.trim() || sessionStorage.getItem(DEFAULTS.adminStorageKey) || ""; }
+    function staffName(){ return $("staffNameInput").value.trim() || "管理スタッフ"; }
+    function todayString(){
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
     }
-    setCheck(c.id, "run", "確認中...");
-    try {
-      const data = await c.run(ctx);
-      ctx[c.id] = data;
-      const count = Array.isArray(data.items) ? data.items.length : Array.isArray(data.cards) ? data.cards.length : Array.isArray(data.queue_entries) ? data.queue_entries.length : "";
-      setCheck(c.id, "ok", count !== "" ? `取得OK：${count}件` : "取得OK");
-      ok++;
-    } catch (e) {
-      setCheck(c.id, "ng", e.message || "エラー");
-      ng++;
+    function escapeHtml(value){
+      return String(value ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
     }
-  }
+    function setText(id,value){ const el=$(id); if(el) el.textContent=value; }
+    function setStatus(id,message,tone="info"){ const el=$(id); if(!el)return; el.className=`status-box ${tone}`; el.textContent=message; }
+    function setSummary(id,value,tone="info"){
+      const valueEl=$(id); if(!valueEl)return; valueEl.textContent=value;
+      const card=valueEl.closest(".summary-card"); if(card) card.className=`summary-card ${tone}`;
+    }
+    function statusTone(status){
+      const s=String(status||"").toLowerCase();
+      if(["pass","ok","success"].includes(s)) return "pass";
+      if(["warn","warning"].includes(s)) return "warn";
+      if(["fail","ng","error"].includes(s)) return "fail";
+      return "info";
+    }
+    function log(type,title,data=null){
+      const now = new Date().toLocaleString("ja-JP",{timeZone:"Asia/Tokyo"});
+      logs.unshift({type,title,data,now});
+      renderLog();
+    }
+    function renderLog(){
+      const box=$("logBox");
+      if(!box)return;
+      if(!logs.length){ box.textContent="まだログはありません。"; return; }
+      box.textContent = logs.map(item => {
+        const head = `[${item.now}] ${item.type.toUpperCase()} ${item.title}`;
+        return item.data ? `${head}\n${JSON.stringify(item.data,null,2)}` : head;
+      }).join("\n\n");
+    }
+    function buildUrl(path,params={},admin=false){
+      const url = new URL(apiBase()+path);
+      const p = typeof params === "function" ? params() : (params || {});
+      Object.entries({clinic_code:clinicCode(),...p}).forEach(([key,value])=>{
+        if(value!==undefined && value!==null && String(value).trim()!=="") url.searchParams.set(key,String(value));
+      });
+      const code=adminCode();
+      if(admin && code){
+        url.searchParams.set("admin_code",code);
+        url.searchParams.set("admin_token",code);
+      }
+      url.searchParams.set("_ts",Date.now());
+      return url;
+    }
+    function authHeaders(){
+      const h = {"Accept":"application/json"};
+      const code=adminCode();
+      if(code){
+        h["X-DPRO-Admin-Code"]=code;
+        h["x-dpro-admin-code"]=code;
+        h["X-Admin-Token"]=code;
+        h["x-admin-token"]=code;
+        h["X-Admin-Code"]=code;
+        h["Authorization"]=`Bearer ${code}`;
+      }
+      return h;
+    }
+    async function apiGet(path,params={},needsAuth=false,debug=false){
+      const url=buildUrl(path,params,needsAuth);
+      const safeUrl=url.toString().replaceAll(adminCode(),"***ADMIN***");
+      if(debug) log("info",`REQUEST GET ${safeUrl}`);
+      const started=performance.now();
+      const res=await fetch(url.toString(),{method:"GET",headers:needsAuth?authHeaders():{"Accept":"application/json"},cache:"no-store"});
+      const text=await res.text();
+      let data=null;
+      try{data=text?JSON.parse(text):null;}catch{data={raw:text};}
+      const ms=Math.round(performance.now()-started);
+      if(debug) log(res.ok?"ok":"ng",`RESPONSE ${res.status} ${res.statusText} / ${ms}ms`,data);
+      if(!res.ok || data?.ok===false){
+        const message=data?.message||data?.error||data?.raw||text||`HTTP ${res.status}`;
+        const error=new Error(message);
+        error.status=res.status;
+        error.data=data;
+        error.url=safeUrl;
+        throw error;
+      }
+      return data;
+    }
+    function ensureAdminCode(){
+      if(!adminCode()){
+        setSummary("sumAdmin","未入力","fail");
+        $("adminCodeInput").focus();
+        throw new Error("管理コードが未入力です。");
+      }
+    }
+    function saveAdminCode(){
+      const code=$("adminCodeInput").value.trim();
+      if(!code){ alert("管理コードを入力してください。"); $("adminCodeInput").focus(); return; }
+      sessionStorage.setItem(DEFAULTS.adminStorageKey,code);
+      sessionStorage.setItem(DEFAULTS.staffStorageKey,staffName());
+      setStatus("configStatus",`管理コードをこのタブに保存しました。文字数 ${code.length} / 末尾 ${code.slice(-4)}`,"ok");
+      setSummary("sumAdmin","保存済み","pass");
+      log("ok","管理コードをsessionStorageへ保存しました。");
+    }
+    function forgetAdminCode(){
+      sessionStorage.removeItem(DEFAULTS.adminStorageKey);
+      sessionStorage.removeItem(DEFAULTS.staffStorageKey);
+      $("adminCodeInput").value="";
+      setStatus("configStatus","管理コードを削除しました。","warn");
+      setSummary("sumAdmin","未入力","fail");
+      log("warn","管理コードを削除しました。");
+    }
+    function updateConfigStatus(){
+      const code=adminCode();
+      const api=apiBase();
+      const clinic=clinicCode();
+      const codeInfo=code?`保存/入力あり：文字数 ${code.length} / 末尾 ${code.slice(-4)}`:"未入力";
+      const demoNote=clinic===DEMO_CLINIC_CODE?"DEMO医院です。":"本番用 clinic_code です。";
+      setStatus("configStatus",`API：${api}\nclinic_code：${clinic}\n管理コード：${codeInfo}\n${demoNote}`,code?"ok":"info");
+    }
 
-  summary.className = ng ? "notice ng" : "notice ok";
-  summary.textContent = ng ? `チェック完了：OK ${ok} / NG ${ng}` : `NGなし：OK ${ok}`;
-}
+    function pageUrl(page,params={}){
+      const url=new URL(`${GITHUB_BASE}/${page}`);
+      Object.entries(params).forEach(([k,v])=>{ if(v!==undefined && v!==null && String(v).trim()!=="") url.searchParams.set(k,String(v).trim()); });
+      return url.toString();
+    }
+    function buildProductionUrls(){
+      const code=clinicCode();
+      const common={clinic_code:code};
+      return [
+        {key:"index",label:"管理トップ",desc:"全体入口",url:pageUrl("index.html",{...common,v:VERSION.index})},
+        {key:"rich-menu",label:"お客スマホ LINE入口",desc:"リッチメニュー想定",url:pageUrl("rich-menu.html",{...common,v:VERSION.richMenu})},
+        {key:"member",label:"お客スマホ ペット診察券",desc:"QR診察券",url:pageUrl("member.html",{...common,demo:"true",v:VERSION.member})},
+        {key:"waiting",label:"お客スマホ 順番受付",desc:"今日の順番受付",url:pageUrl("waiting.html",{...common,demo:"true",mode:"today_queue",v:VERSION.waiting})},
+        {key:"scan-pc",label:"受付PC QRリーダー",desc:"USB QR受付",url:pageUrl("scan-pc.html",{...common,v:VERSION.scanPc})},
+        {key:"scan-ipad",label:"受付タブレット",desc:"iPad QR受付",url:pageUrl("scan-ipad.html",{...common,v:VERSION.scanIpad})},
+        {key:"doctor",label:"ドクタータブレット",desc:"問診・診察・フォロー指示",url:pageUrl("doctor.html",{...common,v:VERSION.doctor})},
+        {key:"owner",label:"オーナー管理",desc:"今日やること・フォロー",url:pageUrl("owner.html",{...common,v:VERSION.owner})},
+        {key:"admin",label:"管理設定",desc:"飼い主・ペット・診察券",url:pageUrl("admin.html",{...common,v:VERSION.admin})},
+        {key:"admin-queue",label:"受付ルール設定",desc:"順番受付・混雑目安",url:pageUrl("admin-queue.html",{...common,v:VERSION.adminQueue})},
+        {key:"system-check",label:"システム確認",desc:"本画面",url:pageUrl("system-check.html",{...common,v:VERSION.systemCheck})},
+        {key:"debug",label:"黒画面デバッグ",desc:"詳細ログ専用",url:pageUrl("debug.html",{...common,v:VERSION.debug})}
+      ];
+    }
+    function urlsToText(urls){
+      return [
+        "DPRO PET CARE LINE URLセット",
+        `clinic_code: ${clinicCode()}`,
+        `作成日: ${todayString()}`,
+        "",
+        ...urls.flatMap(item=>[item.label,item.url,""])
+      ].join("\n");
+    }
+    function renderUrls(){
+      const urls=buildProductionUrls();
+      lastUrls=urls;
+      const isDemo=clinicCode()===DEMO_CLINIC_CODE;
+      setText("urlClinicCode",clinicCode());
+      setText("urlState",isDemo?"DEMO":"生成済み");
+      setStatus("urlWarning",isDemo?"現在は dpro_vet_demo です。営業デモ用としてOKです。本番では病院専用 clinic_code に変更します。":"本番用 clinic_code でURLを生成しています。","warn");
+      $("urlList").innerHTML=urls.map(item=>`
+        <div class="url-row">
+          <div><div class="url-title">${escapeHtml(item.label)}</div><div class="url-desc">${escapeHtml(item.desc)}</div></div>
+          <div class="url-value">${escapeHtml(item.url)}</div>
+          <button class="btn btn-sub" type="button" data-copy="${escapeHtml(item.url)}">コピー</button>
+          <a class="btn" href="${escapeHtml(item.url)}" target="_blank" rel="noopener">開く</a>
+        </div>
+      `).join("");
+      document.querySelectorAll("[data-copy]").forEach(btn=>{
+        btn.addEventListener("click",async()=>{ await copyText(btn.getAttribute("data-copy")||""); log("ok","URLをコピーしました。"); });
+      });
+      $("urlCopyBox").value=urlsToText(urls);
+      return urls;
+    }
+    async function copyText(text){
+      if(navigator.clipboard && window.isSecureContext){ await navigator.clipboard.writeText(String(text||"")); return true; }
+      const temp=document.createElement("textarea"); temp.value=String(text||""); temp.style.position="fixed"; temp.style.left="-9999px"; document.body.appendChild(temp); temp.focus(); temp.select(); document.execCommand("copy"); temp.remove(); return true;
+    }
+    async function copyUrlSet(){ const urls=lastUrls.length?lastUrls:renderUrls(); await copyText(urlsToText(urls)); log("ok","URL一覧をまとめてコピーしました。"); }
+    function toneFromError(test,error){
+      const msg=String(error?.message||"");
+      const status=error?.status;
+      if(status===401 || msg.includes("管理コード")) return "管理コードNG：WorkerのADMIN_TOKEN、保存コード、送信方式を確認";
+      if(status===404 || msg.includes("Not Found")) return test.optional?"任意API未実装：owner/today内データで代替できます":"API名/Workerルート未実装";
+      if(status>=500 || msg.includes("Supabase") || msg.includes("database")) return "DB/SQL側NG：テーブル・関数・ビューを確認";
+      if(msg.includes("Failed to fetch") || msg.includes("CORS")) return "通信/CORS/URL NG：Worker URLを確認";
+      return msg || "原因未特定";
+    }
+    async function runTest(test,debug=false){
+      try{
+        if(test.admin) ensureAdminCode();
+        const data=await apiGet(test.path,test.params||{},test.admin,debug);
+        lastResults[test.id]=data;
+        const count=Array.isArray(data.items)?data.items.length:Array.isArray(data.cards)?data.cards.length:Array.isArray(data.queue_entries)?data.queue_entries.length:"";
+        return {id:test.id,label:test.label,area:test.area,status:test.optional && data?.ok===false?"warn":"pass",message:count!==""?`${test.okHint} / ${count}件`:test.okHint,data};
+      }catch(e){
+        const msg=toneFromError(test,e);
+        log(test.optional?"warn":"ng",`${test.label} NG`,{message:e.message,status:e.status,url:e.url,data:e.data,diagnosis:msg});
+        return {id:test.id,label:test.label,area:test.area,status:test.optional?"warn":"fail",message:msg,error:e};
+      }
+    }
+    function renderApiChecks(results){
+      $("apiChecks").innerHTML=results.map(item=>{
+        const tone=statusTone(item.status);
+        return `<div class="check-item"><span class="mini-pill ${tone}">${escapeHtml(String(item.status).toUpperCase())}</span><b>${escapeHtml(item.label)}</b><span>${escapeHtml(item.message)}</span></div>`;
+      }).join("");
+      const pass=results.filter(x=>statusTone(x.status)==="pass").length;
+      const warn=results.filter(x=>statusTone(x.status)==="warn").length;
+      const fail=results.filter(x=>statusTone(x.status)==="fail").length;
+      setSummary("sumPublic", results.filter(x=>x.area==="公開" && statusTone(x.status)==="pass").length + "/5", fail ? "warn" : "pass");
+      setSummary("sumAdmin", results.filter(x=>x.area==="管理" && statusTone(x.status)==="pass").length + "/8", fail ? "fail" : (warn ? "warn":"pass"));
+      setSummary("sumTotal", fail ? "NG" : (warn ? "注意" : "OK"), fail ? "fail" : (warn ? "warn":"pass"));
+      const member=lastResults.member?.cards?.length || 0;
+      const queue=lastResults.queueEntries?.items?.length || 0;
+      const owner=lastResults.ownerToday || {};
+      const follow=Array.isArray(owner.followup_todos)?owner.followup_todos.length:(Array.isArray(lastResults.followupsStandalone?.items)?lastResults.followupsStandalone.items.length:0);
+      const prev=Array.isArray(owner.prevention_todos)?owner.prevention_todos.length:(Array.isArray(lastResults.preventionsStandalone?.items)?lastResults.preventionsStandalone.items.length:0);
+      setText("memberCount",member+"件");
+      setText("queueCount",queue+"件");
+      setText("followCount",follow+"件");
+      setText("preventionCount",prev+"件");
+      setSummary("sumFollow",`${follow}/${prev}`, fail ? "warn" : "pass");
+      renderRoleStatus(results);
+    }
+    function renderRoleStatus(results){
+      const failed=results.filter(x=>statusTone(x.status)==="fail");
+      const warn=results.filter(x=>statusTone(x.status)==="warn");
+      const owner=lastResults.ownerToday || {};
+      const queue=Array.isArray(owner.queue_entries)?owner.queue_entries:[];
+      const active=queue.filter(x=>["reserved","waiting","checked_in","examining"].includes(x.status)).length;
+      const follow=Array.isArray(owner.followup_todos)?owner.followup_todos.length:0;
+      const prev=Array.isArray(owner.prevention_todos)?owner.prevention_todos.length:0;
+      const unlinked=Array.isArray(owner.line_unlinked_guardians)?owner.line_unlinked_guardians.length:0;
 
-function init(){
-  document.getElementById("saveAdminTokenBtn").addEventListener("click", () => {
-    const input = document.getElementById("adminTokenInput");
-    const v = String(input.value || "").trim();
-    if (!v) { alert("管理コードを入力してください。"); return; }
-    clearAdminToken();
-    saveAdminToken(v);
-    input.value = "";
-    renderAuthStatus();
-  });
+      setStatus("roleStatusBox",[
+        `お客スマホ：ペット診察券 ${lastResults.member?.cards?.length || 0}件 / 順番受付 ${lastResults.queueEntries?.items?.length || 0}件`,
+        `受付PC/タブレット：QR lookup ${lastResults.scanLookup ? "OK" : "未確認"}`,
+        `ドクター：受付一覧 ${lastResults.doctorQueue ? "OK" : "未確認"}`,
+        `オーナー：受付中 ${active}件 / LINEフォロー ${follow}件 / 予防案内 ${prev}件 / 未連携 ${unlinked}件`
+      ].join("\n"), failed.length ? "ng" : (warn.length ? "warn":"ok"));
 
-  document.getElementById("clearAdminTokenBtn").addEventListener("click", () => {
-    clearAdminToken();
-    document.getElementById("adminTokenInput").value = "";
-    renderAuthStatus();
-    document.getElementById("summary").className = "notice info";
-    document.getElementById("summary").textContent = "すべて削除しました。正しいコードを保存してください。";
-  });
-
-  document.getElementById("fillBtn").addEventListener("click", () => {
-    document.getElementById("adminTokenInput").value = CORRECT_TOKEN;
-  });
-
-  document.getElementById("runBtn").addEventListener("click", runChecks);
-  renderInitial();
-  renderAuthStatus();
-}
-
-init();
-</script>
+      if(failed.length){
+        setStatus("roleNextBox",`NGがあります。黒ログの診断を見て、最初に失敗した項目から直してください。\n最初のNG：${failed[0].label}\n原因：${failed[0].message}`,"ng");
+      }else if(warn.length){
+        setStatus("roleNextBox",`主要機能はOKです。WARNは任意APIまたは代替可能な項目です。\n営業DEMOは進められます。`,"warn");
+      }else{
+        setStatus("roleNextBox","主要チェックはOKです。営業DEMOに進めます。","ok");
+      }
+    }
+    async function checkHealth(debug=false){
+      const data=await apiGet("/api/health",{},false,debug);
+      lastResults.health=data;
+      setSummary("sumWorker","OK","pass");
+      log("ok","Worker health OK",data);
+      return data;
+    }
+    async function checkApiCounts(debug=false){
+      const results=[];
+      try{
+        await checkHealth(debug);
+      }catch(e){
+        setSummary("sumWorker","NG","fail");
+        log("ng","Worker health NG",{message:e.message,status:e.status,data:e.data});
+      }
+      for(const test of tests.filter(x=>x.id!=="health")){
+        const result=await runTest(test,debug);
+        results.push(result);
+      }
+      renderApiChecks([{id:"health",label:"Worker health",area:"公開",status:lastResults.health?"pass":"fail",message:lastResults.health?"Worker起動OK":"Worker NG"},...results]);
+      setStatus("debugSummary", "APIチェックを実行しました。NGがある場合は下のログにURL・ステータス・レスポンスが残っています。", results.some(x=>statusTone(x.status)==="fail")?"ng":"ok");
+    }
+    async function runAllChecks(){
+      updateConfigStatus();
+      renderUrls();
+      await checkApiCounts(false);
+    }
+    async function runDebugChecks(){
+      logs=[];
+      renderLog();
+      updateConfigStatus();
+      renderUrls();
+      log("info","===== STEP VET-27 DEBUG START =====",{apiBase:apiBase(),clinicCode:clinicCode(),adminCodeLength:adminCode().length,adminCodeTail:adminCode().slice(-4)});
+      await checkApiCounts(true);
+      log("info","===== DEBUG END =====");
+    }
+    async function runDebugAdminOnly(){
+      logs=[];
+      renderLog();
+      updateConfigStatus();
+      log("info","===== ADMIN DEBUG START =====",{apiBase:apiBase(),clinicCode:clinicCode(),adminCodeLength:adminCode().length,adminCodeTail:adminCode().slice(-4)});
+      const results=[];
+      for(const test of tests.filter(x=>x.admin)){
+        const result=await runTest(test,true);
+        results.push(result);
+      }
+      renderApiChecks(results);
+      log("info","===== ADMIN DEBUG END =====");
+    }
+    function renderLatestLinks(){
+      const links=buildProductionUrls();
+      $("latestLinks").innerHTML=links.map(item=>`
+        <div class="url-row">
+          <div><div class="url-title">${escapeHtml(item.label)}</div><div class="url-desc">${escapeHtml(item.desc)}</div></div>
+          <div class="url-value">${escapeHtml(item.url)}</div>
+          <button class="btn btn-sub" type="button" data-copy-latest="${escapeHtml(item.url)}">コピー</button>
+          <a class="btn" href="${escapeHtml(item.url)}" target="_blank" rel="noopener">開く</a>
+        </div>
+      `).join("");
+      document.querySelectorAll("[data-copy-latest]").forEach(btn=>{
+        btn.addEventListener("click",async()=>{await copyText(btn.getAttribute("data-copy-latest")||"");log("ok","リンクをコピーしました。");});
+      });
+    }
+    function applyQueryParams(){
+      const url=new URL(location.href);
+      const clinic=url.searchParams.get("clinic_code") || url.searchParams.get("clinic");
+      const api=url.searchParams.get("api");
+      if(clinic) $("clinicCodeInput").value=clinic;
+      if(api) $("apiBaseInput").value=api;
+    }
+    function restoreSession(){
+      $("apiBaseInput").value=DEFAULTS.apiBase;
+      $("clinicCodeInput").value=DEFAULTS.clinicCode;
+      const code=sessionStorage.getItem(DEFAULTS.adminStorageKey);
+      const staff=sessionStorage.getItem(DEFAULTS.staffStorageKey);
+      if(code){ $("adminCodeInput").value=code; setSummary("sumAdmin","保存済み","pass"); }
+      if(staff) $("staffNameInput").value=staff;
+    }
+    function bindEvents(){
+      $("runAllButton").addEventListener("click",runAllChecks);
+      $("runDebugButton").addEventListener("click",runDebugChecks);
+      $("saveAdminButton").addEventListener("click",saveAdminCode);
+      $("forgetAdminButton").addEventListener("click",forgetAdminCode);
+      $("generateUrlsButton").addEventListener("click",renderUrls);
+      $("copyUrlsButton").addEventListener("click",async()=>{const urls=lastUrls.length?lastUrls:renderUrls();await copyText(urlsToText(urls));log("ok","URL一覧をコピーしました。");});
+      $("apiCheckButton").addEventListener("click",()=>checkApiCounts(false));
+      $("apiDebugButton").addEventListener("click",()=>checkApiCounts(true));
+      $("debugAdminButton").addEventListener("click",runDebugAdminOnly);
+      $("copyLogButton").addEventListener("click",async()=>{await copyText($("logBox").textContent);alert("ログをコピーしました。");});
+      $("clearLogButton").addEventListener("click",()=>{logs=[];renderLog();});
+      $("clinicCodeInput").addEventListener("input",()=>{updateConfigStatus();renderUrls();renderLatestLinks();});
+      $("apiBaseInput").addEventListener("input",updateConfigStatus);
+      document.querySelectorAll("[data-scroll]").forEach(card=>{
+        card.addEventListener("click",()=>{const target=document.querySelector(card.getAttribute("data-scroll")); if(target) target.scrollIntoView({behavior:"smooth",block:"start"});});
+      });
+    }
+    function init(){
+      restoreSession();
+      applyQueryParams();
+      bindEvents();
+      updateConfigStatus();
+      renderUrls();
+      renderLatestLinks();
+      log("info","system-check STEP VET-27 を起動しました。");
+    }
+    init();
+  </script>
 </body>
 </html>
