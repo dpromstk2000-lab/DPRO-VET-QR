@@ -1,0 +1,1422 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DPRO PET CARE LINE｜順番受付・優先受付予約</title>
+  <script src="./config.js"></script>
+  <style>
+    :root {
+      --bg: #f4f1ea;
+      --card: #ffffff;
+      --ink: #22302c;
+      --muted: #6f7b75;
+      --line: #d9d2c4;
+      --green: #1f8f65;
+      --green2: #e8f7ef;
+      --blue: #3d74a8;
+      --blue2: #edf5ff;
+      --orange: #e79724;
+      --orange2: #fff5df;
+      --red: #c65d4f;
+      --red2: #fff0ed;
+      --purple: #7564b8;
+      --purple2: #f0f3ff;
+      --brown: #8a6a42;
+      --shadow: 0 16px 42px rgba(34, 48, 44, .11);
+      --radius: 22px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", "YuGothic", "Noto Sans JP", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(31, 143, 101, .15), transparent 36%),
+        linear-gradient(135deg, #fbfaf6 0%, var(--bg) 100%);
+      line-height: 1.7;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font-family: inherit;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    .page {
+      width: min(1120px, calc(100% - 26px));
+      margin: 0 auto;
+      padding: 22px 0 54px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .logo {
+      width: 48px;
+      height: 48px;
+      display: grid;
+      place-items: center;
+      border-radius: 16px;
+      color: #fff;
+      background: linear-gradient(135deg, #1f8f65, #83c99f);
+      box-shadow: 0 12px 24px rgba(31,143,101,.23);
+      font-size: 24px;
+      flex: 0 0 auto;
+    }
+
+    .brand small {
+      display: block;
+      color: var(--muted);
+      font-weight: 900;
+      font-size: 12px;
+      letter-spacing: .08em;
+    }
+
+    .brand strong {
+      display: block;
+      font-size: clamp(18px, 2.3vw, 28px);
+      line-height: 1.15;
+      letter-spacing: -.02em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .pill-link,
+    .btn {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.84);
+      border-radius: 999px;
+      padding: 9px 13px;
+      font-size: 13px;
+      font-weight: 900;
+      text-decoration: none;
+      cursor: pointer;
+      transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+    }
+
+    .pill-link:hover,
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 20px rgba(34,48,44,.11);
+      background: #fff;
+    }
+
+    .btn-main {
+      border-color: transparent;
+      background: var(--green);
+      color: #fff;
+      box-shadow: 0 12px 26px rgba(31,143,101,.23);
+    }
+
+    .btn-sub {
+      border-color: rgba(31,143,101,.3);
+      background: var(--green2);
+      color: #11704c;
+    }
+
+    .btn-danger {
+      border-color: rgba(198,93,79,.28);
+      background: var(--red2);
+      color: #a73f32;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap: 18px;
+      align-items: stretch;
+      margin-bottom: 18px;
+    }
+
+    .card {
+      background: rgba(255,255,255,.91);
+      border: 1px solid rgba(217,210,196,.86);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      padding: clamp(18px, 2.7vw, 28px);
+    }
+
+    .hero h1 {
+      margin: 0 0 12px;
+      font-size: clamp(27px, 4vw, 48px);
+      line-height: 1.15;
+      letter-spacing: -.035em;
+    }
+
+    .lead {
+      margin: 0;
+      color: #52615b;
+      font-weight: 800;
+      font-size: clamp(14px, 1.7vw, 17px);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 11px;
+      border-radius: 999px;
+      background: var(--green2);
+      color: #11704c;
+      font-size: 12px;
+      font-weight: 950;
+      margin-bottom: 12px;
+    }
+
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .status-box {
+      background: #fffdf9;
+      border: 1px solid rgba(217,210,196,.86);
+      border-radius: 18px;
+      padding: 13px;
+      min-height: 82px;
+    }
+
+    .status-box small {
+      display: block;
+      color: var(--muted);
+      font-weight: 900;
+      font-size: 12px;
+    }
+
+    .status-box b {
+      display: block;
+      font-size: 24px;
+      line-height: 1.25;
+      letter-spacing: -.03em;
+    }
+
+    .status-box .sub {
+      color: #62706a;
+      font-weight: 800;
+      font-size: 12px;
+    }
+
+    .level {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 950;
+    }
+
+    .level.quiet { background: var(--green2); color: #11704c; }
+    .level.moderate { background: var(--orange2); color: #8b5b0e; }
+    .level.crowded { background: var(--red2); color: #a43e32; }
+    .level.reception_closed,
+    .level.emergency,
+    .level.closed { background: #f1f1f1; color: #3e4542; }
+
+    .notice {
+      background: #fff8e8;
+      border: 1px solid #eed8a5;
+      color: #6f541c;
+      border-radius: 16px;
+      padding: 12px;
+      font-size: 12px;
+      font-weight: 850;
+      margin-top: 12px;
+    }
+
+    .notice.red {
+      background: var(--red2);
+      border-color: #e7b8b1;
+      color: #96382f;
+    }
+
+    .notice.green {
+      background: var(--green2);
+      border-color: #bfe3cc;
+      color: #0e6a48;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: .9fr 1.1fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .section-title {
+      margin: 26px 0 12px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .section-title h2 {
+      margin: 0;
+      font-size: clamp(22px, 3vw, 34px);
+      letter-spacing: -.025em;
+    }
+
+    .section-title p {
+      margin: 0;
+      color: var(--muted);
+      font-weight: 850;
+      font-size: 13px;
+      text-align: right;
+    }
+
+    .mode-grid {
+      display: grid;
+      gap: 10px;
+    }
+
+    .mode-card {
+      border: 1px solid rgba(217,210,196,.9);
+      background: #fffdf9;
+      border-radius: 20px;
+      padding: 14px;
+      cursor: pointer;
+      transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+    }
+
+    .mode-card:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 24px rgba(34,48,44,.09);
+    }
+
+    .mode-card.active {
+      border-color: rgba(31,143,101,.72);
+      background: linear-gradient(180deg, #fff, #f3fbf6);
+      box-shadow: 0 12px 28px rgba(31,143,101,.13);
+    }
+
+    .mode-head {
+      display: flex;
+      gap: 11px;
+      align-items: flex-start;
+    }
+
+    .mode-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 15px;
+      display: grid;
+      place-items: center;
+      font-size: 24px;
+      background: var(--green2);
+      flex: 0 0 auto;
+    }
+
+    .mode-card[data-mode="priority_reservation"] .mode-icon { background: var(--orange2); }
+    .mode-card[data-mode="medicine_prevention"] .mode-icon { background: var(--purple2); }
+    .mode-card[data-mode="care_consult"] .mode-icon { background: var(--blue2); }
+
+    .mode-card h3 {
+      margin: 0 0 4px;
+      font-size: 18px;
+      line-height: 1.3;
+    }
+
+    .mode-card p {
+      margin: 0;
+      color: #5c6963;
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 1.55;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .form-row {
+      margin-bottom: 12px;
+    }
+
+    .form-row.full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 13px;
+      color: #46524d;
+      font-weight: 950;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid #d8d0c0;
+      background: #fff;
+      color: var(--ink);
+      border-radius: 15px;
+      padding: 11px 12px;
+      font-size: 15px;
+      font-weight: 750;
+      outline: none;
+      transition: border-color .15s ease, box-shadow .15s ease;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: rgba(31,143,101,.65);
+      box-shadow: 0 0 0 4px rgba(31,143,101,.10);
+    }
+
+    textarea {
+      min-height: 92px;
+      resize: vertical;
+    }
+
+    .radio-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    .choice {
+      position: relative;
+    }
+
+    .choice input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .choice span {
+      display: block;
+      border: 1px solid #d8d0c0;
+      background: #fff;
+      border-radius: 15px;
+      padding: 11px 10px;
+      font-size: 13px;
+      font-weight: 900;
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .choice input:checked + span {
+      border-color: rgba(31,143,101,.72);
+      background: var(--green2);
+      color: #11704c;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .submit-area {
+      margin-top: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .api-status {
+      margin-left: auto;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    .pet-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .pet-card {
+      border: 1px solid rgba(217,210,196,.86);
+      background: #fffdf9;
+      border-radius: 16px;
+      padding: 12px;
+      cursor: pointer;
+    }
+
+    .pet-card.active {
+      border-color: rgba(31,143,101,.7);
+      background: #f1fbf5;
+    }
+
+    .pet-card b {
+      display: block;
+      font-size: 15px;
+    }
+
+    .pet-card span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .result-card {
+      margin-top: 14px;
+      background: linear-gradient(180deg, #ffffff, #f3fbf6);
+      border: 1px solid rgba(31,143,101,.34);
+      border-radius: 22px;
+      padding: 16px;
+      box-shadow: 0 12px 28px rgba(31,143,101,.10);
+    }
+
+    .result-card h3 {
+      margin: 0 0 10px;
+      font-size: 23px;
+    }
+
+    .result-number {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      gap: 12px;
+      align-items: center;
+      margin: 12px 0;
+    }
+
+    .big-number {
+      border-radius: 22px;
+      background: var(--green);
+      color: #fff;
+      text-align: center;
+      padding: 18px 8px;
+      box-shadow: 0 12px 26px rgba(31,143,101,.20);
+    }
+
+    .big-number small {
+      display: block;
+      opacity: .9;
+      font-weight: 900;
+      font-size: 12px;
+    }
+
+    .big-number b {
+      display: block;
+      font-size: 42px;
+      line-height: 1;
+    }
+
+    .info-table {
+      display: grid;
+      gap: 7px;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      border-bottom: 1px dashed #dcd4c5;
+      padding: 7px 0;
+      font-size: 13px;
+    }
+
+    .info-row span:first-child {
+      color: var(--muted);
+      font-weight: 900;
+    }
+
+    .info-row strong {
+      text-align: right;
+    }
+
+    .entry-list {
+      display: grid;
+      gap: 9px;
+      margin-top: 12px;
+    }
+
+    .entry {
+      border: 1px solid rgba(217,210,196,.84);
+      background: #fffdf9;
+      border-radius: 17px;
+      padding: 12px;
+      display: grid;
+      grid-template-columns: 56px 1fr;
+      gap: 10px;
+      align-items: start;
+    }
+
+    .entry-no {
+      width: 50px;
+      height: 50px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      background: var(--green2);
+      color: #11704c;
+      font-weight: 950;
+      font-size: 18px;
+    }
+
+    .entry.examining .entry-no {
+      background: var(--orange2);
+      color: #8b5b0e;
+    }
+
+    .entry.completed,
+    .entry.cancelled,
+    .entry.no_show {
+      opacity: .55;
+    }
+
+    .entry h4 {
+      margin: 0 0 4px;
+      font-size: 15px;
+      line-height: 1.35;
+    }
+
+    .entry p {
+      margin: 0;
+      color: #61706a;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .tagline {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 7px;
+    }
+
+    .tag {
+      display: inline-flex;
+      border-radius: 999px;
+      background: #f6f2e9;
+      color: #79623d;
+      padding: 3px 7px;
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    .tab-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .tab {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 999px;
+      padding: 8px 11px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 950;
+    }
+
+    .tab.active {
+      background: var(--green);
+      color: #fff;
+      border-color: var(--green);
+    }
+
+    .empty {
+      border: 1px dashed #d5cbb9;
+      border-radius: 18px;
+      padding: 16px;
+      color: var(--muted);
+      font-weight: 850;
+      text-align: center;
+      background: rgba(255,255,255,.62);
+    }
+
+    .footer-note {
+      margin-top: 18px;
+      border: 1px solid rgba(217,210,196,.88);
+      background: rgba(255,255,255,.8);
+      border-radius: 22px;
+      padding: 14px;
+      color: #56645e;
+      font-weight: 800;
+      font-size: 13px;
+    }
+
+    @media (max-width: 920px) {
+      .hero,
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .section-title {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .section-title p {
+        text-align: left;
+      }
+    }
+
+    @media (max-width: 620px) {
+      .topbar {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .actions {
+        justify-content: flex-start;
+      }
+
+      .status-grid,
+      .form-grid,
+      .radio-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .result-number {
+        grid-template-columns: 1fr;
+      }
+
+      .brand strong {
+        white-space: normal;
+      }
+
+      .card {
+        border-radius: 22px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="page">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo">🐾</div>
+        <div>
+          <small>飼い主さん用受付画面</small>
+          <strong>DPRO PET CARE LINE</strong>
+        </div>
+      </div>
+
+      <nav class="actions" aria-label="関連画面リンク">
+        <a class="pill-link" href="./member.html?demo=true&v=step-vet-16">ペット診察券</a>
+        <a class="pill-link" href="./rich-menu.html?v=step-vet-16">リッチメニュー</a>
+        <a class="pill-link" href="./index.html?v=step-vet-16">管理トップ</a>
+      </nav>
+    </header>
+
+    <section class="hero">
+      <div class="card">
+        <span class="badge">STEP VET-16｜順番受付・優先受付予約</span>
+        <h1>今日行く人も、<br>後日1番で取りたい人も。</h1>
+        <p class="lead">
+          今日の順番受付、後日の午前1番・午後1番の優先受付予約、お薬・予防受付を分けて登録できます。
+          「ただいま何人」だけではなく、診察・薬・ケアを分けた混雑目安も確認できます。
+        </p>
+        <div class="notice">
+          優先受付予約は、診察開始時刻を保証する時間予約ではありません。午前・午後の優先受付枠です。
+        </div>
+      </div>
+
+      <div class="card">
+        <span id="levelBadge" class="level quiet">空いています</span>
+        <div class="status-grid">
+          <div class="status-box">
+            <small>通常診察</small>
+            <b id="generalExamCount">-</b>
+            <div class="sub">診察・再診の待ち</div>
+          </div>
+          <div class="status-box">
+            <small>現在診察中</small>
+            <b id="currentExamNumber">-</b>
+            <div class="sub">受付番号</div>
+          </div>
+          <div class="status-box">
+            <small>お薬・予防</small>
+            <b id="medicineCount">-</b>
+            <div class="sub">薬・フード・ワクチン等</div>
+          </div>
+          <div class="status-box">
+            <small>ケア・予約枠</small>
+            <b id="careReserveCount">-</b>
+            <div class="sub">処置・優先受付など</div>
+          </div>
+        </div>
+        <div class="notice green" id="summaryMessage">混雑状況を読み込み中です。</div>
+      </div>
+    </section>
+
+    <div class="section-title">
+      <h2>受付内容を選択</h2>
+      <p>LINEから入った飼い主さんが、そのまま登録できる画面です。</p>
+    </div>
+
+    <section class="layout">
+      <aside class="card">
+        <div class="mode-grid">
+          <div class="mode-card active" data-mode="today_queue" tabindex="0" role="button">
+            <div class="mode-head">
+              <div class="mode-icon">🏥</div>
+              <div>
+                <h3>今日の順番受付</h3>
+                <p>今日診てもらいたい場合。通常診察・再診・体調不良など。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="mode-card" data-mode="priority_reservation" tabindex="0" role="button">
+            <div class="mode-head">
+              <div class="mode-icon">🌅</div>
+              <div>
+                <h3>優先受付予約</h3>
+                <p>後日の午前1番・午後1番。時間予約ではなく優先受付枠。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="mode-card" data-mode="medicine_prevention" tabindex="0" role="button">
+            <div class="mode-head">
+              <div class="mode-icon">💊</div>
+              <div>
+                <h3>お薬・予防受付</h3>
+                <p>薬・フード、予防薬、ワクチン、健診などを診察待ちと分ける。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="mode-card" data-mode="care_consult" tabindex="0" role="button">
+            <div class="mode-head">
+              <div class="mode-icon">🧼</div>
+              <div>
+                <h3>ケア処置相談</h3>
+                <p>爪切り、耳そうじ、肛門腺など。必要に応じて診察へ切り替え。</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="notice" style="margin-top:14px;">
+          トリミング・手術は通常の順番受付に混ぜず、病院側で別枠管理する方針です。
+        </div>
+      </aside>
+
+      <section class="card">
+        <form id="queueForm">
+          <div class="form-grid">
+            <div class="form-row full">
+              <label>ペットを選択</label>
+              <div id="petList" class="pet-list">
+                <div class="empty">ペット情報を読み込み中です。</div>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <label for="requestCategory">来院目的</label>
+              <select id="requestCategory" name="request_category">
+                <option value="general_exam">通常診察</option>
+                <option value="recheck">再診</option>
+                <option value="vaccination">予防接種</option>
+                <option value="prevention_medicine">予防薬</option>
+                <option value="medicine_food">お薬・フード</option>
+                <option value="hygiene_care">衛生処置</option>
+                <option value="health_check">健康診断</option>
+                <option value="other">その他</option>
+              </select>
+            </div>
+
+            <div class="form-row">
+              <label for="targetDate">希望日</label>
+              <input id="targetDate" name="target_date" type="date" />
+            </div>
+
+            <div class="form-row full">
+              <label>時間帯</label>
+              <div class="radio-grid">
+                <label class="choice">
+                  <input type="radio" name="day_part" value="morning" checked />
+                  <span>午前</span>
+                </label>
+                <label class="choice">
+                  <input type="radio" name="day_part" value="afternoon" />
+                  <span>午後</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="form-row full">
+              <label for="purpose">目的・症状の概要</label>
+              <input id="purpose" name="purpose" type="text" placeholder="例：皮膚のかゆみ、ワクチン、フィラリア薬など" />
+            </div>
+
+            <div class="form-row">
+              <label for="onsetNote">いつから</label>
+              <input id="onsetNote" name="onset_note" type="text" placeholder="例：昨日から、1週間前から" />
+            </div>
+
+            <div class="form-row">
+              <label for="appetite">食欲</label>
+              <select id="appetite" name="appetite">
+                <option value="unknown">わからない</option>
+                <option value="normal">いつも通り</option>
+                <option value="low">少ない</option>
+                <option value="none">食べない</option>
+                <option value="not_applicable">該当なし</option>
+              </select>
+            </div>
+
+            <div class="form-row">
+              <label for="energyLevel">元気</label>
+              <select id="energyLevel" name="energy_level">
+                <option value="unknown">わからない</option>
+                <option value="normal">いつも通り</option>
+                <option value="low">少し元気がない</option>
+                <option value="very_low">かなり元気がない</option>
+                <option value="not_applicable">該当なし</option>
+              </select>
+            </div>
+
+            <div class="form-row">
+              <label for="desiredContact">連絡方法</label>
+              <select id="desiredContact" name="desired_contact">
+                <option value="line">LINE</option>
+                <option value="phone">電話</option>
+                <option value="none">連絡不要</option>
+              </select>
+            </div>
+
+            <div class="form-row full">
+              <label for="freeText">詳しい内容</label>
+              <textarea id="freeText" name="free_text" placeholder="症状、気になること、薬・フードの内容などを入力してください。"></textarea>
+            </div>
+
+            <div class="form-row full">
+              <label class="choice">
+                <input type="checkbox" id="emergencyFlag" name="emergency_flag" />
+                <span>ぐったりしている、呼吸が苦しそうなど、急ぎの可能性があります</span>
+              </label>
+            </div>
+          </div>
+
+          <div id="modeNotice" class="notice">
+            今日の順番受付です。受付番号を発行します。
+          </div>
+
+          <div class="submit-area">
+            <button class="btn btn-main" type="submit" id="submitButton">受付する</button>
+            <button class="btn btn-sub" type="button" id="refreshButton">混雑状況を更新</button>
+            <span class="api-status" id="apiStatus">API未確認</span>
+          </div>
+        </form>
+
+        <div id="resultArea"></div>
+      </section>
+    </section>
+
+    <div class="section-title">
+      <h2>本日の受付状況</h2>
+      <p>診察・薬・ケアを分けて見せるための確認表示です。</p>
+    </div>
+
+    <section class="card">
+      <div class="tab-row">
+        <button class="tab active" type="button" data-filter="active">受付中</button>
+        <button class="tab" type="button" data-filter="today_queue">通常診察</button>
+        <button class="tab" type="button" data-filter="medicine_prevention">お薬・予防</button>
+        <button class="tab" type="button" data-filter="care_consult">ケア処置</button>
+        <button class="tab" type="button" data-filter="priority_reservation">優先受付</button>
+        <button class="tab" type="button" data-filter="all">すべて</button>
+      </div>
+
+      <div id="entryList" class="entry-list">
+        <div class="empty">受付状況を読み込み中です。</div>
+      </div>
+    </section>
+
+    <div class="footer-note">
+      この画面はSTEP VET-16です。登録内容は localStorage ではなく、Cloudflare Worker API 経由で Supabase の
+      vet_waiting_entries / vet_previsit_questionnaires に保存されます。
+    </div>
+  </main>
+
+  <script>
+    const CONFIG = window.DPRO_CONFIG || {};
+    const API_BASE_URL = (CONFIG.API_BASE_URL || "https://dpro-vet-qr-api.dpromstk2000.workers.dev").replace(/\/$/, "");
+    const CLINIC_CODE = CONFIG.CLINIC_CODE || CONFIG.DEFAULT_CLINIC_CODE || "dpro_vet_demo";
+
+    const state = {
+      mode: "today_queue",
+      selectedPet: null,
+      selectedGuardian: null,
+      cards: [],
+      entries: [],
+      summaries: [],
+      summary: null,
+      filter: "active"
+    };
+
+    const modeInfo = {
+      today_queue: {
+        title: "今日の順番受付",
+        submit: "受付番号を取る",
+        notice: "今日の順番受付です。来院目的と問診を入力すると、受付番号が発行されます。",
+        defaultCategory: "general_exam",
+        dateOffset: 0
+      },
+      priority_reservation: {
+        title: "優先受付予約",
+        submit: "優先受付予約する",
+        notice: "後日の午前1番・午後1番の優先受付枠です。診察開始時刻を保証する時間予約ではありません。",
+        defaultCategory: "vaccination",
+        dateOffset: 2
+      },
+      medicine_prevention: {
+        title: "お薬・予防受付",
+        submit: "お薬・予防受付する",
+        notice: "薬・フード、予防薬、ワクチン、健康診断などを通常診察と分けて受付します。",
+        defaultCategory: "medicine_food",
+        dateOffset: 0
+      },
+      care_consult: {
+        title: "ケア処置相談",
+        submit: "ケア処置相談する",
+        notice: "爪切り、耳そうじ、肛門腺などの相談です。必要に応じて診察へ切り替わる場合があります。",
+        defaultCategory: "hygiene_care",
+        dateOffset: 0
+      }
+    };
+
+    const el = {
+      levelBadge: document.getElementById("levelBadge"),
+      generalExamCount: document.getElementById("generalExamCount"),
+      currentExamNumber: document.getElementById("currentExamNumber"),
+      medicineCount: document.getElementById("medicineCount"),
+      careReserveCount: document.getElementById("careReserveCount"),
+      summaryMessage: document.getElementById("summaryMessage"),
+      petList: document.getElementById("petList"),
+      queueForm: document.getElementById("queueForm"),
+      requestCategory: document.getElementById("requestCategory"),
+      targetDate: document.getElementById("targetDate"),
+      purpose: document.getElementById("purpose"),
+      onsetNote: document.getElementById("onsetNote"),
+      appetite: document.getElementById("appetite"),
+      energyLevel: document.getElementById("energyLevel"),
+      desiredContact: document.getElementById("desiredContact"),
+      freeText: document.getElementById("freeText"),
+      emergencyFlag: document.getElementById("emergencyFlag"),
+      modeNotice: document.getElementById("modeNotice"),
+      submitButton: document.getElementById("submitButton"),
+      refreshButton: document.getElementById("refreshButton"),
+      apiStatus: document.getElementById("apiStatus"),
+      resultArea: document.getElementById("resultArea"),
+      entryList: document.getElementById("entryList")
+    };
+
+    function todayString() {
+      const d = new Date();
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return `${y}-${m}-${day}`;
+    }
+
+    function addDaysString(days) {
+      const d = new Date();
+      d.setDate(d.getDate() + Number(days || 0));
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return `${y}-${m}-${day}`;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    async function apiGet(path, params = {}) {
+      const url = new URL(API_BASE_URL + path);
+      Object.entries({ clinic_code: CLINIC_CODE, ...params }).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== "") url.searchParams.set(key, value);
+      });
+      const res = await fetch(url.toString(), { method: "GET" });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.ok === false) {
+        throw new Error(data.message || data.error || `API Error ${res.status}`);
+      }
+      return data;
+    }
+
+    async function apiPost(path, body = {}) {
+      const res = await fetch(API_BASE_URL + path, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ clinic_code: CLINIC_CODE, ...body })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.ok === false) {
+        throw new Error(data.message || data.error || `API Error ${res.status}`);
+      }
+      return data;
+    }
+
+    function setApiStatus(text, ok = true) {
+      el.apiStatus.textContent = text;
+      el.apiStatus.style.color = ok ? "#11704c" : "#a43e32";
+    }
+
+    function getSelectedDayPart() {
+      const radio = document.querySelector('input[name="day_part"]:checked');
+      return radio ? radio.value : "morning";
+    }
+
+    function setDayPart(value) {
+      const radio = document.querySelector(`input[name="day_part"][value="${value}"]`);
+      if (radio) radio.checked = true;
+    }
+
+    function getBestSummary() {
+      if (!state.summaries || !state.summaries.length) return state.summary;
+      const part = getSelectedDayPart();
+      return state.summaries.find(item => item.day_part === part) || state.summaries[0] || state.summary;
+    }
+
+    function renderSummary() {
+      const s = getBestSummary() || {};
+      const level = s.display_level || "quiet";
+      const label = s.display_level_label || "空いています";
+
+      el.levelBadge.className = `level ${level}`;
+      el.levelBadge.textContent = label;
+      el.generalExamCount.textContent = Number(s.general_exam_count || 0) + "組";
+      el.currentExamNumber.textContent = s.current_exam_number ? String(s.current_exam_number) + "番" : "-";
+      el.medicineCount.textContent = Number(s.medicine_prevention_count || 0) + "件";
+
+      const careReserve = Number(s.care_count || 0) + Number(s.priority_reservation_count || 0) + Number(s.grooming_surgery_count || 0);
+      el.careReserveCount.textContent = careReserve + "件";
+      el.summaryMessage.textContent = s.display_message || "混雑状況を確認できます。";
+      el.summaryMessage.className = level === "crowded" || level === "reception_closed" || level === "emergency" ? "notice red" : "notice green";
+    }
+
+    function renderPets() {
+      if (!state.cards.length) {
+        el.petList.innerHTML = '<div class="empty">ペット情報が見つかりません。デモでは田中 美咲様のペットを読み込みます。</div>';
+        return;
+      }
+
+      el.petList.innerHTML = state.cards.map((card, index) => {
+        const id = card.pet_id || card.id || "";
+        const active = state.selectedPet && state.selectedPet.pet_id === id ? " active" : "";
+        const petName = card.pet_name || "ペット";
+        const species = card.species_label || card.species || "";
+        const cardNo = card.card_no || "";
+        return `
+          <div class="pet-card${active}" data-pet-id="${escapeHtml(id)}">
+            <b>${escapeHtml(petName)}</b>
+            <span>${escapeHtml(species)} ${cardNo ? " / 診察券 " + escapeHtml(cardNo) : ""}</span>
+          </div>
+        `;
+      }).join("");
+
+      el.petList.querySelectorAll(".pet-card").forEach(node => {
+        node.addEventListener("click", () => {
+          const petId = node.dataset.petId;
+          state.selectedPet = state.cards.find(card => String(card.pet_id || card.id) === String(petId)) || state.cards[0];
+          renderPets();
+        });
+      });
+    }
+
+    function setMode(mode) {
+      state.mode = mode;
+      document.querySelectorAll(".mode-card").forEach(card => {
+        card.classList.toggle("active", card.dataset.mode === mode);
+      });
+
+      const info = modeInfo[mode] || modeInfo.today_queue;
+      el.submitButton.textContent = info.submit;
+      el.modeNotice.textContent = info.notice;
+      el.requestCategory.value = info.defaultCategory;
+
+      if (mode === "priority_reservation") {
+        el.targetDate.min = addDaysString(1);
+        el.targetDate.value = addDaysString(info.dateOffset);
+      } else {
+        el.targetDate.min = todayString();
+        el.targetDate.value = todayString();
+      }
+
+      if (mode === "medicine_prevention") {
+        el.purpose.placeholder = "例：フィラリア薬、ノミダニ薬、フード受け取り、ワクチン";
+      } else if (mode === "care_consult") {
+        el.purpose.placeholder = "例：爪切り、耳そうじ、肛門腺、簡単なケア相談";
+      } else if (mode === "priority_reservation") {
+        el.purpose.placeholder = "例：ワクチン、健康診断、慢性疾患の再診";
+      } else {
+        el.purpose.placeholder = "例：皮膚のかゆみ、食欲不振、再診など";
+      }
+    }
+
+    function buildEntryTags(item) {
+      const tags = [];
+      if (item.entry_kind_label) tags.push(item.entry_kind_label);
+      if (item.request_category_label) tags.push(item.request_category_label);
+      if (item.status_label) tags.push(item.status_label);
+      if (item.day_part_label) tags.push(item.day_part_label);
+      return tags.map(tag => `<span class="tag">${escapeHtml(tag)}</span>`).join("");
+    }
+
+    function shouldShowEntry(item) {
+      if (state.filter === "all") return true;
+      if (state.filter === "active") return ["reserved", "waiting", "checked_in", "examining"].includes(item.status);
+      return item.entry_kind === state.filter;
+    }
+
+    function renderEntries() {
+      const filtered = (state.entries || []).filter(shouldShowEntry);
+
+      if (!filtered.length) {
+        el.entryList.innerHTML = '<div class="empty">表示する受付データがありません。</div>';
+        return;
+      }
+
+      el.entryList.innerHTML = filtered.map(item => {
+        const no = item.queue_number ? `${item.queue_number}` : "-";
+        const title = `${item.pet_name || "ペット"}｜${item.purpose || item.request_category_label || "受付"}`;
+        const guardian = item.guardian_name || item.line_display_name || "飼い主";
+        const statusClass = item.status || "";
+        const datePart = `${item.target_date || ""} ${item.day_part_label || ""}`.trim();
+        return `
+          <article class="entry ${escapeHtml(statusClass)}">
+            <div class="entry-no">${escapeHtml(no)}</div>
+            <div>
+              <h4>${escapeHtml(title)}</h4>
+              <p>${escapeHtml(guardian)} / ${escapeHtml(datePart)}</p>
+              ${item.symptoms_summary ? `<p>${escapeHtml(item.symptoms_summary)}</p>` : ""}
+              <div class="tagline">${buildEntryTags(item)}</div>
+            </div>
+          </article>
+        `;
+      }).join("");
+    }
+
+    function renderResult(data) {
+      const entry = data.entry || {};
+      const result = data.result || {};
+      const number = entry.queue_number || result.queue_number || "-";
+      const isPriority = entry.entry_kind === "priority_reservation" || state.mode === "priority_reservation";
+      const statusTitle = isPriority ? "優先受付予約が完了しました" : "受付が完了しました";
+
+      el.resultArea.innerHTML = `
+        <div class="result-card">
+          <h3>${escapeHtml(statusTitle)}</h3>
+          <div class="result-number">
+            <div class="big-number">
+              <small>${isPriority ? "優先受付" : "受付番号"}</small>
+              <b>${escapeHtml(number)}</b>
+            </div>
+            <div class="info-table">
+              <div class="info-row"><span>ペット</span><strong>${escapeHtml(entry.pet_name || state.selectedPet?.pet_name || "-")}</strong></div>
+              <div class="info-row"><span>受付種別</span><strong>${escapeHtml(entry.entry_kind_label || modeInfo[state.mode].title)}</strong></div>
+              <div class="info-row"><span>目的</span><strong>${escapeHtml(entry.purpose || el.purpose.value || "-")}</strong></div>
+              <div class="info-row"><span>日付</span><strong>${escapeHtml(entry.target_date || el.targetDate.value)}</strong></div>
+              <div class="info-row"><span>時間帯</span><strong>${escapeHtml(entry.day_part_label || (getSelectedDayPart() === "morning" ? "午前" : "午後"))}</strong></div>
+            </div>
+          </div>
+          <div class="notice">
+            ${isPriority
+              ? "この予約は診察開始時刻を保証するものではありません。午前・午後の優先受付枠です。"
+              : "急患対応などにより順番が前後する場合があります。順番が近づきましたら、院内受付までお越しください。"
+            }
+          </div>
+        </div>
+      `;
+    }
+
+    async function loadPetCards() {
+      const params = new URLSearchParams(location.search);
+      const demo = params.get("demo") || "true";
+      const lineUserId = params.get("line_user_id") || "";
+      const guardianId = params.get("guardian_id") || "";
+
+      const data = await apiGet("/api/member/pet-cards", {
+        demo,
+        line_user_id: lineUserId,
+        guardian_id: guardianId
+      });
+
+      state.selectedGuardian = data.guardian || null;
+      state.cards = Array.isArray(data.cards) ? data.cards : [];
+      state.selectedPet = state.cards[0] || null;
+      renderPets();
+    }
+
+    async function loadQueueData() {
+      const date = el.targetDate.value || todayString();
+      const [summary, entries] = await Promise.all([
+        apiGet("/api/public/queue/summary", { date }),
+        apiGet("/api/public/queue/entries", { date, limit: 160 })
+      ]);
+
+      state.summary = summary.summary || null;
+      state.summaries = summary.items || [];
+      state.entries = entries.items || [];
+      renderSummary();
+      renderEntries();
+    }
+
+    function validateForm() {
+      if (!state.selectedPet) {
+        throw new Error("ペットを選択してください。");
+      }
+
+      if (!el.purpose.value.trim()) {
+        throw new Error("目的・症状の概要を入力してください。");
+      }
+
+      if (state.mode === "priority_reservation" && el.targetDate.value <= todayString()) {
+        throw new Error("優先受付予約は、明日以降の日付を選択してください。");
+      }
+    }
+
+    async function submitForm(event) {
+      event.preventDefault();
+
+      try {
+        validateForm();
+
+        el.submitButton.disabled = true;
+        el.submitButton.textContent = "送信中...";
+
+        const selected = state.selectedPet || {};
+        const body = {
+          demo: true,
+          source: "line",
+          actor_name: state.selectedGuardian?.guardian_name || "飼い主",
+          guardian_id: state.selectedGuardian?.id || state.selectedGuardian?.guardian_id || selected.guardian_id || null,
+          pet_id: selected.pet_id || selected.id || null,
+          qr_token: selected.qr_token || selected.card_token || selected.token || null,
+          entry_kind: state.mode,
+          request_category: el.requestCategory.value,
+          target_date: el.targetDate.value,
+          day_part: getSelectedDayPart(),
+          purpose: el.purpose.value.trim(),
+          symptoms_summary: el.freeText.value.trim() || el.purpose.value.trim(),
+          desired_contact: el.desiredContact.value,
+          questionnaire: {
+            purpose: el.purpose.value.trim(),
+            onset_note: el.onsetNote.value.trim(),
+            appetite: el.appetite.value,
+            energy_level: el.energyLevel.value,
+            free_text: el.freeText.value.trim(),
+            emergency_flag: el.emergencyFlag.checked
+          }
+        };
+
+        const data = await apiPost("/api/member/queue/create", body);
+        renderResult(data);
+        await loadQueueData();
+        setApiStatus("受付保存OK", true);
+      } catch (error) {
+        alert(error.message || "受付に失敗しました。");
+        setApiStatus("受付エラー", false);
+      } finally {
+        const info = modeInfo[state.mode] || modeInfo.today_queue;
+        el.submitButton.disabled = false;
+        el.submitButton.textContent = info.submit;
+      }
+    }
+
+    async function init() {
+      setMode("today_queue");
+      el.targetDate.value = todayString();
+
+      document.querySelectorAll(".mode-card").forEach(card => {
+        card.addEventListener("click", () => {
+          setMode(card.dataset.mode);
+          loadQueueData().catch(error => setApiStatus(error.message, false));
+        });
+        card.addEventListener("keydown", event => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            setMode(card.dataset.mode);
+            loadQueueData().catch(error => setApiStatus(error.message, false));
+          }
+        });
+      });
+
+      document.querySelectorAll(".tab").forEach(tab => {
+        tab.addEventListener("click", () => {
+          document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+          tab.classList.add("active");
+          state.filter = tab.dataset.filter || "active";
+          renderEntries();
+        });
+      });
+
+      document.querySelectorAll('input[name="day_part"]').forEach(radio => {
+        radio.addEventListener("change", renderSummary);
+      });
+
+      el.targetDate.addEventListener("change", () => {
+        loadQueueData().catch(error => setApiStatus(error.message, false));
+      });
+
+      el.refreshButton.addEventListener("click", () => {
+        loadQueueData()
+          .then(() => setApiStatus("混雑状況更新OK", true))
+          .catch(error => setApiStatus(error.message, false));
+      });
+
+      el.queueForm.addEventListener("submit", submitForm);
+
+      try {
+        await loadPetCards();
+        await loadQueueData();
+        setApiStatus("API接続OK", true);
+      } catch (error) {
+        console.error(error);
+        setApiStatus(error.message || "API接続エラー", false);
+        el.petList.innerHTML = '<div class="empty">API接続に失敗しました。config.js と Worker URL を確認してください。</div>';
+        el.entryList.innerHTML = '<div class="empty">受付状況を読み込めませんでした。</div>';
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
