@@ -1,0 +1,1119 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#223b34" />
+  <title>DPRO PET CARE LINE｜受付設定 STEP VET-21</title>
+  <script src="./config.js"></script>
+  <style>
+    :root{
+      --bg:#f4f1ea;
+      --card:#fff;
+      --ink:#22302c;
+      --muted:#6f7b75;
+      --line:#d9d2c4;
+      --main:#1f8f65;
+      --main-dark:#223b34;
+      --green-soft:#e8f7ef;
+      --blue:#3d74a8;
+      --blue-soft:#edf5ff;
+      --amber:#8a621f;
+      --amber-soft:#fff6de;
+      --red:#b84a4a;
+      --red-soft:#fff0ef;
+      --shadow:0 18px 46px rgba(34,48,44,.12);
+      --radius:24px;
+    }
+
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Yu Gothic","YuGothic","Noto Sans JP",Meiryo,sans-serif;
+      color:var(--ink);
+      background:
+        radial-gradient(circle at top left,rgba(31,143,101,.17),transparent 35%),
+        radial-gradient(circle at 88% 10%,rgba(231,151,36,.12),transparent 28%),
+        linear-gradient(180deg,#fbfaf6 0%,var(--bg) 100%);
+      line-height:1.7;
+    }
+
+    a{color:inherit}
+    button,input,select,textarea{font:inherit}
+    button{cursor:pointer}
+
+    .page{
+      width:min(1240px,calc(100% - 28px));
+      margin:0 auto;
+      padding:22px 0 54px;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      margin-bottom:18px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width:0;
+    }
+
+    .logo{
+      width:52px;
+      height:52px;
+      border-radius:18px;
+      display:grid;
+      place-items:center;
+      color:#fff;
+      background:linear-gradient(135deg,#1f8f65,#83c99f);
+      box-shadow:0 14px 26px rgba(31,143,101,.23);
+      font-size:26px;
+      flex:0 0 auto;
+    }
+
+    .brand small{
+      display:block;
+      color:var(--muted);
+      font-weight:950;
+      font-size:12px;
+      letter-spacing:.08em;
+    }
+
+    .brand strong{
+      display:block;
+      font-size:clamp(19px,2.4vw,30px);
+      line-height:1.12;
+      letter-spacing:-.03em;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .actions{
+      display:flex;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+      gap:8px;
+    }
+
+    .pill,.btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:7px;
+      border:1px solid var(--line);
+      border-radius:999px;
+      padding:9px 13px;
+      background:rgba(255,255,255,.86);
+      color:var(--ink);
+      text-decoration:none;
+      font-size:13px;
+      font-weight:950;
+      line-height:1.15;
+      transition:.15s transform,.15s box-shadow,.15s background;
+    }
+
+    .pill:hover,.btn:hover{
+      transform:translateY(-1px);
+      box-shadow:0 10px 22px rgba(34,48,44,.11);
+      background:#fff;
+    }
+
+    .btn-main{border-color:transparent;background:var(--main);color:#fff;box-shadow:0 14px 28px rgba(31,143,101,.24)}
+    .btn-sub{border-color:#bfe3cc;background:var(--green-soft);color:#11704c}
+    .btn-warn{border-color:#efd89e;background:var(--amber-soft);color:var(--amber)}
+    .btn-danger{border-color:#ecc0bc;background:var(--red-soft);color:#9f3939}
+    .btn:disabled{opacity:.56;cursor:not-allowed;transform:none;box-shadow:none}
+
+    .hero{
+      display:grid;
+      grid-template-columns:1.08fr .92fr;
+      gap:18px;
+      align-items:stretch;
+      margin-bottom:18px;
+    }
+
+    .card{
+      border:1px solid rgba(217,210,196,.88);
+      border-radius:var(--radius);
+      background:rgba(255,255,255,.92);
+      box-shadow:var(--shadow);
+      padding:clamp(18px,2.5vw,28px);
+    }
+
+    .hero-card{
+      position:relative;
+      overflow:hidden;
+      border-radius:32px;
+      background:
+        linear-gradient(135deg,rgba(34,59,52,.98),rgba(31,143,101,.92)),
+        radial-gradient(circle at 86% 10%,rgba(255,255,255,.22),transparent 24%);
+      color:#fff;
+      padding:clamp(22px,3.6vw,42px);
+      box-shadow:var(--shadow);
+    }
+
+    .hero-card::after{
+      content:"QUEUE";
+      position:absolute;
+      right:-20px;
+      bottom:-30px;
+      font-size:clamp(68px,12vw,150px);
+      font-weight:1000;
+      letter-spacing:.06em;
+      opacity:.06;
+      pointer-events:none;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      border-radius:999px;
+      padding:8px 12px;
+      background:rgba(255,255,255,.14);
+      border:1px solid rgba(255,255,255,.24);
+      color:#fff;
+      font-size:12px;
+      font-weight:950;
+      letter-spacing:.04em;
+      margin-bottom:14px;
+    }
+
+    .badge-dark{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      border-radius:999px;
+      padding:7px 11px;
+      background:var(--green-soft);
+      color:#11704c;
+      font-size:12px;
+      font-weight:950;
+      margin-bottom:12px;
+    }
+
+    h1{
+      position:relative;
+      z-index:1;
+      margin:0 0 14px;
+      font-size:clamp(31px,4.4vw,58px);
+      line-height:1.08;
+      letter-spacing:-.055em;
+    }
+
+    h2{
+      margin:0 0 12px;
+      font-size:clamp(22px,2.8vw,34px);
+      line-height:1.2;
+      letter-spacing:-.03em;
+    }
+
+    h3{
+      margin:0 0 8px;
+      font-size:20px;
+      line-height:1.3;
+    }
+
+    .lead{
+      position:relative;
+      z-index:1;
+      margin:0;
+      color:rgba(255,255,255,.88);
+      font-size:clamp(14px,1.7vw,17px);
+      font-weight:770;
+      line-height:1.9;
+    }
+
+    .plain-lead{
+      margin:0;
+      color:#5a6862;
+      font-size:14px;
+      font-weight:780;
+      line-height:1.8;
+    }
+
+    .auth-box{
+      display:grid;
+      grid-template-columns:1fr auto auto;
+      gap:8px;
+      align-items:center;
+      margin-top:14px;
+    }
+
+    .section-title{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-end;
+      gap:12px;
+      margin:26px 0 12px;
+    }
+
+    .section-title h2{margin:0}
+    .section-title p{
+      margin:0;
+      color:var(--muted);
+      text-align:right;
+      font-size:13px;
+      font-weight:850;
+    }
+
+    .status-grid{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:10px;
+      margin-top:12px;
+    }
+
+    .metric{
+      border:1px solid rgba(217,210,196,.86);
+      border-radius:18px;
+      background:#fffdf9;
+      padding:13px;
+      min-height:84px;
+    }
+
+    .metric small{
+      display:block;
+      color:var(--muted);
+      font-weight:950;
+      font-size:12px;
+    }
+
+    .metric b{
+      display:block;
+      font-size:26px;
+      line-height:1.2;
+      letter-spacing:-.04em;
+      margin-top:2px;
+    }
+
+    .metric span{
+      display:block;
+      color:#62706a;
+      font-size:12px;
+      font-weight:850;
+      margin-top:2px;
+    }
+
+    .level{
+      display:inline-flex;
+      align-items:center;
+      gap:7px;
+      padding:8px 12px;
+      border-radius:999px;
+      font-size:13px;
+      font-weight:950;
+    }
+
+    .level.quiet{background:var(--green-soft);color:#11704c}
+    .level.moderate{background:var(--amber-soft);color:#8b5b0e}
+    .level.crowded{background:var(--red-soft);color:#a43e32}
+    .level.reception_closed,.level.emergency,.level.closed{background:#f1f1f1;color:#3e4542}
+
+    .notice{
+      border-radius:16px;
+      padding:12px;
+      margin-top:12px;
+      font-size:13px;
+      font-weight:850;
+      line-height:1.65;
+      background:var(--amber-soft);
+      border:1px solid #efd89e;
+      color:var(--amber);
+    }
+
+    .notice.ok{background:var(--green-soft);border-color:#bfe3cc;color:#11704c}
+    .notice.ng{background:var(--red-soft);border-color:#ecc0bc;color:#9f3939}
+    .notice.info{background:var(--blue-soft);border-color:#bdd5ef;color:#2d68a6}
+
+    .layout{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:16px;
+      align-items:start;
+    }
+
+    .form-grid{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:12px;
+    }
+
+    .form-row{
+      display:block;
+    }
+
+    .form-row.full{
+      grid-column:1 / -1;
+    }
+
+    label{
+      display:block;
+      margin-bottom:6px;
+      color:#46534d;
+      font-size:13px;
+      font-weight:950;
+    }
+
+    input,select,textarea{
+      width:100%;
+      border:1px solid #d8d0c0;
+      border-radius:15px;
+      padding:11px 12px;
+      background:#fff;
+      color:var(--ink);
+      font-size:14px;
+      font-weight:800;
+      outline:none;
+      transition:.15s border-color,.15s box-shadow;
+    }
+
+    input[type="time"]{
+      padding:10px 12px;
+    }
+
+    textarea{
+      min-height:90px;
+      resize:vertical;
+      line-height:1.6;
+    }
+
+    input:focus,select:focus,textarea:focus{
+      border-color:rgba(31,143,101,.65);
+      box-shadow:0 0 0 4px rgba(31,143,101,.11);
+    }
+
+    .toggle-row{
+      display:grid;
+      gap:10px;
+    }
+
+    .toggle{
+      display:grid;
+      grid-template-columns:auto 1fr;
+      gap:10px;
+      align-items:start;
+      border:1px solid rgba(217,210,196,.88);
+      background:#fffdf9;
+      border-radius:18px;
+      padding:12px;
+    }
+
+    .toggle input{
+      width:22px;
+      height:22px;
+      margin-top:2px;
+      accent-color:var(--main);
+    }
+
+    .toggle strong{
+      display:block;
+      font-size:15px;
+      line-height:1.35;
+    }
+
+    .toggle span{
+      display:block;
+      color:#62706a;
+      font-size:12px;
+      font-weight:780;
+      line-height:1.6;
+      margin-top:3px;
+    }
+
+    .preset-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top:14px;
+    }
+
+    .button-row{
+      display:flex;
+      flex-wrap:wrap;
+      align-items:center;
+      gap:10px;
+      margin-top:16px;
+    }
+
+    .api-status{
+      margin-left:auto;
+      color:var(--muted);
+      font-size:12px;
+      font-weight:850;
+    }
+
+    .guide-list{
+      display:grid;
+      gap:10px;
+    }
+
+    .guide{
+      border:1px solid rgba(217,210,196,.88);
+      border-radius:18px;
+      background:#fffdf9;
+      padding:13px;
+    }
+
+    .guide b{
+      display:block;
+      font-size:15px;
+      margin-bottom:4px;
+    }
+
+    .guide span{
+      display:block;
+      color:#62706a;
+      font-size:12px;
+      font-weight:780;
+      line-height:1.65;
+    }
+
+    .footer-note{
+      margin-top:18px;
+      border:1px solid rgba(217,210,196,.88);
+      background:rgba(255,255,255,.78);
+      border-radius:22px;
+      padding:14px;
+      color:#56645e;
+      font-size:13px;
+      font-weight:780;
+      line-height:1.7;
+    }
+
+    @media(max-width:980px){
+      .hero,.layout{grid-template-columns:1fr}
+      .status-grid{grid-template-columns:repeat(2,1fr)}
+      .section-title{align-items:flex-start;flex-direction:column}
+      .section-title p{text-align:left}
+    }
+
+    @media(max-width:640px){
+      .topbar{align-items:flex-start;flex-direction:column}
+      .actions{justify-content:flex-start}
+      .auth-box,.form-grid,.status-grid{grid-template-columns:1fr}
+      .brand strong{white-space:normal}
+      .hero-card,.card{border-radius:22px}
+      .api-status{margin-left:0;width:100%}
+    }
+  </style>
+</head>
+
+<body>
+  <main class="page">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo">⚙️</div>
+        <div>
+          <small>受付設定・順番受付管理</small>
+          <strong>DPRO PET CARE LINE</strong>
+        </div>
+      </div>
+
+      <nav class="actions" aria-label="関連画面">
+        <a class="pill" href="./index.html?v=step-vet-21">管理トップ</a>
+        <a class="pill" href="./waiting.html?demo=true&v=step-vet-21">飼い主受付</a>
+        <a class="pill" href="./owner.html?v=step-vet-21">オーナー画面</a>
+        <a class="pill" href="./system-check.html?v=step-vet-21">システム確認</a>
+      </nav>
+    </header>
+
+    <section class="hero">
+      <div class="hero-card">
+        <span class="badge">STEP VET-21｜受付ルール設定</span>
+        <h1>病院ごとに、<br>受付の出し方を変えられる。</h1>
+        <p class="lead">
+          今日の順番受付、後日の午前1番・午後1番の優先受付予約、お薬・予防受付、混雑目安のしきい値をここで設定します。
+          ソトマチ対抗の「痒いところに手が届く」運用ルールを、病院ごとに調整できます。
+        </p>
+      </div>
+
+      <div class="card">
+        <span class="badge-dark">現在の混雑目安</span>
+        <span id="levelBadge" class="level quiet">読み込み中</span>
+        <div class="status-grid">
+          <div class="metric">
+            <small>通常診察</small>
+            <b id="generalExamCount">-</b>
+            <span>診察・再診</span>
+          </div>
+          <div class="metric">
+            <small>現在診察中</small>
+            <b id="currentExamNumber">-</b>
+            <span>受付番号</span>
+          </div>
+          <div class="metric">
+            <small>お薬・予防</small>
+            <b id="medicineCount">-</b>
+            <span>薬・フード等</span>
+          </div>
+          <div class="metric">
+            <small>ケア・優先枠</small>
+            <b id="careReserveCount">-</b>
+            <span>処置・後日予約</span>
+          </div>
+        </div>
+        <div id="summaryMessage" class="notice info">混雑状況を読み込み中です。</div>
+
+        <div id="authStatus" class="notice">管理コード確認中</div>
+        <div class="auth-box">
+          <input id="adminTokenInput" type="password" placeholder="管理コードを入力" autocomplete="off" />
+          <button class="btn btn-main" id="saveAdminTokenBtn" type="button">保存</button>
+          <button class="btn btn-danger" id="clearAdminTokenBtn" type="button">削除</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="section-title">
+      <h2>受付機能のON/OFF</h2>
+      <p>病院の運用に合わせて、使う入口だけ表示できます。</p>
+    </div>
+
+    <section class="layout">
+      <div class="card">
+        <div class="toggle-row">
+          <label class="toggle">
+            <input id="same_day_queue_enabled" type="checkbox" />
+            <span>
+              <strong>今日の順番受付を使う</strong>
+              <span>今日診てもらいたい飼い主さんが受付番号を取れるようにします。</span>
+            </span>
+          </label>
+
+          <label class="toggle">
+            <input id="priority_reservation_enabled" type="checkbox" />
+            <span>
+              <strong>優先受付予約を使う</strong>
+              <span>後日の午前1番・午後1番の優先受付枠を取れるようにします。</span>
+            </span>
+          </label>
+
+          <label class="toggle">
+            <input id="medicine_prevention_enabled" type="checkbox" />
+            <span>
+              <strong>お薬・予防受付を使う</strong>
+              <span>薬・フード、予防薬、ワクチン、健康診断を通常診察と分けます。</span>
+            </span>
+          </label>
+
+          <label class="toggle">
+            <input id="congestion_public_enabled" type="checkbox" />
+            <span>
+              <strong>混雑目安を公開する</strong>
+              <span>飼い主受付画面に「空いています / やや混雑 / 混雑」を表示します。</span>
+            </span>
+          </label>
+        </div>
+
+        <div class="preset-row">
+          <button class="btn btn-sub" id="presetStandard" type="button">おすすめ設定</button>
+          <button class="btn btn-warn" id="presetSmall" type="button">小規模病院向け</button>
+          <button class="btn btn-danger" id="presetLimit" type="button">混雑抑制設定</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>設定の考え方</h2>
+        <div class="guide-list">
+          <div class="guide">
+            <b>今日の順番受付</b>
+            <span>当日行きたい人向け。通常診察・再診・体調不良などに使います。</span>
+          </div>
+          <div class="guide">
+            <b>優先受付予約</b>
+            <span>時間予約ではなく、後日の午前1番・午後1番の優先受付枠です。急患対応で前後する注意文は必須です。</span>
+          </div>
+          <div class="guide">
+            <b>お薬・予防受付</b>
+            <span>薬だけ・予防薬・ワクチンなどを通常診察の待ち人数に混ぜず、飼い主さんに分かりやすくします。</span>
+          </div>
+          <div class="guide">
+            <b>混雑目安</b>
+            <span>正確な待ち時間ではなく、診察待ち件数から安全な目安だけを表示します。</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="section-title">
+      <h2>今日の順番受付</h2>
+      <p>当日の午前・午後の受付時間と上限数を設定します。</p>
+    </div>
+
+    <section class="card">
+      <div class="form-grid">
+        <div class="form-row">
+          <label for="same_day_morning_start">午前受付開始</label>
+          <input id="same_day_morning_start" type="time" />
+        </div>
+        <div class="form-row">
+          <label for="same_day_morning_end">午前受付終了</label>
+          <input id="same_day_morning_end" type="time" />
+        </div>
+        <div class="form-row">
+          <label for="same_day_afternoon_start">午後受付開始</label>
+          <input id="same_day_afternoon_start" type="time" />
+        </div>
+        <div class="form-row">
+          <label for="same_day_afternoon_end">午後受付終了</label>
+          <input id="same_day_afternoon_end" type="time" />
+        </div>
+        <div class="form-row">
+          <label for="same_day_morning_capacity">午前の受付上限</label>
+          <input id="same_day_morning_capacity" type="number" min="0" max="300" />
+        </div>
+        <div class="form-row">
+          <label for="same_day_afternoon_capacity">午後の受付上限</label>
+          <input id="same_day_afternoon_capacity" type="number" min="0" max="300" />
+        </div>
+      </div>
+    </section>
+
+    <div class="section-title">
+      <h2>優先受付予約・お薬予防受付</h2>
+      <p>後日1番枠と、薬・予防受付の受付上限を設定します。</p>
+    </div>
+
+    <section class="card">
+      <div class="form-grid">
+        <div class="form-row">
+          <label for="priority_future_days">何日先まで予約可能</label>
+          <input id="priority_future_days" type="number" min="1" max="180" />
+        </div>
+        <div class="form-row">
+          <label for="medicine_prevention_daily_capacity">お薬・予防受付の1日上限</label>
+          <input id="medicine_prevention_daily_capacity" type="number" min="0" max="300" />
+        </div>
+        <div class="form-row">
+          <label for="priority_morning_capacity">午前1番枠の件数</label>
+          <input id="priority_morning_capacity" type="number" min="0" max="20" />
+        </div>
+        <div class="form-row">
+          <label for="priority_afternoon_capacity">午後1番枠の件数</label>
+          <input id="priority_afternoon_capacity" type="number" min="0" max="20" />
+        </div>
+      </div>
+      <div class="notice">
+        優先受付予約は、診察開始時刻を保証する時間予約ではありません。飼い主画面にも注意文を表示します。
+      </div>
+    </section>
+
+    <div class="section-title">
+      <h2>混雑目安</h2>
+      <p>通常診察の待ち件数に応じて、自動表示の基準を設定します。</p>
+    </div>
+
+    <section class="card">
+      <div class="form-grid">
+        <div class="form-row">
+          <label for="auto_congestion_moderate_threshold">やや混雑にする待ち件数</label>
+          <input id="auto_congestion_moderate_threshold" type="number" min="0" max="100" />
+        </div>
+        <div class="form-row">
+          <label for="auto_congestion_crowded_threshold">混雑にする待ち件数</label>
+          <input id="auto_congestion_crowded_threshold" type="number" min="0" max="200" />
+        </div>
+      </div>
+    </section>
+
+    <div class="section-title">
+      <h2>飼い主さんに表示する注意文</h2>
+      <p>トラブル防止のため、必ず分かりやすく表示します。</p>
+    </div>
+
+    <section class="card">
+      <div class="form-grid">
+        <div class="form-row full">
+          <label for="public_note">順番受付の注意文</label>
+          <textarea id="public_note"></textarea>
+        </div>
+        <div class="form-row full">
+          <label for="priority_note">優先受付予約の注意文</label>
+          <textarea id="priority_note"></textarea>
+        </div>
+        <div class="form-row full">
+          <label for="medicine_note">お薬・予防受付の注意文</label>
+          <textarea id="medicine_note"></textarea>
+        </div>
+      </div>
+
+      <div class="button-row">
+        <button class="btn btn-main" id="saveSettingsBtn" type="button">受付設定を保存</button>
+        <button class="btn btn-sub" id="reloadBtn" type="button">再読み込み</button>
+        <a class="btn" href="./waiting.html?demo=true&v=step-vet-21">飼い主画面で確認</a>
+        <span class="api-status" id="apiStatus">未読み込み</span>
+      </div>
+    </section>
+
+    <div class="footer-note">
+      STEP VET-21 は、既存の admin.html を壊さないために、新しい admin-queue.html として追加します。
+      飼い主・ペット管理は従来の admin.html、受付ルールはこの admin-queue.html で管理します。
+    </div>
+  </main>
+
+  <script>
+    const CONFIG = window.DPRO_CONFIG || {};
+    const API_BASE_URL = (CONFIG.API_BASE_URL || "https://dpro-vet-qr-api.dpromstk2000.workers.dev").replace(/\/$/, "");
+    const CLINIC_CODE = CONFIG.CLINIC_CODE || CONFIG.DEFAULT_CLINIC_CODE || "dpro_vet_demo";
+    const ADMIN_TOKEN_KEYS = ["DPRO_VET_ADMIN_TOKEN", "dpro_vet_admin_token", "DPRO_ADMIN_TOKEN", "dpro_admin_token"];
+
+    const fields = [
+      "same_day_queue_enabled",
+      "same_day_morning_start",
+      "same_day_morning_end",
+      "same_day_afternoon_start",
+      "same_day_afternoon_end",
+      "same_day_morning_capacity",
+      "same_day_afternoon_capacity",
+      "priority_reservation_enabled",
+      "priority_future_days",
+      "priority_morning_capacity",
+      "priority_afternoon_capacity",
+      "medicine_prevention_enabled",
+      "medicine_prevention_daily_capacity",
+      "congestion_public_enabled",
+      "auto_congestion_moderate_threshold",
+      "auto_congestion_crowded_threshold",
+      "public_note",
+      "priority_note",
+      "medicine_note"
+    ];
+
+    const numberFields = new Set([
+      "same_day_morning_capacity",
+      "same_day_afternoon_capacity",
+      "priority_future_days",
+      "priority_morning_capacity",
+      "priority_afternoon_capacity",
+      "medicine_prevention_daily_capacity",
+      "auto_congestion_moderate_threshold",
+      "auto_congestion_crowded_threshold"
+    ]);
+
+    const checkboxFields = new Set([
+      "same_day_queue_enabled",
+      "priority_reservation_enabled",
+      "medicine_prevention_enabled",
+      "congestion_public_enabled"
+    ]);
+
+    function todayString(){
+      const d = new Date();
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return `${y}-${m}-${day}`;
+    }
+
+    function getAdminToken(){
+      if (CONFIG.getAdminToken && typeof CONFIG.getAdminToken === "function") {
+        const v = CONFIG.getAdminToken();
+        if (v) return v;
+      }
+      for (const key of ADMIN_TOKEN_KEYS) {
+        const v = localStorage.getItem(key);
+        if (v) return v;
+      }
+      return "";
+    }
+
+    function saveAdminToken(token){
+      const value = String(token || "").trim();
+      if (!value) return;
+      localStorage.setItem("DPRO_VET_ADMIN_TOKEN", value);
+      localStorage.setItem("dpro_vet_admin_token", value);
+    }
+
+    function clearAdminToken(){
+      ADMIN_TOKEN_KEYS.forEach(key => localStorage.removeItem(key));
+    }
+
+    function headers(json=false, admin=false){
+      const h = {};
+      if (json) h["Content-Type"] = "application/json";
+      const token = getAdminToken();
+      if (admin && token) {
+        h["x-admin-token"] = token;
+        h["X-Admin-Token"] = token;
+        h["Authorization"] = "Bearer " + token;
+      }
+      return h;
+    }
+
+    function setStatus(message, ok=true){
+      const el = document.getElementById("apiStatus");
+      el.textContent = message;
+      el.style.color = ok ? "#11704c" : "#9f3939";
+    }
+
+    function renderAuthStatus(){
+      const token = getAdminToken();
+      const box = document.getElementById("authStatus");
+      box.className = token ? "notice ok" : "notice";
+      box.textContent = token
+        ? "管理コード保存済みです。受付設定を保存できます。"
+        : "管理コード未保存です。保存するには管理コードを入力してください。";
+    }
+
+    async function apiGet(path, params={}, admin=false){
+      const url = new URL(API_BASE_URL + path);
+      Object.entries({ clinic_code: CLINIC_CODE, ...params }).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== "") url.searchParams.set(key, value);
+      });
+      const res = await fetch(url.toString(), { method:"GET", headers:headers(false, admin) });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.ok === false) {
+        throw new Error(data.message || data.error || `API Error ${res.status}`);
+      }
+      return data;
+    }
+
+    async function apiPost(path, body={}, admin=true){
+      const res = await fetch(API_BASE_URL + path, {
+        method:"POST",
+        headers:headers(true, admin),
+        body:JSON.stringify({ clinic_code: CLINIC_CODE, ...body })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.ok === false) {
+        throw new Error(data.message || data.error || `API Error ${res.status}`);
+      }
+      return data;
+    }
+
+    function setValue(id, value){
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (checkboxFields.has(id)) {
+        el.checked = Boolean(value);
+      } else if (value !== undefined && value !== null) {
+        el.value = String(value).slice(0, id.includes("_start") || id.includes("_end") ? 5 : undefined);
+      }
+    }
+
+    function getPayload(){
+      const payload = { staff_name:"admin-queue.html" };
+      fields.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+
+        if (checkboxFields.has(id)) {
+          payload[id] = el.checked;
+        } else if (numberFields.has(id)) {
+          payload[id] = Number(el.value || 0);
+        } else {
+          payload[id] = el.value;
+        }
+      });
+      return payload;
+    }
+
+    function applySettings(settings){
+      fields.forEach(id => {
+        if (settings && Object.prototype.hasOwnProperty.call(settings, id)) {
+          setValue(id, settings[id]);
+        }
+      });
+
+      // DBにまだ値がない時の保険
+      const defaults = {
+        same_day_queue_enabled:true,
+        same_day_morning_start:"08:30",
+        same_day_morning_end:"11:30",
+        same_day_afternoon_start:"15:30",
+        same_day_afternoon_end:"18:30",
+        same_day_morning_capacity:40,
+        same_day_afternoon_capacity:40,
+        priority_reservation_enabled:true,
+        priority_future_days:30,
+        priority_morning_capacity:1,
+        priority_afternoon_capacity:1,
+        medicine_prevention_enabled:true,
+        medicine_prevention_daily_capacity:99,
+        congestion_public_enabled:true,
+        auto_congestion_moderate_threshold:3,
+        auto_congestion_crowded_threshold:8,
+        public_note:"急患対応や診療内容により順番が前後する場合があります。",
+        priority_note:"優先受付予約は診察開始時刻を保証するものではありません。午前・午後の優先受付枠です。",
+        medicine_note:"お薬・フードのみでも、診察が必要と判断された場合は通常診察へ切り替わる場合があります。"
+      };
+
+      fields.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        if ((checkboxFields.has(id) && settings?.[id] === undefined) || (!checkboxFields.has(id) && !el.value)) {
+          setValue(id, defaults[id]);
+        }
+      });
+    }
+
+    function renderSummary(summary){
+      const level = summary?.display_level || "quiet";
+      const label = summary?.display_level_label || "空いています";
+
+      document.getElementById("levelBadge").className = `level ${level}`;
+      document.getElementById("levelBadge").textContent = label;
+      document.getElementById("generalExamCount").textContent = Number(summary?.general_exam_count || 0) + "組";
+      document.getElementById("currentExamNumber").textContent = summary?.current_exam_number ? String(summary.current_exam_number) + "番" : "-";
+      document.getElementById("medicineCount").textContent = Number(summary?.medicine_prevention_count || 0) + "件";
+
+      const careReserve = Number(summary?.care_count || 0) + Number(summary?.priority_reservation_count || 0) + Number(summary?.grooming_surgery_count || 0);
+      document.getElementById("careReserveCount").textContent = careReserve + "件";
+
+      const msg = document.getElementById("summaryMessage");
+      msg.textContent = summary?.display_message || "混雑状況を確認できます。";
+      msg.className = level === "crowded" || level === "reception_closed" || level === "emergency" ? "notice ng" : "notice ok";
+    }
+
+    async function loadAll(){
+      setStatus("読み込み中...");
+      const [settingsData, summaryData] = await Promise.all([
+        apiGet("/api/admin/queue/settings", {}, true),
+        apiGet("/api/public/queue/summary", { date: todayString() }, false)
+      ]);
+
+      applySettings(settingsData.settings || {});
+      renderSummary(summaryData.summary || summaryData.items?.[0] || {});
+      setStatus("読み込みOK");
+    }
+
+    async function saveSettings(){
+      if (!getAdminToken()) {
+        alert("先に管理コードを保存してください。");
+        return;
+      }
+
+      const btn = document.getElementById("saveSettingsBtn");
+      btn.disabled = true;
+      btn.textContent = "保存中...";
+      try {
+        const data = await apiPost("/api/admin/queue/settings", getPayload(), true);
+        applySettings(data.settings || {});
+        setStatus("保存OK");
+        alert("受付設定を保存しました。");
+      } catch (error) {
+        setStatus("保存エラー", false);
+        alert(error.message || "保存に失敗しました。");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "受付設定を保存";
+      }
+    }
+
+    function applyPreset(type){
+      const presets = {
+        standard:{
+          same_day_queue_enabled:true,
+          same_day_morning_start:"08:30",
+          same_day_morning_end:"11:30",
+          same_day_afternoon_start:"15:30",
+          same_day_afternoon_end:"18:30",
+          same_day_morning_capacity:40,
+          same_day_afternoon_capacity:40,
+          priority_reservation_enabled:true,
+          priority_future_days:30,
+          priority_morning_capacity:1,
+          priority_afternoon_capacity:1,
+          medicine_prevention_enabled:true,
+          medicine_prevention_daily_capacity:99,
+          congestion_public_enabled:true,
+          auto_congestion_moderate_threshold:3,
+          auto_congestion_crowded_threshold:8
+        },
+        small:{
+          same_day_queue_enabled:true,
+          same_day_morning_start:"08:45",
+          same_day_morning_end:"11:00",
+          same_day_afternoon_start:"15:45",
+          same_day_afternoon_end:"18:00",
+          same_day_morning_capacity:20,
+          same_day_afternoon_capacity:20,
+          priority_reservation_enabled:true,
+          priority_future_days:21,
+          priority_morning_capacity:1,
+          priority_afternoon_capacity:1,
+          medicine_prevention_enabled:true,
+          medicine_prevention_daily_capacity:50,
+          congestion_public_enabled:true,
+          auto_congestion_moderate_threshold:2,
+          auto_congestion_crowded_threshold:6
+        },
+        limit:{
+          same_day_queue_enabled:true,
+          same_day_morning_start:"08:45",
+          same_day_morning_end:"10:45",
+          same_day_afternoon_start:"15:45",
+          same_day_afternoon_end:"17:30",
+          same_day_morning_capacity:15,
+          same_day_afternoon_capacity:15,
+          priority_reservation_enabled:true,
+          priority_future_days:14,
+          priority_morning_capacity:1,
+          priority_afternoon_capacity:1,
+          medicine_prevention_enabled:true,
+          medicine_prevention_daily_capacity:40,
+          congestion_public_enabled:true,
+          auto_congestion_moderate_threshold:2,
+          auto_congestion_crowded_threshold:5
+        }
+      };
+
+      const p = presets[type];
+      Object.entries(p).forEach(([key, value]) => setValue(key, value));
+
+      setValue("public_note", "急患対応や診療内容により順番が前後する場合があります。順番が近づきましたら、院内受付までお越しください。");
+      setValue("priority_note", "優先受付予約は診察開始時刻を保証するものではありません。午前・午後の優先受付枠です。急患対応などにより順番が前後する場合があります。");
+      setValue("medicine_note", "お薬・フードのみでも、診察が必要と判断された場合は通常診察へ切り替わる場合があります。");
+    }
+
+    function init(){
+      renderAuthStatus();
+
+      document.getElementById("saveAdminTokenBtn").addEventListener("click", () => {
+        saveAdminToken(document.getElementById("adminTokenInput").value);
+        document.getElementById("adminTokenInput").value = "";
+        renderAuthStatus();
+        loadAll().catch(error => {
+          setStatus("読み込みエラー", false);
+          alert(error.message || "読み込みに失敗しました。");
+        });
+      });
+
+      document.getElementById("clearAdminTokenBtn").addEventListener("click", () => {
+        clearAdminToken();
+        renderAuthStatus();
+      });
+
+      document.getElementById("reloadBtn").addEventListener("click", () => {
+        loadAll().catch(error => {
+          setStatus("読み込みエラー", false);
+          alert(error.message || "読み込みに失敗しました。");
+        });
+      });
+
+      document.getElementById("saveSettingsBtn").addEventListener("click", saveSettings);
+
+      document.getElementById("presetStandard").addEventListener("click", () => applyPreset("standard"));
+      document.getElementById("presetSmall").addEventListener("click", () => applyPreset("small"));
+      document.getElementById("presetLimit").addEventListener("click", () => applyPreset("limit"));
+
+      loadAll().catch(error => {
+        setStatus("読み込みエラー", false);
+        applyPreset("standard");
+        renderSummary({});
+        console.error(error);
+      });
+    }
+
+    init();
+  </script>
+</body>
+</html>
