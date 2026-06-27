@@ -45,16 +45,17 @@
     <header class="topbar">
       <div class="brand"><div class="logo">📊</div><div><small>オーナー管理画面</small><strong>DPRO PET CARE LINE</strong></div></div>
       <nav class="actions">
-        <a class="pill-link" href="./waiting.html?demo=true&v=step-vet-17">飼い主受付</a>
-        <a class="pill-link" href="./scan-ipad.html?v=step-vet-17">受付iPad</a>
-        <a class="pill-link" href="./doctor.html?v=step-vet-17">獣医師画面</a>
-        <a class="pill-link" href="./admin.html?v=step-vet-17">管理設定</a>
+        <a class="pill-link" href="./waiting.html?demo=true&v=step-vet-22">飼い主受付</a>
+        <a class="pill-link" href="./scan-ipad.html?v=step-vet-22">受付iPad</a>
+        <a class="pill-link" href="./doctor.html?v=step-vet-22">獣医師画面</a>
+        <a class="pill-link" href="./admin-queue.html?v=step-vet-22">受付設定</a>
+        <a class="pill-link" href="./admin.html?v=step-vet-22">管理設定</a>
       </nav>
     </header>
 
     <section class="hero">
       <div class="card">
-        <span class="badge">STEP VET-17｜院内管理に順番受付を反映</span>
+        <span class="badge">STEP VET-22｜受付設定導線追加</span>
         <h1>通常診察・お薬予防・ケアを分けて、混雑を見える化。</h1>
         <p class="lead">ソトマチのように合計人数だけを見せるのではなく、診察負荷ごとに分けて管理します。受付終了・急患対応中などの手動表示もここから変更できます。</p>
         <div id="authStatus" class="notice">管理コード確認中</div>
@@ -103,6 +104,7 @@
         <div class="entry-actions" style="justify-content:flex-start;max-width:none;margin-top:12px;">
           <button class="btn btn-main" id="saveCongestionBtn" type="button">混雑表示を保存</button>
           <button class="btn btn-sub" id="autoCongestionBtn" type="button">自動判定に戻す</button>
+          <a class="btn btn-sub" href="./admin-queue.html?v=step-vet-22">受付ルール設定へ</a>
           <button class="btn btn-warn" id="resetDemoBtn" type="button">DEMO受付リセット</button>
         </div>
       </div>
@@ -131,7 +133,7 @@
       <div id="entryList" class="entry-list"><div class="empty">読み込み中です。</div></div>
     </section>
 
-    <div class="footer-note">STEP VET-17：オーナー画面に、順番受付・優先受付予約・お薬予防受付・混雑目安の管理を追加しました。</div>
+    <div class="footer-note">STEP VET-22：オーナー画面から受付設定 admin-queue.html へ移動できるようにしました。</div>
   </main>
   <script>
 
