@@ -614,10 +614,10 @@
       </div>
 
       <nav class="top-actions" aria-label="デモ画面リンク">
-        <a class="pill-link" href="./index.html?v=step-vet-13">管理トップ</a>
-        <a class="pill-link" href="./member.html?demo=true&v=step-vet-13">ペット診察券</a>
-        <a class="pill-link" href="./owner.html?v=step-vet-13">オーナー画面</a>
-        <a class="pill-link" href="./system-check.html?v=step-vet-13">システム確認</a>
+        <a class="pill-link" href="./index.html?v=step-vet-20">管理トップ</a>
+        <a class="pill-link" href="./member.html?demo=true&v=step-vet-20">ペット診察券</a>
+        <a class="pill-link" href="./owner.html?v=step-vet-20">オーナー画面</a>
+        <a class="pill-link" href="./system-check.html?v=step-vet-20">システム確認</a>
       </nav>
     </header>
 
@@ -673,7 +673,7 @@
       <div>
         <h2>飼い主さん用リッチメニュー 6分割</h2>
       </div>
-      <p>STEP VET-13：痒いところに手が届く受付導線へ変更</p>
+      <p>STEP VET-20：実際に動くLINEリッチメニュー導線</p>
     </div>
 
     <section class="menu-board" id="menuBoard">
@@ -688,7 +688,7 @@
         <div class="tile-icon">🏥</div>
         <h3>今日の順番受付</h3>
         <p>今日診てもらいたい時に、来院目的と問診を入力して受付番号を取得。</p>
-        <span class="tile-tag">STEP VET-16 実装予定</span>
+        <span class="tile-tag">実装済み</span>
       </article>
 
       <article class="menu-tile" data-key="priority" tabindex="0" role="button" aria-label="優先受付予約">
@@ -779,8 +779,8 @@
     </section>
 
     <div class="footer-note">
-      このページはSTEP VET-13のリッチメニュー設計DEMOです。
-      「今日の順番受付」「優先受付予約」「お薬・予防受付」「混雑目安」の実データ保存は、次のSTEP VET-14以降でSupabase・Worker・waiting.htmlに追加します。
+      このページはSTEP VET-20のリッチメニュー実動線DEMOです。
+      「今日の順番受付」「優先受付予約」「お薬・予防受付」は、waiting.html へ直接つながります。混雑目安もAPIから取得済みの受付状況を表示します。
     </div>
   </main>
 
@@ -801,7 +801,7 @@
           "次回来院予定や診察後フォローも確認しやすい"
         ],
         buttons: [
-          { label: "ペット診察券DEMOを開く", href: "./member.html?demo=true&v=step-vet-13", primary: true }
+          { label: "ペット診察券DEMOを開く", href: "./member.html?demo=true&v=step-vet-20", primary: true }
         ],
         body: `
           <div class="sample-box">
@@ -817,7 +817,7 @@
         `
       },
       today: {
-        badge: "STEP VET-16 実装予定",
+        badge: "実装済み",
         title: "今日の順番受付",
         lead: "今日診てもらいたい時に、ペット・来院目的・問診を入力して受付番号を取ります。",
         screenTitle: "今日の順番受付 画面例",
@@ -828,7 +828,7 @@
           "診察開始時刻は保証せず、順番受付として案内する"
         ],
         buttons: [
-          { label: "STEP VET-16で waiting.html に実装", href: "#future", primary: false }
+          { label: "今日の順番受付を開く", href: "./waiting.html?demo=true&mode=today_queue&v=step-vet-20", primary: true }
         ],
         body: `
           <div class="sample-box">
@@ -854,7 +854,7 @@
           "時間予約ではないため、動物病院の実運用に合わせやすい"
         ],
         buttons: [
-          { label: "STEP VET-16で予約導線を実装", href: "#future", primary: false }
+          { label: "優先受付予約を開く", href: "./waiting.html?demo=true&mode=priority_reservation&v=step-vet-20", primary: true }
         ],
         body: `
           <div class="sample-box">
@@ -880,7 +880,7 @@
           "飼い主さんも『17人待ち』に不安になりにくい"
         ],
         buttons: [
-          { label: "STEP VET-16で受付フォームを実装", href: "#future", primary: false }
+          { label: "お薬・予防受付を開く", href: "./waiting.html?demo=true&mode=medicine_prevention&v=step-vet-20", primary: true }
         ],
         body: `
           <div class="sample-box">
@@ -906,7 +906,7 @@
           "正確な待ち時間ではなく、安全な混雑目安を表示する"
         ],
         buttons: [
-          { label: "STEP VET-14以降で混雑API追加", href: "#future", primary: false }
+          { label: "混雑目安を確認する", href: "./waiting.html?demo=true&v=step-vet-20", primary: true }
         ],
         body: `
           <div class="sample-box">
@@ -933,7 +933,7 @@
         ],
         buttons: [
           { label: "Googleマップで開く", href: "https://www.google.com/maps/search/?api=1&query=DPRO%E3%81%A9%E3%81%86%E3%81%B6%E3%81%A4%E7%97%85%E9%99%A2", primary: true },
-          { label: "管理画面で休診日を確認", href: "./admin.html?v=step-vet-13", primary: false }
+          { label: "管理画面で休診日を確認", href: "./admin.html?v=step-vet-20", primary: false }
         ],
         body: `
           <div class="sample-box">
@@ -990,7 +990,7 @@
         if (btn.href === "#future") {
           a.addEventListener("click", (event) => {
             event.preventDefault();
-            alert("この機能はSTEP VET-14以降で、Supabase・Worker・waiting.htmlに実装します。");
+            alert("このメニューは現在 waiting.html の実動線につながっています。");
           });
         }
         detailButtons.appendChild(a);
