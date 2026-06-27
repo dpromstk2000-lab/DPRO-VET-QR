@@ -1,0 +1,1046 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#06C755">
+  <title>DPRO PET CARE LINE｜LINE公式リッチメニューDEMO STEP VET-11</title>
+
+  <script src="./config.js"></script>
+
+  <style>
+    :root{
+      --line:#06C755;
+      --line-dark:#00a846;
+      --bg:#eef6f0;
+      --card:#ffffff;
+      --ink:#1f2a24;
+      --muted:#68746d;
+      --soft:#f8fbf8;
+      --main:#2f6f5e;
+      --main-dark:#243b35;
+      --gold:#b88a36;
+      --gold-soft:#fff6df;
+      --blue:#2d68a6;
+      --blue-soft:#edf5ff;
+      --green:#2f7a5b;
+      --green-soft:#e8f5ee;
+      --amber:#8a621f;
+      --amber-soft:#fff6de;
+      --red:#b84a4a;
+      --red-soft:#fff0ef;
+      --line-border:#dbe5dc;
+      --shadow:0 18px 44px rgba(35,64,50,.12);
+      --radius:24px;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;
+      color:var(--ink);
+      background:
+        radial-gradient(circle at top left,rgba(6,199,85,.16),transparent 32%),
+        radial-gradient(circle at 90% 16%,rgba(184,138,54,.12),transparent 28%),
+        linear-gradient(180deg,#fbfdfb 0%,var(--bg) 100%);
+    }
+
+    a{color:inherit;text-decoration:none}
+    button,input,select,textarea{font:inherit}
+    button{cursor:pointer}
+
+    .app{
+      width:min(1280px,100%);
+      margin:0 auto;
+      padding:18px 16px 38px;
+    }
+
+    .hero{
+      position:relative;
+      overflow:hidden;
+      border-radius:34px;
+      background:
+        linear-gradient(135deg,rgba(0,168,70,.98),rgba(47,111,94,.96)),
+        radial-gradient(circle at 84% 10%,rgba(255,255,255,.22),transparent 26%);
+      color:#fff;
+      padding:26px;
+      box-shadow:var(--shadow);
+    }
+
+    .hero::after{
+      content:"LINE";
+      position:absolute;
+      right:18px;
+      bottom:-22px;
+      font-size:104px;
+      font-weight:950;
+      letter-spacing:.08em;
+      opacity:.08;
+    }
+
+    .hero-top{
+      display:flex;
+      justify-content:space-between;
+      gap:24px;
+      align-items:flex-start;
+      position:relative;
+      z-index:1;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      border-radius:999px;
+      padding:8px 12px;
+      background:rgba(255,255,255,.14);
+      border:1px solid rgba(255,255,255,.24);
+      color:#fff;
+      font-size:12px;
+      font-weight:950;
+      letter-spacing:.04em;
+    }
+
+    h1{
+      margin:18px 0 10px;
+      font-size:38px;
+      line-height:1.12;
+      letter-spacing:.02em;
+    }
+
+    .hero p{
+      margin:0;
+      color:rgba(255,255,255,.9);
+      line-height:1.85;
+      font-size:15px;
+      max-width:760px;
+    }
+
+    .hero-actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:18px;
+      position:relative;
+      z-index:1;
+    }
+
+    .btn{
+      appearance:none;
+      border:none;
+      border-radius:999px;
+      padding:12px 16px;
+      min-height:48px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      background:var(--main);
+      color:#fff;
+      font-weight:950;
+      text-decoration:none;
+      box-shadow:0 12px 24px rgba(47,111,94,.18);
+    }
+
+    .btn.white{
+      background:#fff;
+      color:var(--main-dark);
+      box-shadow:0 12px 30px rgba(0,0,0,.12);
+    }
+
+    .btn.secondary{
+      background:#fff;
+      color:var(--main);
+      border:1px solid #cddbd2;
+      box-shadow:none;
+    }
+
+    .btn.line{
+      background:var(--line);
+      color:#fff;
+    }
+
+    .btn.blue{background:var(--blue);color:#fff}
+    .btn.warn{background:var(--amber);color:#fff}
+
+    .layout{
+      display:grid;
+      grid-template-columns:420px 1fr;
+      gap:18px;
+      margin-top:18px;
+      align-items:start;
+    }
+
+    .phone-wrap{
+      position:sticky;
+      top:14px;
+    }
+
+    .phone{
+      width:min(420px,100%);
+      margin:0 auto;
+      border-radius:42px;
+      padding:12px;
+      background:#17201c;
+      box-shadow:
+        0 28px 60px rgba(0,0,0,.22),
+        inset 0 0 0 1px rgba(255,255,255,.08);
+    }
+
+    .screen{
+      overflow:hidden;
+      border-radius:32px;
+      background:#edf7ef;
+      min-height:760px;
+      display:flex;
+      flex-direction:column;
+      position:relative;
+    }
+
+    .line-header{
+      background:var(--line);
+      color:#fff;
+      padding:12px 14px 10px;
+      display:grid;
+      gap:9px;
+    }
+
+    .statusbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      font-size:12px;
+      font-weight:900;
+      opacity:.95;
+    }
+
+    .chat-title{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+    }
+
+    .chat-title-main{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width:0;
+    }
+
+    .avatar{
+      width:38px;
+      height:38px;
+      border-radius:50%;
+      background:#fff;
+      color:var(--line);
+      display:grid;
+      place-items:center;
+      font-size:22px;
+      flex:none;
+      font-weight:950;
+    }
+
+    .name{
+      min-width:0;
+    }
+
+    .name strong{
+      display:block;
+      font-size:15px;
+      line-height:1.2;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .name span{
+      display:block;
+      font-size:11px;
+      opacity:.9;
+      margin-top:3px;
+    }
+
+    .icons{
+      display:flex;
+      gap:8px;
+      font-weight:950;
+      font-size:19px;
+    }
+
+    .chat{
+      flex:1;
+      padding:14px 12px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      overflow:hidden;
+    }
+
+    .date-chip{
+      align-self:center;
+      border-radius:999px;
+      padding:5px 9px;
+      background:rgba(0,0,0,.14);
+      color:#fff;
+      font-size:11px;
+      font-weight:900;
+    }
+
+    .bubble-row{
+      display:flex;
+      align-items:flex-start;
+      gap:8px;
+    }
+
+    .bubble-avatar{
+      width:30px;
+      height:30px;
+      border-radius:50%;
+      background:#fff;
+      color:var(--line);
+      display:grid;
+      place-items:center;
+      font-size:17px;
+      flex:none;
+    }
+
+    .bubble{
+      max-width:285px;
+      background:#fff;
+      border-radius:18px 18px 18px 4px;
+      padding:10px 12px;
+      line-height:1.6;
+      font-size:13px;
+      box-shadow:0 3px 9px rgba(0,0,0,.06);
+    }
+
+    .bubble strong{
+      color:var(--main-dark);
+    }
+
+    .bubble .mini{
+      margin-top:7px;
+      border-top:1px solid #e6efe8;
+      padding-top:7px;
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    .bubble-user{
+      align-self:flex-end;
+      background:#b8f3c5;
+      border-radius:18px 18px 4px 18px;
+      max-width:245px;
+      padding:9px 11px;
+      font-size:13px;
+      line-height:1.5;
+      box-shadow:0 3px 9px rgba(0,0,0,.05);
+    }
+
+    .rich-menu-toggle{
+      height:34px;
+      background:#fff;
+      border-top:1px solid #d7e2d9;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      color:#4f5b54;
+      font-size:12px;
+      font-weight:950;
+    }
+
+    .rich-menu{
+      background:#fff;
+      border-top:1px solid #d7e2d9;
+      padding:8px;
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:6px;
+    }
+
+    .rich-cell{
+      min-height:82px;
+      border:1px solid #e0e9e3;
+      border-radius:16px;
+      background:linear-gradient(180deg,#ffffff,#f8fbf8);
+      display:grid;
+      place-items:center;
+      text-align:center;
+      padding:7px;
+      color:var(--ink);
+      box-shadow:0 5px 12px rgba(35,64,50,.045);
+      transition:.15s ease;
+    }
+
+    .rich-cell:hover{
+      transform:translateY(-1px);
+      border-color:var(--line);
+    }
+
+    .rich-cell .emoji{
+      font-size:24px;
+      line-height:1;
+      margin-bottom:5px;
+    }
+
+    .rich-cell strong{
+      display:block;
+      font-size:12px;
+      line-height:1.25;
+    }
+
+    .rich-cell span{
+      display:block;
+      color:var(--muted);
+      font-size:9px;
+      line-height:1.25;
+      margin-top:3px;
+    }
+
+    .side{
+      display:grid;
+      gap:18px;
+    }
+
+    .panel{
+      background:#fff;
+      border:1px solid rgba(219,229,220,.92);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+
+    .panel-head{
+      padding:16px 18px;
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:center;
+      border-bottom:1px solid var(--line-border);
+      background:linear-gradient(180deg,#fff,#fbfdfb);
+    }
+
+    .panel-head h2{
+      margin:0;
+      font-size:22px;
+      line-height:1.25;
+    }
+
+    .panel-head small{
+      color:var(--muted);
+      font-weight:850;
+    }
+
+    .panel-body{
+      padding:16px;
+    }
+
+    .value-grid{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:10px;
+    }
+
+    .value-card{
+      border:1px solid #dde9e1;
+      border-radius:20px;
+      padding:14px;
+      background:#fff;
+      min-height:112px;
+      box-shadow:0 8px 18px rgba(35,64,50,.045);
+    }
+
+    .value-card .icon{
+      width:42px;
+      height:42px;
+      display:grid;
+      place-items:center;
+      border-radius:16px;
+      background:var(--green-soft);
+      color:var(--green);
+      font-size:23px;
+      margin-bottom:10px;
+    }
+
+    .value-card.gold .icon{background:var(--gold-soft);color:var(--gold)}
+    .value-card.blue .icon{background:var(--blue-soft);color:var(--blue)}
+    .value-card.warn .icon{background:var(--amber-soft);color:var(--amber)}
+
+    .value-card strong{
+      display:block;
+      font-size:15px;
+      margin-bottom:5px;
+    }
+
+    .value-card span{
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.65;
+    }
+
+    .menu-list{
+      display:grid;
+      gap:10px;
+    }
+
+    .menu-item{
+      display:grid;
+      grid-template-columns:48px 1fr auto;
+      gap:12px;
+      align-items:center;
+      border:1px solid #dde9e1;
+      border-radius:18px;
+      padding:12px;
+      background:#fff;
+      box-shadow:0 8px 18px rgba(35,64,50,.045);
+    }
+
+    .menu-icon{
+      width:44px;
+      height:44px;
+      border-radius:16px;
+      display:grid;
+      place-items:center;
+      background:var(--green-soft);
+      color:var(--green);
+      font-size:23px;
+    }
+
+    .menu-item strong{
+      display:block;
+      margin-bottom:3px;
+      font-size:15px;
+    }
+
+    .menu-item span{
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.55;
+    }
+
+    .tag{
+      display:inline-flex;
+      align-items:center;
+      border-radius:999px;
+      padding:5px 8px;
+      font-size:11px;
+      font-weight:950;
+      white-space:nowrap;
+      background:#eef2f7;
+      color:#46546c;
+    }
+
+    .tag.ok{background:var(--green-soft);color:var(--green)}
+    .tag.line{background:#e5fbea;color:var(--line-dark)}
+    .tag.warn{background:var(--amber-soft);color:var(--amber)}
+
+    .script{
+      display:grid;
+      gap:10px;
+      counter-reset:step;
+    }
+
+    .script-item{
+      counter-increment:step;
+      border:1px solid #dde9e1;
+      border-radius:18px;
+      background:#fff;
+      padding:12px;
+      display:grid;
+      grid-template-columns:38px 1fr;
+      gap:10px;
+      align-items:start;
+    }
+
+    .script-item::before{
+      content:counter(step);
+      width:30px;
+      height:30px;
+      display:grid;
+      place-items:center;
+      border-radius:50%;
+      background:var(--line);
+      color:#fff;
+      font-weight:950;
+    }
+
+    .script-item strong{
+      display:block;
+      margin-bottom:4px;
+    }
+
+    .script-item span{
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.65;
+    }
+
+    .notice{
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      border:1px solid #d6e8dc;
+      background:var(--green-soft);
+      color:#285a46;
+      border-radius:20px;
+      padding:13px;
+      line-height:1.65;
+      font-size:13px;
+    }
+
+    .notice.warn{
+      background:var(--amber-soft);
+      border-color:#edd89e;
+      color:#6d501b;
+    }
+
+    .copy-box{
+      width:100%;
+      min-height:122px;
+      border:1px solid #d8e4dc;
+      border-radius:15px;
+      padding:10px;
+      background:#fbfdfb;
+      color:#26332d;
+      line-height:1.65;
+      white-space:pre-wrap;
+      font-size:13px;
+      resize:vertical;
+    }
+
+    .debug{
+      margin-top:14px;
+      border:1px solid #dce8df;
+      border-radius:18px;
+      background:#fff;
+      overflow:hidden;
+    }
+
+    .debug summary{
+      cursor:pointer;
+      padding:12px 14px;
+      font-weight:900;
+      color:var(--muted);
+    }
+
+    .debug pre{
+      margin:0;
+      padding:14px;
+      overflow:auto;
+      background:#10251e;
+      color:#dff8e8;
+      font-size:12px;
+      line-height:1.6;
+      max-height:360px;
+    }
+
+    .toast{
+      position:fixed;
+      left:50%;
+      bottom:22px;
+      transform:translateX(-50%) translateY(20px);
+      opacity:0;
+      pointer-events:none;
+      background:rgba(31,42,36,.95);
+      color:#fff;
+      border-radius:999px;
+      padding:12px 16px;
+      font-weight:900;
+      box-shadow:0 18px 36px rgba(0,0,0,.2);
+      transition:.2s ease;
+      z-index:100;
+      max-width:calc(100% - 24px);
+      text-align:center;
+    }
+
+    .toast.show{
+      opacity:1;
+      transform:translateX(-50%) translateY(0);
+    }
+
+    @media (max-width:1050px){
+      .layout{grid-template-columns:1fr}
+      .phone-wrap{position:static}
+      .phone{max-width:420px}
+    }
+
+    @media (max-width:700px){
+      .app{padding:12px 10px 28px}
+      .hero{border-radius:26px;padding:22px 18px}
+      h1{font-size:29px}
+      .hero-top{display:block}
+      .value-grid{grid-template-columns:1fr}
+      .panel-head{display:block}
+      .panel-head .btn{margin-top:10px}
+      .menu-item{grid-template-columns:44px 1fr}
+      .menu-item .tag{grid-column:1 / -1;width:max-content}
+      .screen{min-height:720px}
+    }
+  </style>
+</head>
+
+<body>
+  <main class="app">
+    <section class="hero">
+      <div class="hero-top">
+        <div>
+          <div class="badge">LINE公式リッチメニューDEMO</div>
+          <h1>LINE公式に入れた時の見え方</h1>
+          <p>
+            DPRO PET CARE LINEを動物病院のLINE公式に入れると、飼い主さんはトーク画面下のリッチメニューから
+            診察券・受付・予防予定・再診フォロー・病院案内へすぐ進めます。
+          </p>
+          <div class="hero-actions">
+            <a class="btn white" id="memberTopLink" href="#">🎫 実際の診察券を開く</a>
+            <a class="btn white" id="indexTopLink" href="#">🏠 DEMOトップへ戻る</a>
+            <button class="btn warn" id="copyProposalBtn" type="button">営業トークをコピー</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="layout">
+      <section class="phone-wrap">
+        <div class="phone">
+          <div class="screen">
+            <div class="line-header">
+              <div class="statusbar">
+                <span>15:42</span>
+                <span>5G  🔋</span>
+              </div>
+              <div class="chat-title">
+                <div class="chat-title-main">
+                  <div class="avatar">🐾</div>
+                  <div class="name">
+                    <strong>DPROどうぶつ病院</strong>
+                    <span>LINE公式アカウント</span>
+                  </div>
+                </div>
+                <div class="icons">☎︎ ︙</div>
+              </div>
+            </div>
+
+            <div class="chat">
+              <div class="date-chip">今日</div>
+
+              <div class="bubble-row">
+                <div class="bubble-avatar">🐾</div>
+                <div class="bubble">
+                  <strong>ご来院ありがとうございます。</strong><br>
+                  ペット診察券・予防予定・再診フォローは、下のメニューから確認できます。
+                  <div class="mini">DPRO PET CARE LINE</div>
+                </div>
+              </div>
+
+              <div class="bubble-user">ココの診察券を見たいです</div>
+
+              <div class="bubble-row">
+                <div class="bubble-avatar">🐾</div>
+                <div class="bubble">
+                  下の「ペット診察券」を押すと、登録済みのペットをまとめて確認できます。<br>
+                  QR受付にもそのまま使えます。
+                </div>
+              </div>
+
+              <div class="bubble-row">
+                <div class="bubble-avatar">💉</div>
+                <div class="bubble">
+                  <strong>予防予定のお知らせ</strong><br>
+                  ココちゃんのフィラリア予防が近づいています。
+                  <div class="mini">LINEから再来院のきっかけを作れます。</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="rich-menu-toggle">⌃ メニューを閉じる / 開く</div>
+
+            <div class="rich-menu">
+              <a class="rich-cell" id="richMemberLink" href="#">
+                <div>
+                  <div class="emoji">🎫</div>
+                  <strong>ペット診察券</strong>
+                  <span>QR・多頭表示</span>
+                </div>
+              </a>
+              <a class="rich-cell" id="richCheckinLink" href="#">
+                <div>
+                  <div class="emoji">📱</div>
+                  <strong>受付する</strong>
+                  <span>QR受付DEMO</span>
+                </div>
+              </a>
+              <a class="rich-cell" id="richPreventionLink" href="#">
+                <div>
+                  <div class="emoji">💉</div>
+                  <strong>予防予定</strong>
+                  <span>ワクチン等</span>
+                </div>
+              </a>
+              <a class="rich-cell" id="richFollowupLink" href="#">
+                <div>
+                  <div class="emoji">🩺</div>
+                  <strong>再診フォロー</strong>
+                  <span>来院後ケア</span>
+                </div>
+              </a>
+              <a class="rich-cell" id="richAccessLink" href="#">
+                <div>
+                  <div class="emoji">🏥</div>
+                  <strong>病院案内</strong>
+                  <span>時間・休診日</span>
+                </div>
+              </a>
+              <a class="rich-cell" id="richContactLink" href="#">
+                <div>
+                  <div class="emoji">💬</div>
+                  <strong>相談・予約</strong>
+                  <span>LINEへ誘導</span>
+                </div>
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="side">
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>リッチメニューで伝わる価値</h2>
+              <small>LINE公式を「再来院導線」に変える</small>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="value-grid">
+              <div class="value-card gold">
+                <div class="icon">🎫</div>
+                <strong>診察券をLINE化</strong>
+                <span>紙の診察券忘れを減らし、複数ペットもLINE内で確認できます。</span>
+              </div>
+              <div class="value-card">
+                <div class="icon">📱</div>
+                <strong>受付が分かりやすい</strong>
+                <span>受付iPadとつながり、ペットごとのQR受付DEMOを見せられます。</span>
+              </div>
+              <div class="value-card blue">
+                <div class="icon">💉</div>
+                <strong>予防案内につなげる</strong>
+                <span>ワクチン・フィラリア・健診などの来院きっかけを作ります。</span>
+              </div>
+              <div class="value-card warn">
+                <div class="icon">🩺</div>
+                <strong>再診フォローを逃さない</strong>
+                <span>診察後の確認・次回フォローをLINE導線で続けられます。</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>メニュー構成案</h2>
+              <small>本番リッチメニューの6分割想定</small>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="menu-list">
+              <div class="menu-item">
+                <div class="menu-icon">🎫</div>
+                <div><strong>ペット診察券</strong><span>member.html。飼い主側のメイン導線。</span></div>
+                <span class="tag line">LIFF</span>
+              </div>
+              <div class="menu-item">
+                <div class="menu-icon">📱</div>
+                <div><strong>受付する</strong><span>受付iPad/QR受付の説明。実運用では院内QRや受付導線へ。</span></div>
+                <span class="tag ok">院内</span>
+              </div>
+              <div class="menu-item">
+                <div class="menu-icon">💉</div>
+                <div><strong>予防予定</strong><span>ワクチン・フィラリア・健診などの予定確認。</span></div>
+                <span class="tag line">LIFF</span>
+              </div>
+              <div class="menu-item">
+                <div class="menu-icon">🩺</div>
+                <div><strong>再診フォロー</strong><span>来院後メッセージ・再診のきっかけ作り。</span></div>
+                <span class="tag line">LINE</span>
+              </div>
+              <div class="menu-item">
+                <div class="menu-icon">🏥</div>
+                <div><strong>病院案内</strong><span>診療時間・休診日・アクセスを表示。</span></div>
+                <span class="tag ok">案内</span>
+              </div>
+              <div class="menu-item">
+                <div class="menu-icon">💬</div>
+                <div><strong>相談・予約</strong><span>LINE返信、電話、予約フォームなどへ誘導。</span></div>
+                <span class="tag warn">導線</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>営業時の説明順</h2>
+              <small>この順番で見せると伝わりやすい</small>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="script">
+              <div class="script-item">
+                <div>
+                  <strong>LINE公式の下にメニューが出ることを見せる</strong>
+                  <span>飼い主さんが迷わず診察券・予防予定を開けることを説明します。</span>
+                </div>
+              </div>
+              <div class="script-item">
+                <div>
+                  <strong>ペット診察券を押す</strong>
+                  <span>実際の member.html を開き、複数ペットとQR表示を見せます。</span>
+                </div>
+              </div>
+              <div class="script-item">
+                <div>
+                  <strong>受付iPad・獣医師画面へつながることを見せる</strong>
+                  <span>飼い主側だけで終わらず、院内運用までつながる点を強調します。</span>
+                </div>
+              </div>
+              <div class="script-item">
+                <div>
+                  <strong>予防・再診フォローで再来院導線になることを説明</strong>
+                  <span>単なるLINEメニューではなく、来院機会を逃しにくくする仕組みとして提案します。</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="notice" style="margin-top:12px;">
+              <div>💡</div>
+              <div>
+                本番では、この画面そのものをLINEに入れるのではなく、LINE Developers / LINE Official Account Manager で
+                リッチメニュー画像と各ボタンのリンク先を設定します。
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>営業トーク文</h2>
+              <small>コピーして説明に使えます</small>
+            </div>
+          </div>
+          <div class="panel-body">
+            <textarea id="proposalText" class="copy-box">動物病院では、LINE公式を単なるお知らせ配信だけで使うのではなく、飼い主さんが毎回使う「ペット診察券」や「予防予定」「再診フォロー」の入口にできます。
+
+DPRO PET CARE LINEでは、飼い主さんはLINEの下メニューからペット診察券を開き、複数ペットの診察券・QR・予防予定を確認できます。院内では受付iPad、獣医師画面、オーナー管理画面につながるため、LINE公式が受付・診察・フォローまでつながる仕組みになります。
+
+ワクチン、フィラリア、健康診断、再診などの来院きっかけを逃しにくくなるので、飼い主さんの利便性と病院側の継続フォローの両方に効果があります。</textarea>
+            <div class="hero-actions" style="margin-top:12px;">
+              <button class="btn line" id="copyProposalBtn2" type="button">営業トークをコピー</button>
+              <a class="btn secondary" id="systemCheckLink" href="#">全体チェックへ</a>
+            </div>
+          </div>
+        </section>
+
+        <details class="debug">
+          <summary>リンク設定確認</summary>
+          <pre id="debugJson">{}</pre>
+        </details>
+      </section>
+    </div>
+  </main>
+
+  <div id="toast" class="toast">OK</div>
+
+  <script>
+    (function () {
+      "use strict";
+
+      const CONFIG = window.DPRO_VET_CONFIG || window.DPRO_CONFIG || {};
+      const $ = (id) => document.getElementById(id);
+
+      document.addEventListener("DOMContentLoaded", init);
+
+      function init() {
+        setupLinks();
+        $("copyProposalBtn").addEventListener("click", copyProposal);
+        $("copyProposalBtn2").addEventListener("click", copyProposal);
+      }
+
+      function getClinicCode() {
+        return (CONFIG.clinic && CONFIG.clinic.clinicCode) ||
+          (CONFIG.demo && CONFIG.demo.clinicCode) ||
+          "dpro_vet_demo";
+      }
+
+      function getSiteBase() {
+        return (CONFIG.urls && CONFIG.urls.siteBaseUrl) || "https://dpromstk2000-lab.github.io/DPRO-VET-QR";
+      }
+
+      function pageUrl(key, file, params) {
+        const base = CONFIG.urls && CONFIG.urls[key] ? CONFIG.urls[key] : `${getSiteBase()}/${file}`;
+        const url = new URL(base, location.href);
+        url.searchParams.set("clinic_code", getClinicCode());
+        Object.entries(params || {}).forEach(([k, v]) => url.searchParams.set(k, v));
+        return url.toString();
+      }
+
+      function setupLinks() {
+        const urls = {
+          index: pageUrl("index", "index.html"),
+          member: pageUrl("member", "member.html", { demo: "true" }),
+          scan: pageUrl("scanIpad", "scan-ipad.html"),
+          doctor: pageUrl("doctor", "doctor.html"),
+          owner: pageUrl("owner", "owner.html"),
+          admin: pageUrl("admin", "admin.html"),
+          system: pageUrl("systemCheck", "system-check.html"),
+          rich: pageUrl("richMenu", "rich-menu.html")
+        };
+
+        setHref("memberTopLink", urls.member);
+        setHref("indexTopLink", urls.index);
+        setHref("richMemberLink", urls.member);
+        setHref("richCheckinLink", urls.scan);
+        setHref("richPreventionLink", urls.member + "#prevention");
+        setHref("richFollowupLink", urls.owner);
+        setHref("richAccessLink", urls.admin);
+        setHref("richContactLink", urls.member);
+        setHref("systemCheckLink", urls.system);
+
+        $("debugJson").textContent = JSON.stringify({
+          clinic_code: getClinicCode(),
+          urls
+        }, null, 2);
+      }
+
+      function setHref(id, href) {
+        const el = $(id);
+        if (el) el.href = href;
+      }
+
+      async function copyProposal() {
+        const text = $("proposalText").value.trim();
+        try {
+          await navigator.clipboard.writeText(text);
+          toast("営業トークをコピーしました。");
+        } catch (error) {
+          prompt("この文面をコピーしてください", text);
+        }
+      }
+
+      function toast(message) {
+        const el = $("toast");
+        el.textContent = message;
+        el.classList.add("show");
+        clearTimeout(window.__vetRichMenuToastTimer);
+        window.__vetRichMenuToastTimer = setTimeout(() => el.classList.remove("show"), 2600);
+      }
+    })();
+  </script>
+</body>
+</html>
