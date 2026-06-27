@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-<title>DPRO PET CARE LINE｜system-check STEP VET-25A</title>
+<title>DPRO PET CARE LINE｜system-check STEP VET-25B</title>
 <script src="./config.js"></script>
 
 <style>
@@ -22,7 +22,7 @@ input{width:100%;border:1px solid #d8d0c0;border-radius:15px;padding:11px 12px;b
 <body>
 <main class="page">
 <header class="topbar">
-  <div class="brand"><div class="logo">✅</div><div><small>STEP VET-25A｜管理コード互換修正版</small><strong>DPRO PET CARE LINE</strong></div></div>
+  <div class="brand"><div class="logo">✅</div><div><small>STEP VET-25B｜管理コード入力欄クリア修正版</small><strong>DPRO PET CARE LINE</strong></div></div>
   <nav class="actions">
     <a class="pill" href="./index.html?v=step-vet-25a">管理トップ</a>
     <a class="pill" href="./scan-pc.html?v=step-vet-25a">受付PC</a>
@@ -40,9 +40,9 @@ input{width:100%;border:1px solid #d8d0c0;border-radius:15px;padding:11px 12px;b
   <div class="card">
     <span class="badge-dark">管理コード</span>
     <p class="plain-lead">管理系チェックには管理コードが必要です。保存後に全チェック実行してください。</p>
-    <div id="authStatus" class="notice">管理コード確認中</div>
+    <div id="authStatus" class="notice">管理コード確認中</div><div class="notice info">削除を押した後に入力欄が空ならOKです。ブラウザの自動入力で点々が戻る場合は、入力欄をクリックしてCtrl+A→Backspaceでも消せます。</div>
     <div class="auth-box">
-      <input id="adminTokenInput" type="password" placeholder="管理コードを入力" autocomplete="off" />
+      <input id="adminTokenInput" type="text" inputmode="text" placeholder="管理コードを入力" autocomplete="new-password" data-lpignore="true" data-form-type="other" spellcheck="false" />
       <button class="btn btn-main" id="saveAdminTokenBtn" type="button">保存</button>
       <button class="btn btn-danger" id="clearAdminTokenBtn" type="button">削除</button>
     </div>
@@ -59,7 +59,7 @@ input{width:100%;border:1px solid #d8d0c0;border-radius:15px;padding:11px 12px;b
 </section>
 
 <div class="footer-note">
-  STEP VET-25A：前回のNG原因は「管理コードが間違い」ではなく、system-check側の送信形式でした。この版は現在のWorkerに合わせて admin_code でも送ります。
+  STEP VET-25B：削除ボタンで保存済み管理コードだけでなく、入力欄の点々表示も消すように修正しました。黄色の「未保存」が出ている場合、保存データは消えています。
 </div>
 </main>
 
@@ -122,8 +122,39 @@ function renderAuthStatus(){
 }
 function setupAuth(){
   renderAuthStatus();
-  document.getElementById("saveAdminTokenBtn").addEventListener("click",()=>{const i=document.getElementById("adminTokenInput");saveAdminToken(i.value);i.value="";renderAuthStatus();});
-  document.getElementById("clearAdminTokenBtn").addEventListener("click",()=>{clearAdminToken();renderAuthStatus();});
+  const input = document.getElementById("adminTokenInput");
+  if (input) {
+    input.value = "";
+    input.setAttribute("autocomplete", "new-password");
+    input.setAttribute("data-lpignore", "true");
+    input.setAttribute("data-form-type", "other");
+  }
+
+  document.getElementById("saveAdminTokenBtn").addEventListener("click",()=>{
+    const i=document.getElementById("adminTokenInput");
+    const value = String(i?.value || "").trim();
+    if (!value) {
+      alert("管理コードを入力してください。");
+      return;
+    }
+    saveAdminToken(value);
+    if(i)i.value="";
+    renderAuthStatus();
+  });
+
+  document.getElementById("clearAdminTokenBtn").addEventListener("click",()=>{
+    clearAdminToken();
+    const i=document.getElementById("adminTokenInput");
+    if(i){
+      i.value="";
+      i.blur();
+      setTimeout(()=>{ i.value=""; }, 50);
+      setTimeout(()=>{ i.value=""; }, 300);
+    }
+    renderAuthStatus();
+    document.getElementById("summary").className = "notice info";
+    document.getElementById("summary").textContent = "管理コードを削除しました。再度入力して保存してください。";
+  });
 }
 
 const checks = [
