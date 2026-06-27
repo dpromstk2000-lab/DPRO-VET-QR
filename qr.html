@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DPRO SHOP | QR診察券ページ</title>
+  <script src="./config.js"></script>
+  <style>
+    :root {
+      --bg: #f4f8fb;
+      --card: #ffffff;
+      --main: #2563eb;
+      --main-dark: #1e3a8a;
+      --text: #0f172a;
+      --muted: #64748b;
+      --line: #dbeafe;
+      --radius: 26px;
+      --shadow: 0 20px 55px rgba(15, 23, 42, 0.10);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(37, 99, 235, 0.16), transparent 30%),
+        linear-gradient(180deg, #f8fbff 0%, var(--bg) 100%);
+    }
+
+    .card {
+      width: min(720px, 100%);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.92);
+      border: 1px solid rgba(219, 234, 254, 0.95);
+      box-shadow: var(--shadow);
+      padding: 28px;
+      text-align: center;
+    }
+
+    .logo {
+      width: 58px;
+      height: 58px;
+      margin: 0 auto 16px;
+      border-radius: 20px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-weight: 950;
+      background: linear-gradient(135deg, #2563eb, #0f766e);
+      box-shadow: 0 16px 28px rgba(37, 99, 235, 0.25);
+    }
+
+    .kicker {
+      color: var(--main-dark);
+      font-size: 12px;
+      font-weight: 950;
+      letter-spacing: 0.10em;
+    }
+
+    h1 {
+      margin: 10px 0 10px;
+      font-size: clamp(28px, 5vw, 42px);
+      line-height: 1.18;
+      letter-spacing: -0.06em;
+    }
+
+    p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.8;
+      font-size: 15px;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 16px;
+      padding: 14px 18px;
+      min-height: 48px;
+      cursor: pointer;
+      font-weight: 950;
+      font-size: 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      color: #fff;
+      background: linear-gradient(135deg, var(--main), var(--main-dark));
+      box-shadow: 0 16px 28px rgba(37, 99, 235, 0.24);
+    }
+
+    .btn-light {
+      color: var(--main-dark);
+      background: #fff;
+      border: 1px solid var(--line);
+    }
+
+    .note {
+      margin-top: 18px;
+      padding: 14px;
+      border-radius: 18px;
+      background: #eff6ff;
+      color: #1e3a8a;
+      border: 1px solid #bfdbfe;
+      font-size: 13px;
+      line-height: 1.75;
+      text-align: left;
+      word-break: break-all;
+    }
+
+    @media (max-width: 640px) {
+      .card { padding: 22px; }
+      .actions { flex-direction: column; }
+      .btn { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <div class="logo">QR</div>
+    <div class="kicker">DENTAL QR PATIENT CARD</div>
+    <h1>QR診察券ページへ<br />移動します</h1>
+    <p>
+      この `qr.html` は旧汎用デモとの混在防止用ページです。<br />
+      歯科QR診察券では、患者さん用画面は `member.html` を使用します。
+    </p>
+
+    <div class="actions">
+      <a class="btn btn-primary" id="memberLink" href="./member.html?t=demo-dental-patient-001">QR診察券を開く</a>
+      <a class="btn btn-light" href="./">トップページへ</a>
+      <a class="btn btn-light" href="./scan.html">受付QR読み取り</a>
+    </div>
+
+    <div class="note" id="note">
+      QRトークンがURLに含まれている場合は、自動で member.html に転送します。
+    </div>
+  </main>
+
+  <script>
+    function getTokenFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("t") || params.get("token") || params.get("qr_token") || params.get("qrToken") || "";
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const token = getTokenFromUrl();
+      const memberLink = document.getElementById("memberLink");
+      const note = document.getElementById("note");
+
+      if (token) {
+        const url = "./member.html?t=" + encodeURIComponent(token);
+        memberLink.href = url;
+        memberLink.textContent = "QR診察券を開く";
+
+        note.textContent = "QRトークンを検出しました。自動で患者さん用QR診察券へ移動します。";
+
+        setTimeout(() => {
+          window.location.replace(url);
+        }, 700);
+      }
+    });
+  </script>
+</body>
+</html>

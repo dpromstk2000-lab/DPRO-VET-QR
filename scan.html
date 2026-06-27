@@ -1,0 +1,3125 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>DPRO SHOP | 受付QR読み取り LINE連携表示</title>
+
+  <script src="./config.js"></script>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
+  <style>
+    :root {
+      --main: #2563eb;
+      --main-dark: #1d4ed8;
+      --sub: #0f766e;
+      --accent: #f59e0b;
+      --bg: #f6f8fb;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --success: #16a34a;
+      --warning: #f59e0b;
+      --danger: #dc2626;
+      --shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      min-height: 100%;
+      background: var(--bg);
+    }
+
+    body {
+      margin: 0;
+      min-height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(37, 99, 235, 0.12), transparent 32%),
+        radial-gradient(circle at top right, rgba(15, 118, 110, 0.12), transparent 30%),
+        var(--bg);
+    }
+
+    button,
+    input,
+    textarea,
+    select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    .page {
+      width: 100%;
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 18px 18px 40px;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 8px 2px 18px;
+    }
+
+    .brand-kicker {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .brand-title {
+      margin-top: 4px;
+      font-size: 24px;
+      font-weight: 950;
+      letter-spacing: -0.04em;
+      line-height: 1.25;
+    }
+
+    .brand-sub {
+      margin-top: 7px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .top-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    .badge-link,
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      white-space: nowrap;
+      text-decoration: none;
+      border-radius: 999px;
+      padding: 9px 12px;
+      font-size: 12px;
+      font-weight: 900;
+      background: rgba(37, 99, 235, 0.10);
+      color: var(--main-dark);
+      border: 1px solid rgba(37, 99, 235, 0.16);
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .summary-card {
+      border-radius: 22px;
+      background: #fff;
+      border: 1px solid var(--border);
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.055);
+      padding: 16px;
+    }
+
+    .summary-label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .summary-value {
+      margin-top: 8px;
+      font-size: 26px;
+      font-weight: 950;
+      letter-spacing: -0.05em;
+      line-height: 1;
+    }
+
+    .summary-note {
+      margin-top: 9px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 420px 1fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .left-column,
+    .right-column {
+      display: grid;
+      gap: 16px;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 24px;
+      border: 1px solid rgba(226, 232, 240, 0.95);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(248, 250, 252, 0.75), #ffffff);
+    }
+
+    .card-title {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 950;
+      letter-spacing: -0.03em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 13px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(37, 99, 235, 0.10);
+      color: var(--main-dark);
+      font-weight: 950;
+      flex: 0 0 auto;
+    }
+
+    .card-subtitle {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .card-body {
+      padding: 18px 20px 20px;
+    }
+
+    .form-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .field {
+      display: grid;
+      gap: 7px;
+    }
+
+    .field label {
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 900;
+    }
+
+    .field input,
+    .field textarea,
+    .field select {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 15px;
+      background: #fff;
+      color: var(--text);
+      padding: 12px 13px;
+      outline: none;
+      font-size: 15px;
+    }
+
+    .field textarea {
+      min-height: 88px;
+      resize: vertical;
+      line-height: 1.6;
+    }
+
+    .field input:focus,
+    .field textarea:focus,
+    .field select:focus {
+      border-color: rgba(37, 99, 235, 0.50);
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08);
+    }
+
+    .mini-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .three-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+    }
+
+    .btn {
+      min-height: 48px;
+      border: none;
+      border-radius: 15px;
+      padding: 12px 14px;
+      font-size: 14px;
+      font-weight: 950;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      text-decoration: none;
+      transition: transform 0.08s ease, opacity 0.08s ease;
+    }
+
+    .btn:active {
+      transform: translateY(1px);
+      opacity: 0.92;
+    }
+
+    .btn:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      color: #fff;
+      background: linear-gradient(135deg, var(--main), var(--main-dark));
+      box-shadow: 0 12px 24px rgba(37, 99, 235, 0.20);
+    }
+
+    .btn-sub {
+      color: #fff;
+      background: linear-gradient(135deg, var(--sub), #115e59);
+      box-shadow: 0 12px 24px rgba(15, 118, 110, 0.17);
+    }
+
+    .btn-light {
+      color: var(--text);
+      background: #fff;
+      border: 1px solid var(--border);
+    }
+
+    .btn-warning {
+      color: #78350f;
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+    }
+
+    .btn-danger {
+      color: #991b1b;
+      background: #fff1f2;
+      border: 1px solid #fecdd3;
+    }
+
+    .btn-success {
+      color: #14532d;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+    }
+
+    .actions {
+      display: grid;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .scanner-box {
+      border-radius: 22px;
+      background: #0f172a;
+      border: 1px solid rgba(15, 23, 42, 0.20);
+      overflow: hidden;
+      min-height: 300px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      position: relative;
+    }
+
+    #qrReader {
+      width: 100%;
+      min-height: 300px;
+      background: #0f172a;
+    }
+
+    .scanner-placeholder {
+      padding: 28px;
+      text-align: center;
+      color: rgba(255, 255, 255, 0.82);
+    }
+
+    .scanner-placeholder strong {
+      display: block;
+      color: #fff;
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+
+    .message {
+      margin-top: 12px;
+      border-radius: 16px;
+      padding: 13px 14px;
+      font-size: 14px;
+      line-height: 1.65;
+      display: none;
+    }
+
+    .message.show {
+      display: block;
+    }
+
+    .message.info {
+      background: #eff6ff;
+      color: #1e3a8a;
+      border: 1px solid #bfdbfe;
+    }
+
+    .message.success {
+      background: #f0fdf4;
+      color: #166534;
+      border: 1px solid #bbf7d0;
+    }
+
+    .message.warning {
+      background: #fffbeb;
+      color: #92400e;
+      border: 1px solid #fde68a;
+    }
+
+    .message.error {
+      background: #fff1f2;
+      color: #991b1b;
+      border: 1px solid #fecdd3;
+    }
+
+    .patient-hero {
+      position: relative;
+      overflow: hidden;
+      border-radius: 24px;
+      border: 1px solid var(--border);
+      background: linear-gradient(135deg, #fff, #eef6ff);
+      padding: 20px;
+    }
+
+    .patient-hero::after {
+      content: "";
+      position: absolute;
+      width: 180px;
+      height: 180px;
+      right: -70px;
+      top: -80px;
+      border-radius: 50%;
+      background: rgba(37, 99, 235, 0.10);
+    }
+
+    .patient-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    .patient-label {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 900;
+      letter-spacing: 0.07em;
+    }
+
+    .patient-name {
+      margin-top: 7px;
+      font-size: 31px;
+      line-height: 1.2;
+      letter-spacing: -0.05em;
+      font-weight: 950;
+      word-break: break-word;
+    }
+
+    .patient-kana {
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      padding: 8px 11px;
+      font-size: 12px;
+      font-weight: 900;
+      background: #fff;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .pill.blue {
+      background: #eff6ff;
+      color: #1e3a8a;
+      border-color: #bfdbfe;
+    }
+
+    .pill.green {
+      background: #f0fdf4;
+      color: #14532d;
+      border-color: #bbf7d0;
+    }
+
+    .pill.yellow {
+      background: #fffbeb;
+      color: #78350f;
+      border-color: #fde68a;
+    }
+
+    .pill.red {
+      background: #fff1f2;
+      color: #991b1b;
+      border-color: #fecdd3;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+      flex: 0 0 auto;
+    }
+
+    .pill.warning .dot {
+      background: var(--warning);
+    }
+
+    .pill.danger .dot {
+      background: var(--danger);
+    }
+
+    .family-context-box {
+      margin-top: 14px;
+      border-radius: 20px;
+      border: 1px solid #bfdbfe;
+      background:
+        radial-gradient(circle at 12% 18%, rgba(37, 99, 235, 0.12), transparent 32%),
+        #eff6ff;
+      padding: 14px;
+    }
+
+    .family-context-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: flex-start;
+      margin-bottom: 11px;
+    }
+
+    .family-context-title {
+      color: #1e3a8a;
+      font-size: 15px;
+      font-weight: 950;
+      letter-spacing: -0.03em;
+    }
+
+    .family-context-subtitle {
+      margin-top: 4px;
+      color: #334155;
+      font-size: 12px;
+      line-height: 1.6;
+      font-weight: 750;
+    }
+
+    .family-context-pill {
+      flex: 0 0 auto;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      padding: 8px 10px;
+      background: #ffffff;
+      border: 1px solid #dbeafe;
+      color: #1e3a8a;
+      font-size: 12px;
+      font-weight: 950;
+      white-space: nowrap;
+    }
+
+    .family-card-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .family-card-item {
+      display: grid;
+      grid-template-columns: 92px 1fr;
+      gap: 10px;
+      align-items: center;
+      padding: 10px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.86);
+      border: 1px solid rgba(191, 219, 254, 0.75);
+    }
+
+    .family-card-item.active {
+      background: #ffffff;
+      border-color: #2563eb;
+      box-shadow: 0 10px 22px rgba(37, 99, 235, 0.13);
+    }
+
+    .family-card-label {
+      color: #1e3a8a;
+      font-size: 12px;
+      font-weight: 950;
+      line-height: 1.35;
+    }
+
+    .family-card-name {
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 950;
+      line-height: 1.45;
+    }
+
+    .family-card-meta {
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+
+    .scan-line-link-box {
+      margin-top: 14px;
+      border-radius: 20px;
+      border: 1px solid #bbf7d0;
+      background:
+        radial-gradient(circle at 10% 15%, rgba(6, 199, 85, 0.14), transparent 34%),
+        linear-gradient(135deg, #f0fdf4, #ffffff);
+      padding: 14px;
+    }
+
+    .scan-line-link-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .scan-line-link-title {
+      color: #064e3b;
+      font-size: 15px;
+      font-weight: 950;
+      letter-spacing: -0.03em;
+      line-height: 1.45;
+    }
+
+    .scan-line-link-sub {
+      margin-top: 4px;
+      color: #334155;
+      font-size: 12px;
+      line-height: 1.65;
+      font-weight: 750;
+    }
+
+    .scan-line-link-pill {
+      flex: 0 0 auto;
+      display: inline-flex;
+      border-radius: 999px;
+      padding: 8px 10px;
+      background: #dcfce7;
+      border: 1px solid #86efac;
+      color: #064e3b;
+      font-size: 12px;
+      font-weight: 950;
+      white-space: nowrap;
+    }
+
+    .scan-line-link-pill.warning {
+      background: #fffbeb;
+      border-color: #fde68a;
+      color: #92400e;
+    }
+
+    .scan-line-link-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .scan-line-link-mini {
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.86);
+      border: 1px solid rgba(187, 247, 208, 0.8);
+      padding: 9px;
+    }
+
+    .scan-line-link-mini-label {
+      color: #64748b;
+      font-size: 11px;
+      font-weight: 850;
+      line-height: 1.4;
+    }
+
+    .scan-line-link-mini-value {
+      margin-top: 3px;
+      color: #0f172a;
+      font-size: 12px;
+      font-weight: 950;
+      line-height: 1.45;
+      word-break: break-all;
+    }
+
+    @media (max-width: 760px) {
+      .scan-line-link-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+
+    .info-list {
+      display: grid;
+      gap: 0;
+      margin-top: 14px;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .info-row {
+      display: grid;
+      grid-template-columns: 150px 1fr;
+      gap: 12px;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .info-row:last-child {
+      border-bottom: 0;
+    }
+
+    .info-key {
+      color: var(--muted);
+      font-weight: 900;
+    }
+
+    .info-value {
+      color: var(--text);
+      font-weight: 750;
+      word-break: break-word;
+      white-space: pre-wrap;
+    }
+
+    .section {
+      margin-top: 16px;
+      border-radius: 22px;
+      border: 1px solid var(--border);
+      background: #fff;
+      padding: 18px;
+    }
+
+    .section-title {
+      margin: 0 0 12px;
+      font-size: 17px;
+      font-weight: 950;
+      letter-spacing: -0.03em;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .empty-box {
+      border-radius: 18px;
+      background: #f8fafc;
+      border: 1px dashed var(--border);
+      padding: 18px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.7;
+      text-align: center;
+    }
+
+    .visit-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .visit-item {
+      border: 1px solid var(--border);
+      background: #f8fafc;
+      border-radius: 18px;
+      padding: 14px;
+    }
+
+    .visit-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+
+    .visit-date {
+      font-weight: 950;
+      color: var(--text);
+      line-height: 1.4;
+    }
+
+    .visit-type {
+      white-space: nowrap;
+      border-radius: 999px;
+      padding: 5px 9px;
+      background: #fff;
+      border: 1px solid var(--border);
+      color: var(--main-dark);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .visit-text {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.65;
+      white-space: pre-wrap;
+    }
+
+    .line-copy-box {
+      border-radius: 18px;
+      border: 1px solid #bfdbfe;
+      background: #eff6ff;
+      padding: 14px;
+    }
+
+    .line-copy-title {
+      font-weight: 950;
+      color: #1e3a8a;
+      margin-bottom: 8px;
+    }
+
+    .line-copy-text {
+      font-size: 14px;
+      line-height: 1.7;
+      color: #1e3a8a;
+      white-space: pre-wrap;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .footer {
+      margin-top: 20px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.7;
+    }
+
+    .debug {
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 16px;
+      background: #f8fafc;
+      border: 1px dashed var(--border);
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+      word-break: break-all;
+      white-space: pre-wrap;
+    }
+
+    @media (max-width: 920px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .page {
+        max-width: 680px;
+      }
+
+      .summary-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 560px) {
+      .page {
+        padding: 14px 12px 28px;
+      }
+
+      .top-bar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .top-actions {
+        justify-content: flex-start;
+      }
+
+      .brand-title {
+        font-size: 22px;
+      }
+
+      .summary-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      .summary-value {
+        font-size: 22px;
+      }
+
+      .mini-grid,
+      .three-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .patient-name {
+        font-size: 27px;
+      }
+
+      .info-row {
+        grid-template-columns: 96px 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="page">
+    <header class="top-bar">
+      <div>
+        <div class="brand-kicker" id="systemName">DPRO SHOP</div>
+        <div class="brand-title" id="pageTitle">受付QR読み取り</div>
+        <div class="brand-sub" id="clinicNameText">DPRO歯科クリニック / QR診察券読み取り・来院記録</div>
+      </div>
+      <div class="top-actions">
+        <a class="badge-link" id="memberLink" href="./member.html?t=demo">患者画面</a>
+        <a class="badge-link" id="ownerLink" href="./owner.html">管理画面</a>
+        <a class="badge-link" id="adminLink" href="./admin.html">患者登録・医院設定</a>
+        <button class="badge" id="reloadSettingsButton" type="button">設定更新</button>
+      </div>
+    </header>
+
+    <section class="summary-grid">
+      <div class="summary-card">
+        <div class="summary-label">医院設定</div>
+        <div class="summary-value" id="settingsStatusLabel">未読込</div>
+        <div class="summary-note">営業時間・休診日を反映</div>
+      </div>
+
+      <div class="summary-card">
+        <div class="summary-label">予約可能期間</div>
+        <div class="summary-value" id="rangeLabel">3か月</div>
+        <div class="summary-note">医院設定から反映</div>
+      </div>
+
+      <div class="summary-card">
+        <div class="summary-label">時間単位</div>
+        <div class="summary-value" id="slotLabel">15分</div>
+        <div class="summary-note">次回予約の選択間隔</div>
+      </div>
+
+      <div class="summary-card">
+        <div class="summary-label">選択中</div>
+        <div class="summary-value" id="selectedLabel">--</div>
+        <div class="summary-note">読み取り済み患者</div>
+      </div>
+    </section>
+
+    <div class="grid">
+      <div class="left-column">
+        <section class="card">
+          <div class="card-header">
+            <h1 class="card-title">
+              <span class="icon">読</span>
+              QR診察券を読み取る
+            </h1>
+            <div class="card-subtitle">
+              患者さんのスマホに表示されたQR診察券を読み取って、受付・来院記録を残します。
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div class="scanner-box">
+              <div id="qrReader">
+                <div class="scanner-placeholder">
+                  <strong>カメラ待機中</strong>
+                  「カメラで読み取り開始」を押してください。
+                </div>
+              </div>
+            </div>
+
+            <div class="actions">
+              <div class="mini-grid">
+                <button class="btn btn-primary" id="startScanButton" type="button">カメラで読み取り開始</button>
+                <button class="btn btn-danger" id="stopScanButton" type="button">読み取り停止</button>
+              </div>
+
+              <button class="btn btn-light" id="demoPatientButton" type="button">デモ患者を表示</button>
+            </div>
+
+            <div id="scanMessage" class="message"></div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-header">
+            <h2 class="card-title">
+              <span class="icon">検</span>
+              手入力で検索
+            </h2>
+            <div class="card-subtitle">
+              QRが読み取れない場合は、診察券URL・QRトークン・診察券番号・患者名で検索できます。
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div class="form-grid">
+              <div class="field">
+                <label for="manualInput">検索内容</label>
+                <input id="manualInput" type="text" placeholder="例：member.html?t=xxxxx / D260600001 / 山田" autocomplete="off" />
+              </div>
+
+              <div class="mini-grid">
+                <button class="btn btn-sub" id="manualSearchButton" type="button">患者を検索</button>
+                <button class="btn btn-light" id="clearButton" type="button">画面クリア</button>
+              </div>
+            </div>
+
+            <div id="manualMessage" class="message"></div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-header">
+            <h2 class="card-title">
+              <span class="icon">設</span>
+              受付設定
+            </h2>
+            <div class="card-subtitle">
+              管理コードはブラウザに一時保存します。秘密キーやSupabaseキーはここには入れません。
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div class="form-grid">
+              <div class="field">
+                <label for="staffNameInput">スタッフ名</label>
+                <input id="staffNameInput" type="text" placeholder="受付スタッフ" />
+              </div>
+
+              <div class="field">
+                <label for="adminCodeInput">管理コード</label>
+                <input id="adminCodeInput" type="password" placeholder="Worker側で確認する管理コード" />
+              </div>
+
+              <button class="btn btn-light" id="saveSettingsButton" type="button">受付設定を保存</button>
+            </div>
+
+            <div id="settingsMessage" class="message"></div>
+          </div>
+        </section>
+      </div>
+
+      <div class="right-column">
+        <section id="emptyPatientCard" class="card">
+          <div class="card-header">
+            <h2 class="card-title">
+              <span class="icon">患</span>
+              患者情報
+            </h2>
+            <div class="card-subtitle">
+              QRを読み取ると、ここに患者情報・次回予約・来院履歴が表示されます。
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="empty-box">
+              まだ患者情報は表示されていません。<br />
+              QR診察券を読み取るか、手入力で検索してください。
+            </div>
+          </div>
+        </section>
+
+        <section id="patientCard" class="card hidden">
+          <div class="card-header">
+            <h2 class="card-title">
+              <span class="icon">患</span>
+              患者情報
+            </h2>
+            <div class="card-subtitle">
+              受付内容を確認して、必要に応じて来院記録を登録してください。
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div class="patient-hero">
+              <div class="patient-content">
+                <div class="patient-label">PATIENT</div>
+                <div class="patient-name" id="patientName">---</div>
+                <div class="patient-kana" id="patientKana"></div>
+
+                <div class="pill-row">
+                  <div class="pill">
+                    <span>診察券番号</span>
+                    <strong id="memberNo">---</strong>
+                  </div>
+                  <div class="pill" id="statusPill">
+                    <span class="dot"></span>
+                    <strong id="patientStatus">---</strong>
+                  </div>
+                  <div class="pill">
+                    <span>来院回数</span>
+                    <strong id="visitCount">0</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div id="familyContextBox" class="family-context-box hidden">
+              <div class="family-context-head">
+                <div>
+                  <div class="family-context-title" id="familyContextTitle">家族診察券</div>
+                  <div class="family-context-subtitle" id="familyContextSubtitle">
+                    保護者様のLINEに、家族の診察券がまとまっています。
+                  </div>
+                </div>
+                <div class="family-context-pill" id="familyContextCount">1枚</div>
+              </div>
+
+              <div id="familyCardList" class="family-card-list"></div>
+            </div>
+
+            <div id="scanLineLinkBox" class="scan-line-link-box hidden">
+              <div class="scan-line-link-head">
+                <div>
+                  <div class="scan-line-link-title" id="scanLineLinkTitle">LINE公式との連携状態</div>
+                  <div class="scan-line-link-sub" id="scanLineLinkSub">
+                    LINE公式から診察券を開くと、LINEアカウントと家族診察券が紐づきます。
+                  </div>
+                </div>
+                <div class="scan-line-link-pill warning" id="scanLineLinkPill">確認中</div>
+              </div>
+
+              <div class="scan-line-link-grid">
+                <div class="scan-line-link-mini">
+                  <div class="scan-line-link-mini-label">LINE名</div>
+                  <div class="scan-line-link-mini-value" id="scanLineDisplayName">---</div>
+                </div>
+                <div class="scan-line-link-mini">
+                  <div class="scan-line-link-mini-label">LINE userId</div>
+                  <div class="scan-line-link-mini-value" id="scanLineUserId">---</div>
+                </div>
+                <div class="scan-line-link-mini">
+                  <div class="scan-line-link-mini-label">このLINEの診察券</div>
+                  <div class="scan-line-link-mini-value" id="scanLineCardCount">---</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="info-list">
+              <div class="info-row">
+                <div class="info-key">電話</div>
+                <div class="info-value" id="patientPhone">---</div>
+              </div>
+              <div class="info-row">
+                <div class="info-key">LINE名</div>
+                <div class="info-value" id="lineDisplayName">---</div>
+              </div>
+              <div class="info-row">
+                <div class="info-key">前回来院</div>
+                <div class="info-value" id="lastVisit">---</div>
+              </div>
+              <div class="info-row">
+                <div class="info-key">次回予約</div>
+                <div class="info-value" id="nextAppointment">---</div>
+              </div>
+              <div class="info-row">
+                <div class="info-key">患者メモ</div>
+                <div class="info-value" id="patientMemo">---</div>
+              </div>
+              <div class="info-row">
+                <div class="info-key">院内メモ</div>
+                <div class="info-value" id="internalMemo">---</div>
+              </div>
+            </div>
+
+            <div class="actions">
+              <div class="mini-grid">
+                <button class="btn btn-primary" id="copyPatientNameButton" type="button">患者名をコピー</button>
+                <button class="btn btn-light" id="openMemberButton" type="button">診察券を開く</button>
+              </div>
+            </div>
+
+            <div id="patientMessage" class="message"></div>
+          </div>
+        </section>
+
+        <section id="visitCreateSection" class="card hidden">
+          <div class="card-header">
+            <h2 class="card-title">
+              <span class="icon">記</span>
+              来院記録を残す
+            </h2>
+            <div class="card-subtitle">
+              次回予約日は過去日・休診日を避け、時間は医院設定に合わせた候補から選択します。
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div class="form-grid">
+              <div class="mini-grid">
+                <div class="field">
+                  <label for="visitTypeInput">来院種別</label>
+                  <select id="visitTypeInput"></select>
+                </div>
+
+                <div class="field">
+                  <label for="visitStatusInput">来院ステータス</label>
+                  <select id="visitStatusInput"></select>
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="chiefComplaintInput">来院理由・主訴</label>
+                <textarea id="chiefComplaintInput" placeholder="例：定期検診、歯がしみる、クリーニング希望など"></textarea>
+              </div>
+
+              <div class="field">
+                <label for="treatmentSummaryInput">処置内容メモ</label>
+                <textarea id="treatmentSummaryInput" placeholder="例：検診、スケーリング、次回治療説明など"></textarea>
+              </div>
+
+              <div class="mini-grid">
+                <div class="field">
+                  <label for="nextDateInput">次回予約日</label>
+                  <input id="nextDateInput" type="date" />
+                </div>
+
+                <div class="field">
+                  <label for="nextTimeInput">次回予約時間</label>
+                  <select id="nextTimeInput">
+                    <option value="">日付を選択してください</option>
+                  </select>
+                </div>
+              </div>
+
+              <div id="appointmentMessage" class="message"></div>
+
+              <div class="field">
+                <label for="nextMemoInput">次回予約メモ</label>
+                <textarea id="nextMemoInput" placeholder="例：3か月後の定期検診、右下治療の続きなど"></textarea>
+              </div>
+
+              <div class="mini-grid">
+                <div class="field">
+                  <label for="needsFollowupInput">フォロー</label>
+                  <select id="needsFollowupInput">
+                    <option value="false">フォロー不要</option>
+                    <option value="true">フォロー予定を作る</option>
+                  </select>
+                </div>
+
+                <div class="field">
+                  <label for="followupDueDateInput">フォロー予定日</label>
+                  <input id="followupDueDateInput" type="date" />
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="followupReasonInput">フォロー理由</label>
+                <textarea id="followupReasonInput" placeholder="例：3か月後の定期検診案内、治療後の様子確認など"></textarea>
+              </div>
+
+              <div class="field">
+                <label for="lineMessageInput">LINE送信用文面</label>
+                <textarea id="lineMessageInput" placeholder="来院後にLINE公式へ貼り付ける文面"></textarea>
+              </div>
+
+              <div class="actions">
+                <button class="btn btn-primary" id="saveVisitButton" type="button">来院記録を保存</button>
+
+                <div class="mini-grid">
+                  <button class="btn btn-light" id="fillDefaultMessageButton" type="button">文面を自動作成</button>
+                  <button class="btn btn-success" id="copyLineMessageButton" type="button">LINE文面をコピー</button>
+                </div>
+              </div>
+            </div>
+
+            <div id="visitMessage" class="message"></div>
+          </div>
+        </section>
+
+        <section id="recentVisitsSection" class="card hidden">
+          <div class="card-header">
+            <h2 class="card-title">
+              <span class="icon">歴</span>
+              来院履歴
+            </h2>
+            <div class="card-subtitle">直近の来院履歴を確認できます。</div>
+          </div>
+
+          <div class="card-body">
+            <div id="recentVisitsList" class="visit-list"></div>
+          </div>
+        </section>
+
+        <section id="followupSection" class="card hidden">
+          <div class="card-header">
+            <h2 class="card-title">
+              <span class="icon">L</span>
+              フォロー文面
+            </h2>
+            <div class="card-subtitle">定期検診・再来院フォローに使える文面です。</div>
+          </div>
+
+          <div class="card-body">
+            <div class="line-copy-box">
+              <div class="line-copy-title">コピー用LINE文面</div>
+              <div class="line-copy-text" id="followupCopyText"></div>
+            </div>
+
+            <div class="actions">
+              <button class="btn btn-success" id="copyFollowupButton" type="button">フォロー文面をコピー</button>
+            </div>
+
+            <div id="followupMessage" class="message"></div>
+          </div>
+        </section>
+
+        <div id="debugBox" class="debug hidden"></div>
+      </div>
+    </div>
+
+    <footer class="footer">
+      <strong id="footerClinicName">DPRO歯科クリニック</strong><br />
+      DPRO SHOP 歯科デジタルQR診察券 / scan.html<br />
+      この画面には Supabase Service Role Key や管理者トークンは直書きしていません。
+    </footer>
+  </main>
+
+  <script>
+    (function () {
+      "use strict";
+
+      const CONFIG = window.DPRO_DENTAL_QR_CONFIG || window.DPRO_CONFIG || {};
+      const $ = (id) => document.getElementById(id);
+
+      const DAY_LABELS = ["日曜", "月曜", "火曜", "水曜", "木曜", "金曜", "土曜"];
+
+      const state = {
+        scanner: null,
+        scannerRunning: false,
+        currentPatient: null,
+        currentClinic: null,
+        currentVisits: [],
+        currentFollowups: [],
+        lastScanText: "",
+        settingsLoaded: false,
+        settings: {
+          appointment_max_months_ahead: 3,
+          appointment_slot_minutes: 15,
+          default_visit_duration_minutes: 30,
+          allow_same_day_appointment: true,
+          use_special_days: true
+        },
+        regularHours: [],
+        specialDays: []
+      };
+
+      const els = {
+        systemName: $("systemName"),
+        pageTitle: $("pageTitle"),
+        clinicNameText: $("clinicNameText"),
+        memberLink: $("memberLink"),
+        ownerLink: $("ownerLink"),
+        adminLink: $("adminLink"),
+        reloadSettingsButton: $("reloadSettingsButton"),
+
+        settingsStatusLabel: $("settingsStatusLabel"),
+        rangeLabel: $("rangeLabel"),
+        slotLabel: $("slotLabel"),
+        selectedLabel: $("selectedLabel"),
+
+        qrReader: $("qrReader"),
+        startScanButton: $("startScanButton"),
+        stopScanButton: $("stopScanButton"),
+        demoPatientButton: $("demoPatientButton"),
+        scanMessage: $("scanMessage"),
+
+        manualInput: $("manualInput"),
+        manualSearchButton: $("manualSearchButton"),
+        clearButton: $("clearButton"),
+        manualMessage: $("manualMessage"),
+
+        staffNameInput: $("staffNameInput"),
+        adminCodeInput: $("adminCodeInput"),
+        saveSettingsButton: $("saveSettingsButton"),
+        settingsMessage: $("settingsMessage"),
+
+        emptyPatientCard: $("emptyPatientCard"),
+        patientCard: $("patientCard"),
+        patientName: $("patientName"),
+        patientKana: $("patientKana"),
+        memberNo: $("memberNo"),
+        statusPill: $("statusPill"),
+        patientStatus: $("patientStatus"),
+        visitCount: $("visitCount"),
+        patientPhone: $("patientPhone"),
+        lineDisplayName: $("lineDisplayName"),
+        familyContextBox: $("familyContextBox"),
+        familyContextTitle: $("familyContextTitle"),
+        familyContextSubtitle: $("familyContextSubtitle"),
+        familyContextCount: $("familyContextCount"),
+        familyCardList: $("familyCardList"),
+        scanLineLinkBox: $("scanLineLinkBox"),
+        scanLineLinkTitle: $("scanLineLinkTitle"),
+        scanLineLinkSub: $("scanLineLinkSub"),
+        scanLineLinkPill: $("scanLineLinkPill"),
+        scanLineDisplayName: $("scanLineDisplayName"),
+        scanLineUserId: $("scanLineUserId"),
+        scanLineCardCount: $("scanLineCardCount"),
+        lastVisit: $("lastVisit"),
+        nextAppointment: $("nextAppointment"),
+        patientMemo: $("patientMemo"),
+        internalMemo: $("internalMemo"),
+        copyPatientNameButton: $("copyPatientNameButton"),
+        openMemberButton: $("openMemberButton"),
+        patientMessage: $("patientMessage"),
+
+        visitCreateSection: $("visitCreateSection"),
+        visitTypeInput: $("visitTypeInput"),
+        visitStatusInput: $("visitStatusInput"),
+        chiefComplaintInput: $("chiefComplaintInput"),
+        treatmentSummaryInput: $("treatmentSummaryInput"),
+        nextDateInput: $("nextDateInput"),
+        nextTimeInput: $("nextTimeInput"),
+        appointmentMessage: $("appointmentMessage"),
+        nextMemoInput: $("nextMemoInput"),
+        needsFollowupInput: $("needsFollowupInput"),
+        followupDueDateInput: $("followupDueDateInput"),
+        followupReasonInput: $("followupReasonInput"),
+        lineMessageInput: $("lineMessageInput"),
+        saveVisitButton: $("saveVisitButton"),
+        fillDefaultMessageButton: $("fillDefaultMessageButton"),
+        copyLineMessageButton: $("copyLineMessageButton"),
+        visitMessage: $("visitMessage"),
+
+        recentVisitsSection: $("recentVisitsSection"),
+        recentVisitsList: $("recentVisitsList"),
+
+        followupSection: $("followupSection"),
+        followupCopyText: $("followupCopyText"),
+        copyFollowupButton: $("copyFollowupButton"),
+        followupMessage: $("followupMessage"),
+
+        debugBox: $("debugBox"),
+        footerClinicName: $("footerClinicName")
+      };
+
+      function getConfigValue(path, fallback) {
+        try {
+          return path.split(".").reduce((obj, key) => obj && obj[key], CONFIG) ?? fallback;
+        } catch (error) {
+          return fallback;
+        }
+      }
+
+      function escapeHtml(value) {
+        if (CONFIG.utils && typeof CONFIG.utils.escapeHtml === "function") {
+          return CONFIG.utils.escapeHtml(value);
+        }
+
+        return String(value ?? "")
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
+      }
+
+      function nl2br(value) {
+        if (CONFIG.utils && typeof CONFIG.utils.nl2br === "function") {
+          return CONFIG.utils.nl2br(value);
+        }
+
+        return escapeHtml(value).replace(/\n/g, "<br>");
+      }
+
+      function showMessage(target, type, text) {
+        target.className = `message ${type || "info"} show`;
+        target.innerHTML = nl2br(text || "");
+      }
+
+      function clearMessage(target) {
+        target.className = "message";
+        target.innerHTML = "";
+      }
+
+      function setButtonLoading(button, loading, text) {
+        if (!button) return;
+
+        if (loading) {
+          button.dataset.originalText = button.textContent;
+          button.textContent = text || "処理中...";
+          button.disabled = true;
+        } else {
+          button.textContent = button.dataset.originalText || button.textContent;
+          button.disabled = false;
+        }
+      }
+
+      function formatDate(dateText) {
+        if (CONFIG.utils && typeof CONFIG.utils.formatDate === "function") {
+          return CONFIG.utils.formatDate(dateText);
+        }
+
+        if (!dateText) return "未設定";
+        const date = new Date(`${dateText}T00:00:00+09:00`);
+        if (Number.isNaN(date.getTime())) return dateText;
+
+        return new Intl.DateTimeFormat("ja-JP", {
+          timeZone: "Asia/Tokyo",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+          weekday: "short"
+        }).format(date);
+      }
+
+      function formatDateTime(dateTimeText) {
+        if (CONFIG.utils && typeof CONFIG.utils.formatDateTime === "function") {
+          return CONFIG.utils.formatDateTime(dateTimeText);
+        }
+
+        if (!dateTimeText) return "未設定";
+        const date = new Date(dateTimeText);
+        if (Number.isNaN(date.getTime())) return dateTimeText;
+
+        return new Intl.DateTimeFormat("ja-JP", {
+          timeZone: "Asia/Tokyo",
+          year: "numeric",
+          month: "numeric",
+          day: "numeric",
+          weekday: "short",
+          hour: "2-digit",
+          minute: "2-digit"
+        }).format(date);
+      }
+
+      function formatTime(timeText) {
+        if (CONFIG.utils && typeof CONFIG.utils.formatTime === "function") {
+          return CONFIG.utils.formatTime(timeText);
+        }
+
+        if (!timeText) return "";
+        const parts = String(timeText).split(":");
+        if (parts.length < 2) return timeText;
+        return `${String(parts[0]).padStart(2, "0")}:${parts[1]}`;
+      }
+
+      function getTodayJST() {
+        if (CONFIG.utils && typeof CONFIG.utils.getTodayJST === "function") {
+          return CONFIG.utils.getTodayJST();
+        }
+
+        const now = new Date();
+        const formatter = new Intl.DateTimeFormat("ja-JP", {
+          timeZone: "Asia/Tokyo",
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit"
+        });
+
+        const parts = formatter.formatToParts(now);
+        const y = parts.find((p) => p.type === "year").value;
+        const m = parts.find((p) => p.type === "month").value;
+        const d = parts.find((p) => p.type === "day").value;
+        return `${y}-${m}-${d}`;
+      }
+
+      function toDateText(date) {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, "0");
+        const d = String(date.getDate()).padStart(2, "0");
+        return `${y}-${m}-${d}`;
+      }
+
+      function addDays(dateText, days) {
+        const base = new Date(`${dateText}T00:00:00+09:00`);
+        base.setDate(base.getDate() + Number(days || 0));
+        return toDateText(base);
+      }
+
+      function addMonths(dateText, months) {
+        const base = new Date(`${dateText}T00:00:00+09:00`);
+        const originalDate = base.getDate();
+        base.setMonth(base.getMonth() + Number(months || 0));
+        if (base.getDate() < originalDate) base.setDate(0);
+        return toDateText(base);
+      }
+
+      function timeToMinutes(value) {
+        const time = formatTime(value);
+        if (!time) return null;
+        const [h, m] = time.split(":").map(Number);
+        return h * 60 + m;
+      }
+
+      function minutesToTime(minutes) {
+        const h = Math.floor(minutes / 60);
+        const m = minutes % 60;
+        return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+      }
+
+      function buildSlotsFromRow(row) {
+        const slots = [];
+        const step = Number(state.settings.appointment_slot_minutes || 15);
+        const duration = Number(state.settings.default_visit_duration_minutes || 30);
+
+        if (!row || row.is_closed) return slots;
+
+        [
+          [row.open_time_1, row.close_time_1],
+          [row.open_time_2, row.close_time_2]
+        ].forEach(([open, close]) => {
+          const start = timeToMinutes(open);
+          const end = timeToMinutes(close);
+          if (start === null || end === null || start >= end) return;
+
+          for (let t = start; t <= end - duration; t += step) {
+            slots.push(minutesToTime(t));
+          }
+        });
+
+        return slots;
+      }
+
+      function buildFallbackSlotsForDate(dateText) {
+        const special = state.specialDays.find((item) => item.special_date === dateText);
+
+        if (special && special.day_type !== "memo") {
+          if (special.is_closed || special.day_type === "closed") return [];
+          return buildSlotsFromRow(special);
+        }
+
+        const day = new Date(`${dateText}T00:00:00+09:00`).getDay();
+        const row = state.regularHours.find((item) => Number(item.day_of_week) === day);
+        return buildSlotsFromRow(row);
+      }
+
+      function buildNextAppointmentText(dateText, timeText, memo) {
+        if (CONFIG.utils && typeof CONFIG.utils.buildNextAppointmentText === "function") {
+          return CONFIG.utils.buildNextAppointmentText(dateText, timeText, memo);
+        }
+
+        if (!dateText && !timeText && !memo) return "未設定";
+
+        return [
+          dateText ? formatDate(dateText) : "",
+          timeText ? formatTime(timeText) : "",
+          memo || ""
+        ].filter(Boolean).join(" ");
+      }
+
+      async function copyText(text) {
+        if (CONFIG.utils && typeof CONFIG.utils.copyText === "function") {
+          return CONFIG.utils.copyText(text);
+        }
+
+        const value = String(text || "");
+
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(value);
+          return true;
+        }
+
+        const textarea = document.createElement("textarea");
+        textarea.value = value;
+        textarea.style.position = "fixed";
+        textarea.style.left = "-9999px";
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+        const result = document.execCommand("copy");
+        document.body.removeChild(textarea);
+        return result;
+      }
+
+      function getStatusLabel(status) {
+        if (CONFIG.utils && typeof CONFIG.utils.getStatusLabel === "function") {
+          return CONFIG.utils.getStatusLabel(status);
+        }
+
+        const map = getConfigValue("PATIENT_STATUS", {});
+        return map[status]?.label || status || "未設定";
+      }
+
+      function getVisitTypeLabel(type) {
+        if (CONFIG.utils && typeof CONFIG.utils.getVisitTypeLabel === "function") {
+          return CONFIG.utils.getVisitTypeLabel(type);
+        }
+
+        const map = getConfigValue("VISIT_TYPES", {});
+        return map[type]?.label || type || "未設定";
+      }
+
+      function getVisitStatusLabel(status) {
+        if (CONFIG.utils && typeof CONFIG.utils.getVisitStatusLabel === "function") {
+          return CONFIG.utils.getVisitStatusLabel(status);
+        }
+
+        const map = getConfigValue("VISIT_STATUS", {});
+        return map[status]?.label || status || "未設定";
+      }
+
+      function replaceTemplateVariables(templateText, data) {
+        if (CONFIG.utils && typeof CONFIG.utils.replaceTemplateVariables === "function") {
+          return CONFIG.utils.replaceTemplateVariables(templateText, data);
+        }
+
+        const values = {
+          clinic_name: state.currentClinic?.clinic_name || getConfigValue("CLINIC.NAME", "DPRO歯科クリニック"),
+          patient_name: data?.patient_name || "",
+          member_no: data?.member_no || "",
+          next_appointment: buildNextAppointmentText(
+            data?.next_appointment_date,
+            data?.next_appointment_time,
+            data?.next_appointment_memo
+          ),
+          followup_due_date: data?.followup_due_date ? formatDate(data.followup_due_date) : "",
+          last_visit_date: data?.last_visit_date ? formatDate(data.last_visit_date) : "",
+          today: formatDate(getTodayJST())
+        };
+
+        let text = String(templateText || "");
+        Object.keys(values).forEach((key) => {
+          text = text.replaceAll(`{{${key}}}`, values[key] || "");
+        });
+
+        return text;
+      }
+
+      async function apiFetch(endpoint, options) {
+        if (CONFIG.utils && typeof CONFIG.utils.apiFetch === "function") {
+          return CONFIG.utils.apiFetch(endpoint, options);
+        }
+
+        throw new Error("API設定がまだ読み込まれていません。");
+      }
+
+      function getAdminCode() {
+        if (CONFIG.utils && typeof CONFIG.utils.getAdminCode === "function") {
+          return CONFIG.utils.getAdminCode();
+        }
+
+        try {
+          return localStorage.getItem(getConfigValue("STORAGE_KEYS.ADMIN_CODE", "dpro_dental_qr_admin_code")) || "";
+        } catch (error) {
+          return "";
+        }
+      }
+
+      function setAdminCode(code) {
+        if (CONFIG.utils && typeof CONFIG.utils.setAdminCode === "function") {
+          CONFIG.utils.setAdminCode(code);
+          return;
+        }
+
+        try {
+          localStorage.setItem(getConfigValue("STORAGE_KEYS.ADMIN_CODE", "dpro_dental_qr_admin_code"), code || "");
+        } catch (error) {
+          console.warn(error);
+        }
+      }
+
+      function getStaffName() {
+        if (CONFIG.utils && typeof CONFIG.utils.getStaffName === "function") {
+          return CONFIG.utils.getStaffName();
+        }
+
+        try {
+          return localStorage.getItem(getConfigValue("STORAGE_KEYS.STAFF_NAME", "dpro_dental_qr_staff_name")) || "受付スタッフ";
+        } catch (error) {
+          return "受付スタッフ";
+        }
+      }
+
+      function setStaffName(name) {
+        if (CONFIG.utils && typeof CONFIG.utils.setStaffName === "function") {
+          CONFIG.utils.setStaffName(name);
+          return;
+        }
+
+        try {
+          localStorage.setItem(getConfigValue("STORAGE_KEYS.STAFF_NAME", "dpro_dental_qr_staff_name"), name || "受付スタッフ");
+        } catch (error) {
+          console.warn(error);
+        }
+      }
+
+      function parseScanText(inputText) {
+        const text = String(inputText || "").trim();
+
+        if (!text) {
+          return {
+            raw: "",
+            token: "",
+            member_no: "",
+            q: ""
+          };
+        }
+
+        try {
+          const url = new URL(text);
+          const token =
+            url.searchParams.get("t") ||
+            url.searchParams.get("token") ||
+            url.searchParams.get("qr_token") ||
+            "";
+
+          if (token) {
+            return {
+              raw: text,
+              token,
+              member_no: "",
+              q: token
+            };
+          }
+        } catch (error) {
+          // URLでない場合は下へ進む
+        }
+
+        if (text.includes("?") || text.includes("&")) {
+          const queryPart = text.split("?").pop();
+          const params = new URLSearchParams(queryPart);
+          const token =
+            params.get("t") ||
+            params.get("token") ||
+            params.get("qr_token") ||
+            "";
+
+          if (token) {
+            return {
+              raw: text,
+              token,
+              member_no: "",
+              q: token
+            };
+          }
+        }
+
+        if (/^D\d+/i.test(text) || /^M\d+/i.test(text) || /^P\d+/i.test(text)) {
+          return {
+            raw: text,
+            token: "",
+            member_no: text,
+            q: text
+          };
+        }
+
+        return {
+          raw: text,
+          token: text,
+          member_no: "",
+          q: text
+        };
+      }
+
+      function normalizeLookupData(apiData, sourceText) {
+        const root = apiData?.data || apiData || {};
+
+        const clinic =
+          root.clinic ||
+          root.clinic_info ||
+          apiData?.clinic ||
+          CONFIG.CLINIC ||
+          {};
+
+        const patient =
+          root.patient ||
+          root.card ||
+          root.member ||
+          apiData?.patient ||
+          root ||
+          {};
+
+        const visits =
+          root.visits ||
+          root.recent_visits ||
+          apiData?.visits ||
+          [];
+
+        const followups =
+          root.followups ||
+          root.active_followups ||
+          apiData?.followups ||
+          [];
+
+        const visitCount =
+          root.visit_count ??
+          patient.visit_count ??
+          visits.length ??
+          0;
+
+        return {
+          clinic: Object.assign({}, CONFIG.CLINIC || {}, clinic),
+          patient: {
+            id: patient.id || "",
+            clinic_id: patient.clinic_id || "",
+            qr_token: patient.qr_token || patient.token || parseScanText(sourceText).token || "",
+            member_no: patient.member_no || patient.memberNo || patient.card_no || patient.cardNo || "---",
+            patient_name: patient.patient_name || patient.name || patient.patientName || "患者さま",
+            patient_name_kana: patient.patient_name_kana || patient.kana || patient.patientNameKana || "",
+            phone: patient.phone || "",
+            email: patient.email || "",
+            line_user_id: patient.line_user_id || "",
+            line_display_name: patient.line_display_name || patient.lineDisplayName || "",
+            patient_kind: patient.patient_kind || patient.patientKind || "adult",
+            school_grade: patient.school_grade || patient.schoolGrade || "",
+            guardian_name: patient.guardian_name || patient.guardianName || "",
+            guardian_phone: patient.guardian_phone || patient.guardianPhone || "",
+            family_note: patient.family_note || patient.familyNote || "",
+            status: patient.status || "active",
+            card_enabled: patient.card_enabled !== false,
+            first_visit_date: patient.first_visit_date || "",
+            last_visit_at: patient.last_visit_at || "",
+            last_visit_type: patient.last_visit_type || "",
+            next_appointment_date: patient.next_appointment_date || patient.nextAppointmentDate || "",
+            next_appointment_time: patient.next_appointment_time || patient.nextAppointmentTime || "",
+            next_appointment_memo: patient.next_appointment_memo || patient.nextAppointmentMemo || "",
+            patient_memo: patient.patient_memo || patient.patientMemo || "",
+            internal_memo: patient.internal_memo || patient.internalMemo || "",
+            visit_count: visitCount
+          },
+          visits,
+          followups,
+          raw: apiData
+        };
+      }
+
+      function getDemoData() {
+        const today = getTodayJST();
+        const next = findFirstAvailableDate(today);
+        const followup = addMonths(today, 3);
+
+        return normalizeLookupData({
+          ok: true,
+          clinic: CONFIG.CLINIC || {
+            NAME: "DPRO歯科クリニック"
+          },
+          patient: {
+            id: "demo-patient-id",
+            clinic_id: "demo-clinic-id",
+            qr_token: "demo-dental-patient-001",
+            member_no: "D260600001",
+            patient_name: "山田 花子",
+            patient_name_kana: "ヤマダ ハナコ",
+            phone: "090-0000-0000",
+            line_display_name: "山田花子（お母さん）",
+            patient_kind: "adult",
+            school_grade: "",
+            guardian_name: "",
+            guardian_phone: "",
+            family_note: "お母さん本人の診察券。子どもの診察券もこのLINEにまとめています。",
+            status: "active",
+            card_enabled: true,
+            last_visit_at: new Date().toISOString(),
+            last_visit_type: "cleaning",
+            next_appointment_date: next,
+            next_appointment_time: "10:30",
+            next_appointment_memo: "定期検診・クリーニング予定",
+            patient_memo: "歯科QR診察券デモ用の患者です。",
+            internal_memo: "受付でQRを読み取り、来院記録を残す流れを説明できます。",
+            visit_count: 3
+          },
+          visits: [
+            {
+              id: "visit-demo-1",
+              visit_date: today,
+              visited_at: new Date().toISOString(),
+              visit_type: "cleaning",
+              visit_status: "visited",
+              chief_complaint: "定期検診・クリーニング",
+              treatment_summary: "口腔内チェック、スケーリング、ブラッシング説明",
+              next_appointment_date: next,
+              next_appointment_time: "10:30",
+              next_appointment_memo: "3か月後の定期検診"
+            },
+            {
+              id: "visit-demo-2",
+              visit_date: addDays(today, -92),
+              visited_at: new Date(Date.now() - 92 * 86400000).toISOString(),
+              visit_type: "checkup",
+              visit_status: "completed",
+              chief_complaint: "3か月定期検診",
+              treatment_summary: "問題なし。次回も定期検診予定。",
+              next_appointment_memo: "3か月後に案内"
+            }
+          ],
+          followups: [
+            {
+              id: "followup-demo-1",
+              followup_type: "regular_checkup",
+              due_date: followup,
+              status: "todo",
+              title: "3か月定期検診のご案内",
+              message_text: "こんにちは。DPRO歯科クリニックです。\n\n前回のご来院からお日にちが経ちましたので、定期検診とクリーニングのご案内です。\n\nご都合のよい日時がありましたら、このLINEにそのままご返信ください。"
+            }
+          ]
+        }, "demo");
+
+        demo.family_context = {
+          family: {
+            family_code: "FAM-DEMO-YAMADA",
+            family_name: "山田家",
+            primary_guardian_name: "山田 花子",
+            line_user_id: "demo-line-mother-yamada",
+            line_display_name: "山田花子（お母さん）",
+            line_link_status: "linked",
+            line_link_source: "demo",
+            line_linked_at: new Date().toISOString(),
+            line_last_seen_at: new Date().toISOString()
+          },
+          cards: [
+            {
+              patient_id: "demo-patient-id",
+              qr_token: "demo-dental-patient-001",
+              member_no: "D260600001",
+              patient_name: "山田 花子",
+              patient_kind: "adult",
+              relationship: "mother",
+              display_label: "お母さん",
+              display_order: 1,
+              next_appointment_date: next,
+              next_appointment_time: "10:30",
+              next_appointment_memo: "定期検診・クリーニング予定",
+              family_name: "山田家",
+              primary_guardian_name: "山田 花子"
+            },
+            {
+              patient_id: "demo-child-taro",
+              qr_token: "demo-dental-child-taro",
+              member_no: "D260600002",
+              patient_name: "山田 太郎",
+              patient_kind: "child",
+              school_grade: "小学2年生",
+              relationship: "child",
+              display_label: "長男・太郎くん",
+              display_order: 2,
+              next_appointment_date: "",
+              next_appointment_time: "",
+              next_appointment_memo: "3か月定期検診の案内対象",
+              family_name: "山田家",
+              primary_guardian_name: "山田 花子"
+            },
+            {
+              patient_id: "demo-child-sakura",
+              qr_token: "demo-dental-child-sakura",
+              member_no: "D260600003",
+              patient_name: "山田 さくら",
+              patient_kind: "child",
+              school_grade: "年長",
+              relationship: "child",
+              display_label: "長女・さくらちゃん",
+              display_order: 3,
+              next_appointment_date: addDays(next, 7),
+              next_appointment_time: "15:00",
+              next_appointment_memo: "フッ素塗布・経過確認",
+              family_name: "山田家",
+              primary_guardian_name: "山田 花子"
+            }
+          ]
+        };
+
+        return demo;
+      }
+
+      function buildMemberUrl(token) {
+        const pages = CONFIG.PAGES || {};
+
+        if (pages && typeof pages.getMemberUrl === "function") {
+          return pages.getMemberUrl(token);
+        }
+
+        const base = pages.BASE_PUBLIC_URL || window.location.origin + window.location.pathname.replace(/\/scan\.html.*$/, "");
+        return `${String(base).replace(/\/$/, "")}/member.html?t=${encodeURIComponent(token || "")}`;
+      }
+
+      function findFirstAvailableDate(startDate) {
+        const min = els.nextDateInput.min || startDate;
+        const max = els.nextDateInput.max || addMonths(startDate, Number(state.settings.appointment_max_months_ahead || 3));
+        let date = min;
+
+        for (let i = 0; i < 100; i += 1) {
+          if (date > max) break;
+          const slots = buildFallbackSlotsForDate(date);
+          if (slots.length) return date;
+          date = addDays(date, 1);
+        }
+
+        return min;
+      }
+
+      async function loadClinicSettings() {
+        setButtonLoading(els.reloadSettingsButton, true, "更新中...");
+
+        try {
+          const result = await apiFetch("/api/owner/settings", {
+            method: "GET",
+            params: {
+              clinic_code: getConfigValue("CLINIC.CLINIC_CODE", "dpro_dental_demo")
+            }
+          });
+
+          state.currentClinic = result.clinic || state.currentClinic || {};
+          state.settings = Object.assign({}, state.settings, result.settings || {});
+          state.regularHours = result.regular_hours || [];
+          state.specialDays = result.special_days || [];
+          state.settingsLoaded = true;
+
+          const rules = result.appointment_rules || {};
+          els.nextDateInput.min = rules.min_date || calculateLocalMinDate();
+          els.nextDateInput.max = rules.max_date || addMonths(getTodayJST(), Number(state.settings.appointment_max_months_ahead || 3));
+
+          updateSummary();
+
+          return true;
+        } catch (error) {
+          console.warn(error);
+
+          if (!state.regularHours.length) {
+            state.regularHours = getDefaultRegularHours();
+          }
+
+          els.nextDateInput.min = calculateLocalMinDate();
+          els.nextDateInput.max = addMonths(getTodayJST(), Number(state.settings.appointment_max_months_ahead || 3));
+
+          updateSummary();
+
+          return false;
+        } finally {
+          setButtonLoading(els.reloadSettingsButton, false);
+        }
+      }
+
+      function getDefaultRegularHours() {
+        return [
+          { day_of_week: 0, is_closed: true, open_time_1: null, close_time_1: null, open_time_2: null, close_time_2: null },
+          { day_of_week: 1, is_closed: false, open_time_1: "09:00", close_time_1: "13:00", open_time_2: "14:30", close_time_2: "18:00" },
+          { day_of_week: 2, is_closed: false, open_time_1: "09:00", close_time_1: "13:00", open_time_2: "14:30", close_time_2: "18:00" },
+          { day_of_week: 3, is_closed: false, open_time_1: "09:00", close_time_1: "13:00", open_time_2: "14:30", close_time_2: "18:00" },
+          { day_of_week: 4, is_closed: true, open_time_1: null, close_time_1: null, open_time_2: null, close_time_2: null },
+          { day_of_week: 5, is_closed: false, open_time_1: "09:00", close_time_1: "13:00", open_time_2: "14:30", close_time_2: "18:00" },
+          { day_of_week: 6, is_closed: false, open_time_1: "09:00", close_time_1: "13:00", open_time_2: null, close_time_2: null }
+        ];
+      }
+
+      function calculateLocalMinDate() {
+        return state.settings.allow_same_day_appointment === false ? addDays(getTodayJST(), 1) : getTodayJST();
+      }
+
+      function updateSummary() {
+        els.settingsStatusLabel.textContent = state.settingsLoaded ? "反映中" : "代替";
+        els.rangeLabel.textContent = `${state.settings.appointment_max_months_ahead || 3}か月`;
+        els.slotLabel.textContent = `${state.settings.appointment_slot_minutes || 15}分`;
+        els.selectedLabel.textContent = state.currentPatient?.member_no || "--";
+
+        const clinicName = state.currentClinic?.clinic_name || getConfigValue("CLINIC.NAME", "DPRO歯科クリニック");
+        els.clinicNameText.textContent = `${clinicName} / QR診察券読み取り・来院記録`;
+        els.footerClinicName.textContent = clinicName;
+      }
+
+      async function loadAppointmentOptions(dateText, preferredTime) {
+        clearMessage(els.appointmentMessage);
+        els.nextTimeInput.innerHTML = '<option value="">読み込み中...</option>';
+
+        if (!dateText) {
+          els.nextTimeInput.innerHTML = '<option value="">日付を選択してください</option>';
+          return;
+        }
+
+        const min = els.nextDateInput.min || calculateLocalMinDate();
+        const max = els.nextDateInput.max || addMonths(getTodayJST(), Number(state.settings.appointment_max_months_ahead || 3));
+
+        if (dateText < min) {
+          els.nextTimeInput.innerHTML = '<option value="">過去日は選択できません</option>';
+          showMessage(els.appointmentMessage, "warning", "過去日、または予約可能開始日より前の日付です。");
+          return;
+        }
+
+        if (dateText > max) {
+          els.nextTimeInput.innerHTML = '<option value="">予約可能期間外です</option>';
+          showMessage(els.appointmentMessage, "warning", `予約可能期間は${state.settings.appointment_max_months_ahead || 3}か月先までです。`);
+          return;
+        }
+
+        try {
+          const result = await apiFetch("/api/owner/appointment-options", {
+            method: "GET",
+            params: {
+              clinic_code: getConfigValue("CLINIC.CLINIC_CODE", "dpro_dental_demo"),
+              date: dateText
+            }
+          });
+
+          const slots = result.slots || [];
+          populateTimeOptions(slots, preferredTime);
+
+          if (result.is_available) {
+            showMessage(els.appointmentMessage, "success", `${formatDate(dateText)} の予約可能時間を表示しています。`);
+          } else {
+            showMessage(els.appointmentMessage, "warning", result.reason || "この日は予約できません。");
+          }
+        } catch (error) {
+          console.error(error);
+          const slots = buildFallbackSlotsForDate(dateText);
+          populateTimeOptions(slots, preferredTime);
+
+          showMessage(
+            els.appointmentMessage,
+            slots.length ? "warning" : "error",
+            "予約候補APIを取得できなかったため、画面内の曜日設定で候補を表示しています。\n\n詳細：" + (error.message || error)
+          );
+        }
+      }
+
+      function populateTimeOptions(slots, preferredTime) {
+        const selected = preferredTime ? formatTime(preferredTime) : "";
+
+        if (!slots.length) {
+          els.nextTimeInput.innerHTML = '<option value="">選択できる時間がありません</option>';
+          return;
+        }
+
+        els.nextTimeInput.innerHTML =
+          '<option value="">時間を選択</option>' +
+          slots.map((slot) => `<option value="${escapeHtml(slot)}">${escapeHtml(slot)}</option>`).join("");
+
+        if (selected && slots.includes(selected)) {
+          els.nextTimeInput.value = selected;
+        } else if (slots.includes("10:30")) {
+          els.nextTimeInput.value = "10:30";
+        }
+      }
+
+      async function logScan(scanText, result, patient) {
+        try {
+          const endpoint = getConfigValue("API.ENDPOINTS.SCAN_LOG", "/api/scan/log");
+
+          await apiFetch(endpoint, {
+            method: "POST",
+            body: {
+              clinic_code: getConfigValue("CLINIC.CLINIC_CODE", "dpro_dental_demo"),
+              qr_token: parseScanText(scanText).token || "",
+              scan_result: result || "success",
+              source_screen: "scan.html",
+              scanned_by_staff: getStaffName(),
+              user_agent: navigator.userAgent,
+              patient_id: patient?.id || null
+            }
+          });
+        } catch (error) {
+          console.warn("読み取りログ保存に失敗しました。", error);
+        }
+      }
+
+      async function lookupPatient(inputText, source) {
+        const parsed = parseScanText(inputText);
+
+        if (!parsed.raw) {
+          showMessage(source === "manual" ? els.manualMessage : els.scanMessage, "warning", "検索内容が空です。");
+          return;
+        }
+
+        state.lastScanText = parsed.raw;
+
+        const targetMessage = source === "manual" ? els.manualMessage : els.scanMessage;
+        clearMessage(targetMessage);
+        showMessage(targetMessage, "info", "患者情報を確認しています...");
+
+        try {
+          if (
+            parsed.raw === "demo" ||
+            parsed.token === "demo" ||
+            parsed.token === "demo-dental-patient-001" ||
+            parsed.member_no === "D260600001"
+          ) {
+            const demo = getDemoData();
+            await renderLookupData(demo);
+            showMessage(targetMessage, "success", "デモ患者を表示しました。");
+            return;
+          }
+
+          const endpoint = getConfigValue("API.ENDPOINTS.SCAN_LOOKUP", "/api/scan/lookup");
+
+          const data = await apiFetch(endpoint, {
+            method: "GET",
+            params: {
+              q: parsed.q,
+              t: parsed.token,
+              token: parsed.token,
+              qr_token: parsed.token,
+              member_no: parsed.member_no
+            }
+          });
+
+          if (data && data.ok === false) {
+            throw new Error(data.message || data.error || "患者情報を取得できませんでした。");
+          }
+
+          const normalized = normalizeLookupData(data, parsed.raw);
+
+          if (!normalized.patient || !normalized.patient.id) {
+            await logScan(parsed.raw, "not_found", null);
+            showMessage(targetMessage, "warning", "該当する患者が見つかりませんでした。");
+            return;
+          }
+
+          await renderLookupData(normalized);
+
+          if (normalized.patient.card_enabled === false || normalized.patient.status === "blocked") {
+            await logScan(parsed.raw, "disabled", normalized.patient);
+            showMessage(targetMessage, "error", "この診察券は現在利用停止中です。受付で確認してください。");
+            return;
+          }
+
+          await logScan(parsed.raw, "success", normalized.patient);
+          showMessage(targetMessage, "success", "患者情報を確認しました。");
+        } catch (error) {
+          console.error(error);
+          showMessage(
+            targetMessage,
+            "error",
+            "患者情報を取得できませんでした。\n\n" +
+            "まだWorker未作成の場合は、デモ患者表示で画面確認できます。\n\n" +
+            "詳細：" +
+            (error.message || error)
+          );
+        }
+      }
+
+      function setStatusPill(patient) {
+        const status = patient.status || "active";
+        const label =
+          patient.card_enabled === false || status === "blocked"
+            ? "利用停止中"
+            : getStatusLabel(status);
+
+        els.patientStatus.textContent = label;
+        els.statusPill.classList.remove("warning", "danger");
+
+        if (patient.card_enabled === false || status === "blocked") {
+          els.statusPill.classList.add("danger");
+          return;
+        }
+
+        if (status === "temporary" || status === "needs_followup" || status === "paused") {
+          els.statusPill.classList.add("warning");
+        }
+      }
+
+      async function loadFamilyContextForPatient(patient) {
+        if (!patient || !patient.qr_token) {
+          return {
+            family: null,
+            cards: []
+          };
+        }
+
+        try {
+          const result = await apiFetch("/api/member/family-cards", {
+            method: "GET",
+            params: {
+              clinic_code: getConfigValue("CLINIC.CLINIC_CODE", "dpro_dental_demo"),
+              t: patient.qr_token
+            }
+          });
+
+          return {
+            family: result.family || null,
+            cards: Array.isArray(result.cards) ? result.cards : []
+          };
+        } catch (error) {
+          console.warn("家族診察券情報を取得できませんでした。", error);
+          return {
+            family: null,
+            cards: []
+          };
+        }
+      }
+
+      function getFamilyCardLabel(card) {
+        if (card.display_label) return card.display_label;
+
+        if (card.relationship === "mother") return "お母さん";
+        if (card.relationship === "father") return "お父さん";
+        if (card.relationship === "guardian") return "保護者";
+        if (card.relationship === "child") {
+          if (card.school_grade) return `お子さん・${card.school_grade}`;
+          return "お子さん";
+        }
+
+        if (card.patient_kind === "child") return "お子さん";
+        return "本人";
+      }
+
+      function renderScanLineLinkStatus(family, cards) {
+        if (!els.scanLineLinkBox) return;
+
+        const safeCards = Array.isArray(cards) ? cards : [];
+        const lineUserId = family?.line_user_id || "";
+        const lineDisplayName = family?.line_display_name || "";
+        const status = family?.line_link_status || (lineUserId ? "linked" : "unlinked");
+        const familyName = family?.family_name || "この家族";
+
+        els.scanLineLinkBox.classList.remove("hidden");
+
+        if (status === "linked" || lineUserId) {
+          els.scanLineLinkPill.textContent = "LINE連携済み";
+          els.scanLineLinkPill.classList.remove("warning");
+
+          els.scanLineLinkTitle.textContent = "LINE公式と家族診察券が紐づいています";
+          els.scanLineLinkSub.textContent =
+            `${familyName}は、${lineDisplayName || "保護者様"}のLINEから家族診察券を開けます。`;
+        } else {
+          els.scanLineLinkPill.textContent = "LINE未連携";
+          els.scanLineLinkPill.classList.add("warning");
+
+          els.scanLineLinkTitle.textContent = "まだLINE公式とは未連携です";
+          els.scanLineLinkSub.textContent =
+            "医院側でLINE診察券登録用QRを発行し、患者さんがLINEで開くと紐づけできます。";
+        }
+
+        els.scanLineDisplayName.textContent = lineDisplayName || "未取得";
+        els.scanLineUserId.textContent = lineUserId || "未連携";
+        els.scanLineCardCount.textContent = `${safeCards.length || 0}枚`;
+      }
+
+
+      function renderFamilyContext(patient, family, cards) {
+        const safeCards = Array.isArray(cards) ? cards : [];
+
+        if (!safeCards.length || safeCards.length <= 1) {
+          els.familyContextBox.classList.add("hidden");
+          els.familyCardList.innerHTML = "";
+          return;
+        }
+
+        els.familyContextBox.classList.remove("hidden");
+
+        const familyName = family?.family_name || safeCards[0]?.family_name || "家族";
+        const guardianName =
+          family?.primary_guardian_name ||
+          safeCards[0]?.primary_guardian_name ||
+          patient.guardian_name ||
+          "";
+
+        els.familyContextTitle.textContent = `${familyName}の診察券`;
+        els.familyContextSubtitle.textContent = guardianName
+          ? `保護者：${guardianName} 様のLINEに、家族の診察券がまとまっています。`
+          : "保護者様のLINEに、家族の診察券がまとまっています。";
+
+        els.familyContextCount.textContent = `${safeCards.length}枚`;
+
+        els.familyCardList.innerHTML = safeCards.map((card) => {
+          const isActive =
+            (card.patient_id && card.patient_id === patient.id) ||
+            (card.qr_token && card.qr_token === patient.qr_token) ||
+            (card.member_no && card.member_no === patient.member_no);
+
+          const label = getFamilyCardLabel(card);
+          const next = buildNextAppointmentText(
+            card.next_appointment_date,
+            card.next_appointment_time,
+            card.next_appointment_memo
+          );
+
+          return `
+            <div class="family-card-item ${isActive ? "active" : ""}">
+              <div class="family-card-label">${escapeHtml(isActive ? "今回受付" : label)}</div>
+              <div>
+                <div class="family-card-name">${escapeHtml(card.patient_name || "患者さま")}</div>
+                <div class="family-card-meta">
+                  ${escapeHtml(label)} / 診察券番号：${escapeHtml(card.member_no || "---")}
+                </div>
+                <div class="family-card-meta">
+                  次回：${escapeHtml(next)}
+                </div>
+              </div>
+            </div>
+          `;
+        }).join("");
+      }
+
+      function buildFamilyInfoText(patient, family, cards) {
+        const safeCards = Array.isArray(cards) ? cards : [];
+
+        if (!safeCards.length || safeCards.length <= 1) {
+          if (patient.patient_kind === "child") {
+            return [
+              "子どもの診察券",
+              patient.guardian_name ? `保護者：${patient.guardian_name}` : "",
+              patient.school_grade ? `学年：${patient.school_grade}` : ""
+            ].filter(Boolean).join("\n");
+          }
+
+          return "本人のみ";
+        }
+
+        const active = safeCards.find((card) =>
+          (card.patient_id && card.patient_id === patient.id) ||
+          (card.qr_token && card.qr_token === patient.qr_token) ||
+          (card.member_no && card.member_no === patient.member_no)
+        );
+
+        const guardianName =
+          family?.primary_guardian_name ||
+          safeCards[0]?.primary_guardian_name ||
+          patient.guardian_name ||
+          "";
+
+        return [
+          `${family?.family_name || active?.family_name || "家族"}の診察券`,
+          active ? `今回受付：${getFamilyCardLabel(active)} / ${active.patient_name}` : "",
+          guardianName ? `保護者：${guardianName}` : "",
+          family?.line_display_name ? `LINE名：${family.line_display_name}` : "",
+          family?.line_user_id ? "LINE連携：済み" : "LINE連携：未連携",
+          `登録診察券：${safeCards.length}枚`
+        ].filter(Boolean).join("\n");
+      }
+
+
+      async function renderLookupData(data) {
+        const patient = data.patient;
+        const clinic = data.clinic || {};
+        const visits = Array.isArray(data.visits) ? data.visits : [];
+        const followups = Array.isArray(data.followups) ? data.followups : [];
+
+        const familyContext = data.family_context || await loadFamilyContextForPatient(patient);
+        const family = familyContext.family || null;
+        const familyCards = Array.isArray(familyContext.cards) ? familyContext.cards : [];
+
+        state.currentPatient = patient;
+        state.currentClinic = Object.assign({}, state.currentClinic || {}, clinic);
+        state.currentVisits = visits;
+        state.currentFollowups = followups;
+        state.currentFamily = family;
+        state.currentFamilyCards = familyCards;
+
+        updateSummary();
+
+        els.emptyPatientCard.classList.add("hidden");
+        els.patientCard.classList.remove("hidden");
+        els.visitCreateSection.classList.remove("hidden");
+
+        els.patientName.textContent = patient.patient_name || "患者さま";
+        els.patientKana.textContent = patient.patient_name_kana || "";
+        els.patientKana.classList.toggle("hidden", !patient.patient_name_kana);
+
+        els.memberNo.textContent = patient.member_no || "---";
+        els.visitCount.textContent = String(patient.visit_count ?? visits.length ?? 0);
+
+        setStatusPill(patient);
+
+        els.patientPhone.textContent = patient.phone || "未登録";
+        els.lineDisplayName.textContent =
+          patient.line_display_name ||
+          family?.line_display_name ||
+          (family?.line_user_id ? "家族LINE連携済み" : "未取得");
+
+        els.lastVisit.textContent = patient.last_visit_at
+          ? `${formatDateTime(patient.last_visit_at)} / ${getVisitTypeLabel(patient.last_visit_type)}`
+          : "来院履歴なし";
+
+        els.nextAppointment.textContent = buildNextAppointmentText(
+          patient.next_appointment_date,
+          patient.next_appointment_time,
+          patient.next_appointment_memo
+        );
+
+        els.patientMemo.textContent = patient.patient_memo || "なし";
+        els.internalMemo.textContent =
+          buildFamilyInfoText(patient, family, familyCards) +
+          (family?.line_user_id ? "\nLINE連携：済み" : "\nLINE連携：未連携") +
+          (patient.internal_memo ? "\n\n院内メモ：" + patient.internal_memo : "");
+
+        renderFamilyContext(patient, family, familyCards);
+        renderScanLineLinkStatus(family, familyCards);
+
+        els.nextDateInput.value = patient.next_appointment_date || "";
+        els.nextMemoInput.value = patient.next_appointment_memo || "";
+
+        if (patient.next_appointment_date) {
+          await loadAppointmentOptions(patient.next_appointment_date, patient.next_appointment_time ? formatTime(patient.next_appointment_time) : "");
+        } else {
+          els.nextTimeInput.innerHTML = '<option value="">日付を選択してください</option>';
+        }
+
+        fillDefaultFollowupByVisitType();
+        renderRecentVisits(visits);
+        renderFollowupBox(patient, followups);
+
+        const debug = {
+          patient_id: patient.id,
+          member_no: patient.member_no,
+          qr_token: patient.qr_token,
+          clinic_code: getConfigValue("CLINIC.CLINIC_CODE", "dpro_dental_demo")
+        };
+
+        els.debugBox.textContent = JSON.stringify(debug, null, 2);
+      }
+
+      function renderRecentVisits(visits) {
+        els.recentVisitsList.innerHTML = "";
+
+        if (!Array.isArray(visits) || visits.length === 0) {
+          els.recentVisitsSection.classList.remove("hidden");
+          els.recentVisitsList.innerHTML = '<div class="empty-box">来院履歴はまだありません。</div>';
+          return;
+        }
+
+        els.recentVisitsSection.classList.remove("hidden");
+
+        const html = visits.slice(0, 8).map((visit) => {
+          const date = visit.visit_date
+            ? formatDate(visit.visit_date)
+            : formatDateTime(visit.visited_at);
+
+          const type = getVisitTypeLabel(visit.visit_type);
+          const summary =
+            visit.treatment_summary ||
+            visit.chief_complaint ||
+            visit.staff_memo ||
+            "メモなし";
+
+          const next = buildNextAppointmentText(
+            visit.next_appointment_date,
+            visit.next_appointment_time,
+            visit.next_appointment_memo
+          );
+
+          return `
+            <div class="visit-item">
+              <div class="visit-top">
+                <div class="visit-date">${escapeHtml(date)}</div>
+                <div class="visit-type">${escapeHtml(type)}</div>
+              </div>
+              <div class="visit-text">${nl2br(summary)}</div>
+              <div class="visit-text" style="margin-top: 8px;">
+                <strong>次回：</strong>${escapeHtml(next)}
+              </div>
+            </div>
+          `;
+        }).join("");
+
+        els.recentVisitsList.innerHTML = html;
+      }
+
+      function renderFollowupBox(patient, followups) {
+        const firstFollowup = Array.isArray(followups) && followups.length > 0
+          ? followups[0]
+          : null;
+
+        let text = "";
+
+        if (firstFollowup && firstFollowup.message_text) {
+          text = firstFollowup.message_text;
+        } else {
+          text = buildDefaultLineMessage(patient);
+        }
+
+        els.followupCopyText.textContent = text;
+        els.lineMessageInput.value = text;
+        els.followupSection.classList.remove("hidden");
+      }
+
+      function buildDefaultLineMessage(patient) {
+        const template =
+          getConfigValue("DEFAULT_MESSAGES.revisit_followup", "") ||
+          "こんにちは。{{clinic_name}}です。\n\n先日はご来院ありがとうございました。\n\nその後、お口の状態はいかがでしょうか。\n気になることがありましたら、いつでもLINEでご相談ください。\n\n次回のご来院目安：\n{{next_appointment}}\n\nご都合がよろしければ、ご希望日時をこのLINEにご返信ください。";
+
+        return replaceTemplateVariables(template, {
+          patient_name: patient.patient_name,
+          member_no: patient.member_no,
+          next_appointment_date: els.nextDateInput.value || patient.next_appointment_date,
+          next_appointment_time: els.nextTimeInput.value || patient.next_appointment_time,
+          next_appointment_memo: els.nextMemoInput.value || patient.next_appointment_memo,
+          followup_due_date: els.followupDueDateInput.value || ""
+        });
+      }
+
+      function fillDefaultFollowupByVisitType() {
+        const visitType = els.visitTypeInput.value || getConfigValue("SCAN.DEFAULT_VISIT_TYPE", "checkup");
+        const visitTypes = getConfigValue("VISIT_TYPES", {});
+        const days = visitTypes[visitType]?.followupDefaultDays || 90;
+
+        els.followupDueDateInput.value = addDays(getTodayJST(), days);
+
+        if (!els.followupReasonInput.value) {
+          if (visitType === "checkup" || visitType === "cleaning") {
+            els.followupReasonInput.value = "定期検診・クリーニングの再来院案内";
+          } else if (visitType === "treatment") {
+            els.followupReasonInput.value = "治療後の状態確認・次回案内";
+          } else {
+            els.followupReasonInput.value = "来院後の再来院フォロー";
+          }
+        }
+      }
+
+      function populateSelects() {
+        const visitTypes = getConfigValue("VISIT_TYPES", {});
+        const visitStatus = getConfigValue("VISIT_STATUS", {});
+
+        els.visitTypeInput.innerHTML = Object.entries(visitTypes).map(([key, item]) => {
+          return `<option value="${escapeHtml(key)}">${escapeHtml(item.label || key)}</option>`;
+        }).join("");
+
+        els.visitStatusInput.innerHTML = Object.entries(visitStatus).map(([key, item]) => {
+          return `<option value="${escapeHtml(key)}">${escapeHtml(item.label || key)}</option>`;
+        }).join("");
+
+        if (!els.visitTypeInput.innerHTML) {
+          els.visitTypeInput.innerHTML = `
+            <option value="checkup">定期検診</option>
+            <option value="cleaning">クリーニング</option>
+            <option value="treatment">治療</option>
+            <option value="emergency">急患</option>
+            <option value="consultation">相談</option>
+            <option value="other">その他</option>
+          `;
+        }
+
+        if (!els.visitStatusInput.innerHTML) {
+          els.visitStatusInput.innerHTML = `
+            <option value="visited">来院済み</option>
+            <option value="completed">完了</option>
+            <option value="checked_in">受付済み</option>
+            <option value="cancelled">キャンセル</option>
+            <option value="no_show">無断キャンセル</option>
+          `;
+        }
+
+        els.visitTypeInput.value = getConfigValue("SCAN.DEFAULT_VISIT_TYPE", "checkup");
+        els.visitStatusInput.value = getConfigValue("SCAN.DEFAULT_VISIT_STATUS", "visited");
+      }
+
+      async function startScanner() {
+        clearMessage(els.scanMessage);
+
+        if (!window.Html5Qrcode) {
+          showMessage(els.scanMessage, "error", "QR読み取りライブラリを読み込めませんでした。手入力検索を使ってください。");
+          return;
+        }
+
+        if (state.scannerRunning) {
+          showMessage(els.scanMessage, "info", "すでにカメラ読み取り中です。");
+          return;
+        }
+
+        try {
+          state.scanner = state.scanner || new Html5Qrcode("qrReader");
+
+          await state.scanner.start(
+            { facingMode: "environment" },
+            {
+              fps: 10,
+              qrbox: { width: 240, height: 240 },
+              aspectRatio: 1.0
+            },
+            async (decodedText) => {
+              if (!decodedText || decodedText === state.lastScanText) return;
+
+              state.lastScanText = decodedText;
+              showMessage(els.scanMessage, "success", "QRを読み取りました。患者情報を確認します。");
+
+              try {
+                await stopScanner(false);
+              } catch (error) {
+                console.warn(error);
+              }
+
+              await lookupPatient(decodedText, "scan");
+            },
+            () => {}
+          );
+
+          state.scannerRunning = true;
+          showMessage(els.scanMessage, "info", "カメラ読み取り中です。QR診察券をカメラに向けてください。");
+        } catch (error) {
+          console.error(error);
+          showMessage(
+            els.scanMessage,
+            "error",
+            "カメラを開始できませんでした。\n\n" +
+            "・ブラウザでカメラ許可をしてください。\n" +
+            "・GitHub PagesなどHTTPS環境で開いてください。\n" +
+            "・うまくいかない場合は手入力検索を使ってください。\n\n" +
+            "詳細：" + (error.message || error)
+          );
+        }
+      }
+
+      async function stopScanner(showDoneMessage) {
+        if (!state.scanner || !state.scannerRunning) {
+          if (showDoneMessage) {
+            showMessage(els.scanMessage, "info", "カメラは起動していません。");
+          }
+          return;
+        }
+
+        try {
+          await state.scanner.stop();
+          await state.scanner.clear();
+        } catch (error) {
+          console.warn("カメラ停止時の警告", error);
+        } finally {
+          state.scannerRunning = false;
+        }
+
+        if (showDoneMessage) {
+          showMessage(els.scanMessage, "success", "カメラ読み取りを停止しました。");
+        }
+      }
+
+      async function saveVisit() {
+        const patient = state.currentPatient;
+
+        if (!patient || !patient.id) {
+          showMessage(els.visitMessage, "warning", "先に患者情報を表示してください。");
+          return;
+        }
+
+        if (els.nextTimeInput.value && !els.nextDateInput.value) {
+          showMessage(els.visitMessage, "warning", "次回予約時間を入れる場合は、次回予約日も選択してください。");
+          return;
+        }
+
+        if (els.nextDateInput.value && !els.nextTimeInput.value) {
+          showMessage(els.visitMessage, "warning", "次回予約日を入れる場合は、次回予約時間も選択してください。");
+          return;
+        }
+
+        const body = {
+          clinic_code: getConfigValue("CLINIC.CLINIC_CODE", "dpro_dental_demo"),
+          clinic_id: patient.clinic_id || null,
+          patient_id: patient.id,
+
+          visit_date: getTodayJST(),
+          visit_status: els.visitStatusInput.value,
+          visit_type: els.visitTypeInput.value,
+
+          chief_complaint: els.chiefComplaintInput.value.trim(),
+          treatment_summary: els.treatmentSummaryInput.value.trim(),
+          staff_memo: "",
+
+          next_appointment_date: els.nextDateInput.value || null,
+          next_appointment_time: els.nextTimeInput.value || null,
+          next_appointment_memo: els.nextMemoInput.value.trim(),
+
+          needs_followup: els.needsFollowupInput.value === "true",
+          followup_due_date: els.needsFollowupInput.value === "true" ? els.followupDueDateInput.value || null : null,
+          followup_reason: els.followupReasonInput.value.trim(),
+
+          line_message_text: els.lineMessageInput.value.trim(),
+
+          created_by_staff: getStaffName()
+        };
+
+        setButtonLoading(els.saveVisitButton, true, "保存中...");
+
+        try {
+          if (patient.id === "demo-patient-id") {
+            const demoVisit = {
+              id: `local-${Date.now()}`,
+              visit_date: body.visit_date,
+              visited_at: new Date().toISOString(),
+              visit_status: body.visit_status,
+              visit_type: body.visit_type,
+              chief_complaint: body.chief_complaint,
+              treatment_summary: body.treatment_summary,
+              staff_memo: body.staff_memo,
+              next_appointment_date: body.next_appointment_date,
+              next_appointment_time: body.next_appointment_time,
+              next_appointment_memo: body.next_appointment_memo
+            };
+
+            state.currentVisits = [demoVisit].concat(state.currentVisits || []);
+            state.currentPatient.next_appointment_date = body.next_appointment_date;
+            state.currentPatient.next_appointment_time = body.next_appointment_time;
+            state.currentPatient.next_appointment_memo = body.next_appointment_memo;
+            state.currentPatient.visit_count = Number(state.currentPatient.visit_count || 0) + 1;
+
+            await renderLookupData({
+              clinic: state.currentClinic,
+              patient: state.currentPatient,
+              visits: state.currentVisits,
+              followups: state.currentFollowups
+            });
+
+            showMessage(
+              els.visitMessage,
+              "success",
+              "デモ用の来院記録を画面上に追加しました。\n実データ保存はWorker作成後に動作します。"
+            );
+            return;
+          }
+
+          const endpoint = getConfigValue("API.ENDPOINTS.OWNER_VISIT_CREATE", "/api/owner/visits/create");
+
+          const result = await apiFetch(endpoint, {
+            method: "POST",
+            body
+          });
+
+          if (result && result.ok === false) {
+            throw new Error(result.message || result.error || "来院記録を保存できませんでした。");
+          }
+
+          showMessage(els.visitMessage, "success", "来院記録を保存しました。");
+
+          const token = patient.qr_token || patient.member_no || state.lastScanText;
+          if (token) {
+            await lookupPatient(token, "manual");
+          }
+        } catch (error) {
+          console.error(error);
+          showMessage(
+            els.visitMessage,
+            "error",
+            "来院記録を保存できませんでした。\n\n" +
+            "休診日・営業時間外・予約可能期間外の次回予約は保存できません。\n\n" +
+            "詳細：" + (error.message || error)
+          );
+        } finally {
+          setButtonLoading(els.saveVisitButton, false);
+        }
+      }
+
+      function clearScreen() {
+        state.currentPatient = null;
+        state.currentVisits = [];
+        state.currentFollowups = [];
+        state.lastScanText = "";
+
+        els.manualInput.value = "";
+
+        els.emptyPatientCard.classList.remove("hidden");
+        els.patientCard.classList.add("hidden");
+        els.visitCreateSection.classList.add("hidden");
+        els.recentVisitsSection.classList.add("hidden");
+        els.followupSection.classList.add("hidden");
+
+        [
+          els.scanMessage,
+          els.manualMessage,
+          els.patientMessage,
+          els.visitMessage,
+          els.followupMessage,
+          els.appointmentMessage
+        ].forEach(clearMessage);
+
+        els.chiefComplaintInput.value = "";
+        els.treatmentSummaryInput.value = "";
+        els.nextDateInput.value = "";
+        els.nextTimeInput.innerHTML = '<option value="">日付を選択してください</option>';
+        els.nextMemoInput.value = "";
+        els.followupReasonInput.value = "";
+        els.lineMessageInput.value = "";
+
+        fillDefaultFollowupByVisitType();
+        updateSummary();
+      }
+
+      function saveSettings() {
+        const staffName = els.staffNameInput.value.trim() || getConfigValue("ADMIN.DEFAULT_STAFF_NAME", "受付スタッフ");
+        const adminCode = els.adminCodeInput.value.trim();
+
+        setStaffName(staffName);
+        setAdminCode(adminCode);
+
+        showMessage(
+          els.settingsMessage,
+          "success",
+          "受付設定を保存しました。\n管理コードはWorker側の認証で使用します。"
+        );
+      }
+
+      function applyInitialConfig() {
+        const systemName = getConfigValue("SYSTEM_NAME", "DPRO SHOP");
+        const title = getConfigValue("SCAN.TITLE", "受付QR読み取り");
+        const clinicName = getConfigValue("CLINIC.NAME", "DPRO歯科クリニック");
+
+        document.title = `${systemName} | ${title}`;
+        els.systemName.textContent = systemName;
+        els.pageTitle.textContent = title;
+        els.clinicNameText.textContent = `${clinicName} / QR診察券読み取り・来院記録`;
+        els.footerClinicName.textContent = clinicName;
+
+        const pages = CONFIG.PAGES || {};
+        els.memberLink.href = pages.MEMBER ? `./${pages.MEMBER}` : "./member.html";
+        els.ownerLink.href = pages.OWNER ? `./${pages.OWNER}` : "./owner.html";
+        els.adminLink.href = pages.ADMIN ? `./${pages.ADMIN}` : "./admin.html";
+
+        els.staffNameInput.value = getStaffName();
+        els.adminCodeInput.value = getAdminCode();
+
+        if (!state.regularHours.length) {
+          state.regularHours = getDefaultRegularHours();
+        }
+
+        populateSelects();
+        fillDefaultFollowupByVisitType();
+
+        els.nextDateInput.min = calculateLocalMinDate();
+        els.nextDateInput.max = addMonths(getTodayJST(), Number(state.settings.appointment_max_months_ahead || 3));
+
+        updateSummary();
+      }
+
+      function bindEvents() {
+        els.reloadSettingsButton.addEventListener("click", async () => {
+          const ok = await loadClinicSettings();
+          if (ok) {
+            showMessage(els.settingsMessage, "success", "医院設定を更新しました。");
+          } else {
+            showMessage(els.settingsMessage, "warning", "医院設定APIを取得できませんでした。代替設定で表示しています。");
+          }
+        });
+
+        els.startScanButton.addEventListener("click", startScanner);
+
+        els.stopScanButton.addEventListener("click", async () => {
+          await stopScanner(true);
+        });
+
+        els.demoPatientButton.addEventListener("click", async () => {
+          const demo = getDemoData();
+          await renderLookupData(demo);
+          showMessage(els.scanMessage, "success", "デモ患者を表示しました。");
+        });
+
+        els.manualSearchButton.addEventListener("click", async () => {
+          await lookupPatient(els.manualInput.value, "manual");
+        });
+
+        els.manualInput.addEventListener("keydown", async (event) => {
+          if (event.key === "Enter") {
+            event.preventDefault();
+            await lookupPatient(els.manualInput.value, "manual");
+          }
+        });
+
+        els.clearButton.addEventListener("click", clearScreen);
+        els.saveSettingsButton.addEventListener("click", saveSettings);
+
+        els.copyPatientNameButton.addEventListener("click", async () => {
+          if (!state.currentPatient) return;
+          await copyText(state.currentPatient.patient_name || "");
+          showMessage(els.patientMessage, "success", "患者名をコピーしました。");
+        });
+
+        els.openMemberButton.addEventListener("click", () => {
+          if (!state.currentPatient) return;
+          const url = buildMemberUrl(state.currentPatient.qr_token || "demo-dental-patient-001");
+          window.open(url, "_blank", "noopener");
+        });
+
+        els.visitTypeInput.addEventListener("change", () => {
+          fillDefaultFollowupByVisitType();
+          if (state.currentPatient) {
+            els.lineMessageInput.value = buildDefaultLineMessage(state.currentPatient);
+          }
+        });
+
+        els.needsFollowupInput.addEventListener("change", () => {
+          if (els.needsFollowupInput.value === "true") {
+            fillDefaultFollowupByVisitType();
+          }
+        });
+
+        els.nextDateInput.addEventListener("change", async () => {
+          await loadAppointmentOptions(els.nextDateInput.value, "");
+        });
+
+        els.fillDefaultMessageButton.addEventListener("click", () => {
+          if (!state.currentPatient) {
+            showMessage(els.visitMessage, "warning", "先に患者情報を表示してください。");
+            return;
+          }
+
+          const text = buildDefaultLineMessage(state.currentPatient);
+          els.lineMessageInput.value = text;
+          els.followupCopyText.textContent = text;
+          showMessage(els.visitMessage, "success", "LINE文面を自動作成しました。");
+        });
+
+        els.copyLineMessageButton.addEventListener("click", async () => {
+          const text = els.lineMessageInput.value.trim();
+
+          if (!text) {
+            showMessage(els.visitMessage, "warning", "コピーするLINE文面がありません。");
+            return;
+          }
+
+          await copyText(text);
+          showMessage(els.visitMessage, "success", "LINE文面をコピーしました。LINE公式のチャットに貼り付けて送信してください。");
+        });
+
+        els.copyFollowupButton.addEventListener("click", async () => {
+          const text = els.followupCopyText.textContent.trim();
+
+          if (!text) {
+            showMessage(els.followupMessage, "warning", "コピーする文面がありません。");
+            return;
+          }
+
+          await copyText(text);
+          showMessage(els.followupMessage, "success", "フォロー文面をコピーしました。LINE公式のチャットに貼り付けて送信してください。");
+        });
+
+        els.saveVisitButton.addEventListener("click", saveVisit);
+
+        window.addEventListener("beforeunload", () => {
+          if (state.scanner && state.scannerRunning) {
+            try {
+              state.scanner.stop();
+            } catch (error) {
+              console.warn(error);
+            }
+          }
+        });
+      }
+
+      document.addEventListener("DOMContentLoaded", async () => {
+        applyInitialConfig();
+        bindEvents();
+        await loadClinicSettings();
+      });
+    })();
+  </script>
+</body>
+</html>

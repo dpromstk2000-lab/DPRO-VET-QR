@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DPRO DENTAL CARD</title>
+    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;700&family=Noto+Sans+JP:wght@300;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --medical-blue: #0055ff;
+            --mint-cyan: #00e5ff;
+            --bg-dark: #000c1a;
+            --silver: #f1f5f9;
+            --text-muted: #94a3b8;
+            --card-gradient: linear-gradient(135deg, #0044cc 0%, #001133 100%);
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans JP', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #fff;
+            overflow: hidden;
+        }
+
+        .card-container {
+            width: 90%;
+            max-width: 350px;
+            /* 垂直方向の見切れ防止のため、比率を少し短めに調整(1.58 -> 1.5) */
+            aspect-ratio: 1 / 1.5; 
+            background: var(--card-gradient);
+            border-radius: 24px;
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.8);
+            position: relative;
+            /* パディングを28pxから18pxに削減してスペースを稼ぐ */
+            padding: 18px 22px; 
+            display: flex;
+            flex-direction: column;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            overflow: hidden;
+        }
+
+        .card-container::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px);
+            background-size: 16px 16px;
+            pointer-events: none;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            z-index: 2;
+            margin-bottom: 10px;
+        }
+
+        .logo-section { display: flex; align-items: center; gap: 8px; }
+        .medical-cross {
+            width: 12px; height: 12px;
+            background: var(--mint-cyan);
+            position: relative;
+        }
+        .medical-cross::before { content: ""; position: absolute; top: 4px; left: -4px; width: 20px; height: 4px; background: var(--mint-cyan); }
+        .medical-cross::after { content: ""; position: absolute; left: 4px; top: -4px; width: 4px; height: 20px; background: var(--mint-cyan); }
+
+        .brand-logo {
+            font-family: 'Urbanist', sans-serif;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #fff;
+            margin-left: 8px;
+        }
+
+        .badge-clinic {
+            border: 1px solid var(--mint-cyan);
+            padding: 3px 8px;
+            border-radius: 50px;
+            font-size: 0.55rem;
+            color: var(--mint-cyan);
+        }
+
+        .user-section { z-index: 2; margin-bottom: 8px; }
+        .label-small { font-size: 0.55rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 1px; }
+        /* 文字サイズを1.8remから1.5remに縮小 */
+        .user-name { font-size: 1.5rem; font-weight: 700; margin: 0; color: #fff; }
+
+        .appointment-box {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 10px 14px; /* パディングを削減 */
+            z-index: 2;
+            margin-bottom: 12px;
+        }
+
+        .appointment-title { font-size: 0.6rem; color: var(--mint-cyan); font-weight: 700; margin: 0 0 4px 0; }
+        .appointment-date { font-size: 1.15rem; font-weight: 700; color: #fff; margin: 0; }
+
+        .qrcode-area {
+            background: #fff;
+            padding: 12px;
+            border-radius: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2;
+            /* QRサイズを140pxから115pxに縮小 */
+            width: 115px; 
+            height: 115px;
+            margin: 0 auto;
+        }
+        .qrcode-area img { width: 115px !important; height: 115px !important; }
+
+        .card-footer {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            z-index: 2;
+            padding-top: 8px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            margin-top: auto; /* これでフッターを一番下に固定 */
+        }
+
+        .footer-row { display: flex; justify-content: space-between; align-items: center; }
+        .meta-item { display: flex; flex-direction: column; }
+        .meta-label { font-size: 0.5rem; color: var(--text-muted); }
+        .meta-value-id { font-family: 'Urbanist', sans-serif; font-size: 0.65rem; font-weight: 700; color: var(--mint-cyan); word-break: break-all; }
+        .meta-value { font-family: 'Urbanist', sans-serif; font-size: 0.75rem; font-weight: 700; color: var(--silver); }
+
+        #loading-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-dark); display: flex; justify-content: center; align-items: center; z-index: 999;
+        }
+        .spinner { width: 35px; height: 35px; border: 4px solid rgba(255,255,255,0.05); border-top-color: var(--medical-blue); border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div id="loading-screen"><div class="spinner"></div></div>
+    <div class="card-container">
+        <div class="card-header">
+            <div class="logo-section">
+                <div class="medical-cross"></div>
+                <div class="brand-logo">ひまわり歯科</div>
+            </div>
+            <div class="badge-clinic">DIGITAL CARD</div>
+        </div>
+        <div class="user-section">
+            <p class="label-small">PATIENT NAME</p>
+            <h1 class="user-name" id="userName">Loading...</h1>
+        </div>
+        <div class="appointment-box">
+            <p class="appointment-title">NEXT APPOINTMENT（次回予約日時）</p>
+            <p class="appointment-date" id="appointmentDate">データ取得中...</p>
+        </div>
+        <div class="qrcode-area" id="qrcode"></div>
+        <p style="text-align:center; font-size: 0.55rem; color: rgba(255,255,255,0.3); margin-top: 6px; margin-bottom: 8px; z-index: 2;">受付のリーダーにかざしてください</p>
+        <div class="card-footer">
+            <div class="meta-item">
+                <span class="meta-label">LINE USER ID</span>
+                <span class="meta-value-id" id="displayId">---</span>
+            </div>
+            <div class="footer-row">
+                <div class="meta-item"><span class="meta-label">CHART NO</span><span class="meta-value">No.1045</span></div>
+                <div class="meta-item" style="text-align: right;"><span class="meta-label">CLINIC TEL</span><span class="meta-value">092-XXX-XXXX</span></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function fetchReservation(lineUserId) {
+            const gasUrl = "https://script.google.com/macros/s/AKfycbzQWqnfbt91dQKWUkg7-Xuf1uws32kbb8dzoXxO4dZ6do6uBR08gkCcFrxnTnw0Gcqe/exec"; 
+            try {
+                const response = await fetch(`${gasUrl}?id=${lineUserId}`);
+                const data = await response.json();
+                if (data.reservationDate) {
+                    document.getElementById('appointmentDate').innerText = data.reservationDate;
+                }
+            } catch (error) {
+                console.error("予約データの取得に失敗しました", error);
+                document.getElementById('appointmentDate').innerText = "データ読込エラー";
+            }
+        }
+
+        async function initializeLiff() {
+            try {
+                await liff.init({ liffId: "2010112866-4pueBQPC" }); 
+                if (!liff.isLoggedIn()) { liff.login(); } else {
+                    const profile = await liff.getProfile();
+                    document.getElementById('userName').innerText = profile.displayName + " 様";
+                    document.getElementById('displayId').innerText = profile.userId;
+                    new QRCode(document.getElementById("qrcode"), {
+                        text: profile.userId,
+                        width: 115,
+                        height: 115,
+                        colorDark : "#000000",
+                        colorLight : "#ffffff",
+                        correctLevel : QRCode.CorrectLevel.H
+                    });
+                    await fetchReservation(profile.userId);
+                    setTimeout(() => { document.getElementById('loading-screen').style.display = 'none'; }, 300);
+                }
+            } catch (error) { console.error("LINE通信失敗", error); }
+        }
+        initializeLiff();
+    </script>
+</body>
+</html>
+

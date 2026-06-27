@@ -1,0 +1,563 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>DPRO SHOP | STEP 30-31 営業デモ手順書</title>
+  <style>
+    :root {
+      --line: #06c755;
+      --line-dark: #03a846;
+      --ink: #0f172a;
+      --muted: #64748b;
+      --soft: #f8fafc;
+      --card: #ffffff;
+      --border: #e2e8f0;
+      --blue: #2563eb;
+      --amber: #d97706;
+      --rose: #e11d48;
+      --green-soft: #f0fdf4;
+      --blue-soft: #eff6ff;
+      --amber-soft: #fffbeb;
+      --shadow: 0 18px 50px rgba(15, 23, 42, 0.08);
+      --radius: 26px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 8% 2%, rgba(6, 199, 85, 0.13), transparent 28%),
+        radial-gradient(circle at 90% 12%, rgba(37, 99, 235, 0.10), transparent 28%),
+        linear-gradient(180deg, #ffffff, #f8fafc 52%, #eef2ff);
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .page {
+      width: min(1180px, calc(100% - 28px));
+      margin: 0 auto;
+      padding: 28px 0 52px;
+    }
+
+    .hero {
+      border-radius: 34px;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.96), rgba(240,253,244,0.92)),
+        radial-gradient(circle at right top, rgba(6,199,85,0.18), transparent 38%);
+      border: 1px solid rgba(226, 232, 240, 0.9);
+      box-shadow: var(--shadow);
+      padding: 28px;
+      display: grid;
+      gap: 18px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      right: -90px;
+      top: -90px;
+      width: 260px;
+      height: 260px;
+      border-radius: 999px;
+      background: rgba(6, 199, 85, 0.12);
+    }
+
+    .badge {
+      display: inline-flex;
+      width: fit-content;
+      align-items: center;
+      gap: 8px;
+      border-radius: 999px;
+      background: #dcfce7;
+      color: #166534;
+      padding: 8px 13px;
+      font-size: 12px;
+      line-height: 1;
+      font-weight: 900;
+      position: relative;
+      z-index: 1;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(30px, 4vw, 54px);
+      line-height: 1.08;
+      letter-spacing: -0.07em;
+      font-weight: 950;
+      position: relative;
+      z-index: 1;
+    }
+
+    .lead {
+      margin: 0;
+      color: #334155;
+      font-size: clamp(15px, 1.8vw, 19px);
+      line-height: 1.9;
+      font-weight: 780;
+      max-width: 860px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-actions {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-link {
+      border-radius: 22px;
+      padding: 16px;
+      min-height: 118px;
+      display: grid;
+      align-content: space-between;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      box-shadow: 0 12px 32px rgba(15,23,42,0.06);
+      transition: transform 0.16s ease, box-shadow 0.16s ease;
+    }
+
+    .hero-link:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 44px rgba(15,23,42,0.12);
+    }
+
+    .hero-link b {
+      display: block;
+      font-size: 17px;
+      line-height: 1.35;
+      font-weight: 950;
+      letter-spacing: -0.04em;
+    }
+
+    .hero-link span {
+      display: block;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.55;
+      font-weight: 800;
+    }
+
+    .section {
+      margin-top: 22px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .section-title {
+      margin: 0;
+      font-size: 24px;
+      line-height: 1.35;
+      letter-spacing: -0.06em;
+      font-weight: 950;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .card {
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.96);
+      border: 1px solid var(--border);
+      box-shadow: 0 10px 36px rgba(15,23,42,0.06);
+      padding: 18px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .card h2,
+    .card h3 {
+      margin: 0;
+      font-size: 19px;
+      line-height: 1.45;
+      letter-spacing: -0.05em;
+      font-weight: 950;
+    }
+
+    .card p {
+      margin: 0;
+      color: #475569;
+      font-size: 13px;
+      line-height: 1.85;
+      font-weight: 760;
+    }
+
+    .flow {
+      counter-reset: flow;
+      display: grid;
+      gap: 12px;
+    }
+
+    .flow-item {
+      counter-increment: flow;
+      border-radius: 24px;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      box-shadow: 0 8px 28px rgba(15,23,42,0.05);
+      padding: 16px;
+      display: grid;
+      grid-template-columns: 54px 1fr auto;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .flow-num {
+      width: 48px;
+      height: 48px;
+      border-radius: 18px;
+      display: grid;
+      place-items: center;
+      background: var(--green-soft);
+      color: #166534;
+      font-size: 18px;
+      font-weight: 950;
+    }
+
+    .flow-num::before {
+      content: counter(flow);
+    }
+
+    .flow-item h3 {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.45;
+      letter-spacing: -0.04em;
+      font-weight: 950;
+    }
+
+    .flow-item p {
+      margin: 4px 0 0;
+      color: #475569;
+      font-size: 13px;
+      line-height: 1.75;
+      font-weight: 760;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      padding: 11px 14px;
+      background: var(--line);
+      color: #ffffff;
+      font-size: 13px;
+      line-height: 1;
+      font-weight: 950;
+      white-space: nowrap;
+      box-shadow: 0 10px 24px rgba(6,199,85,0.22);
+    }
+
+    .button.secondary {
+      background: #0f172a;
+      box-shadow: 0 10px 24px rgba(15,23,42,0.18);
+    }
+
+    .talk {
+      background: #0f172a;
+      color: #ffffff;
+      border-radius: 30px;
+      padding: 22px;
+      display: grid;
+      gap: 12px;
+      box-shadow: var(--shadow);
+    }
+
+    .talk h2 {
+      margin: 0;
+      font-size: 24px;
+      line-height: 1.35;
+      letter-spacing: -0.06em;
+      font-weight: 950;
+    }
+
+    .talk p {
+      margin: 0;
+      color: #cbd5e1;
+      font-size: 14px;
+      line-height: 1.9;
+      font-weight: 760;
+    }
+
+    .script-box {
+      border-radius: 20px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.16);
+      padding: 14px;
+      color: #f8fafc;
+      font-size: 14px;
+      line-height: 1.9;
+      font-weight: 820;
+      white-space: pre-wrap;
+    }
+
+    .checklist {
+      display: grid;
+      gap: 9px;
+    }
+
+    .check {
+      display: grid;
+      grid-template-columns: 24px 1fr;
+      gap: 8px;
+      align-items: start;
+      color: #334155;
+      font-size: 13px;
+      line-height: 1.75;
+      font-weight: 790;
+    }
+
+    .check::before {
+      content: "✓";
+      width: 22px;
+      height: 22px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      background: #dcfce7;
+      color: #166534;
+      font-size: 13px;
+      font-weight: 950;
+      margin-top: 1px;
+    }
+
+    .notice {
+      border-radius: 24px;
+      border: 1px solid #fed7aa;
+      background: #fff7ed;
+      color: #9a3412;
+      padding: 16px;
+      font-size: 13px;
+      line-height: 1.8;
+      font-weight: 800;
+    }
+
+    .notice strong {
+      display: block;
+      color: #0f172a;
+      font-size: 15px;
+      line-height: 1.45;
+      font-weight: 950;
+      margin-bottom: 4px;
+    }
+
+    .small {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.7;
+      font-weight: 760;
+    }
+
+    @media (max-width: 900px) {
+      .hero-actions,
+      .grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .flow-item {
+        grid-template-columns: 46px 1fr;
+      }
+
+      .flow-item .button {
+        grid-column: 1 / -1;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .hero {
+        padding: 22px;
+      }
+
+      .hero-actions,
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .flow-item {
+        grid-template-columns: 1fr;
+      }
+
+      .flow-num {
+        width: 42px;
+        height: 42px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <div class="badge">STEP 30-31 / 営業デモ手順書</div>
+      <h1>歯科デジタルQR診察券<br>最新デモの見せ方</h1>
+      <p class="lead">
+        受付iPad・先生用・管理トップ・管理画面を、本番API連動版の流れに合わせて説明するための手順書です。
+        QRリーダー受付から診療済み、LINEフォロー、家族診察券までを一連の流れで見せます。
+      </p>
+
+      <div class="hero-actions">
+        <a class="hero-link" href="scan-ipad.html?v=3029b">
+          <b>受付iPad</b>
+          <span>QRリーダー / カメラ / 手入力で受付</span>
+        </a>
+        <a class="hero-link" href="doctor.html?v=3027g">
+          <b>先生用</b>
+          <span>本日の患者・診療待ち・診療済み</span>
+        </a>
+        <a class="hero-link" href="owner.html?v=3027e">
+          <b>管理トップ</b>
+          <span>今日の数字・LINEフォロー確認</span>
+        </a>
+        <a class="hero-link" href="admin.html?v=3024b">
+          <b>管理画面</b>
+          <span>患者登録・家族診察券・LINE連携</span>
+        </a>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2 class="section-title">まず見せる順番</h2>
+      <div class="flow">
+        <div class="flow-item">
+          <div class="flow-num"></div>
+          <div>
+            <h3>受付iPadでQRリーダー受付</h3>
+            <p>「受付ではQRリーダーでピッと読むだけです。カメラも予備で使えます」と説明します。読み取り後、患者情報を表示して受付済みにします。</p>
+          </div>
+          <a class="button" href="scan-ipad.html?v=3029b">受付を開く</a>
+        </div>
+
+        <div class="flow-item">
+          <div class="flow-num"></div>
+          <div>
+            <h3>先生用で診療待ちを確認</h3>
+            <p>先生用は未受付管理ではなく、診療に集中する画面です。「本日の患者」「診療待ち」「診療済み」「LINEフォロー」を見せます。</p>
+          </div>
+          <a class="button" href="doctor.html?v=3027g">先生用を開く</a>
+        </div>
+
+        <div class="flow-item">
+          <div class="flow-num"></div>
+          <div>
+            <h3>診療済みにしてLINE文面をコピー</h3>
+            <p>診療後にLINEフォロー文面を作り、編集してコピーします。自動送信ではなく、LINE公式チャットに貼り付ける安全な運用として説明します。</p>
+          </div>
+          <a class="button secondary" href="doctor.html?v=3027g">LINE文面へ</a>
+        </div>
+
+        <div class="flow-item">
+          <div class="flow-num"></div>
+          <div>
+            <h3>管理トップで数字が揃うことを確認</h3>
+            <p>受付済み・診療済み・LINEフォローが、Worker API / Supabase 経由で管理トップにも反映されることを見せます。</p>
+          </div>
+          <a class="button" href="owner.html?v=3027e">管理トップ</a>
+        </div>
+
+        <div class="flow-item">
+          <div class="flow-num"></div>
+          <div>
+            <h3>家族診察券とLINE連携の価値を説明</h3>
+            <p>お母さんのLINEに家族分の診察券をまとめられること、紙の診察券忘れを減らせることを説明します。</p>
+          </div>
+          <a class="button" href="admin.html?v=3024b">管理画面</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2 class="section-title">営業で伝えるポイント</h2>
+      <div class="grid">
+        <div class="card">
+          <h3>受付が速くなる</h3>
+          <p>診察券を探す・名前を聞く・紙を確認する手間を減らし、QR読み取りで受付確認に進めます。</p>
+        </div>
+        <div class="card">
+          <h3>家族分をまとめられる</h3>
+          <p>お子さんの診察券を保護者のLINEにまとめられるので、家族来院の多い歯科医院と相性が良いです。</p>
+        </div>
+        <div class="card">
+          <h3>LINEフォローにつながる</h3>
+          <p>診療後の注意事項、次回来院案内、定期検診案内をLINEで送りやすくなります。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="talk">
+        <h2>そのまま使える説明トーク</h2>
+        <p>受付でQR診察券を読んでから、先生用・管理トップまで流れを見せる時の説明です。</p>
+        <div class="script-box">こちらは、LINEで使えるデジタルQR診察券のデモです。
+
+患者さんは紙の診察券を探さずに、スマホのLINEから診察券を開けます。
+受付ではQRリーダーでピッと読み取るだけなので、受付確認がスムーズになります。
+
+さらに、お子さんの診察券も保護者のLINEにまとめられます。
+家族で通院される患者さんが多い歯科医院では、診察券忘れや確認の手間を減らしやすいです。
+
+受付後は先生用画面にも反映され、診療後はLINEフォロー文面を作れます。
+紙の診察券をデジタル化するだけではなく、LINE公式を活かした再来院・定期検診フォローにつなげる仕組みです。</div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2 class="section-title">デモ前チェック</h2>
+      <div class="grid">
+        <div class="card">
+          <h3>画面リンク</h3>
+          <div class="checklist">
+            <div class="check">受付iPadは <b>scan-ipad.html?v=3029b</b> を開く</div>
+            <div class="check">先生用は <b>doctor.html?v=3027g</b> を開く</div>
+            <div class="check">管理トップは <b>owner.html?v=3027e</b> を開く</div>
+            <div class="check">管理画面は <b>admin.html?v=3024b</b> を開く</div>
+          </div>
+        </div>
+        <div class="card">
+          <h3>受付デモ</h3>
+          <div class="checklist">
+            <div class="check">受付状況を更新して数字が出るか確認</div>
+            <div class="check">QRリーダー入力欄にカーソルが合うか確認</div>
+            <div class="check">カメラ読み取りは予備として説明</div>
+            <div class="check">受付済みにした後、先生用・管理トップで確認</div>
+          </div>
+        </div>
+        <div class="card">
+          <h3>説明の注意</h3>
+          <div class="checklist">
+            <div class="check">LINE文面は自動送信ではなくコピー運用と説明</div>
+            <div class="check">本番ではQRリーダー利用が一番スムーズと説明</div>
+            <div class="check">家族診察券は保護者LINEにまとめられると説明</div>
+            <div class="check">紙をなくすだけでなくLINEフォローにつながると説明</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="notice">
+        <strong>本番前の確認ポイント</strong>
+        受付・先生用・管理トップは Worker API / Supabase の同じデータを見ます。
+        数字がずれた場合は、画面側ではなく、まず「Worker API が最新版か」「Supabaseに本日の受付予定があるか」「管理コードが正しいか」を確認します。
+      </div>
+      <p class="small">STEP 30-31 / DPRO SHOP Dental QR Demo Guide</p>
+    </section>
+  </main>
+</body>
+</html>

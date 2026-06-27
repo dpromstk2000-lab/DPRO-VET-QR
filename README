@@ -1,0 +1,15 @@
+STEP 30-45C
+本番医院URLセット自動生成
+
+置き換え対象：
+- system-check.html
+
+内容：
+- STEP 30-45A の本番導入チェック機能を維持
+- 本番医院コードから、admin / owner / doctor / scan-ipad / scan-pc / member / LIFF のフルURLを自動生成
+- dpro_dental_demo のままなら警告表示
+- コピペ用URL一覧を作成
+- URLごとにコピー・開くボタンを追加
+
+反映後URL：
+https://dpromstk2000-lab.github.io/DEGITAL-QR/system-check.html?v=3045c
