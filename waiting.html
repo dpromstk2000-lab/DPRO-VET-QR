@@ -730,15 +730,15 @@
       </div>
 
       <nav class="actions" aria-label="関連画面リンク">
-        <a class="pill-link" href="./member.html?demo=true&v=step-vet-16">ペット診察券</a>
-        <a class="pill-link" href="./rich-menu.html?v=step-vet-16">リッチメニュー</a>
-        <a class="pill-link" href="./index.html?v=step-vet-16">管理トップ</a>
+        <a class="pill-link" href="./member.html?demo=true&v=step-vet-20">ペット診察券</a>
+        <a class="pill-link" href="./rich-menu.html?v=step-vet-20">リッチメニュー</a>
+        <a class="pill-link" href="./index.html?v=step-vet-20">管理トップ</a>
       </nav>
     </header>
 
     <section class="hero">
       <div class="card">
-        <span class="badge">STEP VET-16｜順番受付・優先受付予約</span>
+        <span class="badge">STEP VET-20｜リッチメニュー連動受付</span>
         <h1>今日行く人も、<br>後日1番で取りたい人も。</h1>
         <p class="lead">
           今日の順番受付、後日の午前1番・午後1番の優先受付予約、お薬・予防受付を分けて登録できます。
@@ -964,7 +964,7 @@
     </section>
 
     <div class="footer-note">
-      この画面はSTEP VET-16です。登録内容は localStorage ではなく、Cloudflare Worker API 経由で Supabase の
+      この画面はSTEP VET-20です。登録内容は localStorage ではなく、Cloudflare Worker API 経由で Supabase の
       vet_waiting_entries / vet_previsit_questionnaires に保存されます。
     </div>
   </main>
@@ -1362,8 +1362,9 @@
     }
 
     async function init() {
-      setMode("today_queue");
-      el.targetDate.value = todayString();
+      const params = new URLSearchParams(location.search);
+      const initialMode = params.get("mode") || "today_queue";
+      setMode(modeInfo[initialMode] ? initialMode : "today_queue");
 
       document.querySelectorAll(".mode-card").forEach(card => {
         card.addEventListener("click", () => {
