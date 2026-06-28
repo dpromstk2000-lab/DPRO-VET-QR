@@ -7,7 +7,7 @@
   <title>DPRO PET CARE LINE｜受付登録・LINE連携</title>
 
   <!--
-    STEP VET-34E-R2
+    STEP VET-34E-R3
     DPRO PET CARE LINE 動物病院版
     line-setup.html 完全版
 
@@ -432,7 +432,7 @@
     <section class="hero">
       <div class="heroTop">
         <div class="badge">🐾 DPRO PET CARE LINE</div>
-        <div class="badge">STEP VET-34E-R2</div>
+        <div class="badge">STEP VET-34E-R3</div>
       </div>
       <h1>受付登録・LINE連携</h1>
       <p>
@@ -777,7 +777,7 @@
     </section>
 
     <div class="footer">
-      STEP VET-34E-R2 line-setup.html R2 existing patient link QR fixed complete<br>
+      STEP VET-34E-R3 line-setup.html R3 existing patient guardian id fixed complete<br>
       DPRO PET CARE LINE / 動物病院版
     </div>
   </div>
@@ -1083,7 +1083,10 @@
         }
 
         el.searchResult.innerHTML = items.map((guardian, index) => {
-          const guardianId = guardian.guardian_id || guardian.id || "";
+          // STEP VET-34E-R3:
+          // guardian.guardian_id は旧カラム・別IDの場合があるため、
+          // LINE連携APIに渡すIDは Supabase主キーの guardian.id を最優先する。
+          const guardianId = guardian.id || guardian.guardian_id || "";
           const guardianName = guardian.guardian_name || guardian.name || "飼い主";
           const phone = guardian.phone || guardian.phone_normalized || "";
           const lineStatus = guardian.line_status || guardian.line_link_status || "未確認";
@@ -1091,7 +1094,7 @@
 
           const petHtml = pets.length
             ? `<div class="petList">${pets.map((pet) => {
-                const petId = pet.pet_id || pet.id || "";
+                const petId = pet.id || pet.pet_id || "";
                 const petName = pet.pet_name || pet.name || "ペット";
                 const type = pet.animal_type || pet.species || pet.species_label || "";
                 const cardNo = pet.card_no || "";
@@ -1127,7 +1130,7 @@
                 <div>
                   <strong>${index + 1}. ${escapeHtml(guardianName)}</strong><br>
                   <span class="small">電話：${escapeHtml(phone || "未登録")} / LINE：${escapeHtml(lineStatus)}</span><br>
-                  <span class="small">guardian_id: ${escapeHtml(guardianId || "不明")}</span>
+                  <span class="small">連携用guardian_id: ${escapeHtml(guardianId || "不明")}</span>
                 </div>
                 <span class="pill">既存患者</span>
               </div>
@@ -1138,7 +1141,7 @@
 
         el.searchResult.querySelectorAll("[data-action='issue-link']").forEach((btn) => {
           btn.addEventListener("click", async () => {
-            // STEP VET-34E-R2:
+            // STEP VET-34E-R3:
             // 既存患者検索からLINE連携QRを押した場合は、
             // 「受付で新規登録」タブへ移動せず、この検索画面内にQRを表示する。
             await issueLineLink({
@@ -1239,7 +1242,12 @@
             showResult(el.manualLinkResult, "danger", error.message || "LINE連携QRの発行に失敗しました。");
           } else if (mode === "search") {
             show(el.searchLinkResult);
-            el.searchLineLinkInfo.textContent = error.message || "LINE連携QRの発行に失敗しました。";
+            el.searchLineLinkInfo.textContent = [
+              error.message || "LINE連携QRの発行に失敗しました。",
+              "",
+              "確認：検索結果の連携用guardian_idが実際の飼い主IDになっているか確認してください。",
+              "STEP VET-34E-R3では guardian.id を優先して使用します。"
+            ].join("\n");
           } else {
             show(el.lineLinkResult);
             el.lineLinkInfo.textContent = error.message || "LINE連携QRの発行に失敗しました。";
