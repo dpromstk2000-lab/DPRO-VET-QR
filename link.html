@@ -7,7 +7,7 @@
   <title>DPRO PET CARE LINE｜LINE診察券 連携確認</title>
 
   <!--
-    STEP VET-34F
+    STEP VET-34F-R2
     DPRO PET CARE LINE 動物病院版
     link.html 完全版
 
@@ -424,7 +424,7 @@
     <section class="hero">
       <div class="heroTop">
         <div class="badge">🐾 DPRO PET CARE LINE</div>
-        <div class="badge">STEP VET-34F</div>
+        <div class="badge">STEP VET-34F-R2</div>
       </div>
       <h1>LINE診察券<br>連携確認</h1>
       <p>
@@ -612,7 +612,7 @@
     </div>
 
     <div class="footer">
-      STEP VET-34F link.html complete<br>
+      STEP VET-34F-R2 link.html R2 button event fixed complete<br>
       DPRO PET CARE LINE / 動物病院版
     </div>
   </div>
@@ -738,7 +738,7 @@
       }
 
       function bindEvents(){
-        el.consentChecked.addEventListener("change", updateCompleteState);
+        el.consentChecked.addEventListener("change", () => updateCompleteState());
         el.completeBtn.addEventListener("click", completeLineLink);
         el.cancelBtn.addEventListener("click", () => {
           location.href = `${siteBase}/rich-menu.html?clinic_code=${encodeURIComponent(clinicCode)}`;
@@ -756,6 +756,7 @@
           setStatus("✅", "ブラウザ確認用LINE IDを使用中", `line_user_id：${v}`);
           activateStep("line");
           updateCompleteState();
+          if (el.confirmCard) el.confirmCard.scrollIntoView({ behavior:"smooth", block:"center" });
         });
 
         el.lineLoginBtn.addEventListener("click", () => {
@@ -940,9 +941,20 @@
         activateStep("done");
         setStatus("✅", "LINE連携が完了しました", "LINEからペット診察券を表示できます。");
 
-        const memberUrl =
+        const baseMemberUrl =
           data.member_url ||
           `${siteBase}/member.html?clinic_code=${encodeURIComponent(clinicCode)}`;
+
+        const memberUrlObj = new URL(baseMemberUrl, location.href);
+        memberUrlObj.searchParams.set("clinic_code", clinicCode);
+
+        // ブラウザ確認モードでは、member.htmlでも同じテスト用LINE IDを渡す。
+        // 本番LIFFではURLではなくLIFFからline_user_idを取得する。
+        if (state.lineUserId && (isDemoMode || !liffId)) {
+          memberUrlObj.searchParams.set("line_user_id", state.lineUserId);
+        }
+
+        const memberUrl = memberUrlObj.toString();
 
         setHref(el.goMemberSuccess, memberUrl);
         setHref(el.goMemberTop, memberUrl);
@@ -976,8 +988,30 @@
 
       function updateCompleteState(label){
         const ready = state.tokenReady && state.lineReady && el.consentChecked.checked && !state.completing;
+
+        let safeLabel = "";
+        if (typeof label === "string") {
+          safeLabel = label;
+        }
+
         el.completeBtn.disabled = !ready;
-        el.completeBtn.textContent = label || (ready ? "この内容でLINE診察券を作成する" : "確認後に連携できます");
+
+        if (safeLabel) {
+          el.completeBtn.textContent = safeLabel;
+          return;
+        }
+
+        if (state.completing) {
+          el.completeBtn.textContent = "連携中...";
+        } else if (!state.tokenReady) {
+          el.completeBtn.textContent = "連携QR確認中";
+        } else if (!state.lineReady) {
+          el.completeBtn.textContent = "先にLINE IDを確認してください";
+        } else if (!el.consentChecked.checked) {
+          el.completeBtn.textContent = "同意チェック後に連携できます";
+        } else {
+          el.completeBtn.textContent = "この内容でLINE診察券を作成する";
+        }
       }
 
       function activateStep(name){
@@ -997,6 +1031,8 @@
         const fullUrl = path.startsWith("http") ? path : `${apiBase}${path}`;
         const res = await fetch(fullUrl, {
           method:"GET",
+          mode:"cors",
+          cache:"no-store",
           headers:{ "Accept":"application/json" }
         });
         return parseResponse(res);
@@ -1006,6 +1042,8 @@
         const fullUrl = path.startsWith("http") ? path : `${apiBase}${path}`;
         const res = await fetch(fullUrl, {
           method:"POST",
+          mode:"cors",
+          cache:"no-store",
           headers:{
             "Content-Type":"application/json",
             "Accept":"application/json"
