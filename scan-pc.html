@@ -111,11 +111,11 @@
         </div>
       </div>
       <nav class="actions" aria-label="関連画面">
-        <a class="pill" href="./index.html?v=step-vet-23">管理トップ</a>
-        <a class="pill" href="./waiting.html?demo=true&v=step-vet-23">飼い主受付</a>
-        <a class="pill" href="./doctor.html?v=step-vet-23">獣医師画面</a>
-        <a class="pill" href="./owner.html?v=step-vet-23">オーナー画面</a>
-        <a class="pill" href="./system-check.html?v=step-vet-23">システム確認</a>
+        <a class="pill" href="./index.html?v=step-vet-34h">管理トップ</a>
+        <a class="pill" href="./waiting.html?demo=true&v=step-vet-34h">飼い主受付</a>
+        <a class="pill" href="./doctor.html?v=step-vet-34h">獣医師画面</a>
+        <a class="pill" href="./owner.html?v=step-vet-34h">オーナー画面</a>
+        <a class="pill" href="./system-check.html?v=step-vet-34h">システム確認</a>
       </nav>
     </header>
 
@@ -125,7 +125,7 @@
         <h1>診察券QRを読んで、<br>そのまま来院受付。</h1>
         <p class="lead">
           USB QRリーダーで読み取り、来院受付・受付番号発行まで行います。
-          歯科QR診察券の良い所を引き継ぎ、ペット情報確認、受付番号発行、院内受付済み、診察中、診療済みまでつなげます。
+          ペット診察券QRの card_token を安全に照会し、ペット情報確認、受付番号発行、院内受付済み、診察中、診療済みまでつなげます。
         </p>
       </div>
 
@@ -248,14 +248,24 @@
     </section>
 
     <div class="footer-note">
-      STEP VET-23：PC・受付タブレット両対応のQR来院受付です。LINE受付で先に番号を取った人も、来院時に受付スタッフが「院内受付済み」へ変更できます。
+      STEP VET-34H：ペット診察券QRの本番照会を強化しました。vetcard:clinic_code:card_token 形式、card_token、従来のQR URL / qr_token / card_no に対応します。
     </div>
   </main>
 
   <script>
-    const CONFIG = window.DPRO_CONFIG || {};
-    const API_BASE_URL = (CONFIG.API_BASE_URL || "https://dpro-vet-qr-api.dpromstk2000.workers.dev").replace(/\/$/, "");
-    const CLINIC_CODE = CONFIG.CLINIC_CODE || CONFIG.DEFAULT_CLINIC_CODE || "dpro_vet_demo";
+    const CONFIG = window.DPRO_VET_CONFIG || window.DPRO_CONFIG || window.APP_CONFIG || {};
+    const API_BASE_URL = (
+      CONFIG.API_BASE_URL ||
+      CONFIG?.api?.baseUrl ||
+      CONFIG?.urls?.apiBaseUrl ||
+      "https://dpro-vet-qr-api.dpromstk2000.workers.dev"
+    ).replace(/\/$/, "");
+    const CLINIC_CODE =
+      CONFIG.CLINIC_CODE ||
+      CONFIG.DEFAULT_CLINIC_CODE ||
+      CONFIG?.clinic?.clinicCode ||
+      CONFIG?.demo?.clinicCode ||
+      "dpro_vet_demo";
     const ADMIN_TOKEN_KEYS = ["dpro_vet_admin_code", "DPRO_VET_ADMIN_CODE", "DPRO_VET_ADMIN_TOKEN", "dpro_vet_admin_token", "DPRO_ADMIN_TOKEN", "dpro_admin_token"];
 
     const state = {
@@ -379,16 +389,150 @@
       const raw = String(value || "").trim();
       if (!raw) return {};
 
+      // STEP VET-34H:
+      // member.html のQRは基本的に以下の形式を想定する。
+      // vetcard:clinic_code:card_token
+      // QR内に飼い主名・電話番号などの個人情報は入れない。
+      if (raw.startsWith("vetcard:")) {
+        const parts = raw.split(":");
+        const qrClinicCode = parts[1] || CLINIC_CODE;
+        const cardToken = parts.slice(2).join(":");
+        return {
+          clinic_code: qrClinicCode,
+          card_token: cardToken,
+          token: cardToken,
+          qr_token: cardToken,
+          qr_payload: raw,
+          raw,
+          source_format: "vetcard_payload"
+        };
+      }
+
       try {
         const url = new URL(raw);
-        const token = url.searchParams.get("token") || url.searchParams.get("qr_token") || url.searchParams.get("t") || "";
+        const token =
+          url.searchParams.get("card_token") ||
+          url.searchParams.get("token") ||
+          url.searchParams.get("qr_token") ||
+          url.searchParams.get("t") ||
+          "";
         const cardNo = url.searchParams.get("card_no") || "";
-        if (token) return { qr_token: token, raw };
-        if (cardNo) return { card_no: cardNo, raw };
+        const qrPayload = url.searchParams.get("qr_payload") || "";
+
+        if (qrPayload && qrPayload.startsWith("vetcard:")) {
+          const parts = qrPayload.split(":");
+          const qrClinicCode = parts[1] || CLINIC_CODE;
+          const cardToken = parts.slice(2).join(":");
+          return {
+            clinic_code: qrClinicCode,
+            card_token: cardToken,
+            token: cardToken,
+            qr_token: cardToken,
+            qr_payload: qrPayload,
+            raw,
+            source_format: "url_qr_payload"
+          };
+        }
+
+        if (token) {
+          return {
+            card_token: token,
+            token,
+            qr_token: token,
+            raw,
+            source_format: "url_token"
+          };
+        }
+        if (cardNo) return { card_no: cardNo, raw, source_format: "url_card_no" };
       } catch (_) {}
 
-      if (/^VET-/.test(raw)) return { card_no: raw, raw };
-      return { qr_token: raw, raw };
+      if (/^VET-/i.test(raw)) return { card_no: raw, raw, source_format: "card_no" };
+      if (/^card_/i.test(raw)) return { card_token: raw, token: raw, qr_token: raw, raw, source_format: "card_token" };
+
+      // 従来の qr_token にも対応する
+      return { card_token: raw, token: raw, qr_token: raw, raw, source_format: "raw_token" };
+    }
+
+    function normalizeScanData(data, parsed){
+      const item = data?.item || {};
+      const guardian = data?.guardian || {};
+      const pet = data?.pet || {};
+      const card = data?.card || {};
+
+      const normalizedCard = {
+        ...item,
+        ...card,
+        guardian_id: card.guardian_id || item.guardian_id || guardian.guardian_id || guardian.id || "",
+        guardian_name: card.guardian_name || item.guardian_name || guardian.guardian_name || guardian.name || "",
+        phone: card.phone || item.phone || guardian.phone || "",
+        pet_id: card.pet_id || item.pet_id || pet.pet_id || pet.id || "",
+        pet_name: card.pet_name || item.pet_name || pet.pet_name || pet.name || "",
+        species: card.species || item.species || pet.species || item.animal_type || pet.animal_type || "",
+        species_label: card.species_label || item.species_label || item.animal_type || pet.animal_type || "",
+        animal_type: card.animal_type || item.animal_type || pet.animal_type || "",
+        breed: card.breed || item.breed || pet.breed || "",
+        sex: card.sex || item.sex || pet.sex || "",
+        age_text: card.age_text || item.age_text || pet.age_text || "",
+        medical_note: card.medical_note || item.medical_note || pet.medical_note || "",
+        allergy_note: card.allergy_note || item.allergy_note || pet.allergy_note || "",
+        caution_memo: card.caution_memo || item.caution_memo || pet.caution_memo || "",
+        allergies: card.allergies || item.allergies || card.allergy_note || item.allergy_note || pet.allergy_note || "",
+        card_id: card.card_id || item.card_id || "",
+        card_no: card.card_no || item.card_no || "",
+        card_token: card.card_token || item.card_token || parsed.card_token || parsed.token || "",
+        qr_token: card.qr_token || item.qr_token || card.card_token || item.card_token || parsed.card_token || parsed.token || "",
+        qr_payload: card.qr_payload || item.qr_payload || parsed.qr_payload || "",
+        card_enabled: card.card_enabled !== undefined ? card.card_enabled : true
+      };
+
+      return {
+        ...data,
+        card: normalizedCard,
+        guardian: {
+          ...guardian,
+          guardian_id: guardian.guardian_id || normalizedCard.guardian_id,
+          guardian_name: guardian.guardian_name || normalizedCard.guardian_name,
+          phone: guardian.phone || normalizedCard.phone
+        },
+        pet: {
+          ...pet,
+          pet_id: pet.pet_id || normalizedCard.pet_id,
+          pet_name: pet.pet_name || normalizedCard.pet_name,
+          animal_type: pet.animal_type || normalizedCard.animal_type || normalizedCard.species_label,
+          species_label: pet.species_label || normalizedCard.species_label,
+          breed: pet.breed || normalizedCard.breed,
+          sex: pet.sex || normalizedCard.sex,
+          age_text: pet.age_text || normalizedCard.age_text,
+          medical_note: pet.medical_note || normalizedCard.medical_note,
+          allergy_note: pet.allergy_note || normalizedCard.allergy_note
+        }
+      };
+    }
+
+    async function lookupByCardTokenFirst(parsed){
+      // STEP VET-34H：本番QRは /api/public/card-lookup を優先。
+      // 既存デモ・旧QRは /api/scan/lookup にフォールバック。
+      const cardToken = parsed.card_token || parsed.token || parsed.qr_token || "";
+      if (cardToken) {
+        try {
+          const data = await apiPost("/api/public/card-lookup", {
+            clinic_code: parsed.clinic_code || CLINIC_CODE,
+            card_token: parsed.qr_payload || cardToken
+          }, false);
+          return normalizeScanData(data, parsed);
+        } catch (error) {
+          console.warn("card-lookup fallback to scan/lookup:", error);
+        }
+      }
+
+      const legacyParams = {};
+      if (parsed.card_no) legacyParams.card_no = parsed.card_no;
+      if (cardToken) {
+        legacyParams.qr_token = cardToken;
+        legacyParams.token = cardToken;
+      }
+      const data = await apiGet("/api/scan/lookup", legacyParams, true);
+      return normalizeScanData(data, parsed);
     }
 
     function petEmoji(card){
@@ -429,17 +573,19 @@
         alert("先に管理コードを保存してください。");
         return;
       }
+
       const parsed = parseQrValue(el.qrInput.value);
-      if (!parsed.qr_token && !parsed.card_no) {
+      if (!parsed.card_token && !parsed.qr_token && !parsed.token && !parsed.card_no) {
         el.lookupStatus.className = "notice ng";
-        el.lookupStatus.textContent = "QR URL / token / card_no を入力してください。";
+        el.lookupStatus.textContent = "QR URL / vetcard / card_token / card_no を入力してください。";
         return;
       }
 
       el.lookupStatus.className = "notice info";
       el.lookupStatus.textContent = "ペット診察券を確認中...";
+
       try {
-        const data = await apiGet("/api/scan/lookup", parsed, true);
+        const data = await lookupByCardTokenFirst(parsed);
         state.selected = {
           ...data,
           parsed
@@ -466,13 +612,19 @@
         return;
       }
 
-      const card = state.selected.card;
-      const token = state.selected.parsed?.qr_token || card.qr_token || "";
+      const card = state.selected.card || {};
+      const guardian = state.selected.guardian || {};
+      const pet = state.selected.pet || {};
+      const token = state.selected.parsed?.card_token || state.selected.parsed?.qr_token || card.card_token || card.qr_token || "";
+      const qrPayload = state.selected.parsed?.qr_payload || card.qr_payload || (token ? `vetcard:${CLINIC_CODE}:${token}` : "");
       const body = {
         qr_token: token,
+        token,
+        card_token: token,
+        qr_payload: qrPayload,
         card_id: card.card_id,
-        guardian_id: card.guardian_id,
-        pet_id: card.pet_id,
+        guardian_id: card.guardian_id || guardian.guardian_id || guardian.id,
+        pet_id: card.pet_id || pet.pet_id || pet.id,
         entry_kind: el.entryKind.value,
         request_category: el.requestCategory.value,
         target_date: todayString(),
