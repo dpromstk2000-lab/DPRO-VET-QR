@@ -67,6 +67,11 @@
     label{display:block;margin-bottom:6px;color:#46534d;font-size:13px;font-weight:950}
     .scan-input{font-size:17px;padding:14px 16px;border-radius:18px}
     .button-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:12px}
+    .readerless-box{margin-top:14px;padding:14px;border:1px solid #cfe6d8;background:linear-gradient(180deg,#f8fffb,#eef9f3);border-radius:20px}
+    .readerless-box h3{margin:0 0 6px;font-size:17px}
+    .readerless-box p{margin:0;color:#5e6a65;font-size:13px;font-weight:800;line-height:1.75}
+    .readerless-grid{display:grid;grid-template-columns:1fr auto;gap:10px;margin-top:10px;align-items:end}
+    .mono-input{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;letter-spacing:.01em}
     .hidden{display:none!important}
     .form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
     .full{grid-column:1/-1}
@@ -106,7 +111,7 @@
       <div class="brand">
         <div class="logo">📷</div>
         <div>
-          <small>scan-pc.html</small>
+          <small>scan-pc.html / STEP VET-34H-R2</small>
           <strong>DPRO PET CARE LINE</strong>
         </div>
       </div>
@@ -121,11 +126,12 @@
 
     <section class="hero">
       <div class="hero-card">
-        <span class="badge">STEP VET-23｜受付PC QRリーダー受付</span>
+        <span class="badge">STEP VET-34H-R2｜受付PC QRリーダー受付</span>
         <h1>診察券QRを読んで、<br>そのまま来院受付。</h1>
         <p class="lead">
           USB QRリーダーで読み取り、来院受付・受付番号発行まで行います。
-          ペット診察券QRの card_token を安全に照会し、ペット情報確認、受付番号発行、院内受付済み、診察中、診療済みまでつなげます。
+          さらに、リーダーがない場合でも member.html でコピーした QR文字列（vetcard:...）を貼り付けて、
+          ペット情報確認、受付番号発行、院内受付済み、診察中、診療済みまで確認できます。
         </p>
       </div>
 
@@ -152,10 +158,31 @@
         <div class="button-row">
           <button class="btn btn-main" id="lookupBtn" type="button">ペット確認</button>
           <button class="btn btn-sub" id="clearScanBtn" type="button">クリア</button>
-
         </div>
 
+        <div class="readerless-box">
+          <h3>リーダーなし確認モード</h3>
+          <p>
+            QRリーダーがない場合は、飼い主さんの診察券画面
+            <strong>member.html</strong> にある「QR文字列をコピー」で取得した
+            <strong>vetcard:clinic_code:card_token</strong> をここへ貼り付けて確認できます。
+          </p>
 
+          <label for="readerlessInput" style="margin-top:10px;">member.html でコピーした QR文字列</label>
+          <textarea id="readerlessInput" class="mono-input" placeholder="例：vetcard:dpro_vet_demo:card_xxxxx"></textarea>
+
+          <div class="button-row">
+            <button class="btn btn-sub" id="useReaderlessBtn" type="button">上の入力欄へ反映</button>
+            <button class="btn btn-main" id="lookupReaderlessBtn" type="button">リーダーなしで確認する</button>
+            <button class="btn" id="sampleReaderlessBtn" type="button">例を入れる</button>
+          </div>
+
+          <div class="notice info" style="margin-top:10px;">
+            貼り付ける内容は URL ではなく、
+            <strong>vetcard:dpro_vet_demo:card_...</strong>
+            のような QR文字列そのものです。
+          </div>
+        </div>
 
         <div id="lookupStatus" class="notice info">QR待機中です。</div>
         <div id="petPanel" class="hidden"></div>
@@ -248,7 +275,7 @@
     </section>
 
     <div class="footer-note">
-      STEP VET-34H：ペット診察券QRの本番照会を強化しました。vetcard:clinic_code:card_token 形式、card_token、従来のQR URL / qr_token / card_no に対応します。
+      STEP VET-34H-R2：リーダーなし確認モードを追加しました。vetcard:clinic_code:card_token 形式、card_token、従来のQR URL / qr_token / card_no に対応します。
     </div>
   </main>
 
@@ -293,7 +320,11 @@
       followupList: document.getElementById("followupList"),
       preventionList: document.getElementById("preventionList"),
       authStatus: document.getElementById("authStatus"),
-      adminTokenInput: document.getElementById("adminTokenInput")
+      adminTokenInput: document.getElementById("adminTokenInput"),
+      readerlessInput: document.getElementById("readerlessInput"),
+      useReaderlessBtn: document.getElementById("useReaderlessBtn"),
+      lookupReaderlessBtn: document.getElementById("lookupReaderlessBtn"),
+      sampleReaderlessBtn: document.getElementById("sampleReaderlessBtn")
     };
 
     function todayString(){
@@ -854,11 +885,33 @@
       }
     }
 
+
+    function getReaderlessValue(){
+      return String(el.readerlessInput?.value || "").trim();
+    }
+
+    function applyReaderlessToMainInput(){
+      const value = getReaderlessValue();
+      if (!value) {
+        alert("先に QR文字列 を貼り付けてください。");
+        if (el.readerlessInput) el.readerlessInput.focus();
+        return "";
+      }
+      el.qrInput.value = value;
+      return value;
+    }
+
+    async function lookupReaderless(){
+      const value = applyReaderlessToMainInput();
+      if (!value) return;
+      await lookupQr();
+    }
+
     function clearScan(){
       state.selected = null;
       el.qrInput.value = "";
       el.lookupStatus.className = "notice info";
-      el.lookupStatus.textContent = "QR待機中です。";
+      el.lookupStatus.textContent = "QR待機中です。リーダーまたはリーダーなし確認モードを使ってください。";
       el.petPanel.classList.add("hidden");
       el.createStatus.className = "notice";
       el.createStatus.textContent = "ペット確認後に受付できます。";
@@ -940,12 +993,47 @@
       el.createReceptionBtn.addEventListener("click", createReception);
       el.refreshBtn.addEventListener("click", loadAll);
       el.entryKind.addEventListener("change", updateCategoryByKind);
+
+      if (el.useReaderlessBtn) {
+        el.useReaderlessBtn.addEventListener("click", () => {
+          const value = applyReaderlessToMainInput();
+          if (value) {
+            el.lookupStatus.className = "notice info";
+            el.lookupStatus.textContent = "QR文字列を上の入力欄へ反映しました。必要なら「ペット確認」を押してください。";
+            el.qrInput.focus();
+            el.qrInput.select();
+          }
+        });
+      }
+
+      if (el.lookupReaderlessBtn) {
+        el.lookupReaderlessBtn.addEventListener("click", lookupReaderless);
+      }
+
+      if (el.sampleReaderlessBtn) {
+        el.sampleReaderlessBtn.addEventListener("click", () => {
+          const sample = "vetcard:dpro_vet_demo:card_xxxxx";
+          if (el.readerlessInput) el.readerlessInput.value = sample;
+          el.lookupStatus.className = "notice info";
+          el.lookupStatus.textContent = "例の QR文字列 を入れました。本番では member.html でコピーした実際の QR文字列 に置き換えてください。";
+        });
+      }
+
       el.qrInput.addEventListener("keydown", event => {
         if (event.key === "Enter") {
           event.preventDefault();
           lookupQr();
         }
       });
+
+      if (el.readerlessInput) {
+        el.readerlessInput.addEventListener("keydown", event => {
+          if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
+            event.preventDefault();
+            lookupReaderless();
+          }
+        });
+      }
 
       const cameraBtn = document.getElementById("cameraBtn");
       const stopBtn = document.getElementById("stopCameraBtn");
