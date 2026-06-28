@@ -1,0 +1,1336 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#2f6f5e">
+  <title>DPRO PET CARE LINE｜受付登録・LINE連携</title>
+
+  <!--
+    STEP VET-34E
+    DPRO PET CARE LINE 動物病院版
+    line-setup.html 完全版
+
+    目的：
+    ・受付スタッフが飼い主・ペットを登録する
+    ・LINE未連携でも診察券QRを発行する
+    ・既存患者を検索する
+    ・既存患者のLINE連携QRを発行する
+    ・新規登録案内QRを表示する
+    ・重複確認候補を確認する
+
+    前提：
+    ・STEP VET-34B SQL 実行済み
+    ・STEP VET-34C-R2 Worker 反映済み
+    ・register.html はGitHub Pages直下に配置済み
+    ・link.html はSTEP VET-34Fで追加予定
+    ・config.js 読み込み済み
+
+    重要：
+    ・ADMIN_TOKEN はこのHTMLに直書きしない
+    ・管理コードはlocalStorageに保存し、Workerへヘッダーで送る
+    ・登録・検索・LINE連携QR発行は必ずCloudflare Worker API経由
+    ・本番では demo clinic_code を使わない
+  -->
+
+  <script src="./config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+
+  <style>
+    :root{
+      --bg:#f4f7f3;
+      --card:#ffffff;
+      --ink:#1f2a24;
+      --muted:#66746d;
+      --line:#dce7df;
+      --main:#2f6f5e;
+      --main2:#4f9a7f;
+      --soft:#e9f4ee;
+      --soft2:#f7fbf8;
+      --warn:#fff5dc;
+      --warn-line:#ead39a;
+      --danger:#b84a4a;
+      --danger-bg:#fff0f0;
+      --ok:#23694f;
+      --ok-bg:#eef8f2;
+      --shadow:0 18px 45px rgba(29,60,48,.13);
+      --radius:22px;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;
+      background:
+        radial-gradient(circle at top left,rgba(79,154,127,.20),transparent 34%),
+        linear-gradient(180deg,#f8fcf9 0%,var(--bg) 100%);
+      color:var(--ink);
+    }
+
+    button,input,select,textarea{font:inherit}
+    button{cursor:pointer}
+    button:disabled{cursor:not-allowed;opacity:.62}
+    a{color:inherit}
+    .app{
+      width:min(1180px,100%);
+      margin:0 auto;
+      padding:18px 14px 58px;
+    }
+
+    .hero{
+      position:relative;
+      overflow:hidden;
+      border-radius:28px;
+      background:
+        linear-gradient(135deg,rgba(47,111,94,.98),rgba(86,154,126,.92)),
+        radial-gradient(circle at 88% 12%,rgba(255,255,255,.25),transparent 30%);
+      color:#fff;
+      padding:24px 20px 22px;
+      box-shadow:var(--shadow);
+    }
+    .hero::after{
+      content:"受付";
+      position:absolute;
+      right:18px;
+      top:8px;
+      font-size:82px;
+      font-weight:950;
+      opacity:.09;
+      letter-spacing:-.08em;
+    }
+    .heroTop{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:flex-start;
+      position:relative;
+      z-index:1;
+      flex-wrap:wrap;
+    }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      border:1px solid rgba(255,255,255,.34);
+      background:rgba(255,255,255,.15);
+      padding:7px 11px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:850;
+      letter-spacing:.03em;
+    }
+    .hero h1{
+      margin:14px 0 8px;
+      font-size:clamp(25px,5vw,42px);
+      line-height:1.12;
+      letter-spacing:-.03em;
+      position:relative;
+      z-index:1;
+    }
+    .hero p{
+      margin:0;
+      color:rgba(255,255,255,.9);
+      line-height:1.75;
+      font-weight:650;
+      position:relative;
+      z-index:1;
+      max-width:820px;
+    }
+    .heroActions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top:18px;
+      position:relative;
+      z-index:1;
+    }
+
+    .btn{
+      border:0;
+      border-radius:16px;
+      padding:12px 14px;
+      font-weight:900;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      min-height:46px;
+      transition:.15s transform ease,.15s box-shadow ease,.15s opacity ease;
+      text-decoration:none;
+      white-space:nowrap;
+    }
+    .btn:hover{transform:translateY(-1px)}
+    .btnPrimary{
+      background:var(--main);
+      color:#fff;
+      box-shadow:0 12px 28px rgba(47,111,94,.22);
+    }
+    .btnWhite{
+      background:#fff;
+      color:var(--main);
+      box-shadow:0 10px 24px rgba(10,40,28,.13);
+    }
+    .btnGhost{
+      background:rgba(255,255,255,.16);
+      color:#fff;
+      border:1px solid rgba(255,255,255,.28);
+    }
+    .btnSoft{
+      background:var(--soft);
+      color:var(--main);
+      border:1px solid #cfe4d6;
+    }
+    .btnDanger{
+      background:#fff0f0;
+      color:var(--danger);
+      border:1px solid #f0c7c7;
+    }
+    .btnMini{
+      min-height:36px;
+      padding:8px 10px;
+      border-radius:12px;
+      font-size:13px;
+    }
+
+    .navTabs{
+      display:flex;
+      gap:8px;
+      overflow:auto;
+      padding:12px 0 2px;
+      margin-top:6px;
+    }
+    .tabBtn{
+      background:#fff;
+      color:var(--muted);
+      border:1px solid var(--line);
+      border-radius:999px;
+      padding:10px 12px;
+      font-weight:900;
+      white-space:nowrap;
+    }
+    .tabBtn.active{
+      color:#fff;
+      background:var(--main);
+      border-color:var(--main);
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:14px;
+      margin-top:14px;
+    }
+    @media (min-width:940px){
+      .grid.two{grid-template-columns:1.05fr .95fr}
+      .grid.side{grid-template-columns:310px 1fr}
+      .grid.three{grid-template-columns:repeat(3,1fr)}
+    }
+
+    .card{
+      background:rgba(255,255,255,.94);
+      border:1px solid rgba(220,231,223,.95);
+      border-radius:var(--radius);
+      box-shadow:0 14px 34px rgba(29,60,48,.08);
+      padding:18px;
+      backdrop-filter: blur(8px);
+    }
+    .card h2{
+      margin:0 0 10px;
+      font-size:20px;
+      letter-spacing:-.02em;
+    }
+    .card h3{
+      margin:0 0 8px;
+      font-size:16px;
+    }
+    .lead{
+      color:var(--muted);
+      line-height:1.75;
+      font-weight:650;
+      margin:0;
+    }
+    .small{
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.7;
+    }
+    .hidden{display:none!important}
+
+    .alert{
+      border-radius:18px;
+      padding:14px;
+      border:1px solid var(--line);
+      background:#fff;
+      line-height:1.7;
+      font-weight:650;
+    }
+    .alert.warn{background:var(--warn);border-color:var(--warn-line);color:#6b4c00}
+    .alert.danger{background:var(--danger-bg);border-color:#f0c7c7;color:#7c2323}
+    .alert.ok{background:var(--ok-bg);border-color:#bfe1ca;color:#1f6045}
+
+    .field{margin-bottom:12px}
+    label{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      font-weight:850;
+      margin-bottom:6px;
+      font-size:14px;
+    }
+    .req,.opt{
+      border-radius:999px;
+      padding:2px 7px;
+      font-size:11px;
+      line-height:1.4;
+      flex:0 0 auto;
+    }
+    .req{color:#fff;background:var(--main)}
+    .opt{color:var(--muted);background:#eef3ef}
+    input,select,textarea{
+      width:100%;
+      border:1px solid var(--line);
+      border-radius:16px;
+      background:#fff;
+      color:var(--ink);
+      padding:12px 13px;
+      outline:none;
+      transition:.15s border-color ease,.15s box-shadow ease;
+    }
+    textarea{
+      min-height:88px;
+      resize:vertical;
+      line-height:1.65;
+    }
+    input:focus,select:focus,textarea:focus{
+      border-color:#8dc6a3;
+      box-shadow:0 0 0 4px rgba(79,154,127,.13);
+    }
+    .row{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:12px;
+    }
+    @media (min-width:700px){
+      .row.two{grid-template-columns:1fr 1fr}
+      .row.three{grid-template-columns:1fr 1fr 1fr}
+    }
+
+    .section{
+      display:none;
+      margin-top:14px;
+    }
+    .section.active{display:block}
+
+    .statusBox{
+      display:flex;
+      gap:12px;
+      align-items:flex-start;
+      border:1px solid var(--line);
+      background:#fff;
+      border-radius:18px;
+      padding:14px;
+    }
+    .statusIcon{
+      width:38px;
+      height:38px;
+      border-radius:14px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:var(--soft);
+      flex:0 0 auto;
+      font-size:19px;
+    }
+    .statusBox strong{display:block;margin-bottom:3px}
+    .statusBox p{margin:0;color:var(--muted);font-size:13px;line-height:1.6}
+
+    .resultBox{
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:14px;
+      background:#fff;
+      margin-top:12px;
+    }
+    .resultHeader{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:flex-start;
+      flex-wrap:wrap;
+      margin-bottom:8px;
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:5px 8px;
+      border-radius:999px;
+      background:var(--soft);
+      color:var(--main);
+      font-size:12px;
+      font-weight:900;
+    }
+    .muted{color:var(--muted)}
+    .mono{
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      word-break:break-all;
+      font-size:12px;
+      color:var(--muted);
+      background:#f6f8f6;
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:10px;
+      white-space:pre-wrap;
+    }
+    .qrWrap{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:14px;
+      align-items:start;
+    }
+    @media (min-width:760px){
+      .qrWrap{grid-template-columns:240px 1fr}
+    }
+    .qrBox{
+      border:1px solid var(--line);
+      border-radius:22px;
+      background:#fff;
+      padding:16px;
+      text-align:center;
+    }
+    canvas{max-width:100%;height:auto}
+    .petList{
+      display:grid;
+      gap:8px;
+      margin-top:10px;
+    }
+    .petCard{
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:10px;
+      background:#fbfdfb;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    .petCard strong{display:block}
+    .footer{
+      margin-top:18px;
+      text-align:center;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.7;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <section class="hero">
+      <div class="heroTop">
+        <div class="badge">🐾 DPRO PET CARE LINE</div>
+        <div class="badge">STEP VET-34E</div>
+      </div>
+      <h1>受付登録・LINE連携</h1>
+      <p>
+        受付スタッフが飼い主さん・ペット情報を登録し、ペット診察券QRを発行します。
+        既存患者さんにはLINE連携QRを発行して、登録済みデータとLINEを安全に紐づけます。
+      </p>
+      <div class="heroActions">
+        <a class="btn btnWhite" id="goAdmin" href="./admin.html">管理設定へ</a>
+        <a class="btn btnGhost" id="goRegister" href="./register.html">飼い主登録画面</a>
+        <a class="btn btnGhost" id="goMember" href="./member.html">診察券確認</a>
+      </div>
+    </section>
+
+    <nav class="navTabs">
+      <button class="tabBtn active" type="button" data-tab="setup">管理コード</button>
+      <button class="tabBtn" type="button" data-tab="guide">新規登録案内QR</button>
+      <button class="tabBtn" type="button" data-tab="staffRegister">受付で新規登録</button>
+      <button class="tabBtn" type="button" data-tab="search">既存患者検索</button>
+      <button class="tabBtn" type="button" data-tab="manualLink">手動LINE連携QR</button>
+      <button class="tabBtn" type="button" data-tab="reviews">重複確認</button>
+    </nav>
+
+    <section class="section active" id="tab-setup">
+      <div class="grid two">
+        <div class="card">
+          <h2>1. 管理コード確認</h2>
+          <p class="lead">
+            受付登録・既存患者検索・LINE連携QR発行は管理操作です。
+            管理コードはGitHubに書かず、Cloudflare Worker Secret の ADMIN_TOKEN と照合します。
+          </p>
+
+          <div class="field" style="margin-top:14px">
+            <label for="adminCode">管理コード <span class="req">必須</span></label>
+            <input id="adminCode" type="password" placeholder="管理コードを入力">
+          </div>
+
+          <div class="row two">
+            <button class="btn btnPrimary" type="button" id="saveAdminCodeBtn">管理コードを保存</button>
+            <button class="btn btnSoft" type="button" id="checkApiBtn">本番登録APIチェック</button>
+          </div>
+
+          <div id="apiCheckResult" class="resultBox hidden"></div>
+        </div>
+
+        <div class="card">
+          <h2>この画面でできること</h2>
+          <div class="statusBox">
+            <div class="statusIcon">📝</div>
+            <div>
+              <strong>受付で飼い主・ペット登録</strong>
+              <p>LINE未連携のまま診察券QRを発行できます。LINEが苦手な方にも対応できます。</p>
+            </div>
+          </div>
+          <div class="statusBox" style="margin-top:10px">
+            <div class="statusIcon">🔗</div>
+            <div>
+              <strong>既存患者のLINE連携</strong>
+              <p>既存データに対してLINE連携QRを発行し、重複登録を防ぎます。</p>
+            </div>
+          </div>
+          <div class="alert warn" style="margin-top:12px">
+            本番では、飼い主さんの自己登録だけに頼らず、受付登録と既存患者LINE連携を併用します。
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="tab-guide">
+      <div class="grid two">
+        <div class="card">
+          <h2>新規登録案内QR</h2>
+          <p class="lead">
+            初診の方や、飼い主さん自身に入力してもらう場合は、このQRを読み取ってもらいます。
+          </p>
+          <div class="qrWrap" style="margin-top:14px">
+            <div class="qrBox">
+              <canvas id="registerQrCanvas" width="220" height="220"></canvas>
+              <div class="small" style="margin-top:8px">初回登録QR</div>
+            </div>
+            <div>
+              <h3>案内文</h3>
+              <div class="mono" id="registerUrlText"></div>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+                <button class="btn btnSoft" type="button" id="copyRegisterUrlBtn">URLコピー</button>
+                <a class="btn btnPrimary" id="openRegisterUrlBtn" target="_blank" rel="noopener">開く</a>
+              </div>
+              <div class="alert ok" style="margin-top:12px">
+                声かけ例：<br>
+                「こちらのQRからLINE診察券を作成できます。飼い主さんのお名前とペット情報を入力してください。」
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>受付で使う判断</h2>
+          <div class="statusBox">
+            <div class="statusIcon">🆕</div>
+            <div>
+              <strong>新規・LINEに慣れている方</strong>
+              <p>この登録QRを読み取って、自分でregister.htmlから登録してもらう。</p>
+            </div>
+          </div>
+          <div class="statusBox" style="margin-top:10px">
+            <div class="statusIcon">🏥</div>
+            <div>
+              <strong>既存患者さん</strong>
+              <p>自分で新規登録させず、受付で検索してLINE連携QRを発行する。</p>
+            </div>
+          </div>
+          <div class="statusBox" style="margin-top:10px">
+            <div class="statusIcon">👩‍💼</div>
+            <div>
+              <strong>LINEが苦手な方</strong>
+              <p>受付スタッフがこの画面で登録し、LINE未連携のまま診察券QRを発行する。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="tab-staffRegister">
+      <div class="grid two">
+        <div class="card">
+          <h2>受付で飼い主・ペットを新規登録</h2>
+          <p class="lead">
+            飼い主さんが自分で入力できない場合や、受付で確認しながら登録したい場合に使います。
+            登録後、LINE未連携の状態でペット診察券QRを発行します。
+          </p>
+
+          <form id="staffRegisterForm" style="margin-top:14px">
+            <div class="row two">
+              <div class="field">
+                <label for="staffName">受付担当者名 <span class="opt">任意</span></label>
+                <input id="staffName" type="text" placeholder="例：受付 佐藤">
+              </div>
+              <div class="field">
+                <label for="guardianName">飼い主名 <span class="req">必須</span></label>
+                <input id="guardianName" type="text" placeholder="例：山田 花子" required>
+              </div>
+            </div>
+
+            <div class="row two">
+              <div class="field">
+                <label for="phone">電話番号 <span class="opt">推奨</span></label>
+                <input id="phone" type="tel" inputmode="tel" placeholder="例：090-1234-5678">
+              </div>
+              <div class="field">
+                <label for="petName">ペット名 <span class="req">必須</span></label>
+                <input id="petName" type="text" placeholder="例：ココ" required>
+              </div>
+            </div>
+
+            <div class="row three">
+              <div class="field">
+                <label for="animalType">種類 <span class="opt">推奨</span></label>
+                <select id="animalType">
+                  <option value="">選択なし</option>
+                  <option value="犬">犬</option>
+                  <option value="猫">猫</option>
+                  <option value="うさぎ">うさぎ</option>
+                  <option value="ハムスター">ハムスター</option>
+                  <option value="フェレット">フェレット</option>
+                  <option value="鳥">鳥</option>
+                  <option value="その他">その他</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="ageText">年齢 <span class="opt">任意</span></label>
+                <input id="ageText" type="text" placeholder="例：5歳">
+              </div>
+              <div class="field">
+                <label for="sex">性別 <span class="opt">任意</span></label>
+                <select id="sex">
+                  <option value="">選択なし</option>
+                  <option value="男の子">男の子</option>
+                  <option value="女の子">女の子</option>
+                  <option value="不明">不明</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="medicalNote">既往歴・気になること <span class="opt">任意</span></label>
+              <textarea id="medicalNote" placeholder="例：皮膚が弱い、薬が苦手、怖がり など"></textarea>
+            </div>
+
+            <div class="field">
+              <label for="allergyNote">アレルギー・注意事項 <span class="opt">任意</span></label>
+              <textarea id="allergyNote" placeholder="例：薬アレルギー、食物アレルギー、苦手な処置 など"></textarea>
+            </div>
+
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+              <button class="btn btnPrimary" type="submit">登録して診察券QR発行</button>
+              <button class="btn btnSoft" type="button" id="clearStaffRegisterBtn">入力クリア</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="card">
+          <h2>登録結果</h2>
+          <div id="staffRegisterResult" class="alert warn">
+            まだ登録していません。登録すると、診察券QRとLINE連携QR発行ボタンが表示されます。
+          </div>
+          <div id="staffQrArea" class="hidden" style="margin-top:14px">
+            <div class="qrWrap">
+              <div class="qrBox">
+                <canvas id="staffCardQrCanvas" width="220" height="220"></canvas>
+                <div class="small" style="margin-top:8px">ペット診察券QR</div>
+              </div>
+              <div>
+                <div class="mono" id="staffCardInfo"></div>
+                <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+                  <button class="btn btnPrimary" type="button" id="issueLinkForLastRegisteredBtn">この人のLINE連携QRを発行</button>
+                  <button class="btn btnSoft" type="button" id="copyStaffCardQrTextBtn">QR文字列コピー</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="lineLinkResult" class="hidden" style="margin-top:14px">
+            <h3>LINE連携QR</h3>
+            <div class="qrWrap">
+              <div class="qrBox">
+                <canvas id="lineLinkQrCanvas" width="220" height="220"></canvas>
+                <div class="small" style="margin-top:8px">LINE連携QR</div>
+              </div>
+              <div>
+                <div class="mono" id="lineLinkInfo"></div>
+                <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+                  <button class="btn btnSoft" type="button" id="copyLineLinkUrlBtn">連携URLコピー</button>
+                  <a class="btn btnPrimary" id="openLineLinkUrlBtn" target="_blank" rel="noopener">連携画面を開く</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="tab-search">
+      <div class="card">
+        <h2>既存患者検索</h2>
+        <p class="lead">
+          既に病院に登録済みの飼い主さんは、ここで検索してLINE連携QRを発行します。
+          自分で新規登録してもらうと重複する可能性があります。
+        </p>
+
+        <div class="row two" style="margin-top:14px">
+          <div class="field">
+            <label for="searchKeyword">検索キーワード <span class="req">必須</span></label>
+            <input id="searchKeyword" type="search" placeholder="飼い主名・電話番号・ペット名・診察券番号">
+          </div>
+          <div class="field">
+            <label>&nbsp;</label>
+            <button class="btn btnPrimary" type="button" id="searchBtn">検索する</button>
+          </div>
+        </div>
+
+        <div id="searchResult" style="margin-top:12px"></div>
+      </div>
+    </section>
+
+    <section class="section" id="tab-manualLink">
+      <div class="grid two">
+        <div class="card">
+          <h2>手動LINE連携QR発行</h2>
+          <p class="lead">
+            検索結果から発行できない場合や、IDが分かっている場合はここから直接発行できます。
+          </p>
+
+          <div class="field" style="margin-top:14px">
+            <label for="manualGuardianId">guardian_id <span class="req">必須</span></label>
+            <input id="manualGuardianId" type="text" placeholder="guardian_id">
+          </div>
+          <div class="field">
+            <label for="manualPetId">pet_id <span class="opt">任意</span></label>
+            <input id="manualPetId" type="text" placeholder="pet_id">
+          </div>
+          <div class="row two">
+            <div class="field">
+              <label for="manualExpires">有効期限 分 <span class="opt">任意</span></label>
+              <input id="manualExpires" type="number" min="5" max="1440" value="60">
+            </div>
+            <div class="field">
+              <label>&nbsp;</label>
+              <button class="btn btnPrimary" type="button" id="manualIssueLinkBtn">LINE連携QRを発行</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>発行結果</h2>
+          <div id="manualLinkResult" class="alert warn">まだ発行していません。</div>
+          <div id="manualQrArea" class="hidden" style="margin-top:14px">
+            <div class="qrWrap">
+              <div class="qrBox">
+                <canvas id="manualLinkQrCanvas" width="220" height="220"></canvas>
+                <div class="small" style="margin-top:8px">LINE連携QR</div>
+              </div>
+              <div>
+                <div class="mono" id="manualLinkInfo"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="tab-reviews">
+      <div class="card">
+        <h2>重複確認リスト</h2>
+        <p class="lead">
+          飼い主さんが自己登録した時に、同じ電話番号などが見つかった場合は重複確認に回ります。
+        </p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
+          <button class="btn btnPrimary" type="button" id="loadReviewsBtn">重複確認を読み込む</button>
+          <button class="btn btnSoft" type="button" id="clearReviewsBtn">表示クリア</button>
+        </div>
+        <div id="reviewsResult" style="margin-top:12px"></div>
+      </div>
+    </section>
+
+    <div class="footer">
+      STEP VET-34E line-setup.html complete<br>
+      DPRO PET CARE LINE / 動物病院版
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      "use strict";
+
+      const CONFIG = window.DPRO_VET_CONFIG || window.DPRO_CONFIG || window.APP_CONFIG || {};
+      const DEFAULT_API_BASE = "https://dpro-vet-qr-api.dpromstk2000.workers.dev";
+      const DEFAULT_CLINIC_CODE = "dpro_vet_demo";
+      const url = new URL(location.href);
+
+      const apiBase = trimSlash(
+        CONFIG?.api?.baseUrl ||
+        CONFIG?.urls?.apiBaseUrl ||
+        DEFAULT_API_BASE
+      );
+
+      const siteBase = trimSlash(
+        CONFIG?.urls?.siteBaseUrl ||
+        (location.origin + location.pathname.replace(/\/[^\/]*$/, ""))
+      );
+
+      const clinicCode =
+        clean(url.searchParams.get("clinic_code")) ||
+        CONFIG?.clinic?.clinicCode ||
+        CONFIG?.demo?.clinicCode ||
+        DEFAULT_CLINIC_CODE;
+
+      const adminStorageKey =
+        CONFIG?.admin?.tokenStorageKey ||
+        "dpro_vet_admin_code";
+
+      const adminStorageKeys =
+        CONFIG?.admin?.tokenStorageKeys ||
+        ["dpro_vet_admin_code","DPRO_VET_ADMIN_CODE","DPRO_VET_ADMIN_TOKEN","dpro_vet_admin_token"];
+
+      const adminHeaderName =
+        CONFIG?.admin?.tokenHeaderName ||
+        "X-DPRO-Admin-Code";
+
+      const state = {
+        lastRegistration: null,
+        lastLineLinkUrl: "",
+        lastCardQrPayload: "",
+        manualLineLinkUrl: ""
+      };
+
+      const el = {
+        adminCode: document.getElementById("adminCode"),
+        saveAdminCodeBtn: document.getElementById("saveAdminCodeBtn"),
+        checkApiBtn: document.getElementById("checkApiBtn"),
+        apiCheckResult: document.getElementById("apiCheckResult"),
+
+        goAdmin: document.getElementById("goAdmin"),
+        goRegister: document.getElementById("goRegister"),
+        goMember: document.getElementById("goMember"),
+
+        registerQrCanvas: document.getElementById("registerQrCanvas"),
+        registerUrlText: document.getElementById("registerUrlText"),
+        copyRegisterUrlBtn: document.getElementById("copyRegisterUrlBtn"),
+        openRegisterUrlBtn: document.getElementById("openRegisterUrlBtn"),
+
+        staffRegisterForm: document.getElementById("staffRegisterForm"),
+        clearStaffRegisterBtn: document.getElementById("clearStaffRegisterBtn"),
+        staffRegisterResult: document.getElementById("staffRegisterResult"),
+        staffQrArea: document.getElementById("staffQrArea"),
+        staffCardQrCanvas: document.getElementById("staffCardQrCanvas"),
+        staffCardInfo: document.getElementById("staffCardInfo"),
+        issueLinkForLastRegisteredBtn: document.getElementById("issueLinkForLastRegisteredBtn"),
+        copyStaffCardQrTextBtn: document.getElementById("copyStaffCardQrTextBtn"),
+
+        lineLinkResult: document.getElementById("lineLinkResult"),
+        lineLinkQrCanvas: document.getElementById("lineLinkQrCanvas"),
+        lineLinkInfo: document.getElementById("lineLinkInfo"),
+        copyLineLinkUrlBtn: document.getElementById("copyLineLinkUrlBtn"),
+        openLineLinkUrlBtn: document.getElementById("openLineLinkUrlBtn"),
+
+        searchKeyword: document.getElementById("searchKeyword"),
+        searchBtn: document.getElementById("searchBtn"),
+        searchResult: document.getElementById("searchResult"),
+
+        manualGuardianId: document.getElementById("manualGuardianId"),
+        manualPetId: document.getElementById("manualPetId"),
+        manualExpires: document.getElementById("manualExpires"),
+        manualIssueLinkBtn: document.getElementById("manualIssueLinkBtn"),
+        manualLinkResult: document.getElementById("manualLinkResult"),
+        manualQrArea: document.getElementById("manualQrArea"),
+        manualLinkQrCanvas: document.getElementById("manualLinkQrCanvas"),
+        manualLinkInfo: document.getElementById("manualLinkInfo"),
+
+        loadReviewsBtn: document.getElementById("loadReviewsBtn"),
+        clearReviewsBtn: document.getElementById("clearReviewsBtn"),
+        reviewsResult: document.getElementById("reviewsResult")
+      };
+
+      init();
+
+      async function init(){
+        setupLinks();
+        setupTabs();
+        loadAdminCode();
+        bindEvents();
+        await renderRegisterGuideQr();
+      }
+
+      function setupLinks(){
+        setHref(el.goAdmin, `${siteBase}/admin.html?clinic_code=${encodeURIComponent(clinicCode)}`);
+        setHref(el.goRegister, `${siteBase}/register.html?clinic_code=${encodeURIComponent(clinicCode)}`);
+        setHref(el.goMember, `${siteBase}/member.html?clinic_code=${encodeURIComponent(clinicCode)}`);
+      }
+
+      function setupTabs(){
+        document.querySelectorAll(".tabBtn").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const tab = btn.dataset.tab;
+            document.querySelectorAll(".tabBtn").forEach((b) => b.classList.remove("active"));
+            document.querySelectorAll(".section").forEach((s) => s.classList.remove("active"));
+            btn.classList.add("active");
+            document.getElementById(`tab-${tab}`).classList.add("active");
+          });
+        });
+      }
+
+      function bindEvents(){
+        el.saveAdminCodeBtn.addEventListener("click", saveAdminCode);
+        el.checkApiBtn.addEventListener("click", checkProdRegisterApi);
+
+        el.copyRegisterUrlBtn.addEventListener("click", () => copyText(el.registerUrlText.textContent, "登録URLをコピーしました。"));
+        el.staffRegisterForm.addEventListener("submit", onStaffRegister);
+        el.clearStaffRegisterBtn.addEventListener("click", () => el.staffRegisterForm.reset());
+        el.issueLinkForLastRegisteredBtn.addEventListener("click", issueLinkForLastRegistered);
+        el.copyStaffCardQrTextBtn.addEventListener("click", () => copyText(state.lastCardQrPayload, "診察券QR文字列をコピーしました。"));
+        el.copyLineLinkUrlBtn.addEventListener("click", () => copyText(state.lastLineLinkUrl, "LINE連携URLをコピーしました。"));
+
+        el.searchBtn.addEventListener("click", searchGuardians);
+        el.searchKeyword.addEventListener("keydown", (ev) => {
+          if (ev.key === "Enter") searchGuardians();
+        });
+
+        el.manualIssueLinkBtn.addEventListener("click", issueManualLineLink);
+        el.loadReviewsBtn.addEventListener("click", loadDuplicateReviews);
+        el.clearReviewsBtn.addEventListener("click", () => el.reviewsResult.innerHTML = "");
+      }
+
+      function loadAdminCode(){
+        let code = "";
+        for (const key of adminStorageKeys) {
+          code = localStorage.getItem(key) || sessionStorage.getItem(key) || "";
+          if (code) break;
+        }
+        el.adminCode.value = code;
+      }
+
+      function saveAdminCode(){
+        const code = clean(el.adminCode.value);
+        if (!code) {
+          alert("管理コードを入力してください。");
+          return;
+        }
+        localStorage.setItem(adminStorageKey, code);
+        adminStorageKeys.forEach((key) => localStorage.setItem(key, code));
+        showResult(el.apiCheckResult, "ok", "管理コードを保存しました。");
+      }
+
+      async function checkProdRegisterApi(){
+        try {
+          showResult(el.apiCheckResult, "warn", "チェック中です...");
+          const data = await apiGet(`/api/admin/prod-register-check?clinic_code=${encodeURIComponent(clinicCode)}`);
+          renderJsonResult(el.apiCheckResult, "ok", "本番登録APIチェック結果", data);
+        } catch (error) {
+          showResult(el.apiCheckResult, "danger", error.message || "チェックに失敗しました。");
+        }
+      }
+
+      async function renderRegisterGuideQr(){
+        const registerUrl = `${siteBase}/register.html?clinic_code=${encodeURIComponent(clinicCode)}`;
+        el.registerUrlText.textContent = registerUrl;
+        setHref(el.openRegisterUrlBtn, registerUrl);
+
+        if (window.QRCode) {
+          await QRCode.toCanvas(el.registerQrCanvas, registerUrl, {
+            width: 220,
+            margin: 2,
+            errorCorrectionLevel: "M"
+          });
+        }
+      }
+
+      async function onStaffRegister(event){
+        event.preventDefault();
+
+        const payload = {
+          clinic_code: clinicCode,
+          staff_name: clean(document.getElementById("staffName").value) || "受付スタッフ",
+          guardian_name: clean(document.getElementById("guardianName").value),
+          phone: clean(document.getElementById("phone").value),
+          pet_name: clean(document.getElementById("petName").value),
+          animal_type: clean(document.getElementById("animalType").value),
+          age_text: clean(document.getElementById("ageText").value),
+          sex: clean(document.getElementById("sex").value),
+          medical_note: clean(document.getElementById("medicalNote").value),
+          allergy_note: clean(document.getElementById("allergyNote").value)
+        };
+
+        if (!payload.guardian_name) return alert("飼い主名を入力してください。");
+        if (!payload.pet_name) return alert("ペット名を入力してください。");
+
+        try {
+          showResult(el.staffRegisterResult, "warn", "登録中です...");
+          const data = await apiPost("/api/admin/register-by-staff", payload);
+          const reg = data.registration || {};
+          state.lastRegistration = normalizeRegistration(reg);
+          state.lastCardQrPayload = state.lastRegistration.qr_payload || "";
+
+          renderJsonResult(el.staffRegisterResult, "ok", "受付登録が完了しました", data);
+          await renderStaffCardQr(state.lastRegistration);
+        } catch (error) {
+          showResult(el.staffRegisterResult, "danger", error.message || "受付登録に失敗しました。");
+        }
+      }
+
+      function normalizeRegistration(reg){
+        return {
+          guardian_id: reg.guardian_id || reg.id || "",
+          pet_id: reg.pet_id || "",
+          card_id: reg.card_id || "",
+          card_no: reg.card_no || "",
+          card_token: reg.card_token || "",
+          qr_payload: reg.qr_payload || "",
+          line_status: reg.line_status || "registered_unlinked"
+        };
+      }
+
+      async function renderStaffCardQr(reg){
+        if (!reg || !reg.qr_payload) {
+          hide(el.staffQrArea);
+          return;
+        }
+
+        show(el.staffQrArea);
+        el.staffCardInfo.textContent = [
+          `guardian_id: ${reg.guardian_id}`,
+          `pet_id: ${reg.pet_id}`,
+          `card_id: ${reg.card_id}`,
+          `card_no: ${reg.card_no}`,
+          `line_status: ${reg.line_status}`,
+          `qr_payload: ${reg.qr_payload}`
+        ].join("\n");
+
+        if (window.QRCode) {
+          await QRCode.toCanvas(el.staffCardQrCanvas, reg.qr_payload, {
+            width: 220,
+            margin: 2,
+            errorCorrectionLevel: "M"
+          });
+        }
+      }
+
+      async function issueLinkForLastRegistered(){
+        if (!state.lastRegistration || !state.lastRegistration.guardian_id) {
+          alert("先に受付登録を完了してください。");
+          return;
+        }
+        await issueLineLink({
+          guardian_id: state.lastRegistration.guardian_id,
+          pet_id: state.lastRegistration.pet_id,
+          staff_name: clean(document.getElementById("staffName").value) || "受付スタッフ",
+          expires_minutes: 60
+        }, "main");
+      }
+
+      async function searchGuardians(){
+        const keyword = clean(el.searchKeyword.value);
+        if (!keyword) return alert("検索キーワードを入力してください。");
+
+        try {
+          el.searchResult.innerHTML = `<div class="alert warn">検索中です...</div>`;
+          const data = await apiPost("/api/admin/guardians/search", {
+            clinic_code: clinicCode,
+            keyword,
+            q: keyword,
+            limit: 50
+          });
+
+          const items = data.items || data.guardians || [];
+          renderSearchResults(items);
+        } catch (error) {
+          el.searchResult.innerHTML = `<div class="alert danger">${escapeHtml(error.message || "検索に失敗しました。")}</div>`;
+        }
+      }
+
+      function renderSearchResults(items){
+        if (!items.length) {
+          el.searchResult.innerHTML = `<div class="alert warn">該当する飼い主・ペットが見つかりませんでした。</div>`;
+          return;
+        }
+
+        el.searchResult.innerHTML = items.map((guardian, index) => {
+          const guardianId = guardian.guardian_id || guardian.id || "";
+          const guardianName = guardian.guardian_name || guardian.name || "飼い主";
+          const phone = guardian.phone || guardian.phone_normalized || "";
+          const lineStatus = guardian.line_status || guardian.line_link_status || "未確認";
+          const pets = guardian.pets || guardian.cards || guardian.family_cards || [];
+
+          const petHtml = pets.length
+            ? `<div class="petList">${pets.map((pet) => {
+                const petId = pet.pet_id || pet.id || "";
+                const petName = pet.pet_name || pet.name || "ペット";
+                const type = pet.animal_type || pet.species || pet.species_label || "";
+                const cardNo = pet.card_no || "";
+                return `
+                  <div class="petCard">
+                    <div>
+                      <strong>${escapeHtml(petName)} ${type ? " / " + escapeHtml(type) : ""}</strong>
+                      <span class="small">pet_id: ${escapeHtml(petId || "不明")} ${cardNo ? " / " + escapeHtml(cardNo) : ""}</span>
+                    </div>
+                    <button class="btn btnPrimary btnMini" type="button"
+                      data-action="issue-link"
+                      data-guardian-id="${escapeAttr(guardianId)}"
+                      data-pet-id="${escapeAttr(petId)}">
+                      LINE連携QR
+                    </button>
+                  </div>
+                `;
+              }).join("")}</div>`
+            : `
+              <div style="margin-top:10px">
+                <button class="btn btnPrimary btnMini" type="button"
+                  data-action="issue-link"
+                  data-guardian-id="${escapeAttr(guardianId)}"
+                  data-pet-id="">
+                  飼い主単位でLINE連携QR
+                </button>
+              </div>
+            `;
+
+          return `
+            <div class="resultBox">
+              <div class="resultHeader">
+                <div>
+                  <strong>${index + 1}. ${escapeHtml(guardianName)}</strong><br>
+                  <span class="small">電話：${escapeHtml(phone || "未登録")} / LINE：${escapeHtml(lineStatus)}</span><br>
+                  <span class="small">guardian_id: ${escapeHtml(guardianId || "不明")}</span>
+                </div>
+                <span class="pill">既存患者</span>
+              </div>
+              ${petHtml}
+            </div>
+          `;
+        }).join("");
+
+        el.searchResult.querySelectorAll("[data-action='issue-link']").forEach((btn) => {
+          btn.addEventListener("click", async () => {
+            await issueLineLink({
+              guardian_id: btn.dataset.guardianId,
+              pet_id: btn.dataset.petId,
+              staff_name: "受付スタッフ",
+              expires_minutes: 60
+            }, "main");
+            document.querySelector("[data-tab='staffRegister']").click();
+          });
+        });
+      }
+
+      async function issueManualLineLink(){
+        const guardianId = clean(el.manualGuardianId.value);
+        const petId = clean(el.manualPetId.value);
+        const expires = Number(el.manualExpires.value || 60);
+
+        if (!guardianId) return alert("guardian_id を入力してください。");
+
+        await issueLineLink({
+          guardian_id: guardianId,
+          pet_id: petId,
+          staff_name: "受付スタッフ",
+          expires_minutes: expires
+        }, "manual");
+      }
+
+      async function issueLineLink(payload, mode){
+        try {
+          const data = await apiPost("/api/admin/line-link-token", {
+            clinic_code: clinicCode,
+            ...payload
+          });
+
+          const linkUrl = data.link_url || data.qr_payload || "";
+          if (!linkUrl) throw new Error("連携URLが返ってきませんでした。");
+
+          if (mode === "manual") {
+            state.manualLineLinkUrl = linkUrl;
+            show(el.manualQrArea);
+            renderJsonResult(el.manualLinkResult, "ok", "LINE連携QRを発行しました", data);
+            el.manualLinkInfo.textContent = [
+              `guardian_id: ${payload.guardian_id}`,
+              `pet_id: ${payload.pet_id || ""}`,
+              `expires_at: ${data.expires_at || ""}`,
+              `url: ${linkUrl}`
+            ].join("\n");
+
+            if (window.QRCode) {
+              await QRCode.toCanvas(el.manualLinkQrCanvas, linkUrl, {
+                width: 220,
+                margin: 2,
+                errorCorrectionLevel: "M"
+              });
+            }
+          } else {
+            state.lastLineLinkUrl = linkUrl;
+            show(el.lineLinkResult);
+            el.lineLinkInfo.textContent = [
+              `guardian_id: ${payload.guardian_id}`,
+              `pet_id: ${payload.pet_id || ""}`,
+              `expires_at: ${data.expires_at || ""}`,
+              `url: ${linkUrl}`
+            ].join("\n");
+            setHref(el.openLineLinkUrlBtn, linkUrl);
+
+            if (window.QRCode) {
+              await QRCode.toCanvas(el.lineLinkQrCanvas, linkUrl, {
+                width: 220,
+                margin: 2,
+                errorCorrectionLevel: "M"
+              });
+            }
+          }
+        } catch (error) {
+          if (mode === "manual") {
+            showResult(el.manualLinkResult, "danger", error.message || "LINE連携QRの発行に失敗しました。");
+          } else {
+            show(el.lineLinkResult);
+            el.lineLinkInfo.textContent = error.message || "LINE連携QRの発行に失敗しました。";
+          }
+        }
+      }
+
+      async function loadDuplicateReviews(){
+        try {
+          el.reviewsResult.innerHTML = `<div class="alert warn">読み込み中です...</div>`;
+          const data = await apiGet(`/api/admin/duplicate-reviews?clinic_code=${encodeURIComponent(clinicCode)}&status=pending&limit=100`);
+          const items = data.items || [];
+          if (!items.length) {
+            el.reviewsResult.innerHTML = `<div class="alert ok">現在、重複確認待ちはありません。</div>`;
+            return;
+          }
+
+          el.reviewsResult.innerHTML = items.map((item, index) => `
+            <div class="resultBox">
+              <div class="resultHeader">
+                <div>
+                  <strong>${index + 1}. ${escapeHtml(item.guardian_name || "飼い主名未入力")}</strong><br>
+                  <span class="small">ペット：${escapeHtml(item.pet_name || "未入力")} / 電話：${escapeHtml(item.phone_normalized || "")}</span><br>
+                  <span class="small">理由：${escapeHtml(item.reason || "")}</span>
+                </div>
+                <span class="pill">${escapeHtml(item.status || "pending")}</span>
+              </div>
+              <div class="mono">${escapeHtml(JSON.stringify(item, null, 2))}</div>
+            </div>
+          `).join("");
+        } catch (error) {
+          el.reviewsResult.innerHTML = `<div class="alert danger">${escapeHtml(error.message || "重複確認の取得に失敗しました。")}</div>`;
+        }
+      }
+
+      async function apiGet(path){
+        const fullUrl = path.startsWith("http") ? path : `${apiBase}${path}`;
+        const res = await fetch(fullUrl, {
+          method: "GET",
+          headers: buildHeaders()
+        });
+        return parseResponse(res);
+      }
+
+      async function apiPost(path, body){
+        const fullUrl = path.startsWith("http") ? path : `${apiBase}${path}`;
+        const res = await fetch(fullUrl, {
+          method: "POST",
+          headers: buildHeaders({ "Content-Type": "application/json" }),
+          body: JSON.stringify({ clinic_code: clinicCode, ...(body || {}) })
+        });
+        return parseResponse(res);
+      }
+
+      async function parseResponse(res){
+        const text = await res.text();
+        let data = null;
+        if (text) {
+          try { data = JSON.parse(text); } catch { data = { raw: text }; }
+        }
+        if (!res.ok || !data || data.ok === false) {
+          throw new Error((data && (data.message || data.error)) || `APIエラー status=${res.status}`);
+        }
+        return data;
+      }
+
+      function buildHeaders(extra){
+        const code = clean(el.adminCode.value) || getStoredAdminCode();
+        const headers = {
+          "Accept": "application/json",
+          ...(extra || {})
+        };
+        if (code) {
+          headers[adminHeaderName] = code;
+          headers["X-DPRO-Admin-Code"] = code;
+          headers["X-Admin-Token"] = code;
+          headers["Authorization"] = `Bearer ${code}`;
+        }
+        return headers;
+      }
+
+      function getStoredAdminCode(){
+        for (const key of adminStorageKeys) {
+          const code = localStorage.getItem(key) || sessionStorage.getItem(key) || "";
+          if (code) return code;
+        }
+        return "";
+      }
+
+      function renderJsonResult(node, type, title, data){
+        node.className = `resultBox alert ${type || ""}`;
+        node.classList.remove("hidden");
+        node.innerHTML = `
+          <strong>${escapeHtml(title)}</strong>
+          <div class="mono" style="margin-top:10px">${escapeHtml(JSON.stringify(data, null, 2))}</div>
+        `;
+      }
+
+      function showResult(node, type, message){
+        node.className = `alert ${type || ""}`;
+        node.classList.remove("hidden");
+        node.innerHTML = escapeHtml(message);
+      }
+
+      async function copyText(text, doneMessage){
+        const value = clean(text);
+        if (!value) return alert("コピーする内容がありません。");
+        try {
+          await navigator.clipboard.writeText(value);
+          alert(doneMessage || "コピーしました。");
+        } catch {
+          prompt("コピーしてください", value);
+        }
+      }
+
+      function trimSlash(value){
+        return String(value || "").replace(/\/+$/,"");
+      }
+      function clean(value){
+        return String(value ?? "").trim();
+      }
+      function setHref(node, href){
+        if (node) node.href = href;
+      }
+      function show(node){
+        if (node) node.classList.remove("hidden");
+      }
+      function hide(node){
+        if (node) node.classList.add("hidden");
+      }
+      function escapeHtml(value){
+        return String(value ?? "")
+          .replaceAll("&","&amp;")
+          .replaceAll("<","&lt;")
+          .replaceAll(">","&gt;")
+          .replaceAll('"',"&quot;")
+          .replaceAll("'","&#039;");
+      }
+      function escapeAttr(value){
+        return escapeHtml(value).replaceAll("`","&#096;");
+      }
+    })();
+  </script>
+</body>
+</html>
