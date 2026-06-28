@@ -4,37 +4,36 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#2f6f5e">
-  <title>DPRO PET CARE LINE｜受付登録・LINE連携</title>
+  <title>DPRO PET CARE LINE｜LINE診察券 連携確認</title>
 
   <!--
-    STEP VET-34E-R5
+    STEP VET-34F-R2
     DPRO PET CARE LINE 動物病院版
-    line-setup.html 完全版
+    link.html 完全版
 
     目的：
-    ・受付スタッフが飼い主・ペットを登録する
-    ・LINE未連携でも診察券QRを発行する
-    ・既存患者を検索する
-    ・既存患者のLINE連携QRを発行する
-    ・新規登録案内QRを表示する
-    ・重複確認候補を確認する
+    ・受付で発行したLINE連携QRから開く
+    ・既存の飼い主・ペット情報を確認する
+    ・LIFFで取得したLINE userIdと既存guardian/petを紐づける
+    ・連携完了後 member.html へ案内する
 
     前提：
     ・STEP VET-34B SQL 実行済み
     ・STEP VET-34C-R2 Worker 反映済み
-    ・register.html はGitHub Pages直下に配置済み
-    ・link.html はSTEP VET-34Fで追加予定
+    ・STEP VET-34E line-setup.html からLINE連携QRを発行する
     ・config.js 読み込み済み
+    ・本番では LIFF ID を config.js に設定する
 
     重要：
-    ・ADMIN_TOKEN はこのHTMLに直書きしない
-    ・管理コードはlocalStorageに保存し、Workerへヘッダーで送る
-    ・登録・検索・LINE連携QR発行は必ずCloudflare Worker API経由
-    ・本番では demo clinic_code を使わない
+    ・この画面にADMIN_TOKENは不要
+    ・管理コードを絶対に書かない
+    ・tokenはURLの ?token=xxxx から受け取る
+    ・tokenは期限付き・1回使用が前提
+    ・連携前に飼い主・ペット情報を必ず確認してもらう
   -->
 
   <script src="./config.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 
   <style>
     :root{
@@ -63,17 +62,18 @@
       min-height:100vh;
       font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;
       background:
-        radial-gradient(circle at top left,rgba(79,154,127,.20),transparent 34%),
+        radial-gradient(circle at top left,rgba(79,154,127,.22),transparent 34%),
         linear-gradient(180deg,#f8fcf9 0%,var(--bg) 100%);
       color:var(--ink);
     }
 
-    button,input,select,textarea{font:inherit}
+    a{color:inherit}
+    button,input{font:inherit}
     button{cursor:pointer}
     button:disabled{cursor:not-allowed;opacity:.62}
-    a{color:inherit}
+
     .app{
-      width:min(1180px,100%);
+      width:min(880px,100%);
       margin:0 auto;
       padding:18px 14px 58px;
     }
@@ -84,21 +84,21 @@
       border-radius:28px;
       background:
         linear-gradient(135deg,rgba(47,111,94,.98),rgba(86,154,126,.92)),
-        radial-gradient(circle at 88% 12%,rgba(255,255,255,.25),transparent 30%);
+        radial-gradient(circle at 85% 16%,rgba(255,255,255,.25),transparent 30%);
       color:#fff;
       padding:24px 20px 22px;
       box-shadow:var(--shadow);
     }
     .hero::after{
-      content:"受付";
+      content:"🔗";
       position:absolute;
       right:18px;
-      top:8px;
-      font-size:82px;
-      font-weight:950;
-      opacity:.09;
-      letter-spacing:-.08em;
+      top:10px;
+      font-size:96px;
+      opacity:.13;
+      transform:rotate(-10deg);
     }
+
     .heroTop{
       display:flex;
       justify-content:space-between;
@@ -108,6 +108,7 @@
       z-index:1;
       flex-wrap:wrap;
     }
+
     .badge{
       display:inline-flex;
       align-items:center;
@@ -120,6 +121,7 @@
       font-weight:850;
       letter-spacing:.03em;
     }
+
     .hero h1{
       margin:14px 0 8px;
       font-size:clamp(25px,5vw,42px);
@@ -128,6 +130,7 @@
       position:relative;
       z-index:1;
     }
+
     .hero p{
       margin:0;
       color:rgba(255,255,255,.9);
@@ -135,8 +138,23 @@
       font-weight:650;
       position:relative;
       z-index:1;
-      max-width:820px;
+      max-width:760px;
     }
+
+    .clinicName{
+      margin-top:14px;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      background:rgba(255,255,255,.18);
+      border:1px solid rgba(255,255,255,.26);
+      border-radius:14px;
+      padding:8px 11px;
+      font-weight:850;
+      position:relative;
+      z-index:1;
+    }
+
     .heroActions{
       display:flex;
       gap:8px;
@@ -149,16 +167,15 @@
     .btn{
       border:0;
       border-radius:16px;
-      padding:12px 14px;
+      padding:13px 15px;
       font-weight:900;
       display:inline-flex;
       align-items:center;
       justify-content:center;
       gap:8px;
-      min-height:46px;
+      min-height:48px;
       transition:.15s transform ease,.15s box-shadow ease,.15s opacity ease;
       text-decoration:none;
-      white-space:nowrap;
     }
     .btn:hover{transform:translateY(-1px)}
     .btnPrimary{
@@ -186,33 +203,42 @@
       color:var(--danger);
       border:1px solid #f0c7c7;
     }
-    .btnMini{
-      min-height:36px;
-      padding:8px 10px;
-      border-radius:12px;
-      font-size:13px;
-    }
 
-    .navTabs{
-      display:flex;
+    .steps{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
       gap:8px;
-      overflow:auto;
-      padding:12px 0 2px;
-      margin-top:6px;
+      margin-top:14px;
     }
-    .tabBtn{
-      background:#fff;
-      color:var(--muted);
+    .step{
       border:1px solid var(--line);
-      border-radius:999px;
-      padding:10px 12px;
-      font-weight:900;
-      white-space:nowrap;
+      background:#fff;
+      border-radius:16px;
+      padding:10px;
+      min-height:74px;
     }
-    .tabBtn.active{
-      color:#fff;
-      background:var(--main);
-      border-color:var(--main);
+    .step .num{
+      width:26px;
+      height:26px;
+      border-radius:999px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      background:var(--soft);
+      color:var(--main);
+      font-size:13px;
+      font-weight:900;
+      margin-bottom:7px;
+    }
+    .step strong{
+      display:block;
+      font-size:13px;
+      line-height:1.35;
+    }
+    .step.active{
+      border-color:#9fd0b4;
+      background:#f3fbf6;
+      box-shadow:0 8px 20px rgba(47,111,94,.09);
     }
 
     .grid{
@@ -221,10 +247,8 @@
       gap:14px;
       margin-top:14px;
     }
-    @media (min-width:940px){
+    @media (min-width:820px){
       .grid.two{grid-template-columns:1.05fr .95fr}
-      .grid.side{grid-template-columns:310px 1fr}
-      .grid.three{grid-template-columns:repeat(3,1fr)}
     }
 
     .card{
@@ -235,6 +259,7 @@
       padding:18px;
       backdrop-filter: blur(8px);
     }
+
     .card h2{
       margin:0 0 10px;
       font-size:20px;
@@ -255,72 +280,6 @@
       font-size:13px;
       line-height:1.7;
     }
-    .hidden{display:none!important}
-
-    .alert{
-      border-radius:18px;
-      padding:14px;
-      border:1px solid var(--line);
-      background:#fff;
-      line-height:1.7;
-      font-weight:650;
-    }
-    .alert.warn{background:var(--warn);border-color:var(--warn-line);color:#6b4c00}
-    .alert.danger{background:var(--danger-bg);border-color:#f0c7c7;color:#7c2323}
-    .alert.ok{background:var(--ok-bg);border-color:#bfe1ca;color:#1f6045}
-
-    .field{margin-bottom:12px}
-    label{
-      display:flex;
-      justify-content:space-between;
-      gap:12px;
-      font-weight:850;
-      margin-bottom:6px;
-      font-size:14px;
-    }
-    .req,.opt{
-      border-radius:999px;
-      padding:2px 7px;
-      font-size:11px;
-      line-height:1.4;
-      flex:0 0 auto;
-    }
-    .req{color:#fff;background:var(--main)}
-    .opt{color:var(--muted);background:#eef3ef}
-    input,select,textarea{
-      width:100%;
-      border:1px solid var(--line);
-      border-radius:16px;
-      background:#fff;
-      color:var(--ink);
-      padding:12px 13px;
-      outline:none;
-      transition:.15s border-color ease,.15s box-shadow ease;
-    }
-    textarea{
-      min-height:88px;
-      resize:vertical;
-      line-height:1.65;
-    }
-    input:focus,select:focus,textarea:focus{
-      border-color:#8dc6a3;
-      box-shadow:0 0 0 4px rgba(79,154,127,.13);
-    }
-    .row{
-      display:grid;
-      grid-template-columns:1fr;
-      gap:12px;
-    }
-    @media (min-width:700px){
-      .row.two{grid-template-columns:1fr 1fr}
-      .row.three{grid-template-columns:1fr 1fr 1fr}
-    }
-
-    .section{
-      display:none;
-      margin-top:14px;
-    }
-    .section.active{display:block}
 
     .statusBox{
       display:flex;
@@ -345,33 +304,88 @@
     .statusBox strong{display:block;margin-bottom:3px}
     .statusBox p{margin:0;color:var(--muted);font-size:13px;line-height:1.6}
 
-    .resultBox{
+    .alert{
+      border-radius:18px;
+      padding:14px;
+      border:1px solid var(--line);
+      background:#fff;
+      line-height:1.7;
+      font-weight:650;
+    }
+    .alert.warn{background:var(--warn);border-color:var(--warn-line);color:#6b4c00}
+    .alert.danger{background:var(--danger-bg);border-color:#f0c7c7;color:#7c2323}
+    .alert.ok{background:var(--ok-bg);border-color:#bfe1ca;color:#1f6045}
+
+    .confirmBox{
+      border:1px solid var(--line);
+      border-radius:20px;
+      background:#fff;
+      padding:16px;
+      margin-top:12px;
+    }
+    .confirmRow{
+      display:grid;
+      grid-template-columns:116px 1fr;
+      gap:8px;
+      padding:10px 0;
+      border-bottom:1px solid #eef3ef;
+      align-items:start;
+    }
+    .confirmRow:last-child{border-bottom:0}
+    .label{
+      color:var(--muted);
+      font-size:13px;
+      font-weight:850;
+    }
+    .value{
+      font-weight:850;
+      word-break:break-word;
+    }
+
+    .consent{
+      display:flex;
+      gap:12px;
+      align-items:flex-start;
       border:1px solid var(--line);
       border-radius:18px;
       padding:14px;
-      background:#fff;
+      background:var(--soft2);
       margin-top:12px;
     }
-    .resultHeader{
+    .consent input{
+      width:22px;
+      height:22px;
+      margin-top:2px;
+      flex:0 0 auto;
+      accent-color:var(--main);
+    }
+    .consent strong{display:block;margin-bottom:4px}
+    .consent p{margin:0;color:var(--muted);font-size:13px;line-height:1.7}
+
+    .actionBar{
+      position:sticky;
+      bottom:0;
+      margin:18px -14px -58px;
+      padding:14px;
+      background:linear-gradient(180deg,rgba(244,247,243,0),rgba(244,247,243,.96) 22%,rgba(244,247,243,1) 100%);
+      z-index:5;
+    }
+    .actionInner{
+      width:min(880px,100%);
+      margin:0 auto;
+      background:rgba(255,255,255,.96);
+      border:1px solid var(--line);
+      border-radius:22px;
+      padding:12px;
+      box-shadow:0 -12px 35px rgba(29,60,48,.09);
       display:flex;
-      justify-content:space-between;
-      gap:12px;
-      align-items:flex-start;
+      gap:10px;
       flex-wrap:wrap;
-      margin-bottom:8px;
     }
-    .pill{
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-      padding:5px 8px;
-      border-radius:999px;
-      background:var(--soft);
-      color:var(--main);
-      font-size:12px;
-      font-weight:900;
-    }
-    .muted{color:var(--muted)}
+    .actionInner .btn{flex:1 1 220px}
+
+    .hidden{display:none!important}
+
     .mono{
       font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
       word-break:break-all;
@@ -383,61 +397,24 @@
       padding:10px;
       white-space:pre-wrap;
     }
-    .qrWrap{
-      display:grid;
-      grid-template-columns:1fr;
-      gap:14px;
-      align-items:start;
-    }
-    @media (min-width:760px){
-      .qrWrap{grid-template-columns:240px 1fr}
-    }
-    .qrBox{
-      border:1px solid var(--line);
-      border-radius:22px;
-      background:#fff;
-      padding:16px;
-      text-align:center;
-    }
-    canvas{max-width:100%;height:auto}
-    .qrFallbackImg{
-      display:block;
-      width:220px;
-      height:220px;
-      max-width:100%;
-      margin:0 auto;
-      border-radius:12px;
-      background:#fff;
-    }
-    .qrHint{
-      font-size:12px;
-      color:var(--muted);
-      margin-top:6px;
-      line-height:1.5;
-    }
-    .petList{
-      display:grid;
-      gap:8px;
-      margin-top:10px;
-    }
-    .petCard{
-      border:1px solid var(--line);
-      border-radius:14px;
-      padding:10px;
-      background:#fbfdfb;
-      display:flex;
-      justify-content:space-between;
-      gap:10px;
-      align-items:center;
-      flex-wrap:wrap;
-    }
-    .petCard strong{display:block}
     .footer{
       margin-top:18px;
       text-align:center;
       color:var(--muted);
       font-size:12px;
       line-height:1.7;
+    }
+    .field{
+      margin-top:10px;
+    }
+    input{
+      width:100%;
+      border:1px solid var(--line);
+      border-radius:16px;
+      background:#fff;
+      color:var(--ink);
+      padding:12px 13px;
+      outline:none;
     }
   </style>
 </head>
@@ -447,364 +424,195 @@
     <section class="hero">
       <div class="heroTop">
         <div class="badge">🐾 DPRO PET CARE LINE</div>
-        <div class="badge">STEP VET-34E-R5</div>
+        <div class="badge">STEP VET-34F-R2</div>
       </div>
-      <h1>受付登録・LINE連携</h1>
+      <h1>LINE診察券<br>連携確認</h1>
       <p>
-        受付スタッフが飼い主さん・ペット情報を登録し、ペット診察券QRを発行します。
-        既存患者さんにはLINE連携QRを発行して、登録済みデータとLINEを安全に紐づけます。
+        受付で確認した飼い主さん・ペット情報を、あなたのLINEアカウントに連携します。
+        内容に間違いがないか確認してから、LINE診察券を作成してください。
       </p>
+      <div class="clinicName" id="clinicName">🏥 病院情報を確認中...</div>
       <div class="heroActions">
-        <a class="btn btnWhite" id="goAdmin" href="./admin.html">管理設定へ</a>
-        <a class="btn btnGhost" id="goRegister" href="./register.html">飼い主登録画面</a>
-        <a class="btn btnGhost" id="goMember" href="./member.html">診察券確認</a>
+        <a class="btn btnWhite" id="goMemberTop" href="./member.html">診察券へ</a>
+        <a class="btn btnGhost" id="goRichMenuTop" href="./rich-menu.html">メニューへ</a>
       </div>
     </section>
 
-    <nav class="navTabs">
-      <button class="tabBtn active" type="button" data-tab="setup">管理コード</button>
-      <button class="tabBtn" type="button" data-tab="guide">新規登録案内QR</button>
-      <button class="tabBtn" type="button" data-tab="staffRegister">受付で新規登録</button>
-      <button class="tabBtn" type="button" data-tab="search">既存患者検索</button>
-      <button class="tabBtn" type="button" data-tab="manualLink">手動LINE連携QR</button>
-      <button class="tabBtn" type="button" data-tab="reviews">重複確認</button>
-    </nav>
+    <div class="steps">
+      <div class="step active" id="stepToken">
+        <div class="num">1</div>
+        <strong>連携QR確認</strong>
+      </div>
+      <div class="step" id="stepLine">
+        <div class="num">2</div>
+        <strong>LINE確認</strong>
+      </div>
+      <div class="step" id="stepDone">
+        <div class="num">3</div>
+        <strong>連携完了</strong>
+      </div>
+    </div>
 
-    <section class="section active" id="tab-setup">
-      <div class="grid two">
-        <div class="card">
-          <h2>1. 管理コード確認</h2>
+    <div class="grid two">
+      <main>
+        <section class="card" id="statusCard">
+          <h2>連携状態</h2>
+          <div class="statusBox">
+            <div class="statusIcon" id="statusIcon">⏳</div>
+            <div>
+              <strong id="statusTitle">連携トークンを確認しています</strong>
+              <p id="statusText">受付で発行されたLINE連携QRを確認しています。</p>
+            </div>
+          </div>
+
+          <div id="noTokenBox" class="alert danger hidden" style="margin-top:12px">
+            連携トークンがURLにありません。受付スタッフにLINE連携QRを再発行してもらってください。
+          </div>
+
+          <div id="browserTestBox" class="alert warn hidden" style="margin-top:12px">
+            <strong>ブラウザ確認モード</strong><br>
+            本番ではLINEアプリ内で開いてください。デモ確認時だけ、下のテスト用LINE IDを使えます。
+            <div class="field">
+              <input id="browserLineUserId" type="text" placeholder="例：demo_line_link_001">
+            </div>
+            <button class="btn btnSoft" type="button" id="useBrowserLineIdBtn">このIDで確認</button>
+          </div>
+
+          <div id="lineLoginBox" class="alert warn hidden" style="margin-top:12px">
+            LINEログインが必要です。下のボタンからLINEで開き直してください。
+            <div style="margin-top:10px">
+              <button class="btn btnPrimary" type="button" id="lineLoginBtn">LINEでログインする</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="card hidden" id="confirmCard" style="margin-top:14px">
+          <h2>連携する情報を確認してください</h2>
           <p class="lead">
-            受付登録・既存患者検索・LINE連携QR発行は管理操作です。
-            管理コードはGitHubに書かず、Cloudflare Worker Secret の ADMIN_TOKEN と照合します。
+            下記の内容をあなたのLINE診察券として連携します。
+            内容が違う場合は、このまま進まず受付スタッフにお声かけください。
           </p>
 
-          <div class="field" style="margin-top:14px">
-            <label for="adminCode">管理コード <span class="req">必須</span></label>
-            <input id="adminCode" type="password" placeholder="管理コードを入力">
-          </div>
-
-          <div class="row two">
-            <button class="btn btnPrimary" type="button" id="saveAdminCodeBtn">管理コードを保存</button>
-            <button class="btn btnSoft" type="button" id="checkApiBtn">本番登録APIチェック</button>
-          </div>
-
-          <div id="apiCheckResult" class="resultBox hidden"></div>
-        </div>
-
-        <div class="card">
-          <h2>この画面でできること</h2>
-          <div class="statusBox">
-            <div class="statusIcon">📝</div>
-            <div>
-              <strong>受付で飼い主・ペット登録</strong>
-              <p>LINE未連携のまま診察券QRを発行できます。LINEが苦手な方にも対応できます。</p>
+          <div class="confirmBox">
+            <div class="confirmRow">
+              <div class="label">病院</div>
+              <div class="value" id="confirmClinic">-</div>
+            </div>
+            <div class="confirmRow">
+              <div class="label">飼い主</div>
+              <div class="value" id="confirmGuardian">-</div>
+            </div>
+            <div class="confirmRow">
+              <div class="label">ペット</div>
+              <div class="value" id="confirmPet">-</div>
+            </div>
+            <div class="confirmRow">
+              <div class="label">種類</div>
+              <div class="value" id="confirmAnimal">-</div>
+            </div>
+            <div class="confirmRow">
+              <div class="label">性別・年齢</div>
+              <div class="value" id="confirmSexAge">-</div>
+            </div>
+            <div class="confirmRow">
+              <div class="label">診察券</div>
+              <div class="value" id="confirmCardNo">-</div>
             </div>
           </div>
-          <div class="statusBox" style="margin-top:10px">
-            <div class="statusIcon">🔗</div>
+
+          <div class="consent">
+            <input id="consentChecked" type="checkbox">
             <div>
-              <strong>既存患者のLINE連携</strong>
-              <p>既存データに対してLINE連携QRを発行し、重複登録を防ぎます。</p>
+              <strong>この内容をLINE診察券として連携します</strong>
+              <p>
+                入力済みの飼い主・ペット情報を、あなたのLINEアカウントに紐づけます。
+                緊急時や症状が重い場合は、LINE入力だけで判断せず、必ずお電話または直接ご来院ください。
+              </p>
             </div>
           </div>
+
           <div class="alert warn" style="margin-top:12px">
-            本番では、飼い主さんの自己登録だけに頼らず、受付登録と既存患者LINE連携を併用します。
+            内容が違う場合は、連携せず受付スタッフに確認してください。
           </div>
-        </div>
-      </div>
-    </section>
+        </section>
 
-    <section class="section" id="tab-guide">
-      <div class="grid two">
-        <div class="card">
-          <h2>新規登録案内QR</h2>
+        <section class="card hidden" id="successCard" style="margin-top:14px">
+          <h2>LINE連携が完了しました</h2>
+          <div class="alert ok">
+            これで、LINEからペット診察券を表示できます。次回から受付でQR診察券を提示してください。
+          </div>
+          <div class="mono" id="successInfo" style="margin-top:12px"></div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
+            <a class="btn btnPrimary" id="goMemberSuccess" href="./member.html">ペット診察券を開く</a>
+            <a class="btn btnSoft" id="goWaitingSuccess" href="./waiting.html">今日の受付へ</a>
+          </div>
+        </section>
+
+        <section class="card hidden" id="errorCard" style="margin-top:14px">
+          <h2>連携できませんでした</h2>
+          <div class="alert danger" id="errorMessage">
+            連携QRの有効期限が切れているか、すでに使用済みの可能性があります。
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
+            <a class="btn btnSoft" id="goRichMenuError" href="./rich-menu.html">メニューへ戻る</a>
+          </div>
+        </section>
+      </main>
+
+      <aside>
+        <section class="card">
+          <h2>この画面について</h2>
           <p class="lead">
-            初診の方や、飼い主さん自身に入力してもらう場合は、このQRを読み取ってもらいます。
+            この画面は、すでに病院側に登録されている飼い主さん・ペット情報を、あなたのLINEと紐づけるための画面です。
           </p>
-          <div class="qrWrap" style="margin-top:14px">
-            <div class="qrBox">
-              <canvas id="registerQrCanvas" width="220" height="220"></canvas>
-              <img id="registerQrImg" class="qrFallbackImg hidden" alt="新規登録案内QR">
-              <div class="small" style="margin-top:8px">初回登録QR</div>
-            </div>
-            <div>
-              <h3>案内文</h3>
-              <div class="mono" id="registerUrlText"></div>
-              <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
-                <button class="btn btnSoft" type="button" id="copyRegisterUrlBtn">URLコピー</button>
-                <a class="btn btnPrimary" id="openRegisterUrlBtn" target="_blank" rel="noopener">開く</a>
-              </div>
-              <div class="alert ok" style="margin-top:12px">
-                声かけ例：<br>
-                「こちらのQRからLINE診察券を作成できます。飼い主さんのお名前とペット情報を入力してください。」
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="card">
-          <h2>受付で使う判断</h2>
-          <div class="statusBox">
-            <div class="statusIcon">🆕</div>
-            <div>
-              <strong>新規・LINEに慣れている方</strong>
-              <p>この登録QRを読み取って、自分でregister.htmlから登録してもらう。</p>
-            </div>
-          </div>
-          <div class="statusBox" style="margin-top:10px">
+          <div class="statusBox" style="margin-top:12px">
             <div class="statusIcon">🏥</div>
             <div>
-              <strong>既存患者さん</strong>
-              <p>自分で新規登録させず、受付で検索してLINE連携QRを発行する。</p>
+              <strong>既存患者さん向け</strong>
+              <p>受付で発行した連携QRから開きます。</p>
             </div>
           </div>
           <div class="statusBox" style="margin-top:10px">
-            <div class="statusIcon">👩‍💼</div>
+            <div class="statusIcon">🔒</div>
             <div>
-              <strong>LINEが苦手な方</strong>
-              <p>受付スタッフがこの画面で登録し、LINE未連携のまま診察券QRを発行する。</p>
+              <strong>安全な連携</strong>
+              <p>URLのトークンは期限付き・1回使用が前提です。</p>
             </div>
           </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="section" id="tab-staffRegister">
-      <div class="grid two">
-        <div class="card">
-          <h2>受付で飼い主・ペットを新規登録</h2>
-          <p class="lead">
-            飼い主さんが自分で入力できない場合や、受付で確認しながら登録したい場合に使います。
-            登録後、LINE未連携の状態でペット診察券QRを発行します。
-          </p>
-
-          <form id="staffRegisterForm" style="margin-top:14px">
-            <div class="row two">
-              <div class="field">
-                <label for="staffName">受付担当者名 <span class="opt">任意</span></label>
-                <input id="staffName" type="text" placeholder="例：受付 佐藤">
-              </div>
-              <div class="field">
-                <label for="guardianName">飼い主名 <span class="req">必須</span></label>
-                <input id="guardianName" type="text" placeholder="例：山田 花子" required>
-              </div>
-            </div>
-
-            <div class="row two">
-              <div class="field">
-                <label for="phone">電話番号 <span class="opt">推奨</span></label>
-                <input id="phone" type="tel" inputmode="tel" placeholder="例：090-1234-5678">
-              </div>
-              <div class="field">
-                <label for="petName">ペット名 <span class="req">必須</span></label>
-                <input id="petName" type="text" placeholder="例：ココ" required>
-              </div>
-            </div>
-
-            <div class="row three">
-              <div class="field">
-                <label for="animalType">種類 <span class="opt">推奨</span></label>
-                <select id="animalType">
-                  <option value="">選択なし</option>
-                  <option value="犬">犬</option>
-                  <option value="猫">猫</option>
-                  <option value="うさぎ">うさぎ</option>
-                  <option value="ハムスター">ハムスター</option>
-                  <option value="フェレット">フェレット</option>
-                  <option value="鳥">鳥</option>
-                  <option value="その他">その他</option>
-                </select>
-              </div>
-              <div class="field">
-                <label for="ageText">年齢 <span class="opt">任意</span></label>
-                <input id="ageText" type="text" placeholder="例：5歳">
-              </div>
-              <div class="field">
-                <label for="sex">性別 <span class="opt">任意</span></label>
-                <select id="sex">
-                  <option value="">選択なし</option>
-                  <option value="男の子">男の子</option>
-                  <option value="女の子">女の子</option>
-                  <option value="不明">不明</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="field">
-              <label for="medicalNote">既往歴・気になること <span class="opt">任意</span></label>
-              <textarea id="medicalNote" placeholder="例：皮膚が弱い、薬が苦手、怖がり など"></textarea>
-            </div>
-
-            <div class="field">
-              <label for="allergyNote">アレルギー・注意事項 <span class="opt">任意</span></label>
-              <textarea id="allergyNote" placeholder="例：薬アレルギー、食物アレルギー、苦手な処置 など"></textarea>
-            </div>
-
-            <div style="display:flex;gap:10px;flex-wrap:wrap">
-              <button class="btn btnPrimary" type="submit">登録して診察券QR発行</button>
-              <button class="btn btnSoft" type="button" id="clearStaffRegisterBtn">入力クリア</button>
-            </div>
-          </form>
-        </div>
-
-        <div class="card">
-          <h2>登録結果</h2>
-          <div id="staffRegisterResult" class="alert warn">
-            まだ登録していません。登録すると、診察券QRとLINE連携QR発行ボタンが表示されます。
-          </div>
-          <div id="staffQrArea" class="hidden" style="margin-top:14px">
-            <div class="qrWrap">
-              <div class="qrBox">
-                <canvas id="staffCardQrCanvas" width="220" height="220"></canvas>
-                <img id="staffCardQrImg" class="qrFallbackImg hidden" alt="診察券QR">
-                <div class="small" style="margin-top:8px">ペット診察券QR</div>
-              </div>
-              <div>
-                <div class="mono" id="staffCardInfo"></div>
-                <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
-                  <button class="btn btnPrimary" type="button" id="issueLinkForLastRegisteredBtn">この人のLINE連携QRを発行</button>
-                  <button class="btn btnSoft" type="button" id="copyStaffCardQrTextBtn">QR文字列コピー</button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div id="lineLinkResult" class="hidden" style="margin-top:14px">
-            <h3>LINE連携QR</h3>
-            <div class="qrWrap">
-              <div class="qrBox">
-                <canvas id="lineLinkQrCanvas" width="220" height="220"></canvas>
-                <img id="lineLinkQrImg" class="qrFallbackImg hidden" alt="LINE連携QR">
-                <div class="small" style="margin-top:8px">LINE連携QR</div>
-              </div>
-              <div>
-                <div class="mono" id="lineLinkInfo"></div>
-                <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
-                  <button class="btn btnSoft" type="button" id="copyLineLinkUrlBtn">連携URLコピー</button>
-                  <a class="btn btnPrimary" id="openLineLinkUrlBtn" target="_blank" rel="noopener">連携画面を開く</a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="section" id="tab-search">
-      <div class="card">
-        <h2>既存患者検索</h2>
-        <p class="lead">
-          既に病院に登録済みの飼い主さんは、ここで検索してLINE連携QRを発行します。
-          自分で新規登録してもらうと重複する可能性があります。
-        </p>
-
-        <div class="row two" style="margin-top:14px">
-          <div class="field">
-            <label for="searchKeyword">検索キーワード <span class="req">必須</span></label>
-            <input id="searchKeyword" type="search" placeholder="飼い主名・電話番号・ペット名・診察券番号">
-          </div>
-          <div class="field">
-            <label>&nbsp;</label>
-            <button class="btn btnPrimary" type="button" id="searchBtn">検索する</button>
-          </div>
-        </div>
-
-        <div id="searchResult" style="margin-top:12px"></div>
-
-        <div id="searchLinkResult" class="hidden" style="margin-top:16px">
-          <h3>既存患者 LINE連携QR 発行結果</h3>
-          <div class="qrWrap">
-            <div class="qrBox">
-              <canvas id="searchLineLinkQrCanvas" width="220" height="220"></canvas>
-              <img id="searchLineLinkQrImg" class="qrFallbackImg hidden" alt="既存患者LINE連携QR">
-              <div class="qrHint">QRが表示されない場合は「連携画面を開く」でも確認できます。</div>
-              <div class="small" style="margin-top:8px">LINE連携QR</div>
-            </div>
+          <div class="statusBox" style="margin-top:10px">
+            <div class="statusIcon">🐶</div>
             <div>
-              <div class="mono" id="searchLineLinkInfo"></div>
-
-              <div class="field" style="margin-top:12px">
-                <label for="searchLineLinkUrlInput">コピーする連携URL</label>
-                <input id="searchLineLinkUrlInput" type="text" readonly placeholder="ここに link.html?token=... のURLが入ります">
-              </div>
-
-              <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
-                <button class="btn btnSoft" type="button" id="copySearchLineLinkUrlBtn">このURLをコピー</button>
-                <a class="btn btnPrimary" id="openSearchLineLinkUrlBtn" target="_blank" rel="noopener">連携画面を開く</a>
-              </div>
-              <div class="alert ok" style="margin-top:12px">
-                このQRを飼い主さんのLINEで読み取ってもらうと、既存の診察券とLINEが連携されます。
-              </div>
+              <strong>複数ペット対応</strong>
+              <p>連携後、同じ飼い主さんのペット診察券をLINEで表示できます。</p>
             </div>
           </div>
-        </div>
-      </div>
-    </section>
+        </section>
 
-    <section class="section" id="tab-manualLink">
-      <div class="grid two">
-        <div class="card">
-          <h2>手動LINE連携QR発行</h2>
+        <section class="card" style="margin-top:14px">
+          <h2>連携してよい例</h2>
           <p class="lead">
-            検索結果から発行できない場合や、IDが分かっている場合はここから直接発行できます。
+            表示された飼い主名・ペット名が自分の内容と合っている場合だけ進んでください。
           </p>
+        </section>
 
-          <div class="field" style="margin-top:14px">
-            <label for="manualGuardianId">guardian_id <span class="req">必須</span></label>
-            <input id="manualGuardianId" type="text" placeholder="guardian_id">
+        <section class="card" style="margin-top:14px">
+          <h2>連携しない方がよい例</h2>
+          <div class="alert warn">
+            名前やペット情報が違う場合、家族の別LINEで登録したい場合、誰の情報かわからない場合は、受付スタッフに確認してください。
           </div>
-          <div class="field">
-            <label for="manualPetId">pet_id <span class="opt">任意</span></label>
-            <input id="manualPetId" type="text" placeholder="pet_id">
-          </div>
-          <div class="row two">
-            <div class="field">
-              <label for="manualExpires">有効期限 分 <span class="opt">任意</span></label>
-              <input id="manualExpires" type="number" min="5" max="1440" value="60">
-            </div>
-            <div class="field">
-              <label>&nbsp;</label>
-              <button class="btn btnPrimary" type="button" id="manualIssueLinkBtn">LINE連携QRを発行</button>
-            </div>
-          </div>
-        </div>
+        </section>
+      </aside>
+    </div>
 
-        <div class="card">
-          <h2>発行結果</h2>
-          <div id="manualLinkResult" class="alert warn">まだ発行していません。</div>
-          <div id="manualQrArea" class="hidden" style="margin-top:14px">
-            <div class="qrWrap">
-              <div class="qrBox">
-                <canvas id="manualLinkQrCanvas" width="220" height="220"></canvas>
-              <img id="manualLinkQrImg" class="qrFallbackImg hidden" alt="手動LINE連携QR">
-                <div class="small" style="margin-top:8px">LINE連携QR</div>
-              </div>
-              <div>
-                <div class="mono" id="manualLinkInfo"></div>
-              </div>
-            </div>
-          </div>
-        </div>
+    <div class="actionBar" id="actionBar">
+      <div class="actionInner">
+        <button class="btn btnDanger" type="button" id="cancelBtn">連携しない</button>
+        <button class="btn btnPrimary" type="button" id="completeBtn" disabled>この内容でLINE診察券を作成する</button>
       </div>
-    </section>
-
-    <section class="section" id="tab-reviews">
-      <div class="card">
-        <h2>重複確認リスト</h2>
-        <p class="lead">
-          飼い主さんが自己登録した時に、同じ電話番号などが見つかった場合は重複確認に回ります。
-        </p>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
-          <button class="btn btnPrimary" type="button" id="loadReviewsBtn">重複確認を読み込む</button>
-          <button class="btn btnSoft" type="button" id="clearReviewsBtn">表示クリア</button>
-        </div>
-        <div id="reviewsResult" style="margin-top:12px"></div>
-      </div>
-    </section>
+    </div>
 
     <div class="footer">
-      STEP VET-34E-R5 line-setup.html R5 copy link fixed complete<br>
+      STEP VET-34F-R2 link.html R2 button event fixed complete<br>
       DPRO PET CARE LINE / 動物病院版
     </div>
   </div>
@@ -814,9 +622,11 @@
       "use strict";
 
       const CONFIG = window.DPRO_VET_CONFIG || window.DPRO_CONFIG || window.APP_CONFIG || {};
-      const DEFAULT_API_BASE = "https://dpro-vet-qr-api.dpromstk2000.workers.dev";
-      const DEFAULT_CLINIC_CODE = "dpro_vet_demo";
       const url = new URL(location.href);
+
+      const DEFAULT_API_BASE = "https://dpro-vet-qr-api.dpromstk2000.workers.dev";
+      const DEFAULT_SITE_BASE = location.origin + location.pathname.replace(/\/[^\/]*$/, "");
+      const DEFAULT_CLINIC_CODE = "dpro_vet_demo";
 
       const apiBase = trimSlash(
         CONFIG?.api?.baseUrl ||
@@ -826,7 +636,7 @@
 
       const siteBase = trimSlash(
         CONFIG?.urls?.siteBaseUrl ||
-        (location.origin + location.pathname.replace(/\/[^\/]*$/, ""))
+        DEFAULT_SITE_BASE
       );
 
       const clinicCode =
@@ -835,519 +645,395 @@
         CONFIG?.demo?.clinicCode ||
         DEFAULT_CLINIC_CODE;
 
-      const adminStorageKey =
-        CONFIG?.admin?.tokenStorageKey ||
-        "dpro_vet_admin_code";
+      const demoClinicCode = CONFIG?.demo?.clinicCode || DEFAULT_CLINIC_CODE;
+      const isDemoMode = url.searchParams.get("demo") === "true" || clinicCode === demoClinicCode;
 
-      const adminStorageKeys =
-        CONFIG?.admin?.tokenStorageKeys ||
-        ["dpro_vet_admin_code","DPRO_VET_ADMIN_CODE","DPRO_VET_ADMIN_TOKEN","dpro_vet_admin_token"];
+      const liffId =
+        clean(url.searchParams.get("liff_id")) ||
+        clean(CONFIG?.liff?.liffId) ||
+        "";
 
-      const adminHeaderName =
-        CONFIG?.admin?.tokenHeaderName ||
-        "X-DPRO-Admin-Code";
+      const token =
+        clean(url.searchParams.get("token")) ||
+        clean(url.searchParams.get("link_token")) ||
+        clean(url.searchParams.get("t"));
 
       const state = {
-        lastRegistration: null,
-        lastLineLinkUrl: "",
-        lastCardQrPayload: "",
-        manualLineLinkUrl: ""
+        clinic: null,
+        tokenInfo: null,
+        guardian: null,
+        pet: null,
+        card: null,
+        lineUserId: clean(url.searchParams.get("line_user_id")) || "",
+        lineDisplayName: clean(url.searchParams.get("line_display_name")) || "",
+        linePictureUrl: "",
+        lineReady: false,
+        tokenReady: false,
+        completing: false
       };
 
       const el = {
-        adminCode: document.getElementById("adminCode"),
-        saveAdminCodeBtn: document.getElementById("saveAdminCodeBtn"),
-        checkApiBtn: document.getElementById("checkApiBtn"),
-        apiCheckResult: document.getElementById("apiCheckResult"),
+        clinicName: document.getElementById("clinicName"),
+        statusIcon: document.getElementById("statusIcon"),
+        statusTitle: document.getElementById("statusTitle"),
+        statusText: document.getElementById("statusText"),
+        noTokenBox: document.getElementById("noTokenBox"),
+        browserTestBox: document.getElementById("browserTestBox"),
+        browserLineUserId: document.getElementById("browserLineUserId"),
+        useBrowserLineIdBtn: document.getElementById("useBrowserLineIdBtn"),
+        lineLoginBox: document.getElementById("lineLoginBox"),
+        lineLoginBtn: document.getElementById("lineLoginBtn"),
 
-        goAdmin: document.getElementById("goAdmin"),
-        goRegister: document.getElementById("goRegister"),
-        goMember: document.getElementById("goMember"),
+        confirmCard: document.getElementById("confirmCard"),
+        confirmClinic: document.getElementById("confirmClinic"),
+        confirmGuardian: document.getElementById("confirmGuardian"),
+        confirmPet: document.getElementById("confirmPet"),
+        confirmAnimal: document.getElementById("confirmAnimal"),
+        confirmSexAge: document.getElementById("confirmSexAge"),
+        confirmCardNo: document.getElementById("confirmCardNo"),
+        consentChecked: document.getElementById("consentChecked"),
 
-        registerQrCanvas: document.getElementById("registerQrCanvas"),
-        registerQrImg: document.getElementById("registerQrImg"),
-        registerUrlText: document.getElementById("registerUrlText"),
-        copyRegisterUrlBtn: document.getElementById("copyRegisterUrlBtn"),
-        openRegisterUrlBtn: document.getElementById("openRegisterUrlBtn"),
+        successCard: document.getElementById("successCard"),
+        successInfo: document.getElementById("successInfo"),
+        errorCard: document.getElementById("errorCard"),
+        errorMessage: document.getElementById("errorMessage"),
 
-        staffRegisterForm: document.getElementById("staffRegisterForm"),
-        clearStaffRegisterBtn: document.getElementById("clearStaffRegisterBtn"),
-        staffRegisterResult: document.getElementById("staffRegisterResult"),
-        staffQrArea: document.getElementById("staffQrArea"),
-        staffCardQrCanvas: document.getElementById("staffCardQrCanvas"),
-        staffCardQrImg: document.getElementById("staffCardQrImg"),
-        staffCardInfo: document.getElementById("staffCardInfo"),
-        issueLinkForLastRegisteredBtn: document.getElementById("issueLinkForLastRegisteredBtn"),
-        copyStaffCardQrTextBtn: document.getElementById("copyStaffCardQrTextBtn"),
+        actionBar: document.getElementById("actionBar"),
+        cancelBtn: document.getElementById("cancelBtn"),
+        completeBtn: document.getElementById("completeBtn"),
 
-        lineLinkResult: document.getElementById("lineLinkResult"),
-        lineLinkQrCanvas: document.getElementById("lineLinkQrCanvas"),
-        lineLinkQrImg: document.getElementById("lineLinkQrImg"),
-        lineLinkInfo: document.getElementById("lineLinkInfo"),
-        lineLinkUrlInput: document.getElementById("lineLinkUrlInput"),
-        copyLineLinkUrlBtn: document.getElementById("copyLineLinkUrlBtn"),
-        openLineLinkUrlBtn: document.getElementById("openLineLinkUrlBtn"),
+        stepToken: document.getElementById("stepToken"),
+        stepLine: document.getElementById("stepLine"),
+        stepDone: document.getElementById("stepDone"),
 
-        searchKeyword: document.getElementById("searchKeyword"),
-        searchBtn: document.getElementById("searchBtn"),
-        searchResult: document.getElementById("searchResult"),
-        searchLinkResult: document.getElementById("searchLinkResult"),
-        searchLineLinkQrCanvas: document.getElementById("searchLineLinkQrCanvas"),
-        searchLineLinkQrImg: document.getElementById("searchLineLinkQrImg"),
-        searchLineLinkInfo: document.getElementById("searchLineLinkInfo"),
-        searchLineLinkUrlInput: document.getElementById("searchLineLinkUrlInput"),
-        copySearchLineLinkUrlBtn: document.getElementById("copySearchLineLinkUrlBtn"),
-        openSearchLineLinkUrlBtn: document.getElementById("openSearchLineLinkUrlBtn"),
-
-        manualGuardianId: document.getElementById("manualGuardianId"),
-        manualPetId: document.getElementById("manualPetId"),
-        manualExpires: document.getElementById("manualExpires"),
-        manualIssueLinkBtn: document.getElementById("manualIssueLinkBtn"),
-        manualLinkResult: document.getElementById("manualLinkResult"),
-        manualQrArea: document.getElementById("manualQrArea"),
-        manualLinkQrCanvas: document.getElementById("manualLinkQrCanvas"),
-        manualLinkQrImg: document.getElementById("manualLinkQrImg"),
-        manualLinkInfo: document.getElementById("manualLinkInfo"),
-
-        loadReviewsBtn: document.getElementById("loadReviewsBtn"),
-        clearReviewsBtn: document.getElementById("clearReviewsBtn"),
-        reviewsResult: document.getElementById("reviewsResult")
+        goMemberTop: document.getElementById("goMemberTop"),
+        goRichMenuTop: document.getElementById("goRichMenuTop"),
+        goMemberSuccess: document.getElementById("goMemberSuccess"),
+        goWaitingSuccess: document.getElementById("goWaitingSuccess"),
+        goRichMenuError: document.getElementById("goRichMenuError")
       };
-
-
-      function qrImageUrl(text){
-        return "https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=10&data=" + encodeURIComponent(text || "");
-      }
-
-      async function renderQr(canvas, img, text){
-        const value = String(text || "").trim();
-        if (!value) return;
-
-        // 先に画像QRを表示しておく。
-        // CDNのQRCodeライブラリが読み込めない場合でも、QRが空白にならないようにする。
-        if (img) {
-          img.src = qrImageUrl(value);
-          img.classList.remove("hidden");
-        }
-
-        if (!canvas) return;
-
-        try {
-          if (window.QRCode && typeof window.QRCode.toCanvas === "function") {
-            await QRCode.toCanvas(canvas, value, {
-              width: 220,
-              margin: 2,
-              errorCorrectionLevel: "M",
-              color: {
-                dark: "#0f2d22",
-                light: "#ffffff"
-              }
-            });
-
-            // canvas描画が成功した場合はcanvasを優先表示。
-            if (img) img.classList.add("hidden");
-          }
-        } catch (error) {
-          // canvasが失敗しても画像QRが残るので、画面上ではQRを表示できる。
-          if (img) img.classList.remove("hidden");
-        }
-      }
 
       init();
 
       async function init(){
         setupLinks();
-        setupTabs();
-        loadAdminCode();
         bindEvents();
-        await renderRegisterGuideQr();
+
+        if (!token) {
+          showNoToken();
+          return;
+        }
+
+        await loadTokenInfo();
+        await initLine();
+        updateCompleteState();
       }
 
       function setupLinks(){
-        setHref(el.goAdmin, `${siteBase}/admin.html?clinic_code=${encodeURIComponent(clinicCode)}`);
-        setHref(el.goRegister, `${siteBase}/register.html?clinic_code=${encodeURIComponent(clinicCode)}`);
-        setHref(el.goMember, `${siteBase}/member.html?clinic_code=${encodeURIComponent(clinicCode)}`);
-      }
-
-      function setupTabs(){
-        document.querySelectorAll(".tabBtn").forEach((btn) => {
-          btn.addEventListener("click", () => {
-            const tab = btn.dataset.tab;
-            document.querySelectorAll(".tabBtn").forEach((b) => b.classList.remove("active"));
-            document.querySelectorAll(".section").forEach((s) => s.classList.remove("active"));
-            btn.classList.add("active");
-            document.getElementById(`tab-${tab}`).classList.add("active");
-          });
-        });
+        setHref(el.goMemberTop, `${siteBase}/member.html?clinic_code=${encodeURIComponent(clinicCode)}`);
+        setHref(el.goRichMenuTop, `${siteBase}/rich-menu.html?clinic_code=${encodeURIComponent(clinicCode)}`);
+        setHref(el.goMemberSuccess, `${siteBase}/member.html?clinic_code=${encodeURIComponent(clinicCode)}`);
+        setHref(el.goWaitingSuccess, `${siteBase}/waiting.html?clinic_code=${encodeURIComponent(clinicCode)}&mode=today_queue`);
+        setHref(el.goRichMenuError, `${siteBase}/rich-menu.html?clinic_code=${encodeURIComponent(clinicCode)}`);
       }
 
       function bindEvents(){
-        el.saveAdminCodeBtn.addEventListener("click", saveAdminCode);
-        el.checkApiBtn.addEventListener("click", checkProdRegisterApi);
-
-        el.copyRegisterUrlBtn.addEventListener("click", () => copyText(el.registerUrlText.textContent, "登録URLをコピーしました。"));
-        el.staffRegisterForm.addEventListener("submit", onStaffRegister);
-        el.clearStaffRegisterBtn.addEventListener("click", () => el.staffRegisterForm.reset());
-        el.issueLinkForLastRegisteredBtn.addEventListener("click", issueLinkForLastRegistered);
-        el.copyStaffCardQrTextBtn.addEventListener("click", () => copyText(state.lastCardQrPayload, "診察券QR文字列をコピーしました。"));
-        el.copyLineLinkUrlBtn.addEventListener("click", () => copyText(el.lineLinkUrlInput?.value || state.lastLineLinkUrl, "LINE連携URLをコピーしました。"));
-        el.copySearchLineLinkUrlBtn.addEventListener("click", () => copyText(el.searchLineLinkUrlInput?.value || state.searchLineLinkUrl, "LINE連携URLをコピーしました。"));
-        el.copyManualLinkUrlBtn.addEventListener("click", () => copyText(el.manualLineLinkUrlInput?.value || state.manualLineLinkUrl, "LINE連携URLをコピーしました。"));
-
-        if (el.lineLinkUrlInput) el.lineLinkUrlInput.addEventListener("focus", () => el.lineLinkUrlInput.select());
-        if (el.searchLineLinkUrlInput) el.searchLineLinkUrlInput.addEventListener("focus", () => el.searchLineLinkUrlInput.select());
-        if (el.manualLineLinkUrlInput) el.manualLineLinkUrlInput.addEventListener("focus", () => el.manualLineLinkUrlInput.select());
-
-        el.searchBtn.addEventListener("click", searchGuardians);
-        el.searchKeyword.addEventListener("keydown", (ev) => {
-          if (ev.key === "Enter") searchGuardians();
+        el.consentChecked.addEventListener("change", () => updateCompleteState());
+        el.completeBtn.addEventListener("click", completeLineLink);
+        el.cancelBtn.addEventListener("click", () => {
+          location.href = `${siteBase}/rich-menu.html?clinic_code=${encodeURIComponent(clinicCode)}`;
         });
 
-        el.manualIssueLinkBtn.addEventListener("click", issueManualLineLink);
-        el.loadReviewsBtn.addEventListener("click", loadDuplicateReviews);
-        el.clearReviewsBtn.addEventListener("click", () => el.reviewsResult.innerHTML = "");
-      }
+        el.useBrowserLineIdBtn.addEventListener("click", () => {
+          const v = clean(el.browserLineUserId.value);
+          if (!v) {
+            setStatus("⚠️", "テスト用LINE IDを入力してください", "ブラウザ確認モードでは、テスト用の line_user_id が必要です。");
+            return;
+          }
+          state.lineUserId = v;
+          state.lineDisplayName = "ブラウザ確認";
+          state.lineReady = true;
+          setStatus("✅", "ブラウザ確認用LINE IDを使用中", `line_user_id：${v}`);
+          activateStep("line");
+          updateCompleteState();
+          if (el.confirmCard) el.confirmCard.scrollIntoView({ behavior:"smooth", block:"center" });
+        });
 
-      function loadAdminCode(){
-        let code = "";
-        for (const key of adminStorageKeys) {
-          code = localStorage.getItem(key) || sessionStorage.getItem(key) || "";
-          if (code) break;
-        }
-        el.adminCode.value = code;
-      }
-
-      function saveAdminCode(){
-        const code = clean(el.adminCode.value);
-        if (!code) {
-          alert("管理コードを入力してください。");
-          return;
-        }
-        localStorage.setItem(adminStorageKey, code);
-        adminStorageKeys.forEach((key) => localStorage.setItem(key, code));
-        showResult(el.apiCheckResult, "ok", "管理コードを保存しました。");
-      }
-
-      async function checkProdRegisterApi(){
-        try {
-          showResult(el.apiCheckResult, "warn", "チェック中です...");
-          const data = await apiGet(`/api/admin/prod-register-check?clinic_code=${encodeURIComponent(clinicCode)}`);
-          renderJsonResult(el.apiCheckResult, "ok", "本番登録APIチェック結果", data);
-        } catch (error) {
-          showResult(el.apiCheckResult, "danger", error.message || "チェックに失敗しました。");
-        }
-      }
-
-      async function renderRegisterGuideQr(){
-        const registerUrl = `${siteBase}/register.html?clinic_code=${encodeURIComponent(clinicCode)}`;
-        el.registerUrlText.textContent = registerUrl;
-        setHref(el.openRegisterUrlBtn, registerUrl);
-
-        await renderQr(el.registerQrCanvas, el.registerQrImg, registerUrl);
-      }
-
-      async function onStaffRegister(event){
-        event.preventDefault();
-
-        const payload = {
-          clinic_code: clinicCode,
-          staff_name: clean(document.getElementById("staffName").value) || "受付スタッフ",
-          guardian_name: clean(document.getElementById("guardianName").value),
-          phone: clean(document.getElementById("phone").value),
-          pet_name: clean(document.getElementById("petName").value),
-          animal_type: clean(document.getElementById("animalType").value),
-          age_text: clean(document.getElementById("ageText").value),
-          sex: clean(document.getElementById("sex").value),
-          medical_note: clean(document.getElementById("medicalNote").value),
-          allergy_note: clean(document.getElementById("allergyNote").value)
-        };
-
-        if (!payload.guardian_name) return alert("飼い主名を入力してください。");
-        if (!payload.pet_name) return alert("ペット名を入力してください。");
-
-        try {
-          showResult(el.staffRegisterResult, "warn", "登録中です...");
-          const data = await apiPost("/api/admin/register-by-staff", payload);
-          const reg = data.registration || {};
-          state.lastRegistration = normalizeRegistration(reg);
-          state.lastCardQrPayload = state.lastRegistration.qr_payload || "";
-
-          renderJsonResult(el.staffRegisterResult, "ok", "受付登録が完了しました", data);
-          await renderStaffCardQr(state.lastRegistration);
-        } catch (error) {
-          showResult(el.staffRegisterResult, "danger", error.message || "受付登録に失敗しました。");
-        }
-      }
-
-      function normalizeRegistration(reg){
-        return {
-          guardian_id: reg.guardian_id || reg.id || "",
-          pet_id: reg.pet_id || "",
-          card_id: reg.card_id || "",
-          card_no: reg.card_no || "",
-          card_token: reg.card_token || "",
-          qr_payload: reg.qr_payload || "",
-          line_status: reg.line_status || "registered_unlinked"
-        };
-      }
-
-      async function renderStaffCardQr(reg){
-        if (!reg || !reg.qr_payload) {
-          hide(el.staffQrArea);
-          return;
-        }
-
-        show(el.staffQrArea);
-        el.staffCardInfo.textContent = [
-          `guardian_id: ${reg.guardian_id}`,
-          `pet_id: ${reg.pet_id}`,
-          `card_id: ${reg.card_id}`,
-          `card_no: ${reg.card_no}`,
-          `line_status: ${reg.line_status}`,
-          `qr_payload: ${reg.qr_payload}`
-        ].join("\n");
-
-        if (window.QRCode) {
-          await QRCode.toCanvas(el.staffCardQrCanvas, reg.qr_payload, {
-            width: 220,
-            margin: 2,
-            errorCorrectionLevel: "M"
-          });
-        }
-      }
-
-      async function issueLinkForLastRegistered(){
-        if (!state.lastRegistration || !state.lastRegistration.guardian_id) {
-          alert("先に受付登録を完了してください。");
-          return;
-        }
-        await issueLineLink({
-          guardian_id: state.lastRegistration.guardian_id,
-          pet_id: state.lastRegistration.pet_id,
-          staff_name: clean(document.getElementById("staffName").value) || "受付スタッフ",
-          expires_minutes: 60
-        }, "main");
-      }
-
-      async function searchGuardians(){
-        const keyword = clean(el.searchKeyword.value);
-        if (!keyword) return alert("検索キーワードを入力してください。");
-
-        try {
-          el.searchResult.innerHTML = `<div class="alert warn">検索中です...</div>`;
-          const data = await apiPost("/api/admin/guardians/search", {
-            clinic_code: clinicCode,
-            keyword,
-            q: keyword,
-            limit: 50
-          });
-
-          const items = data.items || data.guardians || [];
-          renderSearchResults(items);
-        } catch (error) {
-          el.searchResult.innerHTML = `<div class="alert danger">${escapeHtml(error.message || "検索に失敗しました。")}</div>`;
-        }
-      }
-
-      function renderSearchResults(items){
-        if (!items.length) {
-          el.searchResult.innerHTML = `<div class="alert warn">該当する飼い主・ペットが見つかりませんでした。</div>`;
-          return;
-        }
-
-        el.searchResult.innerHTML = items.map((guardian, index) => {
-          // STEP VET-34E-R5:
-          // guardian.guardian_id は旧カラム・別IDの場合があるため、
-          // LINE連携APIに渡すIDは Supabase主キーの guardian.id を最優先する。
-          const guardianId = guardian.id || guardian.guardian_id || "";
-          const guardianName = guardian.guardian_name || guardian.name || "飼い主";
-          const phone = guardian.phone || guardian.phone_normalized || "";
-          const lineStatus = guardian.line_status || guardian.line_link_status || "未確認";
-          const pets = guardian.pets || guardian.cards || guardian.family_cards || [];
-
-          const petHtml = pets.length
-            ? `<div class="petList">${pets.map((pet) => {
-                const petId = pet.id || pet.pet_id || "";
-                const petName = pet.pet_name || pet.name || "ペット";
-                const type = pet.animal_type || pet.species || pet.species_label || "";
-                const cardNo = pet.card_no || "";
-                return `
-                  <div class="petCard">
-                    <div>
-                      <strong>${escapeHtml(petName)} ${type ? " / " + escapeHtml(type) : ""}</strong>
-                      <span class="small">pet_id: ${escapeHtml(petId || "不明")} ${cardNo ? " / " + escapeHtml(cardNo) : ""}</span>
-                    </div>
-                    <button class="btn btnPrimary btnMini" type="button"
-                      data-action="issue-link"
-                      data-guardian-id="${escapeAttr(guardianId)}"
-                      data-pet-id="${escapeAttr(petId)}">
-                      LINE連携QR
-                    </button>
-                  </div>
-                `;
-              }).join("")}</div>`
-            : `
-              <div style="margin-top:10px">
-                <button class="btn btnPrimary btnMini" type="button"
-                  data-action="issue-link"
-                  data-guardian-id="${escapeAttr(guardianId)}"
-                  data-pet-id="">
-                  飼い主単位でLINE連携QR
-                </button>
-              </div>
-            `;
-
-          return `
-            <div class="resultBox">
-              <div class="resultHeader">
-                <div>
-                  <strong>${index + 1}. ${escapeHtml(guardianName)}</strong><br>
-                  <span class="small">電話：${escapeHtml(phone || "未登録")} / LINE：${escapeHtml(lineStatus)}</span><br>
-                  <span class="small">連携用guardian_id: ${escapeHtml(guardianId || "不明")}</span>
-                </div>
-                <span class="pill">既存患者</span>
-              </div>
-              ${petHtml}
-            </div>
-          `;
-        }).join("");
-
-        el.searchResult.querySelectorAll("[data-action='issue-link']").forEach((btn) => {
-          btn.addEventListener("click", async () => {
-            // STEP VET-34E-R5:
-            // 既存患者検索からLINE連携QRを押した場合は、
-            // 「受付で新規登録」タブへ移動せず、この検索画面内にQRを表示する。
-            await issueLineLink({
-              guardian_id: btn.dataset.guardianId,
-              pet_id: btn.dataset.petId,
-              staff_name: "受付スタッフ",
-              expires_minutes: 60
-            }, "search");
-          });
+        el.lineLoginBtn.addEventListener("click", () => {
+          if (window.liff && liffId) {
+            try {
+              window.liff.login({ redirectUri: location.href });
+            } catch (e) {
+              alert("LINEログインを開始できませんでした。LINEアプリ内で開いてください。");
+            }
+          }
         });
       }
 
-      async function issueManualLineLink(){
-        const guardianId = clean(el.manualGuardianId.value);
-        const petId = clean(el.manualPetId.value);
-        const expires = Number(el.manualExpires.value || 60);
-
-        if (!guardianId) return alert("guardian_id を入力してください。");
-
-        await issueLineLink({
-          guardian_id: guardianId,
-          pet_id: petId,
-          staff_name: "受付スタッフ",
-          expires_minutes: expires
-        }, "manual");
-      }
-
-      async function issueLineLink(payload, mode){
+      async function loadTokenInfo(){
         try {
-          const data = await apiPost("/api/admin/line-link-token", {
-            clinic_code: clinicCode,
-            ...payload
-          });
+          setStatus("⏳", "連携内容を確認しています", "受付で発行された連携QRの有効性を確認しています。");
 
-          const linkUrl = data.link_url || data.qr_payload || "";
-          if (!linkUrl) throw new Error("連携URLが返ってきませんでした。");
+          const data = await apiGet(`/api/public/line-link-token?clinic_code=${encodeURIComponent(clinicCode)}&token=${encodeURIComponent(token)}`);
 
-          if (mode === "manual") {
-            state.manualLineLinkUrl = linkUrl;
-            if (el.manualLineLinkUrlInput) el.manualLineLinkUrlInput.value = linkUrl;
-            show(el.manualQrArea);
-            renderJsonResult(el.manualLinkResult, "ok", "LINE連携QRを発行しました", data);
-            el.manualLinkInfo.textContent = [
-              `guardian_id: ${payload.guardian_id}`,
-              `pet_id: ${payload.pet_id || ""}`,
-              `expires_at: ${data.expires_at || ""}`,
-              `url: ${linkUrl}`
-            ].join("\n");
+          state.tokenInfo = data.token || data.link_token || data.item || data;
+          state.clinic = data.clinic || state.tokenInfo?.clinic || null;
+          state.guardian = data.guardian || state.tokenInfo?.guardian || {};
+          state.pet = data.pet || state.tokenInfo?.pet || {};
+          state.card = data.card || state.tokenInfo?.card || {};
+          state.tokenReady = true;
 
-            await renderQr(el.manualLinkQrCanvas, el.manualLinkQrImg, linkUrl);
-          } else if (mode === "search") {
-            state.searchLineLinkUrl = linkUrl;
-            if (el.searchLineLinkUrlInput) el.searchLineLinkUrlInput.value = linkUrl;
-            show(el.searchLinkResult);
-            el.searchLineLinkInfo.textContent = [
-              "既存患者検索からLINE連携QRを発行しました。",
-              `guardian_id: ${payload.guardian_id}`,
-              `pet_id: ${payload.pet_id || ""}`,
-              `expires_at: ${data.expires_at || ""}`,
-              `url: ${linkUrl}`
-            ].join("\n");
-            setHref(el.openSearchLineLinkUrlBtn, linkUrl);
+          const clinicName =
+            state.clinic?.clinic_name ||
+            state.clinic?.name ||
+            data.clinic_name ||
+            CONFIG?.clinic?.clinicName ||
+            "動物病院";
 
-            await renderQr(el.searchLineLinkQrCanvas, el.searchLineLinkQrImg, linkUrl);
+          el.clinicName.textContent = `🏥 ${clinicName}`;
 
-            el.searchLinkResult.scrollIntoView({ behavior: "smooth", block: "start" });
-          } else {
-            state.lastLineLinkUrl = linkUrl;
-            if (el.lineLinkUrlInput) el.lineLinkUrlInput.value = linkUrl;
-            show(el.lineLinkResult);
-            el.lineLinkInfo.textContent = [
-              `guardian_id: ${payload.guardian_id}`,
-              `pet_id: ${payload.pet_id || ""}`,
-              `expires_at: ${data.expires_at || ""}`,
-              `url: ${linkUrl}`
-            ].join("\n");
-            setHref(el.openLineLinkUrlBtn, linkUrl);
-
-            await renderQr(el.lineLinkQrCanvas, el.lineLinkQrImg, linkUrl);
-          }
+          renderConfirm(data);
+          show(el.confirmCard);
+          activateStep("line");
+          setStatus("✅", "連携QRを確認しました", "続いて、LINEアカウントを確認します。");
         } catch (error) {
-          if (mode === "manual") {
-            showResult(el.manualLinkResult, "danger", error.message || "LINE連携QRの発行に失敗しました。");
-          } else if (mode === "search") {
-            show(el.searchLinkResult);
-            el.searchLineLinkInfo.textContent = [
-              error.message || "LINE連携QRの発行に失敗しました。",
-              "",
-              "確認：検索結果の連携用guardian_idが実際の飼い主IDになっているか確認してください。",
-              "STEP VET-34E-R5では guardian.id を優先して使用します。"
-            ].join("\n");
-          } else {
-            show(el.lineLinkResult);
-            el.lineLinkInfo.textContent = error.message || "LINE連携QRの発行に失敗しました。";
-          }
+          showError(error.message || "連携QRを確認できませんでした。");
         }
       }
 
-      async function loadDuplicateReviews(){
+      function renderConfirm(data){
+        const clinicName =
+          state.clinic?.clinic_name ||
+          state.clinic?.name ||
+          data.clinic_name ||
+          CONFIG?.clinic?.clinicName ||
+          "動物病院";
+
+        const guardianName =
+          state.guardian?.guardian_name ||
+          state.guardian?.name ||
+          data.guardian_name ||
+          data.target?.guardian_name ||
+          "-";
+
+        const petName =
+          state.pet?.pet_name ||
+          state.pet?.name ||
+          data.pet_name ||
+          data.target?.pet_name ||
+          "-";
+
+        const animalType =
+          state.pet?.animal_type ||
+          state.pet?.species ||
+          data.animal_type ||
+          data.target?.animal_type ||
+          "-";
+
+        const sex =
+          state.pet?.sex ||
+          data.sex ||
+          data.target?.sex ||
+          "";
+
+        const age =
+          state.pet?.age_text ||
+          data.age_text ||
+          data.target?.age_text ||
+          "";
+
+        const cardNo =
+          state.card?.card_no ||
+          data.card_no ||
+          data.target?.card_no ||
+          "連携後に表示";
+
+        el.confirmClinic.textContent = clinicName;
+        el.confirmGuardian.textContent = guardianName;
+        el.confirmPet.textContent = petName;
+        el.confirmAnimal.textContent = animalType;
+        el.confirmSexAge.textContent = [sex, age].filter(Boolean).join(" / ") || "-";
+        el.confirmCardNo.textContent = cardNo;
+      }
+
+      async function initLine(){
+        if (state.lineUserId) {
+          state.lineReady = true;
+          state.lineDisplayName = state.lineDisplayName || "URL指定";
+          setStatus("✅", "LINE情報を確認しました", "URLで指定されたLINE userIdを使います。");
+          activateStep("line");
+          return;
+        }
+
+        if (!liffId || !window.liff) {
+          state.lineReady = false;
+          if (isDemoMode) {
+            show(el.browserTestBox);
+            setStatus("⚠️", "LIFF IDが未設定、またはLINE外で開いています", "デモ確認ではブラウザ確認モードを使えます。本番ではLIFF IDを設定し、LINEアプリ内で開いてください。");
+          } else {
+            setStatus("⚠️", "LINEアプリ内で開いてください", "LINE連携にはLINE userIdの取得が必要です。");
+          }
+          return;
+        }
+
         try {
-          el.reviewsResult.innerHTML = `<div class="alert warn">読み込み中です...</div>`;
-          const data = await apiGet(`/api/admin/duplicate-reviews?clinic_code=${encodeURIComponent(clinicCode)}&status=pending&limit=100`);
-          const items = data.items || [];
-          if (!items.length) {
-            el.reviewsResult.innerHTML = `<div class="alert ok">現在、重複確認待ちはありません。</div>`;
+          await window.liff.init({ liffId });
+
+          if (!window.liff.isLoggedIn()) {
+            show(el.lineLoginBox);
+            setStatus("⚠️", "LINEログインが必要です", "LINEログイン後に連携できます。");
             return;
           }
 
-          el.reviewsResult.innerHTML = items.map((item, index) => `
-            <div class="resultBox">
-              <div class="resultHeader">
-                <div>
-                  <strong>${index + 1}. ${escapeHtml(item.guardian_name || "飼い主名未入力")}</strong><br>
-                  <span class="small">ペット：${escapeHtml(item.pet_name || "未入力")} / 電話：${escapeHtml(item.phone_normalized || "")}</span><br>
-                  <span class="small">理由：${escapeHtml(item.reason || "")}</span>
-                </div>
-                <span class="pill">${escapeHtml(item.status || "pending")}</span>
-              </div>
-              <div class="mono">${escapeHtml(JSON.stringify(item, null, 2))}</div>
-            </div>
-          `).join("");
+          const profile = await window.liff.getProfile();
+          state.lineUserId = profile.userId || "";
+          state.lineDisplayName = profile.displayName || "";
+          state.linePictureUrl = profile.pictureUrl || "";
+          state.lineReady = Boolean(state.lineUserId);
+
+          if (state.lineReady) {
+            setStatus("✅", "LINEアカウントを確認しました", `${state.lineDisplayName || "LINEユーザー"} として連携します。`);
+            activateStep("line");
+          } else {
+            setStatus("⚠️", "LINE userIdを取得できませんでした", "LINEアプリ内で開き直してください。");
+          }
         } catch (error) {
-          el.reviewsResult.innerHTML = `<div class="alert danger">${escapeHtml(error.message || "重複確認の取得に失敗しました。")}</div>`;
+          state.lineReady = false;
+          if (isDemoMode) show(el.browserTestBox);
+          setStatus("⚠️", "LIFF初期化に失敗しました", error.message || "LIFF設定を確認してください。");
         }
+      }
+
+      async function completeLineLink(){
+        if (state.completing) return;
+
+        if (!state.tokenReady) return alert("連携QRを確認できていません。");
+        if (!state.lineReady || !state.lineUserId) return alert("LINEアカウントを確認できていません。LINEアプリ内で開いてください。");
+        if (!el.consentChecked.checked) return alert("同意チェックが必要です。");
+
+        try {
+          state.completing = true;
+          updateCompleteState("連携中...");
+
+          const data = await apiPost("/api/public/line-link-complete", {
+            clinic_code: clinicCode,
+            token,
+            line_user_id: state.lineUserId,
+            line_display_name: state.lineDisplayName,
+            line_picture_url: state.linePictureUrl,
+            consent_checked: true,
+            consent_text_version: "step-vet-34f-v1"
+          });
+
+          showSuccess(data);
+        } catch (error) {
+          showError(error.message || "LINE連携に失敗しました。受付スタッフにご確認ください。");
+        } finally {
+          state.completing = false;
+          updateCompleteState();
+        }
+      }
+
+      function showSuccess(data){
+        hide(el.errorCard);
+        show(el.successCard);
+        hide(el.actionBar);
+        activateStep("done");
+        setStatus("✅", "LINE連携が完了しました", "LINEからペット診察券を表示できます。");
+
+        const baseMemberUrl =
+          data.member_url ||
+          `${siteBase}/member.html?clinic_code=${encodeURIComponent(clinicCode)}`;
+
+        const memberUrlObj = new URL(baseMemberUrl, location.href);
+        memberUrlObj.searchParams.set("clinic_code", clinicCode);
+
+        // ブラウザ確認モードでは、member.htmlでも同じテスト用LINE IDを渡す。
+        // 本番LIFFではURLではなくLIFFからline_user_idを取得する。
+        if (state.lineUserId && (isDemoMode || !liffId)) {
+          memberUrlObj.searchParams.set("line_user_id", state.lineUserId);
+        }
+
+        const memberUrl = memberUrlObj.toString();
+
+        setHref(el.goMemberSuccess, memberUrl);
+        setHref(el.goMemberTop, memberUrl);
+
+        const card = data.card || data.registration || {};
+        el.successInfo.textContent = [
+          `LINE名：${state.lineDisplayName || "-"}`,
+          `診察券番号：${card.card_no || data.card_no || "連携後、診察券画面で確認"}`,
+          `連携日時：${new Date().toLocaleString("ja-JP")}`
+        ].join("\n");
+
+        el.successCard.scrollIntoView({ behavior:"smooth", block:"start" });
+      }
+
+      function showNoToken(){
+        show(el.noTokenBox);
+        show(el.errorCard);
+        hide(el.confirmCard);
+        hide(el.actionBar);
+        setStatus("⚠️", "連携トークンがありません", "受付スタッフにLINE連携QRを再発行してもらってください。");
+      }
+
+      function showError(message){
+        show(el.errorCard);
+        hide(el.confirmCard);
+        hide(el.actionBar);
+        el.errorMessage.textContent = message || "連携QRを確認できませんでした。";
+        setStatus("⚠️", "連携できませんでした", message || "受付スタッフに確認してください。");
+        el.errorCard.scrollIntoView({ behavior:"smooth", block:"start" });
+      }
+
+      function updateCompleteState(label){
+        const ready = state.tokenReady && state.lineReady && el.consentChecked.checked && !state.completing;
+
+        let safeLabel = "";
+        if (typeof label === "string") {
+          safeLabel = label;
+        }
+
+        el.completeBtn.disabled = !ready;
+
+        if (safeLabel) {
+          el.completeBtn.textContent = safeLabel;
+          return;
+        }
+
+        if (state.completing) {
+          el.completeBtn.textContent = "連携中...";
+        } else if (!state.tokenReady) {
+          el.completeBtn.textContent = "連携QR確認中";
+        } else if (!state.lineReady) {
+          el.completeBtn.textContent = "先にLINE IDを確認してください";
+        } else if (!el.consentChecked.checked) {
+          el.completeBtn.textContent = "同意チェック後に連携できます";
+        } else {
+          el.completeBtn.textContent = "この内容でLINE診察券を作成する";
+        }
+      }
+
+      function activateStep(name){
+        [el.stepToken, el.stepLine, el.stepDone].forEach((node) => node.classList.remove("active"));
+        if (name === "token") el.stepToken.classList.add("active");
+        if (name === "line") el.stepLine.classList.add("active");
+        if (name === "done") el.stepDone.classList.add("active");
+      }
+
+      function setStatus(icon, title, text){
+        el.statusIcon.textContent = icon;
+        el.statusTitle.textContent = title;
+        el.statusText.textContent = text;
       }
 
       async function apiGet(path){
         const fullUrl = path.startsWith("http") ? path : `${apiBase}${path}`;
         const res = await fetch(fullUrl, {
-          method: "GET",
-          mode: "cors",
-          cache: "no-store",
-          headers: buildHeaders()
+          method:"GET",
+          mode:"cors",
+          cache:"no-store",
+          headers:{ "Accept":"application/json" }
         });
         return parseResponse(res);
       }
@@ -1355,11 +1041,14 @@
       async function apiPost(path, body){
         const fullUrl = path.startsWith("http") ? path : `${apiBase}${path}`;
         const res = await fetch(fullUrl, {
-          method: "POST",
-          mode: "cors",
-          cache: "no-store",
-          headers: buildHeaders({ "Content-Type": "application/json" }),
-          body: JSON.stringify({ clinic_code: clinicCode, ...(body || {}) })
+          method:"POST",
+          mode:"cors",
+          cache:"no-store",
+          headers:{
+            "Content-Type":"application/json",
+            "Accept":"application/json"
+          },
+          body: JSON.stringify(body || {})
         });
         return parseResponse(res);
       }
@@ -1368,66 +1057,12 @@
         const text = await res.text();
         let data = null;
         if (text) {
-          try { data = JSON.parse(text); } catch { data = { raw: text }; }
+          try { data = JSON.parse(text); } catch { data = { raw:text }; }
         }
         if (!res.ok || !data || data.ok === false) {
           throw new Error((data && (data.message || data.error)) || `APIエラー status=${res.status}`);
         }
         return data;
-      }
-
-      function buildHeaders(extra){
-        const code = clean(el.adminCode.value) || getStoredAdminCode();
-        const headers = {
-          "Accept": "application/json",
-          ...(extra || {})
-        };
-        if (code) {
-          headers["X-DPRO-Admin-Code"] = code;
-        }
-        return headers;
-      }
-
-      function getStoredAdminCode(){
-        for (const key of adminStorageKeys) {
-          const code = localStorage.getItem(key) || sessionStorage.getItem(key) || "";
-          if (code) return code;
-        }
-        return "";
-      }
-
-      function renderJsonResult(node, type, title, data){
-        node.className = `resultBox alert ${type || ""}`;
-        node.classList.remove("hidden");
-        node.innerHTML = `
-          <strong>${escapeHtml(title)}</strong>
-          <div class="mono" style="margin-top:10px">${escapeHtml(JSON.stringify(data, null, 2))}</div>
-        `;
-      }
-
-      function showResult(node, type, message){
-        node.className = `alert ${type || ""}`;
-        node.classList.remove("hidden");
-        node.innerHTML = escapeHtml(message);
-      }
-
-      async function copyText(text, doneMessage){
-        const value = clean(text);
-        if (!value) return alert("コピーする内容がありません。");
-
-        // STEP VET-34E-R5:
-        // 連携URLコピーは必ず link.html?token=... をコピーする。
-        // 検索キーワードや飼い主名が誤って入っている場合は止める。
-        if ((doneMessage || "").includes("LINE連携URL") && !value.includes("link.html?token=")) {
-          return alert("連携URLではない内容が入っています。画面の「コピーする連携URL」に link.html?token=... が出ているか確認してください。");
-        }
-
-        try {
-          await navigator.clipboard.writeText(value);
-          alert(doneMessage || "コピーしました。");
-        } catch {
-          prompt("コピーしてください", value);
-        }
       }
 
       function trimSlash(value){
@@ -1444,17 +1079,6 @@
       }
       function hide(node){
         if (node) node.classList.add("hidden");
-      }
-      function escapeHtml(value){
-        return String(value ?? "")
-          .replaceAll("&","&amp;")
-          .replaceAll("<","&lt;")
-          .replaceAll(">","&gt;")
-          .replaceAll('"',"&quot;")
-          .replaceAll("'","&#039;");
-      }
-      function escapeAttr(value){
-        return escapeHtml(value).replaceAll("`","&#096;");
       }
     })();
   </script>
