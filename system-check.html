@@ -4,12 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#2f6f5e">
-  <title>DPRO PET CARE LINE｜本番導入 system-check R2</title>
+  <title>DPRO PET CARE LINE｜本番導入 system-check R3</title>
 
   <!--
-    STEP VET-34I-R2
+    STEP VET-34I-R3
     DPRO PET CARE LINE 動物病院版
-    system-check.html 本番版 完全版 R2 通信安定化
+    system-check.html 本番版 完全版 R3 POST preflight回避
 
     目的：
     ・営業DEMOチェックではなく、本番導入前チェックに寄せる
@@ -460,7 +460,7 @@
     <section class="hero">
       <div class="heroTop">
         <div class="badge">🐾 DPRO PET CARE LINE</div>
-        <div class="badge">STEP VET-34I-R2</div>
+        <div class="badge">STEP VET-34I-R3</div>
       </div>
       <h1>本番導入 system-check</h1>
       <p>
@@ -642,7 +642,7 @@
     </div>
 
     <div class="footer">
-      STEP VET-34I-R2 system-check.html production complete<br>
+      STEP VET-34I-R3 system-check.html production complete<br>
       DPRO PET CARE LINE / 動物病院版
     </div>
   </div>
@@ -664,7 +664,7 @@
         adminCode: "dpro_vet_admin_code"
       };
 
-      // STEP VET-34I-R2:
+      // STEP VET-34I-R3:
       // POSTのCORS事前確認を安定させるため、管理コード送信ヘッダーは1つだけに統一します。
       // Worker側 requireAdmin は X-DPRO-Admin-Code を受け取れるため、これだけでOKです。
       const ADMIN_HEADER_NAME = "X-DPRO-Admin-Code";
@@ -1245,43 +1245,58 @@
 
       async function apiGet(path, admin){
         const cfg = getConfig();
-        const fullUrl = path.startsWith("http") ? path : `${cfg.apiBase}${path}`;
+        const fullUrl = buildApiUrl(path, admin);
         const res = await fetch(fullUrl, {
           method:"GET",
           mode:"cors",
           cache:"no-store",
-          headers: buildHeaders(admin)
+          headers: {
+            "Accept":"application/json"
+          }
         });
         return parseResponse(res);
       }
 
       async function apiPost(path, body, admin){
-        const cfg = getConfig();
-        const fullUrl = path.startsWith("http") ? path : `${cfg.apiBase}${path}`;
+        const fullUrl = buildApiUrl(path, admin);
+
+        // STEP VET-34I-R3:
+        // application/json + custom header のpreflightで止まる環境を避けるため、
+        // system-checkのPOST診断では text/plain でJSON文字列を送ります。
+        // Cloudflare Workerの request.json() はbody内容をJSONとして読めます。
         const res = await fetch(fullUrl, {
           method:"POST",
           mode:"cors",
           cache:"no-store",
-          headers: buildHeaders(admin, { "Content-Type":"application/json" }),
+          headers: {
+            "Accept":"application/json",
+            "Content-Type":"text/plain;charset=UTF-8"
+          },
           body: JSON.stringify(body || {})
         });
         return parseResponse(res);
       }
 
-      function buildHeaders(admin, extra){
-        const headers = {
-          "Accept":"application/json",
-          ...(extra || {})
-        };
+      function buildApiUrl(path, admin){
+        const cfg = getConfig();
+        const fullUrl = path.startsWith("http") ? new URL(path) : new URL(`${cfg.apiBase}${path}`);
 
         if (admin) {
           const code = clean(el.adminCode.value);
           if (code) {
-            headers[ADMIN_HEADER_NAME] = code;
+            fullUrl.searchParams.set("admin_token", code);
           }
         }
 
-        return headers;
+        return fullUrl.toString();
+      }
+
+      function buildHeaders(admin, extra){
+        // R3ではpreflight回避のため、管理コードはヘッダーでは送らず admin_token クエリで送る。
+        return {
+          "Accept":"application/json",
+          ...(extra || {})
+        };
       }
 
       async function parseResponse(res){
@@ -1307,9 +1322,9 @@
             "確認ポイント:",
             `1. Worker URL: ${getConfig().apiBase}`,
             `2. endpoint: ${endpoint}`,
-            "3. system-check.htmlはSTEP VET-34I-R2に更新済みか",
+            "3. system-check.htmlはSTEP VET-34I-R3に更新済みか",
             "4. Cloudflare Worker側のCORSがPOST/OPTIONSを許可しているか",
-            "5. 管理コードは X-DPRO-Admin-Code で送信しています",
+            "5. 管理コードはpreflight回避のため admin_token クエリで送信しています",
             "",
             "次にブラウザの開発者ツール Network で OPTIONS / POST のステータスを確認してください。"
           ].join("\n");
