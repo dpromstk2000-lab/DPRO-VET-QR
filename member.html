@@ -6,7 +6,37 @@
   <meta name="theme-color" content="#2f6f5e">
   <title>DPRO PET CARE LINE｜ペット診察券</title>
 
+  <!--
+    STEP VET-34G
+    DPRO PET CARE LINE 動物病院版
+    member.html 修正版 完全版
+
+    目的：
+    ・本番導線に合わせたペット診察券画面
+    ・LINE連携済みなら診察券を表示
+    ・未登録なら register.html へ案内
+    ・既存患者は受付で line-setup.html から連携QRを発行してもらう案内
+    ・複数ペット診察券対応
+    ・ペット診察券QRには個人情報を直接入れず、qr_payload / card_token を表示
+    ・Cloudflare Worker API → Supabase → 画面再読込の本番導線
+
+    前提：
+    ・STEP VET-34B SQL 実行済み
+    ・STEP VET-34C-R2 Worker 反映済み
+    ・STEP VET-34D register.html 追加済み
+    ・STEP VET-34E line-setup.html 追加済み
+    ・STEP VET-34F link.html 追加済み
+    ・config.js 読み込み済み
+    ・本番ではLIFF IDをconfig.jsまたはURL liff_idに設定する
+
+    重要：
+    ・ADMIN_TOKEN はこのHTMLに絶対に書かない
+    ・未登録なのにデモ診察券を表示しない
+    ・demo=true の時だけ営業DEMO表示を許可
+  -->
+
   <script src="./config.js"></script>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 
   <style>
@@ -19,9 +49,13 @@
       --main:#2f6f5e;
       --main2:#4f9a7f;
       --soft:#e9f4ee;
+      --soft2:#f8fbf8;
       --warn:#fff5dc;
       --warn-border:#ead39a;
       --danger:#b84a4a;
+      --danger-bg:#fff0f0;
+      --ok:#23694f;
+      --ok-bg:#eef8f2;
       --shadow:0 18px 45px rgba(29,60,48,.12);
       --radius:22px;
     }
@@ -39,11 +73,13 @@
 
     a{color:inherit}
     button,input,select,textarea{font:inherit}
+    button{cursor:pointer}
+    button:disabled{cursor:not-allowed;opacity:.62}
 
     .app{
-      width:min(980px,100%);
+      width:min(1040px,100%);
       margin:0 auto;
-      padding:18px 14px 90px;
+      padding:18px 14px 92px;
     }
 
     .hero{
@@ -68,16 +104,17 @@
       transform:rotate(-12deg);
     }
 
-    .hero-top{
+    .heroTop{
       display:flex;
       justify-content:space-between;
       gap:12px;
       align-items:flex-start;
       position:relative;
       z-index:1;
+      flex-wrap:wrap;
     }
 
-    .service-badge{
+    .serviceBadge{
       display:inline-flex;
       align-items:center;
       gap:8px;
@@ -86,30 +123,12 @@
       border-radius:999px;
       padding:7px 10px;
       font-size:12px;
-      font-weight:800;
+      font-weight:850;
       letter-spacing:.02em;
       backdrop-filter:blur(8px);
     }
 
-    .hero h1{
-      margin:16px 0 8px;
-      font-size:28px;
-      line-height:1.16;
-      letter-spacing:.02em;
-      position:relative;
-      z-index:1;
-    }
-
-    .hero p{
-      margin:0;
-      color:rgba(255,255,255,.9);
-      line-height:1.75;
-      font-size:14px;
-      position:relative;
-      z-index:1;
-    }
-
-    .status-pill{
+    .statusPill{
       display:inline-flex;
       align-items:center;
       gap:7px;
@@ -120,7 +139,7 @@
       border:1px solid rgba(255,255,255,.22);
       color:#fff;
       font-size:12px;
-      font-weight:800;
+      font-weight:850;
       position:relative;
       z-index:1;
     }
@@ -131,18 +150,145 @@
       box-shadow:0 0 0 4px rgba(159,240,190,.18);
     }
 
-    .panel{
-      background:var(--card);
-      border:1px solid rgba(219,229,220,.86);
-      border-radius:var(--radius);
-      box-shadow:var(--shadow);
-      margin-top:14px;
-      overflow:hidden;
+    .hero h1{
+      margin:16px 0 8px;
+      font-size:clamp(28px,5vw,44px);
+      line-height:1.12;
+      letter-spacing:-.03em;
+      position:relative;
+      z-index:1;
     }
 
-    .panel-body{padding:16px}
+    .hero p{
+      margin:0;
+      color:rgba(255,255,255,.9);
+      line-height:1.75;
+      font-size:14px;
+      font-weight:650;
+      position:relative;
+      z-index:1;
+      max-width:840px;
+    }
 
-    .notice{
+    .heroActions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top:18px;
+      position:relative;
+      z-index:1;
+    }
+
+    .btn{
+      border:0;
+      border-radius:16px;
+      padding:12px 14px;
+      font-weight:900;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      min-height:46px;
+      transition:.15s transform ease,.15s box-shadow ease,.15s opacity ease;
+      text-decoration:none;
+      white-space:nowrap;
+    }
+    .btn:hover{transform:translateY(-1px)}
+    .btnPrimary{
+      background:var(--main);
+      color:#fff;
+      box-shadow:0 12px 28px rgba(47,111,94,.22);
+    }
+    .btnWhite{
+      background:#fff;
+      color:var(--main);
+      box-shadow:0 10px 24px rgba(10,40,28,.13);
+    }
+    .btnGhost{
+      background:rgba(255,255,255,.16);
+      color:#fff;
+      border:1px solid rgba(255,255,255,.28);
+    }
+    .btnSoft{
+      background:var(--soft);
+      color:var(--main);
+      border:1px solid #cfe4d6;
+    }
+    .btnDanger{
+      background:#fff0f0;
+      color:var(--danger);
+      border:1px solid #f0c7c7;
+    }
+    .btnMini{
+      min-height:36px;
+      padding:8px 10px;
+      border-radius:12px;
+      font-size:13px;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:14px;
+      margin-top:14px;
+    }
+    @media (min-width:880px){
+      .grid.two{grid-template-columns:1.15fr .85fr}
+      .grid.three{grid-template-columns:repeat(3,1fr)}
+    }
+
+    .panel,.card{
+      background:rgba(255,255,255,.94);
+      border:1px solid rgba(219,229,220,.9);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    .panelBody,.card{
+      padding:18px;
+    }
+
+    .card h2,.panel h2{
+      margin:0 0 10px;
+      font-size:20px;
+      letter-spacing:-.02em;
+    }
+    .card h3{
+      margin:0 0 8px;
+      font-size:16px;
+    }
+    .lead{
+      color:var(--muted);
+      line-height:1.75;
+      font-weight:650;
+      margin:0;
+    }
+    .small{
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.7;
+    }
+
+    .loading{
+      display:grid;
+      place-items:center;
+      min-height:310px;
+      text-align:center;
+      color:var(--muted);
+      gap:12px;
+    }
+    .spinner{
+      width:42px;height:42px;
+      border:4px solid #dce9df;
+      border-top-color:var(--main);
+      border-radius:50%;
+      animation:spin .8s linear infinite;
+    }
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    .hidden{display:none!important}
+
+    .notice,.alert{
       display:flex;
       gap:10px;
       align-items:flex-start;
@@ -153,649 +299,510 @@
       padding:12px 13px;
       line-height:1.6;
       font-size:13px;
-      margin-top:14px;
+      margin-top:12px;
+      font-weight:650;
     }
-
-    .notice.warn{
+    .notice.warn,.alert.warn{
       background:var(--warn);
       border-color:var(--warn-border);
       color:#765c1f;
     }
-
-    .loading{
-      display:grid;
-      place-items:center;
-      min-height:260px;
-      text-align:center;
-      color:var(--muted);
-      gap:12px;
+    .notice.danger,.alert.danger{
+      background:var(--danger-bg);
+      border-color:#f0c7c7;
+      color:#7c2323;
+    }
+    .notice.ok,.alert.ok{
+      background:var(--ok-bg);
+      border-color:#bfe1ca;
+      color:#1f6045;
     }
 
-    .spinner{
-      width:42px;height:42px;
-      border:4px solid #dce9df;
-      border-top-color:var(--main);
-      border-radius:50%;
-      animation:spin .9s linear infinite;
-      margin:0 auto 8px;
-    }
-
-    @keyframes spin{to{transform:rotate(360deg)}}
-
-    .error-box{
-      background:#fff5f5;
-      border:1px solid #f0bcbc;
-      color:#7d2929;
-      border-radius:18px;
-      padding:16px;
-      line-height:1.7;
-    }
-
-    .error-box strong{display:block;margin-bottom:6px}
-
-    .actions{
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      margin-top:14px;
-    }
-
-    .btn{
-      appearance:none;
-      border:none;
-      border-radius:999px;
-      padding:12px 15px;
-      font-weight:900;
-      background:var(--main);
-      color:#fff;
-      cursor:pointer;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:8px;
-      text-decoration:none;
-      min-height:44px;
-      box-shadow:0 10px 22px rgba(47,111,94,.18);
-    }
-
-    .btn.secondary{
-      background:#fff;
-      color:var(--main);
-      border:1px solid #cfe2d5;
-      box-shadow:none;
-    }
-
-    .btn.ghost{
-      background:transparent;
-      color:var(--main);
-      border:1px solid #cfe2d5;
-      box-shadow:none;
-    }
-
-    .btn.danger{
-      background:#b84a4a;
-      color:#fff;
-    }
-
-    .guardian{
+    .guardianHeader{
       display:flex;
       justify-content:space-between;
+      gap:14px;
       align-items:flex-start;
-      gap:12px;
-      padding:18px 16px;
+      flex-wrap:wrap;
+      padding:18px;
       border-bottom:1px solid var(--line);
       background:linear-gradient(180deg,#fff,#fbfdfb);
     }
-
-    .guardian h2{
-      margin:0 0 4px;
-      font-size:20px;
-      line-height:1.25;
+    .guardianHeader h2{
+      margin:0;
+      font-size:22px;
+      letter-spacing:-.02em;
     }
-
-    .guardian .sub{
+    .guardianSub{
       color:var(--muted);
       font-size:13px;
+      margin-top:4px;
       line-height:1.55;
     }
-
-    .line-status{
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
+    .lineStatus{
       border-radius:999px;
       padding:8px 10px;
+      background:#eaf8ef;
+      color:#1d6b4a;
+      border:1px solid #c6e6d0;
       font-size:12px;
       font-weight:900;
-      background:#ebf7ef;
-      color:#236246;
       white-space:nowrap;
     }
-
-    .line-status.unlinked{
-      background:#fff3da;
-      color:#745318;
+    .lineStatus.unlinked{
+      background:#fff5dc;
+      color:#765c1f;
+      border-color:#ead39a;
     }
 
-    .pets-scroll{
+    .petTabs{
       display:flex;
-      gap:10px;
-      padding:14px 16px;
-      overflow-x:auto;
+      gap:8px;
+      overflow:auto;
+      padding:14px 18px;
       border-bottom:1px solid var(--line);
-      background:#fbfdfb;
-      -webkit-overflow-scrolling:touch;
-    }
-
-    .pet-tab{
-      min-width:156px;
-      text-align:left;
       background:#fff;
-      border:1px solid #dae7dc;
+    }
+    .petTab{
+      min-width:150px;
+      border:1px solid var(--line);
+      background:#fff;
       border-radius:18px;
       padding:12px;
-      cursor:pointer;
-      box-shadow:0 8px 18px rgba(39,71,56,.06);
-    }
-
-    .pet-tab.active{
-      border-color:var(--main);
-      background:linear-gradient(180deg,#f1fbf5,#fff);
-      box-shadow:0 10px 24px rgba(47,111,94,.14);
-    }
-
-    .pet-tab .emoji{font-size:24px;display:block;margin-bottom:5px}
-    .pet-tab strong{display:block;font-size:16px}
-    .pet-tab span{display:block;color:var(--muted);font-size:12px;margin-top:4px;line-height:1.45}
-
-    .main-grid{
-      display:grid;
-      grid-template-columns:1.05fr .95fr;
-      gap:14px;
-      padding:16px;
-    }
-
-    .card-visual{
-      border-radius:24px;
-      overflow:hidden;
-      background:
-        linear-gradient(145deg,#ffffff 0%,#f3faf5 100%);
-      border:1px solid #d9e6dd;
-      min-height:430px;
-      display:flex;
-      flex-direction:column;
-    }
-
-    .card-head{
-      background:
-        linear-gradient(135deg,var(--main),var(--main2));
-      color:#fff;
-      padding:18px;
-      position:relative;
-      overflow:hidden;
-    }
-
-    .card-head::after{
-      content:"";
-      position:absolute;
-      width:160px;height:160px;border-radius:50%;
-      background:rgba(255,255,255,.12);
-      right:-46px;top:-64px;
-    }
-
-    .card-head .small{
-      font-size:12px;
-      opacity:.88;
-      font-weight:900;
-      letter-spacing:.05em;
-    }
-
-    .pet-name-row{
-      display:flex;
-      justify-content:space-between;
-      gap:10px;
-      align-items:flex-end;
-      position:relative;
-      z-index:1;
-      margin-top:8px;
-    }
-
-    .pet-name{
-      font-size:34px;
-      font-weight:950;
-      line-height:1.05;
-      letter-spacing:.02em;
-    }
-
-    .pet-kind{
-      text-align:right;
-      font-weight:900;
-      font-size:14px;
-      opacity:.95;
-    }
-
-    .card-info{
-      padding:16px;
-      display:grid;
-      gap:12px;
-    }
-
-    .info-grid{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:10px;
-    }
-
-    .info{
-      border:1px solid #e0eae2;
-      border-radius:16px;
-      padding:11px 12px;
-      background:#fff;
-    }
-
-    .info .label{
+      text-align:left;
       color:var(--muted);
-      font-size:11px;
-      font-weight:900;
-      letter-spacing:.04em;
-      margin-bottom:4px;
-    }
-
-    .info .value{
-      font-size:15px;
-      font-weight:850;
-      line-height:1.45;
-      word-break:break-word;
-    }
-
-    .qr-area{
       display:grid;
-      grid-template-columns:150px 1fr;
+      gap:4px;
+    }
+    .petTab.active{
+      border-color:#99cdb0;
+      background:#f2fbf5;
+      color:var(--ink);
+      box-shadow:0 8px 20px rgba(47,111,94,.08);
+    }
+    .petTab .emoji{font-size:22px}
+    .petTab strong{color:var(--ink);font-size:14px}
+    .petTab span{font-size:12px;line-height:1.4}
+
+    .cardLayout{
+      display:grid;
+      grid-template-columns:1fr;
       gap:14px;
-      align-items:center;
-      border:1px dashed #bdd5c4;
-      background:#f8fcf9;
-      border-radius:18px;
-      padding:14px;
+      padding:18px;
+    }
+    @media (min-width:820px){
+      .cardLayout{grid-template-columns:300px 1fr}
     }
 
-    #qrcode{
-      width:150px;
-      height:150px;
-      background:#fff;
+    .qrCard{
+      background:
+        linear-gradient(180deg,#fff,#fbfdfb);
+      border:1px solid var(--line);
+      border-radius:24px;
+      padding:18px;
+      text-align:center;
+    }
+    .petAvatar{
+      width:74px;height:74px;
+      border-radius:26px;
       display:grid;
       place-items:center;
-      border-radius:14px;
-      border:1px solid #e2e8e3;
-      overflow:hidden;
+      margin:0 auto 10px;
+      background:var(--soft);
+      color:var(--main);
+      font-size:36px;
+      box-shadow:inset 0 0 0 1px #d3e7d9;
     }
-
-    #qrcode canvas,#qrcode img{width:136px!important;height:136px!important}
-
-    .qr-help{
-      color:var(--muted);
-      line-height:1.65;
-      font-size:13px;
-    }
-
-    .qr-help strong{
-      display:block;
-      color:var(--ink);
-      font-size:14px;
-      margin-bottom:4px;
-    }
-
-    .section-title{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      margin:0 0 12px;
-    }
-
-    .section-title h3{
+    .petName{
+      font-size:26px;
+      font-weight:950;
+      letter-spacing:-.03em;
       margin:0;
-      font-size:18px;
     }
-
-    .section-title small{
-      color:var(--muted);
-      font-weight:800;
-    }
-
-    .side{
-      display:grid;
-      gap:14px;
-    }
-
-    .mini-panel{
-      border:1px solid #dce8df;
-      border-radius:20px;
-      background:#fff;
-      padding:15px;
-    }
-
-    .mini-panel.green{
-      background:linear-gradient(180deg,#f2fbf5,#fff);
-    }
-
-    .timeline{
-      display:grid;
-      gap:10px;
-    }
-
-    .todo{
-      display:grid;
-      gap:5px;
-      border:1px solid #e2eadf;
-      background:#fff;
-      border-radius:16px;
-      padding:12px;
-    }
-
-    .todo.due{
-      border-color:#f1c56f;
-      background:#fffaf0;
-    }
-
-    .todo.urgent{
-      border-color:#edb3a7;
-      background:#fff6f3;
-    }
-
-    .todo-title{
-      display:flex;
-      justify-content:space-between;
-      gap:8px;
-      align-items:flex-start;
-    }
-
-    .todo-title strong{font-size:14px;line-height:1.4}
-    .tag{
+    .cardNo{
       display:inline-flex;
+      margin:8px 0 12px;
       border-radius:999px;
-      padding:4px 8px;
-      font-size:11px;
-      font-weight:900;
-      background:#edf6f0;
-      color:#28624d;
-      white-space:nowrap;
-    }
-
-    .tag.due{background:#fff0c7;color:#77560d}
-    .tag.urgent{background:#ffe0da;color:#8b3025}
-
-    .todo p{
-      margin:0;
-      color:var(--muted);
+      background:#f0f6f2;
+      color:var(--main);
+      border:1px solid #d2e7d9;
+      padding:6px 10px;
       font-size:12px;
-      line-height:1.6;
+      font-weight:900;
     }
-
-    .memo{
-      background:#fbfbf7;
-      border:1px solid #e8e4ce;
-      color:#4f4a32;
-      border-radius:16px;
-      padding:12px;
-      line-height:1.65;
-      font-size:13px;
-    }
-
-    .clinic{
-      color:var(--muted);
-      line-height:1.75;
-      font-size:13px;
-    }
-
-    .bottom-nav{
-      position:fixed;
-      left:0;right:0;bottom:0;
-      background:rgba(255,255,255,.92);
-      backdrop-filter:blur(12px);
-      border-top:1px solid #dce8df;
-      padding:8px max(10px,env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left));
-      z-index:20;
-    }
-
-    .bottom-nav-inner{
-      width:min(980px,100%);
+    .qrBox{
+      width:172px;
+      min-height:172px;
       margin:0 auto;
       display:grid;
-      grid-template-columns:repeat(4,1fr);
-      gap:8px;
+      place-items:center;
+      border:1px solid var(--line);
+      background:#fff;
+      border-radius:20px;
+      padding:10px;
+    }
+    .qrText{
+      margin-top:10px;
+      color:var(--muted);
+      font-size:11px;
+      word-break:break-all;
+      line-height:1.5;
+    }
+    .copyBtn{
+      margin-top:10px;
+      width:100%;
     }
 
-    .nav-btn{
-      border:1px solid #dce8df;
-      border-radius:15px;
+    .infoGrid{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:10px;
+    }
+    @media (min-width:620px){
+      .infoGrid{grid-template-columns:1fr 1fr}
+    }
+    .infoItem{
       background:#fff;
-      padding:8px 4px;
-      text-align:center;
-      text-decoration:none;
-      color:var(--ink);
-      font-size:11px;
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:13px;
+      min-height:76px;
+    }
+    .infoItem small{
+      display:block;
+      color:var(--muted);
+      font-size:12px;
+      font-weight:850;
+      margin-bottom:5px;
+    }
+    .infoItem strong{
+      display:block;
+      font-size:16px;
+      line-height:1.45;
+      white-space:pre-wrap;
+    }
+
+    .caution{
+      border:1px solid #e8d49c;
+      background:#fffaf0;
+      color:#6f541d;
+      border-radius:18px;
+      padding:14px;
+      margin-top:12px;
+      line-height:1.65;
+      white-space:pre-wrap;
+    }
+
+    .actionGrid{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:10px;
+      margin-top:14px;
+    }
+    @media (min-width:620px){
+      .actionGrid{grid-template-columns:1fr 1fr}
+    }
+
+    .todoList{
+      display:grid;
+      gap:10px;
+      margin-top:10px;
+    }
+    .todo{
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:13px;
+      background:#fff;
+    }
+    .todoTitle{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:flex-start;
+      flex-wrap:wrap;
+    }
+    .tag{
+      border-radius:999px;
+      padding:5px 8px;
+      background:var(--soft);
+      color:var(--main);
+      font-size:12px;
       font-weight:900;
-      min-height:52px;
+    }
+    .tag.due{background:#fff5dc;color:#765c1f}
+    .tag.urgent{background:#fff0f0;color:#9b2f2f}
+    .todo p{margin:6px 0 0;color:var(--muted);line-height:1.6;font-size:13px}
+
+    .unregisteredHero{
+      text-align:center;
+      padding:26px 18px;
+    }
+    .bigIcon{
+      width:82px;height:82px;
       display:grid;
       place-items:center;
-      gap:2px;
+      margin:0 auto 12px;
+      border-radius:28px;
+      background:var(--soft);
+      font-size:40px;
     }
-
-    .nav-btn span{display:block;font-size:19px;line-height:1}
+    .unregisteredHero h2{
+      font-size:25px;
+      margin:0 0 8px;
+      letter-spacing:-.03em;
+    }
+    .unregisteredHero p{
+      margin:0 auto;
+      max-width:640px;
+      color:var(--muted);
+      line-height:1.8;
+      font-weight:650;
+    }
 
     .debug{
       margin-top:14px;
-      border:1px solid #dce8df;
-      border-radius:18px;
-      background:#fff;
-      overflow:hidden;
+      border-top:1px solid var(--line);
+      padding-top:14px;
     }
-
-    .debug summary{
+    details summary{
       cursor:pointer;
-      padding:12px 14px;
-      font-weight:900;
       color:var(--muted);
+      font-size:13px;
+      font-weight:850;
     }
-
-    .debug pre{
-      margin:0;
-      padding:14px;
+    pre{
+      white-space:pre-wrap;
+      word-break:break-word;
+      background:#f6f8f6;
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:12px;
+      font-size:11px;
+      color:#52625a;
+      max-height:320px;
       overflow:auto;
-      background:#10251e;
-      color:#dff8e8;
+    }
+
+    .footer{
+      margin-top:18px;
+      text-align:center;
+      color:var(--muted);
       font-size:12px;
-      line-height:1.6;
-      max-height:360px;
-    }
-
-    .hidden{display:none!important}
-
-    @media (max-width:760px){
-      .app{padding:12px 10px 86px}
-      .hero{border-radius:24px;padding:20px 16px}
-      .hero h1{font-size:24px}
-      .hero-top{display:block}
-      .status-pill{margin-top:12px}
-      .guardian{display:block}
-      .line-status{margin-top:10px}
-      .main-grid{grid-template-columns:1fr;padding:12px}
-      .info-grid{grid-template-columns:1fr 1fr}
-      .qr-area{grid-template-columns:1fr;text-align:center}
-      #qrcode{margin:0 auto}
-      .pet-name{font-size:30px}
-    }
-
-    @media (max-width:420px){
-      .info-grid{grid-template-columns:1fr}
-      .bottom-nav-inner{gap:6px}
-      .nav-btn{font-size:10px}
+      line-height:1.7;
     }
   </style>
 </head>
 
 <body>
-  <main class="app">
+  <div class="app">
     <section class="hero">
-      <div class="hero-top">
-        <div>
-          <div class="service-badge">🐶 DPRO PET CARE LINE</div>
-          <h1>LINEで使える<br>ペット診察券</h1>
-          <p>
-            飼い主さんのLINEに、複数のペット診察券をまとめて表示します。<br>
-            QR受付・予防予定・次回来院予定を、動物病院とつながる入口にします。
-          </p>
-        </div>
-        <div class="status-pill"><span class="dot"></span><span id="apiStatus">API確認中</span></div>
+      <div class="heroTop">
+        <div class="serviceBadge">🐾 DPRO PET CARE LINE</div>
+        <div class="statusPill"><span class="dot"></span><span id="apiStatus">初期化中</span></div>
+      </div>
+      <h1>ペット診察券</h1>
+      <p>
+        LINEで使えるペット診察券です。受付ではこのQRを提示してください。
+        未登録の場合は、初回登録または受付でのLINE連携が必要です。
+      </p>
+      <div class="heroActions">
+        <a class="btn btnWhite" id="waitingLink" href="./waiting.html">今日の受付へ</a>
+        <a class="btn btnGhost" id="richMenuLink" href="./rich-menu.html">メニューへ</a>
+        <a class="btn btnGhost" id="registerLinkTop" href="./register.html">初回登録</a>
       </div>
     </section>
 
-    <div id="noticeArea" class="notice">
-      <div>💡</div>
-      <div>
-        この画面は <strong>Cloudflare Worker API → Supabase vet_ テーブル</strong> から診察券データを取得します。
-        DEMOでは田中美咲さんの多頭飼い診察券を表示します。
+    <div id="loadingView" class="panel">
+      <div class="loading">
+        <div class="spinner"></div>
+        <div>
+          <strong>診察券を確認しています</strong><br>
+          <span id="loadingText">LINE連携情報とペット診察券を読み込み中です。</span>
+        </div>
       </div>
     </div>
 
-    <section id="loadingView" class="panel">
-      <div class="loading">
+    <div id="unregisteredView" class="panel hidden">
+      <div class="unregisteredHero">
+        <div class="bigIcon">🐶</div>
+        <h2>まだLINE診察券がありません</h2>
+        <p id="unregisteredMessage">
+          このLINEアカウントに紐づくペット診察券が見つかりませんでした。
+          初めての方は初回登録へ、既に病院に登録済みの方は受付でLINE連携QRを発行してもらってください。
+        </p>
+        <div class="heroActions" style="justify-content:center">
+          <a class="btn btnPrimary" id="registerLink" href="./register.html">初回登録する</a>
+          <a class="btn btnSoft" id="richMenuLinkUnreg" href="./rich-menu.html">メニューへ戻る</a>
+        </div>
+      </div>
+
+      <div class="grid two" style="padding:0 18px 18px">
+        <div class="card" style="box-shadow:none">
+          <h2>初めての方</h2>
+          <p class="lead">
+            飼い主さんのお名前・電話番号・ペット情報を入力して、LINE診察券を作成できます。
+          </p>
+          <div class="notice ok">
+            <div>✅</div>
+            <div>LINEに慣れている方は、そのまま初回登録へ進めます。</div>
+          </div>
+        </div>
+        <div class="card" style="box-shadow:none">
+          <h2>既に病院に登録済みの方</h2>
+          <p class="lead">
+            既存データと重複しないよう、受付でLINE連携QRを発行してもらってください。
+          </p>
+          <div class="notice warn">
+            <div>⚠️</div>
+            <div>同じ電話番号や同じペットが既に登録されている場合、自分で新規登録せず受付確認が安全です。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="errorView" class="panel hidden">
+      <div class="unregisteredHero">
+        <div class="bigIcon">⚠️</div>
+        <h2>診察券を表示できませんでした</h2>
+        <p id="errorMessage">読み込みに失敗しました。</p>
+        <div class="heroActions" style="justify-content:center">
+          <button class="btn btnPrimary" id="retryBtn" type="button">もう一度読み込む</button>
+          <a class="btn btnSoft" id="registerLinkError" href="./register.html">初回登録へ</a>
+        </div>
+      </div>
+    </div>
+
+    <main id="cardView" class="panel hidden">
+      <div class="guardianHeader">
         <div>
-          <div class="spinner"></div>
-          <strong>DPRO PET CARE LINE を読み込み中です</strong>
-          <p>ペット診察券データを確認しています。</p>
+          <h2 id="guardianName">飼い主さん</h2>
+          <div class="guardianSub" id="guardianSub">飼い主情報を確認中</div>
+          <div class="guardianSub" id="clinicLine">DPROどうぶつ病院</div>
         </div>
-      </div>
-    </section>
-
-    <section id="errorView" class="panel hidden">
-      <div class="panel-body">
-        <div class="error-box">
-          <strong>診察券データを読み込めませんでした</strong>
-          <div id="errorMessage">API接続を確認してください。</div>
-        </div>
-        <div class="actions">
-          <button class="btn" type="button" id="retryBtn">再読み込み</button>
-          <a class="btn secondary" id="healthLink" href="#" target="_blank" rel="noopener">API health確認</a>
-        </div>
-      </div>
-    </section>
-
-    <section id="cardView" class="panel hidden">
-      <div class="guardian">
-        <div>
-          <h2 id="guardianName">飼い主名</h2>
-          <div class="sub">
-            <span id="guardianSub">LINE連携確認中</span><br>
-            <span id="clinicLine">DPROどうぶつ病院</span>
-          </div>
-        </div>
-        <div id="lineStatus" class="line-status">LINE連携済み</div>
+        <div class="lineStatus" id="lineStatus">LINE連携確認中</div>
       </div>
 
-      <div id="petTabs" class="pets-scroll"></div>
+      <div class="petTabs" id="petTabs"></div>
 
-      <div class="main-grid">
-        <section class="card-visual">
-          <div class="card-head">
-            <div class="small">PET MEDICAL CARD</div>
-            <div class="pet-name-row">
-              <div class="pet-name" id="petName">ココ</div>
-              <div class="pet-kind" id="petKind">犬<br>トイプードル</div>
-            </div>
-          </div>
-
-          <div class="card-info">
-            <div class="info-grid">
-              <div class="info">
-                <div class="label">診察券番号</div>
-                <div class="value" id="cardNo">VET-000001</div>
-              </div>
-              <div class="info">
-                <div class="label">年齢・体重</div>
-                <div class="value" id="petAgeWeight">-</div>
-              </div>
-              <div class="info">
-                <div class="label">性別・避妊去勢</div>
-                <div class="value" id="petSexNeutered">-</div>
-              </div>
-              <div class="info">
-                <div class="label">保険・マイクロチップ</div>
-                <div class="value" id="petInsuranceMicrochip">-</div>
-              </div>
-            </div>
-
-            <div class="qr-area">
-              <div id="qrcode" aria-label="受付QR"></div>
-              <div class="qr-help">
-                <strong>受付でこのQRを見せてください</strong>
-                受付スタッフがiPadで読み取ると、どの飼い主さんのどのペットが来院したか確認できます。
-                <div class="actions">
-                  <button class="btn secondary" type="button" id="copyCardUrlBtn">診察券URLをコピー</button>
-                </div>
-              </div>
-            </div>
-
-            <div class="memo" id="cautionMemo">注意メモを読み込み中...</div>
-          </div>
+      <div class="cardLayout">
+        <section class="qrCard">
+          <div class="petAvatar" id="petEmoji">🐾</div>
+          <h2 class="petName" id="petName">ペット</h2>
+          <div class="cardNo" id="cardNo">診察券番号 -</div>
+          <div class="qrBox" id="qrcode"></div>
+          <div class="qrText" id="qrText">QR情報を確認中</div>
+          <button class="btn btnSoft copyBtn" type="button" id="copyQrTextBtn">QR文字列をコピー</button>
+          <button class="btn btnSoft copyBtn" type="button" id="copyCardUrlBtn">診察券URLをコピー</button>
         </section>
 
-        <aside class="side">
-          <section class="mini-panel green">
-            <div class="section-title">
-              <h3>次回来院予定</h3>
-              <small id="lastVisitLabel">前回来院 -</small>
+        <section>
+          <div class="infoGrid">
+            <div class="infoItem">
+              <small>種類・品種</small>
+              <strong id="petKind">-</strong>
             </div>
-            <div class="info">
-              <div class="label">次回来院目安</div>
-              <div class="value" id="nextVisit">未設定</div>
+            <div class="infoItem">
+              <small>年齢・体重</small>
+              <strong id="petAgeWeight">-</strong>
             </div>
-          </section>
+            <div class="infoItem">
+              <small>性別・避妊去勢</small>
+              <strong id="petSexNeutered">-</strong>
+            </div>
+            <div class="infoItem">
+              <small>保険・マイクロチップ</small>
+              <strong id="petInsuranceMicrochip">-</strong>
+            </div>
+          </div>
 
-          <section class="mini-panel">
-            <div class="section-title">
-              <h3>予防予定</h3>
-              <small id="preventionCount">0件</small>
-            </div>
-            <div id="preventionList" class="timeline"></div>
-          </section>
+          <div class="caution" id="cautionMemo">特記事項は登録されていません。</div>
 
-          <section class="mini-panel">
-            <div class="section-title">
-              <h3>病院情報</h3>
+          <div class="infoGrid" style="margin-top:12px">
+            <div class="infoItem">
+              <small id="lastVisitLabel">前回来院</small>
+              <strong id="lastVisit">-</strong>
             </div>
-            <div class="clinic" id="clinicInfo"></div>
-            <div class="actions">
-              <a class="btn secondary" id="questionnaireLink" href="#">来院前問診</a>
-              <a class="btn secondary" id="scanLink" href="#">受付画面</a>
+            <div class="infoItem">
+              <small>次回予定・フォロー</small>
+              <strong id="nextVisit">未設定</strong>
             </div>
-          </section>
-        </aside>
+          </div>
+
+          <div class="actionGrid">
+            <a class="btn btnPrimary" id="todayQueueLink" href="./waiting.html">今日の順番受付</a>
+            <a class="btn btnSoft" id="previsitLink" href="./waiting.html">来院前問診</a>
+            <a class="btn btnSoft" id="medicineLink" href="./waiting.html">お薬・予防受付</a>
+            <a class="btn btnSoft" id="addPetLink" href="./register.html">ペット追加・登録</a>
+          </div>
+        </section>
       </div>
-    </section>
 
-    <details class="debug">
-      <summary>API取得データを確認</summary>
-      <pre id="debugJson">{}</pre>
-    </details>
-  </main>
+      <div class="grid two" style="padding:0 18px 18px">
+        <section class="card" style="box-shadow:none">
+          <h2>予防・お知らせ <span class="tag" id="preventionCount">0件</span></h2>
+          <div class="todoList" id="preventionList"></div>
+        </section>
 
-  <nav class="bottom-nav" aria-label="LINEリッチメニューDEMO">
-    <div class="bottom-nav-inner">
-      <a class="nav-btn" id="navCard" href="#"><span>🎫</span>診察券</a>
-      <a class="nav-btn" id="navQuestionnaire" href="#"><span>📝</span>問診</a>
-      <a class="nav-btn" id="navPrevention" href="#"><span>💉</span>予防</a>
-      <a class="nav-btn" id="navAccess" href="#"><span>📍</span>アクセス</a>
+        <section class="card" style="box-shadow:none">
+          <h2>病院情報</h2>
+          <p class="lead" id="clinicInfo">病院情報を確認中です。</p>
+          <div class="notice">
+            <div>📌</div>
+            <div>この診察券QRを受付PCまたは受付タブレットで読み取ると、来院受付に進めます。</div>
+          </div>
+        </section>
+      </div>
+
+      <div class="debug">
+        <details>
+          <summary>診断用JSONを表示</summary>
+          <pre id="debugJson"></pre>
+        </details>
+      </div>
+    </main>
+
+    <div class="footer">
+      STEP VET-34G member.html complete<br>
+      DPRO PET CARE LINE / 動物病院版
     </div>
-  </nav>
+  </div>
 
   <script>
     (function () {
       "use strict";
 
-      const CONFIG = window.DPRO_VET_CONFIG || window.DPRO_CONFIG || {};
-      const HELPERS = window.DPRO_VET_HELPERS || window.DPRO_HELPERS || {};
+      const CONFIG = window.DPRO_VET_CONFIG || window.DPRO_CONFIG || window.APP_CONFIG || {};
+      const url = new URL(location.href);
+
+      const DEFAULT_API_BASE = "https://dpro-vet-qr-api.dpromstk2000.workers.dev";
+      const DEFAULT_SITE_BASE = location.origin + location.pathname.replace(/\/[^\/]*$/, "");
+      const DEFAULT_CLINIC_CODE = "dpro_vet_demo";
+
+      const apiBase = trimSlash(
+        CONFIG?.api?.baseUrl ||
+        CONFIG?.urls?.apiBaseUrl ||
+        DEFAULT_API_BASE
+      );
+
+      const siteBase = trimSlash(
+        CONFIG?.urls?.siteBaseUrl ||
+        DEFAULT_SITE_BASE
+      );
+
+      const clinicCode =
+        clean(url.searchParams.get("clinic_code")) ||
+        CONFIG?.clinic?.clinicCode ||
+        CONFIG?.demo?.clinicCode ||
+        DEFAULT_CLINIC_CODE;
+
+      const demoClinicCode = CONFIG?.demo?.clinicCode || DEFAULT_CLINIC_CODE;
+      const isDemoMode = url.searchParams.get("demo") === "true" || url.searchParams.get("demo") === "1";
+      const allowDemoFallback = isDemoMode && clinicCode === demoClinicCode;
+
+      const liffId =
+        clean(url.searchParams.get("liff_id")) ||
+        clean(CONFIG?.liff?.liffId) ||
+        "";
 
       const state = {
         clinic: null,
@@ -803,7 +810,12 @@
         cards: [],
         selectedIndex: 0,
         raw: null,
-        qr: null
+        lineUserId: clean(url.searchParams.get("line_user_id")) || clean(url.searchParams.get("lineUserId")) || "",
+        lineDisplayName: clean(url.searchParams.get("line_display_name")) || "",
+        linePictureUrl: "",
+        lineReady: false,
+        selectedQrPayload: "",
+        lastMode: ""
       };
 
       const $ = (id) => document.getElementById(id);
@@ -812,52 +824,23 @@
 
       function init() {
         setupStaticLinks();
-        $("retryBtn").addEventListener("click", load);
-        $("copyCardUrlBtn").addEventListener("click", copySelectedCardUrl);
+        bindEvents();
         load();
       }
 
+      function bindEvents(){
+        $("retryBtn").addEventListener("click", load);
+        $("copyCardUrlBtn").addEventListener("click", copySelectedCardUrl);
+        $("copyQrTextBtn").addEventListener("click", copySelectedQrText);
+      }
+
       function setupStaticLinks() {
-        const healthUrl = (CONFIG.api && CONFIG.api.health) || "";
-        if ($("healthLink")) $("healthLink").href = healthUrl;
-
-        const questionnaire = withClinic((CONFIG.urls && CONFIG.urls.questionnaire) || "./questionnaire.html");
-        const member = withClinic((CONFIG.urls && CONFIG.urls.member) || "./member.html", { demo: "true" });
-        const prevention = withClinic((CONFIG.urls && CONFIG.urls.prevention) || "./prevention.html");
-        const access = withClinic((CONFIG.urls && CONFIG.urls.access) || "./access.html");
-        const scan = withClinic((CONFIG.urls && CONFIG.urls.scanIpad) || "./scan-ipad.html");
-
-        $("questionnaireLink").href = questionnaire;
-        $("scanLink").href = scan;
-        $("navCard").href = member;
-        $("navQuestionnaire").href = questionnaire;
-        $("navPrevention").href = prevention;
-        $("navAccess").href = access;
-      }
-
-      function withClinic(url, extra) {
-        const params = new URLSearchParams();
-        params.set("clinic_code", getClinicCode());
-        Object.entries(extra || {}).forEach(([k, v]) => {
-          if (v !== undefined && v !== null && String(v).trim() !== "") params.set(k, String(v));
-        });
-
-        const joiner = String(url).includes("?") ? "&" : "?";
-        return `${url}${joiner}${params.toString()}`;
-      }
-
-      function getClinicCode() {
-        return (CONFIG.clinic && CONFIG.clinic.clinicCode) ||
-          (CONFIG.demo && CONFIG.demo.clinicCode) ||
-          "dpro_vet_demo";
-      }
-
-      function getApiBase() {
-        return (CONFIG.api && CONFIG.api.baseUrl) || "https://dpro-vet-qr-api.dpromstk2000.workers.dev";
-      }
-
-      function getUrlParams() {
-        return new URLSearchParams(location.search);
+        setHref("waitingLink", buildPageUrl("waiting.html", { mode:"today_queue" }));
+        setHref("richMenuLink", buildPageUrl("rich-menu.html"));
+        setHref("registerLinkTop", buildPageUrl("register.html"));
+        setHref("registerLink", buildPageUrl("register.html"));
+        setHref("richMenuLinkUnreg", buildPageUrl("rich-menu.html"));
+        setHref("registerLinkError", buildPageUrl("register.html"));
       }
 
       async function load() {
@@ -865,32 +848,42 @@
         setApiStatus("API接続中", true);
 
         try {
-          const params = getUrlParams();
-          const token = params.get("t") || params.get("token") || params.get("qr_token") || "";
-          const guardianId = params.get("guardian_id") || "";
-          const lineUserId = params.get("line_user_id") || "";
-          const forceDemo = params.get("demo");
+          const token = getParam("t") || getParam("token") || getParam("qr_token") || "";
+          const cardToken = extractCardToken(token);
+          const guardianId = getParam("guardian_id");
+          const petId = getParam("pet_id");
 
-          let data;
-          if (token) {
-            data = await fetchPetCardByToken(token);
-            normalizeSingleCardResponse(data);
+          let data = null;
+
+          if (cardToken) {
+            data = await fetchByCardToken(cardToken);
+            state.lastMode = "card_token";
           } else {
-            data = await fetchPetCards({
-              guardian_id: guardianId,
-              line_user_id: lineUserId,
-              demo: forceDemo || "true"
-            });
+            await initLine();
+
+            if (state.lineUserId) {
+              data = await fetchMyCards(state.lineUserId);
+              state.lastMode = "line_user";
+            } else if (guardianId) {
+              data = await fetchLegacyPetCards({ guardian_id: guardianId });
+              state.lastMode = "guardian_id";
+            } else if (allowDemoFallback) {
+              data = await fetchLegacyPetCards({ demo: "true" });
+              state.lastMode = "demo";
+            } else {
+              showUnregistered("このLINEアカウントに紐づく診察券を確認できませんでした。LINEアプリ内で開いているか確認してください。");
+              return;
+            }
           }
 
-          state.raw = data;
-          state.clinic = data.clinic || null;
-          state.guardian = data.guardian || null;
-          state.cards = Array.isArray(data.cards) ? data.cards : (data.card ? [data.card] : []);
-          state.selectedIndex = 0;
+          normalizeAndStore(data);
 
           if (!state.cards.length) {
-            throw new Error(data.message || "表示できるペット診察券がありません。受付でLINE連携を確認してください。");
+            const message =
+              data?.message ||
+              "このLINEアカウントに紐づくペット診察券が見つかりませんでした。初めての方は初回登録、既存患者さんは受付でLINE連携QRを発行してもらってください。";
+            showUnregistered(message);
+            return;
           }
 
           render();
@@ -898,45 +891,183 @@
           setApiStatus("API接続OK", true);
         } catch (error) {
           console.error(error);
-          setApiStatus("APIエラー", false);
-          showError(error.message || "読み込みに失敗しました。");
+
+          if (
+            String(error.message || "").includes("not found") ||
+            String(error.message || "").includes("見つかりません") ||
+            String(error.message || "").includes("連携")
+          ) {
+            showUnregistered(error.message);
+          } else {
+            setApiStatus("APIエラー", false);
+            showError(error.message || "読み込みに失敗しました。");
+          }
         }
       }
 
-      async function fetchPetCards(params) {
-        const url = new URL(`${getApiBase()}/api/member/pet-cards`);
-        url.searchParams.set("clinic_code", getClinicCode());
+      async function initLine(){
+        if (state.lineUserId) {
+          state.lineReady = true;
+          return;
+        }
+
+        if (!liffId || !window.liff) {
+          state.lineReady = false;
+          return;
+        }
+
+        try {
+          await window.liff.init({ liffId });
+
+          if (!window.liff.isLoggedIn()) {
+            window.liff.login({ redirectUri: location.href });
+            return;
+          }
+
+          const profile = await window.liff.getProfile();
+          state.lineUserId = profile.userId || "";
+          state.lineDisplayName = profile.displayName || "";
+          state.linePictureUrl = profile.pictureUrl || "";
+          state.lineReady = Boolean(state.lineUserId);
+        } catch (error) {
+          console.warn("LIFF init failed:", error);
+          state.lineReady = false;
+        }
+      }
+
+      async function fetchMyCards(lineUserId) {
+        const endpoint = `${apiBase}/api/public/my-cards`;
+        const apiUrl = new URL(endpoint);
+        apiUrl.searchParams.set("clinic_code", clinicCode);
+        apiUrl.searchParams.set("line_user_id", lineUserId);
+
+        try {
+          return await apiGet(apiUrl.toString());
+        } catch (error) {
+          // 34C-R2反映前や既存Worker互換のため、旧APIにフォールバック
+          return fetchLegacyPetCards({ line_user_id: lineUserId });
+        }
+      }
+
+      async function fetchByCardToken(cardToken){
+        const endpoint = `${apiBase}/api/public/card-lookup`;
+        try {
+          return await apiPost(endpoint, {
+            clinic_code: clinicCode,
+            card_token: cardToken
+          });
+        } catch (error) {
+          return fetchLegacySingleCard(cardToken);
+        }
+      }
+
+      async function fetchLegacyPetCards(params) {
+        const apiUrl = new URL(`${apiBase}/api/member/pet-cards`);
+        apiUrl.searchParams.set("clinic_code", clinicCode);
         Object.entries(params || {}).forEach(([key, value]) => {
           if (value !== undefined && value !== null && String(value).trim() !== "") {
-            url.searchParams.set(key, String(value));
+            apiUrl.searchParams.set(key, String(value));
           }
         });
+        return apiGet(apiUrl.toString());
+      }
 
-        const res = await fetch(url.toString(), { method: "GET", headers: { "Accept": "application/json" } });
-        const data = await res.json().catch(() => null);
+      async function fetchLegacySingleCard(token) {
+        const apiUrl = new URL(`${apiBase}/api/member/pet-card`);
+        apiUrl.searchParams.set("clinic_code", clinicCode);
+        apiUrl.searchParams.set("token", token);
+        return apiGet(apiUrl.toString());
+      }
+
+      async function apiGet(fullUrl){
+        const res = await fetch(fullUrl, { method:"GET", headers:{ "Accept":"application/json" } });
+        return parseResponse(res);
+      }
+
+      async function apiPost(fullUrl, body){
+        const res = await fetch(fullUrl, {
+          method:"POST",
+          headers:{ "Content-Type":"application/json", "Accept":"application/json" },
+          body: JSON.stringify(body || {})
+        });
+        return parseResponse(res);
+      }
+
+      async function parseResponse(res){
+        const text = await res.text();
+        let data = null;
+        if (text) {
+          try { data = JSON.parse(text); } catch { data = { raw:text }; }
+        }
         if (!res.ok || !data || data.ok === false) {
           throw new Error((data && (data.message || data.error)) || `APIエラー status=${res.status}`);
         }
         return data;
       }
 
-      async function fetchPetCardByToken(token) {
-        const url = new URL(`${getApiBase()}/api/member/pet-card`);
-        url.searchParams.set("clinic_code", getClinicCode());
-        url.searchParams.set("token", token);
+      function normalizeAndStore(data){
+        state.raw = data || {};
+        state.clinic = data?.clinic || data?.item?.clinic || state.clinic || null;
+        state.guardian = data?.guardian || data?.item?.guardian || null;
 
-        const res = await fetch(url.toString(), { method: "GET", headers: { "Accept": "application/json" } });
-        const data = await res.json().catch(() => null);
-        if (!res.ok || !data || data.ok === false) {
-          throw new Error((data && (data.message || data.error)) || `APIエラー status=${res.status}`);
+        let cards = [];
+
+        if (Array.isArray(data?.cards)) {
+          cards = data.cards;
+        } else if (Array.isArray(data?.items)) {
+          cards = data.items;
+        } else if (data?.card) {
+          cards = [data.card];
+        } else if (data?.pet_id || data?.card_token || data?.qr_payload) {
+          cards = [data];
+        } else if (data?.item && (data.item.pet_id || data.item.card_token || data.item.qr_payload)) {
+          cards = [data.item];
         }
-        return data;
+
+        // public/my-cardsの行形式を画面用に補正
+        cards = cards.map((row) => normalizeCardRow(row, data));
+
+        // guardianがない場合はカードから作る
+        if (!state.guardian && cards.length) {
+          const first = cards[0];
+          state.guardian = {
+            guardian_id: first.guardian_id,
+            guardian_name: first.guardian_name,
+            phone: first.phone,
+            line_status: first.line_status || "linked",
+            line_link_status: first.line_link_status || first.line_status || "linked"
+          };
+        }
+
+        state.cards = cards.filter(Boolean);
+        state.selectedIndex = 0;
       }
 
-      function normalizeSingleCardResponse(data) {
-        if (data && data.card && !data.cards) {
-          data.cards = Array.isArray(data.family_cards) ? data.family_cards : [data.card];
-        }
+      function normalizeCardRow(row, data){
+        const card = { ...(row || {}) };
+
+        card.guardian_id = card.guardian_id || data?.guardian_id || data?.guardian?.guardian_id || data?.guardian?.id || "";
+        card.guardian_name = card.guardian_name || data?.guardian_name || data?.guardian?.guardian_name || "";
+        card.phone = card.phone || data?.phone || data?.guardian?.phone || "";
+
+        card.pet_id = card.pet_id || data?.pet_id || data?.pet?.pet_id || data?.pet?.id || "";
+        card.pet_name = card.pet_name || data?.pet_name || data?.pet?.pet_name || "ペット";
+        card.animal_type = card.animal_type || card.species_label || data?.animal_type || data?.pet?.animal_type || "";
+        card.species = card.species || speciesCode(card.animal_type);
+        card.species_label = card.species_label || card.animal_type || speciesLabel(card.species);
+        card.breed = card.breed || data?.breed || data?.pet?.breed || "";
+        card.sex = card.sex || data?.sex || data?.pet?.sex || "";
+        card.age_text = card.age_text || data?.age_text || data?.pet?.age_text || "";
+        card.medical_note = card.medical_note || data?.medical_note || data?.pet?.medical_note || "";
+        card.allergy_note = card.allergy_note || data?.allergy_note || data?.pet?.allergy_note || "";
+
+        card.card_id = card.card_id || data?.card_id || data?.card?.card_id || "";
+        card.card_no = card.card_no || data?.card_no || data?.card?.card_no || "";
+        card.card_token = card.card_token || data?.card_token || data?.card?.card_token || card.qr_token || "";
+        card.qr_token = card.qr_token || card.card_token || "";
+        card.qr_payload = card.qr_payload || data?.qr_payload || data?.card?.qr_payload || "";
+
+        return card;
       }
 
       function render() {
@@ -944,7 +1075,11 @@
         renderTabs();
         renderSelectedCard();
         renderClinic();
-        $("debugJson").textContent = JSON.stringify(state.raw, null, 2);
+        $("debugJson").textContent = JSON.stringify({
+          mode: state.lastMode,
+          line_user_id_found: Boolean(state.lineUserId),
+          raw: state.raw
+        }, null, 2);
       }
 
       function renderGuardian() {
@@ -955,12 +1090,20 @@
         const sub = [];
         if (guardian.guardian_no) sub.push(`飼い主番号：${guardian.guardian_no}`);
         if (guardian.phone || guardian.guardian_phone) sub.push(`電話：${guardian.phone || guardian.guardian_phone}`);
-        $("guardianSub").textContent = sub.join(" / ") || "飼い主情報を確認中";
-        $("clinicLine").textContent = clinic.clinic_name || (CONFIG.clinic && CONFIG.clinic.clinicName) || "DPROどうぶつ病院";
+        if (state.lineDisplayName) sub.push(`LINE：${state.lineDisplayName}`);
+        $("guardianSub").textContent = sub.join(" / ") || "LINE診察券として登録済み";
+        $("clinicLine").textContent = clinic.clinic_name || clinic.name || CONFIG?.clinic?.clinicName || "DPROどうぶつ病院";
 
-        const linked = guardian.line_link_status === "linked";
+        const linked = isLinkedGuardian(guardian);
         $("lineStatus").textContent = linked ? "LINE連携済み" : "LINE未連携";
         $("lineStatus").classList.toggle("unlinked", !linked);
+      }
+
+      function isLinkedGuardian(guardian){
+        const status = guardian.line_status || guardian.line_link_status || "";
+        if (status === "linked") return true;
+        if (state.lineUserId) return true;
+        return false;
       }
 
       function renderTabs() {
@@ -970,11 +1113,11 @@
         state.cards.forEach((card, index) => {
           const btn = document.createElement("button");
           btn.type = "button";
-          btn.className = `pet-tab ${index === state.selectedIndex ? "active" : ""}`;
+          btn.className = `petTab ${index === state.selectedIndex ? "active" : ""}`;
           btn.innerHTML = `
-            <span class="emoji">${getSpeciesEmoji(card.species)}</span>
+            <span class="emoji">${getSpeciesEmoji(card.species || card.animal_type)}</span>
             <strong>${escapeHtml(card.pet_name || "ペット")}</strong>
-            <span>${escapeHtml(card.species_label || "")}${card.breed ? " / " + escapeHtml(card.breed) : ""}<br>${escapeHtml(card.card_no || "")}</span>
+            <span>${escapeHtml(card.species_label || card.animal_type || "")}${card.breed ? " / " + escapeHtml(card.breed) : ""}<br>${escapeHtml(card.card_no || "診察券")}</span>
           `;
           btn.addEventListener("click", () => {
             state.selectedIndex = index;
@@ -989,32 +1132,56 @@
         const card = getSelectedCard();
         if (!card) return;
 
+        $("petEmoji").textContent = getSpeciesEmoji(card.species || card.animal_type);
         $("petName").textContent = card.pet_name || "ペット";
-        $("petKind").innerHTML = `${escapeHtml(card.species_label || "-")}<br>${escapeHtml(card.breed || "")}`;
-        $("cardNo").textContent = card.card_no || "-";
+        $("petKind").innerHTML = `${escapeHtml(card.species_label || card.animal_type || "-")}<br>${escapeHtml(card.breed || "")}`;
+        $("cardNo").textContent = card.card_no ? `診察券番号 ${card.card_no}` : "診察券番号 -";
+
         $("petAgeWeight").textContent = [
-          card.age_years !== null && card.age_years !== undefined ? `${card.age_years}歳` : "",
-          card.weight_kg ? `${card.weight_kg}kg` : ""
+          card.age_text || (card.age_years !== null && card.age_years !== undefined ? `${card.age_years}歳` : ""),
+          card.weight || (card.weight_kg ? `${card.weight_kg}kg` : "")
         ].filter(Boolean).join(" / ") || "-";
-        $("petSexNeutered").textContent = `${sexLabel(card.sex)} / ${neuteredLabel(card.neutered_status)}`;
+
+        $("petSexNeutered").textContent = [
+          sexLabel(card.sex),
+          neuteredLabel(card.neutered || card.neutered_status)
+        ].filter(Boolean).join(" / ") || "-";
+
         $("petInsuranceMicrochip").textContent = [
           card.insurance_status || "保険未登録",
           card.microchip_no ? `MC ${card.microchip_no}` : "MC未登録"
         ].join(" / ");
 
         $("cautionMemo").textContent = buildCautionText(card);
-        $("lastVisitLabel").textContent = card.last_visit_date ? `前回来院 ${card.last_visit_date}` : "前回来院 -";
+        $("lastVisitLabel").textContent = card.last_visit_date ? `前回来院 ${card.last_visit_date}` : "前回来院";
+        $("lastVisit").textContent = card.last_visit_date || "-";
         $("nextVisit").textContent = buildNextVisit(card);
 
+        renderActionLinks(card);
         renderPreventions(card);
         renderQr(card);
+      }
+
+      function renderActionLinks(card){
+        const base = {
+          clinic_code: clinicCode,
+          pet_id: card.pet_id || "",
+          card_token: card.card_token || card.qr_token || ""
+        };
+        setHref("todayQueueLink", buildPageUrl("waiting.html", { ...base, mode:"today_queue" }));
+        setHref("previsitLink", buildPageUrl("waiting.html", { ...base, mode:"previsit" }));
+        setHref("medicineLink", buildPageUrl("waiting.html", { ...base, mode:"medicine_prevention" }));
+        setHref("addPetLink", buildPageUrl("register.html", { add_pet:"true" }));
+        setHref("waitingLink", buildPageUrl("waiting.html", { ...base, mode:"today_queue" }));
       }
 
       function buildCautionText(card) {
         const lines = [];
         if (card.caution_memo) lines.push(`注意メモ：${card.caution_memo}`);
-        if (card.allergies) lines.push(`アレルギー：${card.allergies}`);
+        if (card.allergies || card.allergy_note) lines.push(`アレルギー：${card.allergies || card.allergy_note}`);
         if (card.chronic_conditions) lines.push(`持病・経過観察：${card.chronic_conditions}`);
+        if (card.medical_note) lines.push(`既往歴・メモ：${card.medical_note}`);
+        if (card.personality_note) lines.push(`性格メモ：${card.personality_note}`);
         return lines.join("\n") || "特記事項は登録されていません。";
       }
 
@@ -1034,7 +1201,7 @@
 
         if (!items.length) {
           const empty = document.createElement("div");
-          empty.className = "notice";
+          empty.className = "notice ok";
           empty.innerHTML = `<div>✅</div><div>現在表示できる予防予定はありません。</div>`;
           list.appendChild(empty);
           return;
@@ -1044,9 +1211,9 @@
           const level = item.reminder_level || "normal";
           const due = item.status === "due";
           const div = document.createElement("div");
-          div.className = `todo ${due ? "due" : ""} ${level === "urgent" ? "urgent" : ""}`;
+          div.className = "todo";
           div.innerHTML = `
-            <div class="todo-title">
+            <div class="todoTitle">
               <strong>${escapeHtml(item.title || "予防予定")}</strong>
               <span class="tag ${due ? "due" : ""} ${level === "urgent" ? "urgent" : ""}">${escapeHtml(statusLabel(item.status, level))}</span>
             </div>
@@ -1061,13 +1228,15 @@
         const target = $("qrcode");
         target.innerHTML = "";
 
-        const qrUrl = buildCardUrl(card);
+        const qrPayload = buildQrPayload(card);
+        state.selectedQrPayload = qrPayload;
+        $("qrText").textContent = qrPayload || "QR情報がありません";
 
-        if (window.QRCode && window.QRCode.toCanvas) {
+        if (window.QRCode && window.QRCode.toCanvas && qrPayload) {
           const canvas = document.createElement("canvas");
           target.appendChild(canvas);
-          window.QRCode.toCanvas(canvas, qrUrl, {
-            width: 136,
+          window.QRCode.toCanvas(canvas, qrPayload, {
+            width: 148,
             margin: 1,
             errorCorrectionLevel: "M"
           }, function (error) {
@@ -1081,40 +1250,54 @@
           div.style.padding = "12px";
           div.style.fontSize = "11px";
           div.style.wordBreak = "break-all";
-          div.textContent = card.qr_token || qrUrl;
+          div.textContent = qrPayload || "QR未発行";
           target.appendChild(div);
         }
       }
 
+      function buildQrPayload(card) {
+        if (card.qr_payload) return card.qr_payload;
+        if (card.card_token) return `vetcard:${clinicCode}:${card.card_token}`;
+        if (card.qr_token) return `vetcard:${clinicCode}:${card.qr_token}`;
+        return buildCardUrl(card);
+      }
+
       function buildCardUrl(card) {
-        const base = (CONFIG.urls && CONFIG.urls.member) || location.href.split("?")[0];
-        const url = new URL(base, location.href);
-        url.searchParams.set("clinic_code", getClinicCode());
-        url.searchParams.set("token", card.qr_token || "");
-        return url.toString();
+        const memberUrl = buildPageUrl("member.html", {
+          token: card.card_token || card.qr_token || "",
+          clinic_code: clinicCode
+        });
+        return memberUrl;
+      }
+
+      async function copySelectedQrText() {
+        if (!state.selectedQrPayload) return;
+        await copyText(state.selectedQrPayload, "QR文字列をコピーしました。");
       }
 
       async function copySelectedCardUrl() {
         const card = getSelectedCard();
         if (!card) return;
-        const text = buildCardUrl(card);
+        await copyText(buildCardUrl(card), "診察券URLをコピーしました。");
+      }
 
+      async function copyText(text, doneMessage){
         try {
           await navigator.clipboard.writeText(text);
-          alert("診察券URLをコピーしました。");
+          alert(doneMessage || "コピーしました。");
         } catch (error) {
-          prompt("このURLをコピーしてください", text);
+          prompt("この内容をコピーしてください", text);
         }
       }
 
       function renderClinic() {
         const clinic = state.clinic || {};
         $("clinicInfo").innerHTML = `
-          <strong>${escapeHtml(clinic.clinic_name || "DPROどうぶつ病院")}</strong><br>
-          ${escapeHtml(clinic.business_hours_note || "")}<br>
-          休診：${escapeHtml(clinic.closed_days_note || "")}<br>
-          ${escapeHtml(clinic.address || "")}<br>
-          TEL：${escapeHtml(clinic.phone || "")}
+          <strong>${escapeHtml(clinic.clinic_name || clinic.name || CONFIG?.clinic?.clinicName || "DPROどうぶつ病院")}</strong><br>
+          ${escapeHtml(clinic.business_hours_note || CONFIG?.clinic?.businessHoursNote || "")}<br>
+          休診：${escapeHtml(clinic.closed_days_note || CONFIG?.clinic?.closedDaysNote || "")}<br>
+          ${escapeHtml(clinic.address || CONFIG?.clinic?.address || "")}<br>
+          TEL：${escapeHtml(clinic.phone || CONFIG?.clinic?.phone || "")}
         `;
       }
 
@@ -1124,18 +1307,30 @@
 
       function showLoading() {
         $("loadingView").classList.remove("hidden");
+        $("unregisteredView").classList.add("hidden");
         $("errorView").classList.add("hidden");
         $("cardView").classList.add("hidden");
       }
 
       function showCard() {
         $("loadingView").classList.add("hidden");
+        $("unregisteredView").classList.add("hidden");
         $("errorView").classList.add("hidden");
         $("cardView").classList.remove("hidden");
       }
 
+      function showUnregistered(message) {
+        setApiStatus("未登録", false);
+        $("loadingView").classList.add("hidden");
+        $("unregisteredView").classList.remove("hidden");
+        $("errorView").classList.add("hidden");
+        $("cardView").classList.add("hidden");
+        $("unregisteredMessage").textContent = message || "このLINEアカウントに紐づくペット診察券が見つかりませんでした。";
+      }
+
       function showError(message) {
         $("loadingView").classList.add("hidden");
+        $("unregisteredView").classList.add("hidden");
         $("errorView").classList.remove("hidden");
         $("cardView").classList.add("hidden");
         $("errorMessage").textContent = message;
@@ -1147,7 +1342,84 @@
         if (dot) dot.style.background = ok ? "#9ff0be" : "#ffb3a6";
       }
 
-      function getSpeciesEmoji(species) {
+      function getParam(name){
+        return clean(url.searchParams.get(name));
+      }
+
+      function extractCardToken(value){
+        const text = clean(value);
+        if (!text) return "";
+
+        // vetcard:clinic_code:card_token 形式を読み取る
+        if (text.startsWith("vetcard:")) {
+          const parts = text.split(":");
+          return parts[2] || "";
+        }
+
+        // URLが入った場合も token / card_token を取り出す
+        if (text.startsWith("http://") || text.startsWith("https://")) {
+          try {
+            const u = new URL(text);
+            return clean(u.searchParams.get("token")) ||
+              clean(u.searchParams.get("card_token")) ||
+              clean(u.searchParams.get("qr_token")) ||
+              "";
+          } catch {
+            return text;
+          }
+        }
+
+        return text;
+      }
+
+      function buildPageUrl(file, params){
+        const target = new URL(`${siteBase}/${file.replace(/^\\.\\//,"")}`);
+        const merged = { clinic_code: clinicCode, ...(params || {}) };
+        Object.entries(merged).forEach(([key, value]) => {
+          if (value !== undefined && value !== null && String(value).trim() !== "") {
+            target.searchParams.set(key, String(value));
+          }
+        });
+        return target.toString();
+      }
+
+      function setHref(id, href){
+        const node = $(id);
+        if (node) node.href = href;
+      }
+
+      function trimSlash(value){
+        return String(value || "").replace(/\/+$/,"");
+      }
+
+      function clean(value){
+        return String(value ?? "").trim();
+      }
+
+      function speciesCode(value){
+        const text = String(value || "").toLowerCase();
+        if (text.includes("犬") || text.includes("dog")) return "dog";
+        if (text.includes("猫") || text.includes("cat")) return "cat";
+        if (text.includes("うさ") || text.includes("rabbit")) return "rabbit";
+        if (text.includes("ハム") || text.includes("hamster")) return "hamster";
+        if (text.includes("鳥") || text.includes("bird")) return "bird";
+        return "other";
+      }
+
+      function speciesLabel(value){
+        const map = {
+          dog: "犬",
+          cat: "猫",
+          rabbit: "うさぎ",
+          hamster: "ハムスター",
+          bird: "鳥",
+          other: "その他"
+        };
+        return map[value] || value || "その他";
+      }
+
+      function getSpeciesEmoji(value) {
+        const code = speciesCode(value);
         const map = {
           dog: "🐶",
           cat: "🐱",
@@ -1156,17 +1428,35 @@
           bird: "🐦",
           other: "🐾"
         };
-        return map[species] || "🐾";
+        return map[code] || "🐾";
       }
 
       function sexLabel(value) {
-        const map = { male: "男の子", female: "女の子", unknown: "性別未登録" };
-        return map[value] || "性別未登録";
+        const text = String(value || "");
+        const map = {
+          male: "男の子",
+          female: "女の子",
+          unknown: "性別未登録",
+          "男の子": "男の子",
+          "女の子": "女の子",
+          "不明": "性別未登録"
+        };
+        return map[text] || text || "性別未登録";
       }
 
       function neuteredLabel(value) {
-        const map = { neutered: "避妊去勢済み", not_neutered: "未実施", unknown: "未確認" };
-        return map[value] || "未確認";
+        const text = String(value || "");
+        const map = {
+          neutered: "避妊去勢済み",
+          not_neutered: "未実施",
+          unknown: "未確認",
+          yes: "避妊去勢済み",
+          no: "未実施",
+          "済み": "避妊去勢済み",
+          "未実施": "未実施",
+          "不明": "未確認"
+        };
+        return map[text] || text || "未確認";
       }
 
       function preventionLabel(value) {
@@ -1180,7 +1470,7 @@
           dental_care: "デンタルケア",
           other: "その他"
         };
-        return map[value] || "その他";
+        return map[value] || value || "その他";
       }
 
       function statusLabel(status, level) {
