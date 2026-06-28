@@ -7,7 +7,7 @@
   <title>DPRO PET CARE LINE｜受付登録・LINE連携</title>
 
   <!--
-    STEP VET-34E-R5
+    STEP VET-34E-R6
     DPRO PET CARE LINE 動物病院版
     line-setup.html 完全版
 
@@ -447,7 +447,7 @@
     <section class="hero">
       <div class="heroTop">
         <div class="badge">🐾 DPRO PET CARE LINE</div>
-        <div class="badge">STEP VET-34E-R5</div>
+        <div class="badge">STEP VET-34E-R6</div>
       </div>
       <h1>受付登録・LINE連携</h1>
       <p>
@@ -680,8 +680,14 @@
               </div>
               <div>
                 <div class="mono" id="lineLinkInfo"></div>
+
+                <div class="field" style="margin-top:12px">
+                  <label for="lineLinkUrlInput">コピーする連携URL</label>
+                  <input id="lineLinkUrlInput" type="text" readonly placeholder="ここに link.html?token=... のURLが入ります">
+                </div>
+
                 <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
-                  <button class="btn btnSoft" type="button" id="copyLineLinkUrlBtn">連携URLコピー</button>
+                  <button class="btn btnSoft" type="button" id="copyLineLinkUrlBtn">このURLをコピー</button>
                   <a class="btn btnPrimary" id="openLineLinkUrlBtn" target="_blank" rel="noopener">連携画面を開く</a>
                 </div>
               </div>
@@ -782,6 +788,16 @@
               </div>
               <div>
                 <div class="mono" id="manualLinkInfo"></div>
+
+                <div class="field" style="margin-top:12px">
+                  <label for="manualLineLinkUrlInput">コピーする連携URL</label>
+                  <input id="manualLineLinkUrlInput" type="text" readonly placeholder="ここに link.html?token=... のURLが入ります">
+                </div>
+
+                <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+                  <button class="btn btnSoft" type="button" id="copyManualLinkUrlBtn">このURLをコピー</button>
+                  <a class="btn btnPrimary" id="openManualLinkUrlBtn" target="_blank" rel="noopener">連携画面を開く</a>
+                </div>
               </div>
             </div>
           </div>
@@ -804,7 +820,7 @@
     </section>
 
     <div class="footer">
-      STEP VET-34E-R5 line-setup.html R5 copy link fixed complete<br>
+      STEP VET-34E-R6 line-setup.html R6 search button fixed complete<br>
       DPRO PET CARE LINE / 動物病院版
     </div>
   </div>
@@ -851,7 +867,8 @@
         lastRegistration: null,
         lastLineLinkUrl: "",
         lastCardQrPayload: "",
-        manualLineLinkUrl: ""
+        manualLineLinkUrl: "",
+        searchLineLinkUrl: ""
       };
 
       const el = {
@@ -908,6 +925,9 @@
         manualLinkQrCanvas: document.getElementById("manualLinkQrCanvas"),
         manualLinkQrImg: document.getElementById("manualLinkQrImg"),
         manualLinkInfo: document.getElementById("manualLinkInfo"),
+        manualLineLinkUrlInput: document.getElementById("manualLineLinkUrlInput"),
+        copyManualLinkUrlBtn: document.getElementById("copyManualLinkUrlBtn"),
+        openManualLinkUrlBtn: document.getElementById("openManualLinkUrlBtn"),
 
         loadReviewsBtn: document.getElementById("loadReviewsBtn"),
         clearReviewsBtn: document.getElementById("clearReviewsBtn"),
@@ -990,18 +1010,28 @@
         el.clearStaffRegisterBtn.addEventListener("click", () => el.staffRegisterForm.reset());
         el.issueLinkForLastRegisteredBtn.addEventListener("click", issueLinkForLastRegistered);
         el.copyStaffCardQrTextBtn.addEventListener("click", () => copyText(state.lastCardQrPayload, "診察券QR文字列をコピーしました。"));
-        el.copyLineLinkUrlBtn.addEventListener("click", () => copyText(el.lineLinkUrlInput?.value || state.lastLineLinkUrl, "LINE連携URLをコピーしました。"));
-        el.copySearchLineLinkUrlBtn.addEventListener("click", () => copyText(el.searchLineLinkUrlInput?.value || state.searchLineLinkUrl, "LINE連携URLをコピーしました。"));
-        el.copyManualLinkUrlBtn.addEventListener("click", () => copyText(el.manualLineLinkUrlInput?.value || state.manualLineLinkUrl, "LINE連携URLをコピーしました。"));
+        if (el.copyLineLinkUrlBtn) {
+          el.copyLineLinkUrlBtn.addEventListener("click", () => copyText(el.lineLinkUrlInput?.value || state.lastLineLinkUrl, "LINE連携URLをコピーしました。"));
+        }
+        if (el.copySearchLineLinkUrlBtn) {
+          el.copySearchLineLinkUrlBtn.addEventListener("click", () => copyText(el.searchLineLinkUrlInput?.value || state.searchLineLinkUrl, "LINE連携URLをコピーしました。"));
+        }
+        if (el.copyManualLinkUrlBtn) {
+          el.copyManualLinkUrlBtn.addEventListener("click", () => copyText(el.manualLineLinkUrlInput?.value || state.manualLineLinkUrl, "LINE連携URLをコピーしました。"));
+        }
 
         if (el.lineLinkUrlInput) el.lineLinkUrlInput.addEventListener("focus", () => el.lineLinkUrlInput.select());
         if (el.searchLineLinkUrlInput) el.searchLineLinkUrlInput.addEventListener("focus", () => el.searchLineLinkUrlInput.select());
         if (el.manualLineLinkUrlInput) el.manualLineLinkUrlInput.addEventListener("focus", () => el.manualLineLinkUrlInput.select());
 
-        el.searchBtn.addEventListener("click", searchGuardians);
-        el.searchKeyword.addEventListener("keydown", (ev) => {
-          if (ev.key === "Enter") searchGuardians();
-        });
+        if (el.searchBtn) {
+          el.searchBtn.addEventListener("click", searchGuardians);
+        }
+        if (el.searchKeyword) {
+          el.searchKeyword.addEventListener("keydown", (ev) => {
+            if (ev.key === "Enter") searchGuardians();
+          });
+        }
 
         el.manualIssueLinkBtn.addEventListener("click", issueManualLineLink);
         el.loadReviewsBtn.addEventListener("click", loadDuplicateReviews);
@@ -1156,7 +1186,7 @@
         }
 
         el.searchResult.innerHTML = items.map((guardian, index) => {
-          // STEP VET-34E-R5:
+          // STEP VET-34E-R6:
           // guardian.guardian_id は旧カラム・別IDの場合があるため、
           // LINE連携APIに渡すIDは Supabase主キーの guardian.id を最優先する。
           const guardianId = guardian.id || guardian.guardian_id || "";
@@ -1214,7 +1244,7 @@
 
         el.searchResult.querySelectorAll("[data-action='issue-link']").forEach((btn) => {
           btn.addEventListener("click", async () => {
-            // STEP VET-34E-R5:
+            // STEP VET-34E-R6:
             // 既存患者検索からLINE連携QRを押した場合は、
             // 「受付で新規登録」タブへ移動せず、この検索画面内にQRを表示する。
             await issueLineLink({
@@ -1255,6 +1285,7 @@
           if (mode === "manual") {
             state.manualLineLinkUrl = linkUrl;
             if (el.manualLineLinkUrlInput) el.manualLineLinkUrlInput.value = linkUrl;
+            if (el.openManualLinkUrlBtn) setHref(el.openManualLinkUrlBtn, linkUrl);
             show(el.manualQrArea);
             renderJsonResult(el.manualLinkResult, "ok", "LINE連携QRを発行しました", data);
             el.manualLinkInfo.textContent = [
@@ -1304,7 +1335,7 @@
               error.message || "LINE連携QRの発行に失敗しました。",
               "",
               "確認：検索結果の連携用guardian_idが実際の飼い主IDになっているか確認してください。",
-              "STEP VET-34E-R5では guardian.id を優先して使用します。"
+              "STEP VET-34E-R6では guardian.id を優先して使用します。"
             ].join("\n");
           } else {
             show(el.lineLinkResult);
@@ -1415,7 +1446,7 @@
         const value = clean(text);
         if (!value) return alert("コピーする内容がありません。");
 
-        // STEP VET-34E-R5:
+        // STEP VET-34E-R6:
         // 連携URLコピーは必ず link.html?token=... をコピーする。
         // 検索キーワードや飼い主名が誤って入っている場合は止める。
         if ((doneMessage || "").includes("LINE連携URL") && !value.includes("link.html?token=")) {
