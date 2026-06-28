@@ -7,7 +7,7 @@
   <title>DPRO PET CARE LINE｜受付登録・LINE連携</title>
 
   <!--
-    STEP VET-34E
+    STEP VET-34E-R2
     DPRO PET CARE LINE 動物病院版
     line-setup.html 完全版
 
@@ -432,7 +432,7 @@
     <section class="hero">
       <div class="heroTop">
         <div class="badge">🐾 DPRO PET CARE LINE</div>
-        <div class="badge">STEP VET-34E</div>
+        <div class="badge">STEP VET-34E-R2</div>
       </div>
       <h1>受付登録・LINE連携</h1>
       <p>
@@ -693,6 +693,26 @@
         </div>
 
         <div id="searchResult" style="margin-top:12px"></div>
+
+        <div id="searchLinkResult" class="hidden" style="margin-top:16px">
+          <h3>既存患者 LINE連携QR 発行結果</h3>
+          <div class="qrWrap">
+            <div class="qrBox">
+              <canvas id="searchLineLinkQrCanvas" width="220" height="220"></canvas>
+              <div class="small" style="margin-top:8px">LINE連携QR</div>
+            </div>
+            <div>
+              <div class="mono" id="searchLineLinkInfo"></div>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+                <button class="btn btnSoft" type="button" id="copySearchLineLinkUrlBtn">連携URLコピー</button>
+                <a class="btn btnPrimary" id="openSearchLineLinkUrlBtn" target="_blank" rel="noopener">連携画面を開く</a>
+              </div>
+              <div class="alert ok" style="margin-top:12px">
+                このQRを飼い主さんのLINEで読み取ってもらうと、既存の診察券とLINEが連携されます。
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -757,7 +777,7 @@
     </section>
 
     <div class="footer">
-      STEP VET-34E line-setup.html complete<br>
+      STEP VET-34E-R2 line-setup.html R2 existing patient link QR fixed complete<br>
       DPRO PET CARE LINE / 動物病院版
     </div>
   </div>
@@ -840,6 +860,11 @@
         searchKeyword: document.getElementById("searchKeyword"),
         searchBtn: document.getElementById("searchBtn"),
         searchResult: document.getElementById("searchResult"),
+        searchLinkResult: document.getElementById("searchLinkResult"),
+        searchLineLinkQrCanvas: document.getElementById("searchLineLinkQrCanvas"),
+        searchLineLinkInfo: document.getElementById("searchLineLinkInfo"),
+        copySearchLineLinkUrlBtn: document.getElementById("copySearchLineLinkUrlBtn"),
+        openSearchLineLinkUrlBtn: document.getElementById("openSearchLineLinkUrlBtn"),
 
         manualGuardianId: document.getElementById("manualGuardianId"),
         manualPetId: document.getElementById("manualPetId"),
@@ -1113,13 +1138,15 @@
 
         el.searchResult.querySelectorAll("[data-action='issue-link']").forEach((btn) => {
           btn.addEventListener("click", async () => {
+            // STEP VET-34E-R2:
+            // 既存患者検索からLINE連携QRを押した場合は、
+            // 「受付で新規登録」タブへ移動せず、この検索画面内にQRを表示する。
             await issueLineLink({
               guardian_id: btn.dataset.guardianId,
               pet_id: btn.dataset.petId,
               staff_name: "受付スタッフ",
               expires_minutes: 60
-            }, "main");
-            document.querySelector("[data-tab='staffRegister']").click();
+            }, "search");
           });
         });
       }
@@ -1167,6 +1194,27 @@
                 errorCorrectionLevel: "M"
               });
             }
+          } else if (mode === "search") {
+            state.searchLineLinkUrl = linkUrl;
+            show(el.searchLinkResult);
+            el.searchLineLinkInfo.textContent = [
+              "既存患者検索からLINE連携QRを発行しました。",
+              `guardian_id: ${payload.guardian_id}`,
+              `pet_id: ${payload.pet_id || ""}`,
+              `expires_at: ${data.expires_at || ""}`,
+              `url: ${linkUrl}`
+            ].join("\n");
+            setHref(el.openSearchLineLinkUrlBtn, linkUrl);
+
+            if (window.QRCode) {
+              await QRCode.toCanvas(el.searchLineLinkQrCanvas, linkUrl, {
+                width: 220,
+                margin: 2,
+                errorCorrectionLevel: "M"
+              });
+            }
+
+            el.searchLinkResult.scrollIntoView({ behavior: "smooth", block: "start" });
           } else {
             state.lastLineLinkUrl = linkUrl;
             show(el.lineLinkResult);
@@ -1189,6 +1237,9 @@
         } catch (error) {
           if (mode === "manual") {
             showResult(el.manualLinkResult, "danger", error.message || "LINE連携QRの発行に失敗しました。");
+          } else if (mode === "search") {
+            show(el.searchLinkResult);
+            el.searchLineLinkInfo.textContent = error.message || "LINE連携QRの発行に失敗しました。";
           } else {
             show(el.lineLinkResult);
             el.lineLinkInfo.textContent = error.message || "LINE連携QRの発行に失敗しました。";
@@ -1228,6 +1279,8 @@
         const fullUrl = path.startsWith("http") ? path : `${apiBase}${path}`;
         const res = await fetch(fullUrl, {
           method: "GET",
+          mode: "cors",
+          cache: "no-store",
           headers: buildHeaders()
         });
         return parseResponse(res);
@@ -1237,6 +1290,8 @@
         const fullUrl = path.startsWith("http") ? path : `${apiBase}${path}`;
         const res = await fetch(fullUrl, {
           method: "POST",
+          mode: "cors",
+          cache: "no-store",
           headers: buildHeaders({ "Content-Type": "application/json" }),
           body: JSON.stringify({ clinic_code: clinicCode, ...(body || {}) })
         });
@@ -1262,10 +1317,7 @@
           ...(extra || {})
         };
         if (code) {
-          headers[adminHeaderName] = code;
           headers["X-DPRO-Admin-Code"] = code;
-          headers["X-Admin-Token"] = code;
-          headers["Authorization"] = `Bearer ${code}`;
         }
         return headers;
       }
