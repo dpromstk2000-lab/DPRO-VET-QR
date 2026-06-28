@@ -1,0 +1,1048 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#2f6f5e">
+  <title>DPRO PET CARE LINE｜LINE診察券 連携確認</title>
+
+  <!--
+    STEP VET-34F
+    DPRO PET CARE LINE 動物病院版
+    link.html 完全版
+
+    目的：
+    ・受付で発行したLINE連携QRから開く
+    ・既存の飼い主・ペット情報を確認する
+    ・LIFFで取得したLINE userIdと既存guardian/petを紐づける
+    ・連携完了後 member.html へ案内する
+
+    前提：
+    ・STEP VET-34B SQL 実行済み
+    ・STEP VET-34C-R2 Worker 反映済み
+    ・STEP VET-34E line-setup.html からLINE連携QRを発行する
+    ・config.js 読み込み済み
+    ・本番では LIFF ID を config.js に設定する
+
+    重要：
+    ・この画面にADMIN_TOKENは不要
+    ・管理コードを絶対に書かない
+    ・tokenはURLの ?token=xxxx から受け取る
+    ・tokenは期限付き・1回使用が前提
+    ・連携前に飼い主・ペット情報を必ず確認してもらう
+  -->
+
+  <script src="./config.js"></script>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+
+  <style>
+    :root{
+      --bg:#f4f7f3;
+      --card:#ffffff;
+      --ink:#1f2a24;
+      --muted:#66746d;
+      --line:#dce7df;
+      --main:#2f6f5e;
+      --main2:#4f9a7f;
+      --soft:#e9f4ee;
+      --soft2:#f7fbf8;
+      --warn:#fff5dc;
+      --warn-line:#ead39a;
+      --danger:#b84a4a;
+      --danger-bg:#fff0f0;
+      --ok:#23694f;
+      --ok-bg:#eef8f2;
+      --shadow:0 18px 45px rgba(29,60,48,.13);
+      --radius:22px;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;
+      background:
+        radial-gradient(circle at top left,rgba(79,154,127,.22),transparent 34%),
+        linear-gradient(180deg,#f8fcf9 0%,var(--bg) 100%);
+      color:var(--ink);
+    }
+
+    a{color:inherit}
+    button,input{font:inherit}
+    button{cursor:pointer}
+    button:disabled{cursor:not-allowed;opacity:.62}
+
+    .app{
+      width:min(880px,100%);
+      margin:0 auto;
+      padding:18px 14px 58px;
+    }
+
+    .hero{
+      position:relative;
+      overflow:hidden;
+      border-radius:28px;
+      background:
+        linear-gradient(135deg,rgba(47,111,94,.98),rgba(86,154,126,.92)),
+        radial-gradient(circle at 85% 16%,rgba(255,255,255,.25),transparent 30%);
+      color:#fff;
+      padding:24px 20px 22px;
+      box-shadow:var(--shadow);
+    }
+    .hero::after{
+      content:"🔗";
+      position:absolute;
+      right:18px;
+      top:10px;
+      font-size:96px;
+      opacity:.13;
+      transform:rotate(-10deg);
+    }
+
+    .heroTop{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:flex-start;
+      position:relative;
+      z-index:1;
+      flex-wrap:wrap;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      border:1px solid rgba(255,255,255,.34);
+      background:rgba(255,255,255,.15);
+      padding:7px 11px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:850;
+      letter-spacing:.03em;
+    }
+
+    .hero h1{
+      margin:14px 0 8px;
+      font-size:clamp(25px,5vw,42px);
+      line-height:1.12;
+      letter-spacing:-.03em;
+      position:relative;
+      z-index:1;
+    }
+
+    .hero p{
+      margin:0;
+      color:rgba(255,255,255,.9);
+      line-height:1.75;
+      font-weight:650;
+      position:relative;
+      z-index:1;
+      max-width:760px;
+    }
+
+    .clinicName{
+      margin-top:14px;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      background:rgba(255,255,255,.18);
+      border:1px solid rgba(255,255,255,.26);
+      border-radius:14px;
+      padding:8px 11px;
+      font-weight:850;
+      position:relative;
+      z-index:1;
+    }
+
+    .heroActions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top:18px;
+      position:relative;
+      z-index:1;
+    }
+
+    .btn{
+      border:0;
+      border-radius:16px;
+      padding:13px 15px;
+      font-weight:900;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      min-height:48px;
+      transition:.15s transform ease,.15s box-shadow ease,.15s opacity ease;
+      text-decoration:none;
+    }
+    .btn:hover{transform:translateY(-1px)}
+    .btnPrimary{
+      background:var(--main);
+      color:#fff;
+      box-shadow:0 12px 28px rgba(47,111,94,.22);
+    }
+    .btnWhite{
+      background:#fff;
+      color:var(--main);
+      box-shadow:0 10px 24px rgba(10,40,28,.13);
+    }
+    .btnGhost{
+      background:rgba(255,255,255,.16);
+      color:#fff;
+      border:1px solid rgba(255,255,255,.28);
+    }
+    .btnSoft{
+      background:var(--soft);
+      color:var(--main);
+      border:1px solid #cfe4d6;
+    }
+    .btnDanger{
+      background:#fff0f0;
+      color:var(--danger);
+      border:1px solid #f0c7c7;
+    }
+
+    .steps{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:8px;
+      margin-top:14px;
+    }
+    .step{
+      border:1px solid var(--line);
+      background:#fff;
+      border-radius:16px;
+      padding:10px;
+      min-height:74px;
+    }
+    .step .num{
+      width:26px;
+      height:26px;
+      border-radius:999px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      background:var(--soft);
+      color:var(--main);
+      font-size:13px;
+      font-weight:900;
+      margin-bottom:7px;
+    }
+    .step strong{
+      display:block;
+      font-size:13px;
+      line-height:1.35;
+    }
+    .step.active{
+      border-color:#9fd0b4;
+      background:#f3fbf6;
+      box-shadow:0 8px 20px rgba(47,111,94,.09);
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:14px;
+      margin-top:14px;
+    }
+    @media (min-width:820px){
+      .grid.two{grid-template-columns:1.05fr .95fr}
+    }
+
+    .card{
+      background:rgba(255,255,255,.94);
+      border:1px solid rgba(220,231,223,.95);
+      border-radius:var(--radius);
+      box-shadow:0 14px 34px rgba(29,60,48,.08);
+      padding:18px;
+      backdrop-filter: blur(8px);
+    }
+
+    .card h2{
+      margin:0 0 10px;
+      font-size:20px;
+      letter-spacing:-.02em;
+    }
+    .card h3{
+      margin:0 0 8px;
+      font-size:16px;
+    }
+    .lead{
+      color:var(--muted);
+      line-height:1.75;
+      font-weight:650;
+      margin:0;
+    }
+    .small{
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.7;
+    }
+
+    .statusBox{
+      display:flex;
+      gap:12px;
+      align-items:flex-start;
+      border:1px solid var(--line);
+      background:#fff;
+      border-radius:18px;
+      padding:14px;
+    }
+    .statusIcon{
+      width:38px;
+      height:38px;
+      border-radius:14px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:var(--soft);
+      flex:0 0 auto;
+      font-size:19px;
+    }
+    .statusBox strong{display:block;margin-bottom:3px}
+    .statusBox p{margin:0;color:var(--muted);font-size:13px;line-height:1.6}
+
+    .alert{
+      border-radius:18px;
+      padding:14px;
+      border:1px solid var(--line);
+      background:#fff;
+      line-height:1.7;
+      font-weight:650;
+    }
+    .alert.warn{background:var(--warn);border-color:var(--warn-line);color:#6b4c00}
+    .alert.danger{background:var(--danger-bg);border-color:#f0c7c7;color:#7c2323}
+    .alert.ok{background:var(--ok-bg);border-color:#bfe1ca;color:#1f6045}
+
+    .confirmBox{
+      border:1px solid var(--line);
+      border-radius:20px;
+      background:#fff;
+      padding:16px;
+      margin-top:12px;
+    }
+    .confirmRow{
+      display:grid;
+      grid-template-columns:116px 1fr;
+      gap:8px;
+      padding:10px 0;
+      border-bottom:1px solid #eef3ef;
+      align-items:start;
+    }
+    .confirmRow:last-child{border-bottom:0}
+    .label{
+      color:var(--muted);
+      font-size:13px;
+      font-weight:850;
+    }
+    .value{
+      font-weight:850;
+      word-break:break-word;
+    }
+
+    .consent{
+      display:flex;
+      gap:12px;
+      align-items:flex-start;
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:14px;
+      background:var(--soft2);
+      margin-top:12px;
+    }
+    .consent input{
+      width:22px;
+      height:22px;
+      margin-top:2px;
+      flex:0 0 auto;
+      accent-color:var(--main);
+    }
+    .consent strong{display:block;margin-bottom:4px}
+    .consent p{margin:0;color:var(--muted);font-size:13px;line-height:1.7}
+
+    .actionBar{
+      position:sticky;
+      bottom:0;
+      margin:18px -14px -58px;
+      padding:14px;
+      background:linear-gradient(180deg,rgba(244,247,243,0),rgba(244,247,243,.96) 22%,rgba(244,247,243,1) 100%);
+      z-index:5;
+    }
+    .actionInner{
+      width:min(880px,100%);
+      margin:0 auto;
+      background:rgba(255,255,255,.96);
+      border:1px solid var(--line);
+      border-radius:22px;
+      padding:12px;
+      box-shadow:0 -12px 35px rgba(29,60,48,.09);
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .actionInner .btn{flex:1 1 220px}
+
+    .hidden{display:none!important}
+
+    .mono{
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      word-break:break-all;
+      font-size:12px;
+      color:var(--muted);
+      background:#f6f8f6;
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:10px;
+      white-space:pre-wrap;
+    }
+    .footer{
+      margin-top:18px;
+      text-align:center;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.7;
+    }
+    .field{
+      margin-top:10px;
+    }
+    input{
+      width:100%;
+      border:1px solid var(--line);
+      border-radius:16px;
+      background:#fff;
+      color:var(--ink);
+      padding:12px 13px;
+      outline:none;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <section class="hero">
+      <div class="heroTop">
+        <div class="badge">🐾 DPRO PET CARE LINE</div>
+        <div class="badge">STEP VET-34F</div>
+      </div>
+      <h1>LINE診察券<br>連携確認</h1>
+      <p>
+        受付で確認した飼い主さん・ペット情報を、あなたのLINEアカウントに連携します。
+        内容に間違いがないか確認してから、LINE診察券を作成してください。
+      </p>
+      <div class="clinicName" id="clinicName">🏥 病院情報を確認中...</div>
+      <div class="heroActions">
+        <a class="btn btnWhite" id="goMemberTop" href="./member.html">診察券へ</a>
+        <a class="btn btnGhost" id="goRichMenuTop" href="./rich-menu.html">メニューへ</a>
+      </div>
+    </section>
+
+    <div class="steps">
+      <div class="step active" id="stepToken">
+        <div class="num">1</div>
+        <strong>連携QR確認</strong>
+      </div>
+      <div class="step" id="stepLine">
+        <div class="num">2</div>
+        <strong>LINE確認</strong>
+      </div>
+      <div class="step" id="stepDone">
+        <div class="num">3</div>
+        <strong>連携完了</strong>
+      </div>
+    </div>
+
+    <div class="grid two">
+      <main>
+        <section class="card" id="statusCard">
+          <h2>連携状態</h2>
+          <div class="statusBox">
+            <div class="statusIcon" id="statusIcon">⏳</div>
+            <div>
+              <strong id="statusTitle">連携トークンを確認しています</strong>
+              <p id="statusText">受付で発行されたLINE連携QRを確認しています。</p>
+            </div>
+          </div>
+
+          <div id="noTokenBox" class="alert danger hidden" style="margin-top:12px">
+            連携トークンがURLにありません。受付スタッフにLINE連携QRを再発行してもらってください。
+          </div>
+
+          <div id="browserTestBox" class="alert warn hidden" style="margin-top:12px">
+            <strong>ブラウザ確認モード</strong><br>
+            本番ではLINEアプリ内で開いてください。デモ確認時だけ、下のテスト用LINE IDを使えます。
+            <div class="field">
+              <input id="browserLineUserId" type="text" placeholder="例：demo_line_link_001">
+            </div>
+            <button class="btn btnSoft" type="button" id="useBrowserLineIdBtn">このIDで確認</button>
+          </div>
+
+          <div id="lineLoginBox" class="alert warn hidden" style="margin-top:12px">
+            LINEログインが必要です。下のボタンからLINEで開き直してください。
+            <div style="margin-top:10px">
+              <button class="btn btnPrimary" type="button" id="lineLoginBtn">LINEでログインする</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="card hidden" id="confirmCard" style="margin-top:14px">
+          <h2>連携する情報を確認してください</h2>
+          <p class="lead">
+            下記の内容をあなたのLINE診察券として連携します。
+            内容が違う場合は、このまま進まず受付スタッフにお声かけください。
+          </p>
+
+          <div class="confirmBox">
+            <div class="confirmRow">
+              <div class="label">病院</div>
+              <div class="value" id="confirmClinic">-</div>
+            </div>
+            <div class="confirmRow">
+              <div class="label">飼い主</div>
+              <div class="value" id="confirmGuardian">-</div>
+            </div>
+            <div class="confirmRow">
+              <div class="label">ペット</div>
+              <div class="value" id="confirmPet">-</div>
+            </div>
+            <div class="confirmRow">
+              <div class="label">種類</div>
+              <div class="value" id="confirmAnimal">-</div>
+            </div>
+            <div class="confirmRow">
+              <div class="label">性別・年齢</div>
+              <div class="value" id="confirmSexAge">-</div>
+            </div>
+            <div class="confirmRow">
+              <div class="label">診察券</div>
+              <div class="value" id="confirmCardNo">-</div>
+            </div>
+          </div>
+
+          <div class="consent">
+            <input id="consentChecked" type="checkbox">
+            <div>
+              <strong>この内容をLINE診察券として連携します</strong>
+              <p>
+                入力済みの飼い主・ペット情報を、あなたのLINEアカウントに紐づけます。
+                緊急時や症状が重い場合は、LINE入力だけで判断せず、必ずお電話または直接ご来院ください。
+              </p>
+            </div>
+          </div>
+
+          <div class="alert warn" style="margin-top:12px">
+            内容が違う場合は、連携せず受付スタッフに確認してください。
+          </div>
+        </section>
+
+        <section class="card hidden" id="successCard" style="margin-top:14px">
+          <h2>LINE連携が完了しました</h2>
+          <div class="alert ok">
+            これで、LINEからペット診察券を表示できます。次回から受付でQR診察券を提示してください。
+          </div>
+          <div class="mono" id="successInfo" style="margin-top:12px"></div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
+            <a class="btn btnPrimary" id="goMemberSuccess" href="./member.html">ペット診察券を開く</a>
+            <a class="btn btnSoft" id="goWaitingSuccess" href="./waiting.html">今日の受付へ</a>
+          </div>
+        </section>
+
+        <section class="card hidden" id="errorCard" style="margin-top:14px">
+          <h2>連携できませんでした</h2>
+          <div class="alert danger" id="errorMessage">
+            連携QRの有効期限が切れているか、すでに使用済みの可能性があります。
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
+            <a class="btn btnSoft" id="goRichMenuError" href="./rich-menu.html">メニューへ戻る</a>
+          </div>
+        </section>
+      </main>
+
+      <aside>
+        <section class="card">
+          <h2>この画面について</h2>
+          <p class="lead">
+            この画面は、すでに病院側に登録されている飼い主さん・ペット情報を、あなたのLINEと紐づけるための画面です。
+          </p>
+          <div class="statusBox" style="margin-top:12px">
+            <div class="statusIcon">🏥</div>
+            <div>
+              <strong>既存患者さん向け</strong>
+              <p>受付で発行した連携QRから開きます。</p>
+            </div>
+          </div>
+          <div class="statusBox" style="margin-top:10px">
+            <div class="statusIcon">🔒</div>
+            <div>
+              <strong>安全な連携</strong>
+              <p>URLのトークンは期限付き・1回使用が前提です。</p>
+            </div>
+          </div>
+          <div class="statusBox" style="margin-top:10px">
+            <div class="statusIcon">🐶</div>
+            <div>
+              <strong>複数ペット対応</strong>
+              <p>連携後、同じ飼い主さんのペット診察券をLINEで表示できます。</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="card" style="margin-top:14px">
+          <h2>連携してよい例</h2>
+          <p class="lead">
+            表示された飼い主名・ペット名が自分の内容と合っている場合だけ進んでください。
+          </p>
+        </section>
+
+        <section class="card" style="margin-top:14px">
+          <h2>連携しない方がよい例</h2>
+          <div class="alert warn">
+            名前やペット情報が違う場合、家族の別LINEで登録したい場合、誰の情報かわからない場合は、受付スタッフに確認してください。
+          </div>
+        </section>
+      </aside>
+    </div>
+
+    <div class="actionBar" id="actionBar">
+      <div class="actionInner">
+        <button class="btn btnDanger" type="button" id="cancelBtn">連携しない</button>
+        <button class="btn btnPrimary" type="button" id="completeBtn" disabled>この内容でLINE診察券を作成する</button>
+      </div>
+    </div>
+
+    <div class="footer">
+      STEP VET-34F link.html complete<br>
+      DPRO PET CARE LINE / 動物病院版
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      "use strict";
+
+      const CONFIG = window.DPRO_VET_CONFIG || window.DPRO_CONFIG || window.APP_CONFIG || {};
+      const url = new URL(location.href);
+
+      const DEFAULT_API_BASE = "https://dpro-vet-qr-api.dpromstk2000.workers.dev";
+      const DEFAULT_SITE_BASE = location.origin + location.pathname.replace(/\/[^\/]*$/, "");
+      const DEFAULT_CLINIC_CODE = "dpro_vet_demo";
+
+      const apiBase = trimSlash(
+        CONFIG?.api?.baseUrl ||
+        CONFIG?.urls?.apiBaseUrl ||
+        DEFAULT_API_BASE
+      );
+
+      const siteBase = trimSlash(
+        CONFIG?.urls?.siteBaseUrl ||
+        DEFAULT_SITE_BASE
+      );
+
+      const clinicCode =
+        clean(url.searchParams.get("clinic_code")) ||
+        CONFIG?.clinic?.clinicCode ||
+        CONFIG?.demo?.clinicCode ||
+        DEFAULT_CLINIC_CODE;
+
+      const demoClinicCode = CONFIG?.demo?.clinicCode || DEFAULT_CLINIC_CODE;
+      const isDemoMode = url.searchParams.get("demo") === "true" || clinicCode === demoClinicCode;
+
+      const liffId =
+        clean(url.searchParams.get("liff_id")) ||
+        clean(CONFIG?.liff?.liffId) ||
+        "";
+
+      const token =
+        clean(url.searchParams.get("token")) ||
+        clean(url.searchParams.get("link_token")) ||
+        clean(url.searchParams.get("t"));
+
+      const state = {
+        clinic: null,
+        tokenInfo: null,
+        guardian: null,
+        pet: null,
+        card: null,
+        lineUserId: clean(url.searchParams.get("line_user_id")) || "",
+        lineDisplayName: clean(url.searchParams.get("line_display_name")) || "",
+        linePictureUrl: "",
+        lineReady: false,
+        tokenReady: false,
+        completing: false
+      };
+
+      const el = {
+        clinicName: document.getElementById("clinicName"),
+        statusIcon: document.getElementById("statusIcon"),
+        statusTitle: document.getElementById("statusTitle"),
+        statusText: document.getElementById("statusText"),
+        noTokenBox: document.getElementById("noTokenBox"),
+        browserTestBox: document.getElementById("browserTestBox"),
+        browserLineUserId: document.getElementById("browserLineUserId"),
+        useBrowserLineIdBtn: document.getElementById("useBrowserLineIdBtn"),
+        lineLoginBox: document.getElementById("lineLoginBox"),
+        lineLoginBtn: document.getElementById("lineLoginBtn"),
+
+        confirmCard: document.getElementById("confirmCard"),
+        confirmClinic: document.getElementById("confirmClinic"),
+        confirmGuardian: document.getElementById("confirmGuardian"),
+        confirmPet: document.getElementById("confirmPet"),
+        confirmAnimal: document.getElementById("confirmAnimal"),
+        confirmSexAge: document.getElementById("confirmSexAge"),
+        confirmCardNo: document.getElementById("confirmCardNo"),
+        consentChecked: document.getElementById("consentChecked"),
+
+        successCard: document.getElementById("successCard"),
+        successInfo: document.getElementById("successInfo"),
+        errorCard: document.getElementById("errorCard"),
+        errorMessage: document.getElementById("errorMessage"),
+
+        actionBar: document.getElementById("actionBar"),
+        cancelBtn: document.getElementById("cancelBtn"),
+        completeBtn: document.getElementById("completeBtn"),
+
+        stepToken: document.getElementById("stepToken"),
+        stepLine: document.getElementById("stepLine"),
+        stepDone: document.getElementById("stepDone"),
+
+        goMemberTop: document.getElementById("goMemberTop"),
+        goRichMenuTop: document.getElementById("goRichMenuTop"),
+        goMemberSuccess: document.getElementById("goMemberSuccess"),
+        goWaitingSuccess: document.getElementById("goWaitingSuccess"),
+        goRichMenuError: document.getElementById("goRichMenuError")
+      };
+
+      init();
+
+      async function init(){
+        setupLinks();
+        bindEvents();
+
+        if (!token) {
+          showNoToken();
+          return;
+        }
+
+        await loadTokenInfo();
+        await initLine();
+        updateCompleteState();
+      }
+
+      function setupLinks(){
+        setHref(el.goMemberTop, `${siteBase}/member.html?clinic_code=${encodeURIComponent(clinicCode)}`);
+        setHref(el.goRichMenuTop, `${siteBase}/rich-menu.html?clinic_code=${encodeURIComponent(clinicCode)}`);
+        setHref(el.goMemberSuccess, `${siteBase}/member.html?clinic_code=${encodeURIComponent(clinicCode)}`);
+        setHref(el.goWaitingSuccess, `${siteBase}/waiting.html?clinic_code=${encodeURIComponent(clinicCode)}&mode=today_queue`);
+        setHref(el.goRichMenuError, `${siteBase}/rich-menu.html?clinic_code=${encodeURIComponent(clinicCode)}`);
+      }
+
+      function bindEvents(){
+        el.consentChecked.addEventListener("change", updateCompleteState);
+        el.completeBtn.addEventListener("click", completeLineLink);
+        el.cancelBtn.addEventListener("click", () => {
+          location.href = `${siteBase}/rich-menu.html?clinic_code=${encodeURIComponent(clinicCode)}`;
+        });
+
+        el.useBrowserLineIdBtn.addEventListener("click", () => {
+          const v = clean(el.browserLineUserId.value);
+          if (!v) {
+            setStatus("⚠️", "テスト用LINE IDを入力してください", "ブラウザ確認モードでは、テスト用の line_user_id が必要です。");
+            return;
+          }
+          state.lineUserId = v;
+          state.lineDisplayName = "ブラウザ確認";
+          state.lineReady = true;
+          setStatus("✅", "ブラウザ確認用LINE IDを使用中", `line_user_id：${v}`);
+          activateStep("line");
+          updateCompleteState();
+        });
+
+        el.lineLoginBtn.addEventListener("click", () => {
+          if (window.liff && liffId) {
+            try {
+              window.liff.login({ redirectUri: location.href });
+            } catch (e) {
+              alert("LINEログインを開始できませんでした。LINEアプリ内で開いてください。");
+            }
+          }
+        });
+      }
+
+      async function loadTokenInfo(){
+        try {
+          setStatus("⏳", "連携内容を確認しています", "受付で発行された連携QRの有効性を確認しています。");
+
+          const data = await apiGet(`/api/public/line-link-token?clinic_code=${encodeURIComponent(clinicCode)}&token=${encodeURIComponent(token)}`);
+
+          state.tokenInfo = data.token || data.link_token || data.item || data;
+          state.clinic = data.clinic || state.tokenInfo?.clinic || null;
+          state.guardian = data.guardian || state.tokenInfo?.guardian || {};
+          state.pet = data.pet || state.tokenInfo?.pet || {};
+          state.card = data.card || state.tokenInfo?.card || {};
+          state.tokenReady = true;
+
+          const clinicName =
+            state.clinic?.clinic_name ||
+            state.clinic?.name ||
+            data.clinic_name ||
+            CONFIG?.clinic?.clinicName ||
+            "動物病院";
+
+          el.clinicName.textContent = `🏥 ${clinicName}`;
+
+          renderConfirm(data);
+          show(el.confirmCard);
+          activateStep("line");
+          setStatus("✅", "連携QRを確認しました", "続いて、LINEアカウントを確認します。");
+        } catch (error) {
+          showError(error.message || "連携QRを確認できませんでした。");
+        }
+      }
+
+      function renderConfirm(data){
+        const clinicName =
+          state.clinic?.clinic_name ||
+          state.clinic?.name ||
+          data.clinic_name ||
+          CONFIG?.clinic?.clinicName ||
+          "動物病院";
+
+        const guardianName =
+          state.guardian?.guardian_name ||
+          state.guardian?.name ||
+          data.guardian_name ||
+          data.target?.guardian_name ||
+          "-";
+
+        const petName =
+          state.pet?.pet_name ||
+          state.pet?.name ||
+          data.pet_name ||
+          data.target?.pet_name ||
+          "-";
+
+        const animalType =
+          state.pet?.animal_type ||
+          state.pet?.species ||
+          data.animal_type ||
+          data.target?.animal_type ||
+          "-";
+
+        const sex =
+          state.pet?.sex ||
+          data.sex ||
+          data.target?.sex ||
+          "";
+
+        const age =
+          state.pet?.age_text ||
+          data.age_text ||
+          data.target?.age_text ||
+          "";
+
+        const cardNo =
+          state.card?.card_no ||
+          data.card_no ||
+          data.target?.card_no ||
+          "連携後に表示";
+
+        el.confirmClinic.textContent = clinicName;
+        el.confirmGuardian.textContent = guardianName;
+        el.confirmPet.textContent = petName;
+        el.confirmAnimal.textContent = animalType;
+        el.confirmSexAge.textContent = [sex, age].filter(Boolean).join(" / ") || "-";
+        el.confirmCardNo.textContent = cardNo;
+      }
+
+      async function initLine(){
+        if (state.lineUserId) {
+          state.lineReady = true;
+          state.lineDisplayName = state.lineDisplayName || "URL指定";
+          setStatus("✅", "LINE情報を確認しました", "URLで指定されたLINE userIdを使います。");
+          activateStep("line");
+          return;
+        }
+
+        if (!liffId || !window.liff) {
+          state.lineReady = false;
+          if (isDemoMode) {
+            show(el.browserTestBox);
+            setStatus("⚠️", "LIFF IDが未設定、またはLINE外で開いています", "デモ確認ではブラウザ確認モードを使えます。本番ではLIFF IDを設定し、LINEアプリ内で開いてください。");
+          } else {
+            setStatus("⚠️", "LINEアプリ内で開いてください", "LINE連携にはLINE userIdの取得が必要です。");
+          }
+          return;
+        }
+
+        try {
+          await window.liff.init({ liffId });
+
+          if (!window.liff.isLoggedIn()) {
+            show(el.lineLoginBox);
+            setStatus("⚠️", "LINEログインが必要です", "LINEログイン後に連携できます。");
+            return;
+          }
+
+          const profile = await window.liff.getProfile();
+          state.lineUserId = profile.userId || "";
+          state.lineDisplayName = profile.displayName || "";
+          state.linePictureUrl = profile.pictureUrl || "";
+          state.lineReady = Boolean(state.lineUserId);
+
+          if (state.lineReady) {
+            setStatus("✅", "LINEアカウントを確認しました", `${state.lineDisplayName || "LINEユーザー"} として連携します。`);
+            activateStep("line");
+          } else {
+            setStatus("⚠️", "LINE userIdを取得できませんでした", "LINEアプリ内で開き直してください。");
+          }
+        } catch (error) {
+          state.lineReady = false;
+          if (isDemoMode) show(el.browserTestBox);
+          setStatus("⚠️", "LIFF初期化に失敗しました", error.message || "LIFF設定を確認してください。");
+        }
+      }
+
+      async function completeLineLink(){
+        if (state.completing) return;
+
+        if (!state.tokenReady) return alert("連携QRを確認できていません。");
+        if (!state.lineReady || !state.lineUserId) return alert("LINEアカウントを確認できていません。LINEアプリ内で開いてください。");
+        if (!el.consentChecked.checked) return alert("同意チェックが必要です。");
+
+        try {
+          state.completing = true;
+          updateCompleteState("連携中...");
+
+          const data = await apiPost("/api/public/line-link-complete", {
+            clinic_code: clinicCode,
+            token,
+            line_user_id: state.lineUserId,
+            line_display_name: state.lineDisplayName,
+            line_picture_url: state.linePictureUrl,
+            consent_checked: true,
+            consent_text_version: "step-vet-34f-v1"
+          });
+
+          showSuccess(data);
+        } catch (error) {
+          showError(error.message || "LINE連携に失敗しました。受付スタッフにご確認ください。");
+        } finally {
+          state.completing = false;
+          updateCompleteState();
+        }
+      }
+
+      function showSuccess(data){
+        hide(el.errorCard);
+        show(el.successCard);
+        hide(el.actionBar);
+        activateStep("done");
+        setStatus("✅", "LINE連携が完了しました", "LINEからペット診察券を表示できます。");
+
+        const memberUrl =
+          data.member_url ||
+          `${siteBase}/member.html?clinic_code=${encodeURIComponent(clinicCode)}`;
+
+        setHref(el.goMemberSuccess, memberUrl);
+        setHref(el.goMemberTop, memberUrl);
+
+        const card = data.card || data.registration || {};
+        el.successInfo.textContent = [
+          `LINE名：${state.lineDisplayName || "-"}`,
+          `診察券番号：${card.card_no || data.card_no || "連携後、診察券画面で確認"}`,
+          `連携日時：${new Date().toLocaleString("ja-JP")}`
+        ].join("\n");
+
+        el.successCard.scrollIntoView({ behavior:"smooth", block:"start" });
+      }
+
+      function showNoToken(){
+        show(el.noTokenBox);
+        show(el.errorCard);
+        hide(el.confirmCard);
+        hide(el.actionBar);
+        setStatus("⚠️", "連携トークンがありません", "受付スタッフにLINE連携QRを再発行してもらってください。");
+      }
+
+      function showError(message){
+        show(el.errorCard);
+        hide(el.confirmCard);
+        hide(el.actionBar);
+        el.errorMessage.textContent = message || "連携QRを確認できませんでした。";
+        setStatus("⚠️", "連携できませんでした", message || "受付スタッフに確認してください。");
+        el.errorCard.scrollIntoView({ behavior:"smooth", block:"start" });
+      }
+
+      function updateCompleteState(label){
+        const ready = state.tokenReady && state.lineReady && el.consentChecked.checked && !state.completing;
+        el.completeBtn.disabled = !ready;
+        el.completeBtn.textContent = label || (ready ? "この内容でLINE診察券を作成する" : "確認後に連携できます");
+      }
+
+      function activateStep(name){
+        [el.stepToken, el.stepLine, el.stepDone].forEach((node) => node.classList.remove("active"));
+        if (name === "token") el.stepToken.classList.add("active");
+        if (name === "line") el.stepLine.classList.add("active");
+        if (name === "done") el.stepDone.classList.add("active");
+      }
+
+      function setStatus(icon, title, text){
+        el.statusIcon.textContent = icon;
+        el.statusTitle.textContent = title;
+        el.statusText.textContent = text;
+      }
+
+      async function apiGet(path){
+        const fullUrl = path.startsWith("http") ? path : `${apiBase}${path}`;
+        const res = await fetch(fullUrl, {
+          method:"GET",
+          headers:{ "Accept":"application/json" }
+        });
+        return parseResponse(res);
+      }
+
+      async function apiPost(path, body){
+        const fullUrl = path.startsWith("http") ? path : `${apiBase}${path}`;
+        const res = await fetch(fullUrl, {
+          method:"POST",
+          headers:{
+            "Content-Type":"application/json",
+            "Accept":"application/json"
+          },
+          body: JSON.stringify(body || {})
+        });
+        return parseResponse(res);
+      }
+
+      async function parseResponse(res){
+        const text = await res.text();
+        let data = null;
+        if (text) {
+          try { data = JSON.parse(text); } catch { data = { raw:text }; }
+        }
+        if (!res.ok || !data || data.ok === false) {
+          throw new Error((data && (data.message || data.error)) || `APIエラー status=${res.status}`);
+        }
+        return data;
+      }
+
+      function trimSlash(value){
+        return String(value || "").replace(/\/+$/,"");
+      }
+      function clean(value){
+        return String(value ?? "").trim();
+      }
+      function setHref(node, href){
+        if (node) node.href = href;
+      }
+      function show(node){
+        if (node) node.classList.remove("hidden");
+      }
+      function hide(node){
+        if (node) node.classList.add("hidden");
+      }
+    })();
+  </script>
+</body>
+</html>
