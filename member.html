@@ -7,7 +7,7 @@
   <title>DPRO PET CARE LINE｜ペット診察券</title>
 
   <!--
-    STEP VET-34G
+    STEP VET-34G-R2
     DPRO PET CARE LINE 動物病院版
     member.html 修正版 完全版
 
@@ -762,7 +762,7 @@
     </main>
 
     <div class="footer">
-      STEP VET-34G member.html complete<br>
+      STEP VET-34G-R2 member.html R2 syntax fixed complete<br>
       DPRO PET CARE LINE / 動物病院版
     </div>
   </div>
@@ -1373,7 +1373,8 @@
       }
 
       function buildPageUrl(file, params){
-        const target = new URL(`${siteBase}/${file.replace(/^\\.\\//,"")}`);
+        const safeFile = String(file || "").replace(/^\.\//, "");
+        const target = new URL(`${siteBase}/${safeFile}`);
         const merged = { clinic_code: clinicCode, ...(params || {}) };
         Object.entries(merged).forEach(([key, value]) => {
           if (value !== undefined && value !== null && String(value).trim() !== "") {
