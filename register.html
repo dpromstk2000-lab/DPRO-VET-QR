@@ -1,0 +1,1193 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#2f6f5e">
+  <title>DPRO PET CARE LINE｜LINE診察券 初回登録</title>
+
+  <!--
+    STEP VET-34D
+    DPRO PET CARE LINE 動物病院版
+    register.html 完全版
+
+    目的：
+    ・飼い主さんがLINEから初回登録する
+    ・飼い主情報とペット情報を登録する
+    ・LINE userId と飼い主を紐づける
+    ・ペット診察券QRを発行する
+    ・登録後 member.html に進める
+
+    前提：
+    ・STEP VET-34B SQL 実行済み
+    ・STEP VET-34C-R2 Worker 反映済み
+    ・config.js 読み込み済み
+    ・本番では LIFF ID を config.js に設定する
+
+    注意：
+    ・ADMIN_TOKEN はこのHTMLに絶対に書かない
+    ・登録は必ず Cloudflare Worker API 経由
+    ・localStorageだけで登録済みに見せかけない
+  -->
+
+  <script src="./config.js"></script>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+
+  <style>
+    :root{
+      --bg:#f4f7f3;
+      --card:#ffffff;
+      --ink:#1f2a24;
+      --muted:#66746d;
+      --line:#dce7df;
+      --main:#2f6f5e;
+      --main2:#4f9a7f;
+      --soft:#e9f4ee;
+      --soft2:#f7fbf8;
+      --warn:#fff5dc;
+      --warn-line:#ead39a;
+      --danger:#b84a4a;
+      --danger-bg:#fff0f0;
+      --ok:#23694f;
+      --shadow:0 18px 45px rgba(29,60,48,.13);
+      --radius:22px;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;
+      background:
+        radial-gradient(circle at top left,rgba(79,154,127,.23),transparent 34%),
+        linear-gradient(180deg,#f8fcf9 0%,var(--bg) 100%);
+      color:var(--ink);
+    }
+
+    a{color:inherit}
+    button,input,select,textarea{font:inherit}
+    button{cursor:pointer}
+    button:disabled{cursor:not-allowed;opacity:.62}
+    .app{
+      width:min(940px,100%);
+      margin:0 auto;
+      padding:18px 14px 88px;
+    }
+
+    .hero{
+      position:relative;
+      overflow:hidden;
+      border-radius:28px;
+      background:
+        linear-gradient(135deg,rgba(47,111,94,.98),rgba(86,154,126,.92)),
+        radial-gradient(circle at 85% 18%,rgba(255,255,255,.25),transparent 30%);
+      color:#fff;
+      padding:24px 20px 22px;
+      box-shadow:var(--shadow);
+    }
+
+    .hero::after{
+      content:"🐾";
+      position:absolute;
+      right:18px;
+      top:8px;
+      font-size:96px;
+      opacity:.14;
+      transform:rotate(-12deg);
+    }
+
+    .heroTop{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:flex-start;
+      position:relative;
+      z-index:1;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      border:1px solid rgba(255,255,255,.34);
+      background:rgba(255,255,255,.15);
+      padding:7px 11px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:800;
+      letter-spacing:.03em;
+    }
+
+    .hero h1{
+      margin:14px 0 8px;
+      font-size:clamp(25px,5vw,42px);
+      line-height:1.12;
+      letter-spacing:-.03em;
+      position:relative;
+      z-index:1;
+    }
+
+    .hero p{
+      margin:0;
+      color:rgba(255,255,255,.9);
+      line-height:1.75;
+      font-weight:650;
+      position:relative;
+      z-index:1;
+    }
+
+    .clinicName{
+      margin-top:14px;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      background:rgba(255,255,255,.18);
+      border:1px solid rgba(255,255,255,.26);
+      border-radius:14px;
+      padding:8px 11px;
+      font-weight:850;
+      position:relative;
+      z-index:1;
+    }
+
+    .heroActions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top:18px;
+      position:relative;
+      z-index:1;
+    }
+
+    .btn{
+      border:0;
+      border-radius:16px;
+      padding:13px 15px;
+      font-weight:900;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      min-height:48px;
+      transition:.15s transform ease,.15s box-shadow ease,.15s opacity ease;
+      text-decoration:none;
+    }
+    .btn:hover{transform:translateY(-1px)}
+    .btnPrimary{
+      background:var(--main);
+      color:#fff;
+      box-shadow:0 12px 28px rgba(47,111,94,.22);
+    }
+    .btnWhite{
+      background:#fff;
+      color:var(--main);
+      box-shadow:0 10px 24px rgba(10,40,28,.13);
+    }
+    .btnGhost{
+      background:rgba(255,255,255,.16);
+      color:#fff;
+      border:1px solid rgba(255,255,255,.28);
+    }
+    .btnSoft{
+      background:var(--soft);
+      color:var(--main);
+      border:1px solid #cfe4d6;
+    }
+    .btnDanger{
+      background:#fff0f0;
+      color:var(--danger);
+      border:1px solid #f0c7c7;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:14px;
+      margin-top:14px;
+    }
+
+    @media (min-width:850px){
+      .grid.two{grid-template-columns:1.06fr .94fr}
+      .grid.three{grid-template-columns:repeat(3,1fr)}
+    }
+
+    .card{
+      background:rgba(255,255,255,.94);
+      border:1px solid rgba(220,231,223,.95);
+      border-radius:var(--radius);
+      box-shadow:0 14px 34px rgba(29,60,48,.08);
+      padding:18px;
+      backdrop-filter: blur(8px);
+    }
+
+    .card h2{
+      margin:0 0 10px;
+      font-size:20px;
+      letter-spacing:-.02em;
+    }
+    .card h3{
+      margin:0 0 8px;
+      font-size:16px;
+    }
+    .small{
+      font-size:13px;
+      color:var(--muted);
+      line-height:1.7;
+    }
+    .lead{
+      color:var(--muted);
+      line-height:1.75;
+      font-weight:650;
+      margin:0;
+    }
+
+    .steps{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:8px;
+      margin-top:14px;
+    }
+
+    .step{
+      border:1px solid var(--line);
+      background:#fff;
+      border-radius:16px;
+      padding:10px;
+      min-height:74px;
+    }
+    .step .num{
+      width:26px;
+      height:26px;
+      border-radius:999px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      background:var(--soft);
+      color:var(--main);
+      font-size:13px;
+      font-weight:900;
+      margin-bottom:7px;
+    }
+    .step strong{
+      display:block;
+      font-size:13px;
+      line-height:1.35;
+    }
+    .step.active{
+      border-color:#9fd0b4;
+      background:#f3fbf6;
+      box-shadow:0 8px 20px rgba(47,111,94,.09);
+    }
+
+    .statusBox{
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:14px;
+      background:#fff;
+      display:flex;
+      gap:12px;
+      align-items:flex-start;
+    }
+    .statusIcon{
+      width:36px;
+      height:36px;
+      border-radius:14px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:var(--soft);
+      flex:0 0 auto;
+      font-size:19px;
+    }
+    .statusBox strong{display:block;margin-bottom:3px}
+    .statusBox p{margin:0;color:var(--muted);font-size:13px;line-height:1.6}
+
+    .alert{
+      border-radius:18px;
+      padding:14px;
+      border:1px solid var(--line);
+      background:#fff;
+      line-height:1.7;
+      font-weight:650;
+    }
+    .alert.warn{background:var(--warn);border-color:var(--warn-line);color:#6b4c00}
+    .alert.danger{background:var(--danger-bg);border-color:#f0c7c7;color:#7c2323}
+    .alert.ok{background:#eef8f2;border-color:#bfe1ca;color:#1f6045}
+
+    .formSection{
+      margin-top:14px;
+      border-top:1px solid var(--line);
+      padding-top:16px;
+    }
+    .sectionTitle{
+      display:flex;
+      align-items:center;
+      gap:9px;
+      margin:0 0 12px;
+      font-size:17px;
+      font-weight:950;
+    }
+    .sectionTitle span{
+      width:30px;
+      height:30px;
+      border-radius:12px;
+      background:var(--main);
+      color:#fff;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      font-size:14px;
+      flex:0 0 auto;
+    }
+
+    .field{
+      margin-bottom:12px;
+    }
+    label{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      font-weight:850;
+      margin-bottom:6px;
+      font-size:14px;
+    }
+    .req{
+      color:#fff;
+      background:var(--main);
+      border-radius:999px;
+      padding:2px 7px;
+      font-size:11px;
+      line-height:1.4;
+      flex:0 0 auto;
+    }
+    .opt{
+      color:var(--muted);
+      background:#eef3ef;
+      border-radius:999px;
+      padding:2px 7px;
+      font-size:11px;
+      line-height:1.4;
+      flex:0 0 auto;
+    }
+    input,select,textarea{
+      width:100%;
+      border:1px solid var(--line);
+      border-radius:16px;
+      background:#fff;
+      color:var(--ink);
+      padding:13px 13px;
+      outline:none;
+      transition:.15s border-color ease,.15s box-shadow ease;
+    }
+    textarea{
+      min-height:92px;
+      resize:vertical;
+      line-height:1.65;
+    }
+    input:focus,select:focus,textarea:focus{
+      border-color:#8dc6a3;
+      box-shadow:0 0 0 4px rgba(79,154,127,.13);
+    }
+
+    .row{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:12px;
+    }
+    @media (min-width:680px){
+      .row.two{grid-template-columns:1fr 1fr}
+      .row.three{grid-template-columns:1fr 1fr 1fr}
+    }
+
+    .consent{
+      display:flex;
+      gap:12px;
+      align-items:flex-start;
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:14px;
+      background:var(--soft2);
+      margin-top:12px;
+    }
+    .consent input{
+      width:22px;
+      height:22px;
+      margin-top:2px;
+      flex:0 0 auto;
+      accent-color:var(--main);
+    }
+    .consent strong{display:block;margin-bottom:4px}
+    .consent p{margin:0;color:var(--muted);font-size:13px;line-height:1.7}
+
+    .submitArea{
+      position:sticky;
+      bottom:0;
+      margin:18px -14px -88px;
+      padding:14px;
+      background:linear-gradient(180deg,rgba(244,247,243,0),rgba(244,247,243,.96) 22%,rgba(244,247,243,1) 100%);
+      z-index:5;
+    }
+    .submitInner{
+      width:min(940px,100%);
+      margin:0 auto;
+      background:rgba(255,255,255,.96);
+      border:1px solid var(--line);
+      border-radius:22px;
+      padding:12px;
+      box-shadow:0 -12px 35px rgba(29,60,48,.09);
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .submitInner .btn{flex:1 1 210px}
+
+    .hidden{display:none !important}
+
+    .successQr{
+      display:grid;
+      gap:14px;
+      align-items:start;
+      grid-template-columns:1fr;
+    }
+    @media (min-width:720px){
+      .successQr{grid-template-columns:240px 1fr}
+    }
+    .qrBox{
+      border:1px solid var(--line);
+      border-radius:22px;
+      background:#fff;
+      padding:16px;
+      text-align:center;
+    }
+    canvas{
+      max-width:100%;
+      height:auto;
+    }
+    .mono{
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      word-break:break-all;
+      font-size:12px;
+      color:var(--muted);
+      background:#f6f8f6;
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:10px;
+    }
+    .list{
+      margin:8px 0 0;
+      padding-left:18px;
+      color:var(--muted);
+      line-height:1.65;
+      font-size:13px;
+    }
+    .duplicateItem{
+      border:1px solid var(--warn-line);
+      background:#fffdf4;
+      border-radius:14px;
+      padding:11px;
+      margin-top:8px;
+      font-size:13px;
+      line-height:1.6;
+    }
+    .footer{
+      margin-top:18px;
+      text-align:center;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.7;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <section class="hero">
+      <div class="heroTop">
+        <div class="badge">🐶 DPRO PET CARE LINE</div>
+        <div class="badge" id="versionBadge">STEP VET-34D</div>
+      </div>
+      <h1>LINE診察券<br>初回登録</h1>
+      <p>
+        飼い主さんとペット情報を登録して、LINEで使えるペット診察券QRを作成します。
+        次回から、診察券表示・順番受付・問診入力がスムーズになります。
+      </p>
+      <div class="clinicName" id="clinicName">🏥 病院情報を確認中...</div>
+      <div class="heroActions">
+        <a class="btn btnWhite" id="goMemberTop" href="./member.html">診察券へ</a>
+        <a class="btn btnGhost" id="goRichMenuTop" href="./rich-menu.html">メニューへ</a>
+      </div>
+    </section>
+
+    <div class="steps">
+      <div class="step active" id="stepLine">
+        <div class="num">1</div>
+        <strong>LINE確認</strong>
+      </div>
+      <div class="step" id="stepForm">
+        <div class="num">2</div>
+        <strong>情報入力</strong>
+      </div>
+      <div class="step" id="stepDone">
+        <div class="num">3</div>
+        <strong>診察券発行</strong>
+      </div>
+    </div>
+
+    <div class="grid two">
+      <main>
+        <section class="card" id="statusCard">
+          <h2>登録前の確認</h2>
+          <div class="statusBox">
+            <div class="statusIcon" id="lineStatusIcon">⏳</div>
+            <div>
+              <strong id="lineStatusTitle">LINE連携を確認しています</strong>
+              <p id="lineStatusText">LINEアプリ内で開いている場合は、自動でLINEアカウントを確認します。</p>
+            </div>
+          </div>
+
+          <div id="browserTestBox" class="alert warn hidden" style="margin-top:12px">
+            <strong>ブラウザ確認モード</strong><br>
+            本番ではLINEアプリ内で開いてください。デモ確認時だけ、下のテスト用LINE IDを使えます。
+            <div class="row two" style="margin-top:10px">
+              <input id="browserLineUserId" type="text" placeholder="例：demo_line_test_001">
+              <button class="btn btnSoft" type="button" id="useBrowserLineIdBtn">このIDで確認</button>
+            </div>
+          </div>
+
+          <div id="lineLoginBox" class="alert warn hidden" style="margin-top:12px">
+            LINEログインが必要です。下のボタンからLINEで開き直してください。
+            <div style="margin-top:10px">
+              <button class="btn btnPrimary" type="button" id="lineLoginBtn">LINEでログインする</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="card" id="formCard" style="margin-top:14px">
+          <h2>飼い主さん・ペット情報</h2>
+          <p class="lead">
+            必須項目を入力してください。既に病院で登録済みの可能性がある場合は、重複防止のため受付確認に進みます。
+          </p>
+
+          <form id="registerForm" autocomplete="on">
+            <div class="formSection">
+              <h3 class="sectionTitle"><span>1</span>飼い主さん情報</h3>
+
+              <div class="row two">
+                <div class="field">
+                  <label for="guardianName">飼い主名 <span class="req">必須</span></label>
+                  <input id="guardianName" name="guardian_name" type="text" placeholder="例：山田 花子" required>
+                </div>
+                <div class="field">
+                  <label for="phone">電話番号 <span class="req">必須</span></label>
+                  <input id="phone" name="phone" type="tel" inputmode="tel" placeholder="例：090-1234-5678" required>
+                </div>
+              </div>
+            </div>
+
+            <div class="formSection">
+              <h3 class="sectionTitle"><span>2</span>ペット情報</h3>
+
+              <div class="row two">
+                <div class="field">
+                  <label for="petName">ペット名 <span class="req">必須</span></label>
+                  <input id="petName" name="pet_name" type="text" placeholder="例：ココ" required>
+                </div>
+                <div class="field">
+                  <label for="animalType">種類 <span class="req">必須</span></label>
+                  <select id="animalType" name="animal_type" required>
+                    <option value="">選択してください</option>
+                    <option value="犬">犬</option>
+                    <option value="猫">猫</option>
+                    <option value="うさぎ">うさぎ</option>
+                    <option value="ハムスター">ハムスター</option>
+                    <option value="フェレット">フェレット</option>
+                    <option value="鳥">鳥</option>
+                    <option value="その他">その他</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="row two">
+                <div class="field">
+                  <label for="ageText">年齢 <span class="opt">任意</span></label>
+                  <input id="ageText" name="age_text" type="text" placeholder="例：5歳 / 2021年生まれ / 不明">
+                </div>
+                <div class="field">
+                  <label for="sex">性別 <span class="req">必須</span></label>
+                  <select id="sex" name="sex" required>
+                    <option value="">選択してください</option>
+                    <option value="男の子">男の子</option>
+                    <option value="女の子">女の子</option>
+                    <option value="不明">不明</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="medicalNote">既往歴・気になること <span class="opt">任意</span></label>
+                <textarea id="medicalNote" name="medical_note" placeholder="例：皮膚が弱い、以前手術歴あり、怖がり、薬が苦手 など"></textarea>
+              </div>
+
+              <div class="field">
+                <label for="allergyNote">アレルギー・注意事項 <span class="opt">任意</span></label>
+                <textarea id="allergyNote" name="allergy_note" placeholder="例：薬のアレルギー、食物アレルギー、苦手な処置 など"></textarea>
+              </div>
+            </div>
+
+            <div class="formSection">
+              <h3 class="sectionTitle"><span>3</span>同意確認</h3>
+
+              <div class="consent">
+                <input id="consentChecked" name="consent_checked" type="checkbox" required>
+                <div>
+                  <strong>LINE診察券の利用に同意します</strong>
+                  <p>
+                    入力した情報を病院の受付・診察補助・予防案内・診察後フォローに利用することに同意します。
+                    緊急時や症状が重い場合は、LINE入力だけで判断せず、必ずお電話または直接ご来院ください。
+                  </p>
+                </div>
+              </div>
+            </div>
+          </form>
+        </section>
+
+        <section class="card hidden" id="duplicateCard" style="margin-top:14px">
+          <h2>受付確認が必要です</h2>
+          <div class="alert warn">
+            同じ電話番号、または似た登録が見つかりました。重複登録を防ぐため、受付スタッフに確認してください。
+          </div>
+          <div id="duplicateList"></div>
+          <div style="margin-top:12px">
+            <a class="btn btnSoft" id="goRichMenuDuplicate" href="./rich-menu.html">メニューへ戻る</a>
+          </div>
+        </section>
+
+        <section class="card hidden" id="successCard" style="margin-top:14px">
+          <h2>LINE診察券を作成しました</h2>
+          <div class="alert ok">
+            登録が完了しました。次回からLINE診察券QRを受付で提示できます。
+          </div>
+
+          <div class="successQr" style="margin-top:14px">
+            <div class="qrBox">
+              <canvas id="qrCanvas" width="220" height="220"></canvas>
+              <div class="small" style="margin-top:8px">ペット診察券QR</div>
+            </div>
+            <div>
+              <h3 id="successPetTitle">診察券情報</h3>
+              <div class="mono" id="successInfo">登録情報を表示します</div>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
+                <a class="btn btnPrimary" id="goMemberSuccess" href="./member.html">ペット診察券を開く</a>
+                <a class="btn btnSoft" id="goWaitingSuccess" href="./waiting.html">今日の受付へ</a>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <aside>
+        <section class="card">
+          <h2>この登録でできること</h2>
+          <ul class="list">
+            <li>LINEでペット診察券を表示</li>
+            <li>受付でQR診察券を提示</li>
+            <li>今日の順番受付</li>
+            <li>優先受付予約</li>
+            <li>お薬・予防受付</li>
+            <li>来院前問診</li>
+            <li>予防案内・診察後フォロー</li>
+          </ul>
+        </section>
+
+        <section class="card" style="margin-top:14px">
+          <h2>登録済みの可能性がある場合</h2>
+          <p class="lead">
+            すでに病院で登録済みの場合は、自分で新規登録せず、受付でLINE連携QRを発行してもらう方が安全です。
+          </p>
+          <div class="alert warn" style="margin-top:12px">
+            同じ電話番号が見つかった場合は、自動登録せず受付確認になります。
+          </div>
+        </section>
+
+        <section class="card" style="margin-top:14px">
+          <h2>注意</h2>
+          <p class="lead">
+            この画面は診察・緊急対応を行うものではありません。急な体調不良、呼吸困難、けいれん、誤飲、出血などがある場合は、LINE入力ではなく病院へ直接ご連絡ください。
+          </p>
+        </section>
+      </aside>
+    </div>
+
+    <div class="submitArea" id="submitArea">
+      <div class="submitInner">
+        <button class="btn btnSoft" type="button" id="duplicateCheckBtn">重複確認</button>
+        <button class="btn btnPrimary" type="submit" form="registerForm" id="submitBtn">LINE診察券を作成する</button>
+      </div>
+    </div>
+
+    <div class="footer">
+      STEP VET-34D register.html complete<br>
+      DPRO PET CARE LINE / 動物病院版
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      "use strict";
+
+      const CONFIG = window.DPRO_VET_CONFIG || window.DPRO_CONFIG || window.APP_CONFIG || {};
+      const url = new URL(location.href);
+
+      const DEFAULT_API_BASE = "https://dpro-vet-qr-api.dpromstk2000.workers.dev";
+      const DEFAULT_SITE_BASE = location.origin + location.pathname.replace(/\/[^\/]*$/, "");
+      const DEFAULT_CLINIC_CODE = "dpro_vet_demo";
+
+      const apiBase = trimSlash(
+        CONFIG?.api?.baseUrl ||
+        CONFIG?.urls?.apiBaseUrl ||
+        DEFAULT_API_BASE
+      );
+
+      const siteBase = trimSlash(
+        CONFIG?.urls?.siteBaseUrl ||
+        DEFAULT_SITE_BASE
+      );
+
+      const clinicCode =
+        clean(url.searchParams.get("clinic_code")) ||
+        CONFIG?.clinic?.clinicCode ||
+        CONFIG?.demo?.clinicCode ||
+        DEFAULT_CLINIC_CODE;
+
+      const demoClinicCode = CONFIG?.demo?.clinicCode || DEFAULT_CLINIC_CODE;
+      const isDemoMode = url.searchParams.get("demo") === "true" || clinicCode === demoClinicCode;
+
+      const liffId =
+        clean(url.searchParams.get("liff_id")) ||
+        clean(CONFIG?.liff?.liffId) ||
+        "";
+
+      const state = {
+        clinic: null,
+        lineUserId: clean(url.searchParams.get("line_user_id")) || "",
+        lineDisplayName: "",
+        linePictureUrl: "",
+        lineReady: false,
+        registering: false,
+        duplicateChecked: false,
+        duplicateBlocked: false
+      };
+
+      const el = {
+        clinicName: document.getElementById("clinicName"),
+        lineStatusIcon: document.getElementById("lineStatusIcon"),
+        lineStatusTitle: document.getElementById("lineStatusTitle"),
+        lineStatusText: document.getElementById("lineStatusText"),
+        browserTestBox: document.getElementById("browserTestBox"),
+        browserLineUserId: document.getElementById("browserLineUserId"),
+        useBrowserLineIdBtn: document.getElementById("useBrowserLineIdBtn"),
+        lineLoginBox: document.getElementById("lineLoginBox"),
+        lineLoginBtn: document.getElementById("lineLoginBtn"),
+        form: document.getElementById("registerForm"),
+        submitBtn: document.getElementById("submitBtn"),
+        duplicateCheckBtn: document.getElementById("duplicateCheckBtn"),
+        duplicateCard: document.getElementById("duplicateCard"),
+        duplicateList: document.getElementById("duplicateList"),
+        successCard: document.getElementById("successCard"),
+        successPetTitle: document.getElementById("successPetTitle"),
+        successInfo: document.getElementById("successInfo"),
+        qrCanvas: document.getElementById("qrCanvas"),
+        submitArea: document.getElementById("submitArea"),
+        stepLine: document.getElementById("stepLine"),
+        stepForm: document.getElementById("stepForm"),
+        stepDone: document.getElementById("stepDone"),
+        goMemberTop: document.getElementById("goMemberTop"),
+        goMemberSuccess: document.getElementById("goMemberSuccess"),
+        goWaitingSuccess: document.getElementById("goWaitingSuccess"),
+        goRichMenuTop: document.getElementById("goRichMenuTop"),
+        goRichMenuDuplicate: document.getElementById("goRichMenuDuplicate")
+      };
+
+      init();
+
+      async function init(){
+        setupLinks();
+        bindEvents();
+        await loadClinic();
+        await initLine();
+        updateSubmitState();
+      }
+
+      function setupLinks(){
+        setHref(el.goMemberTop, `${siteBase}/member.html?clinic_code=${encodeURIComponent(clinicCode)}`);
+        setHref(el.goRichMenuTop, `${siteBase}/rich-menu.html?clinic_code=${encodeURIComponent(clinicCode)}`);
+        setHref(el.goRichMenuDuplicate, `${siteBase}/rich-menu.html?clinic_code=${encodeURIComponent(clinicCode)}`);
+        setHref(el.goMemberSuccess, `${siteBase}/member.html?clinic_code=${encodeURIComponent(clinicCode)}`);
+        setHref(el.goWaitingSuccess, `${siteBase}/waiting.html?clinic_code=${encodeURIComponent(clinicCode)}&mode=today_queue`);
+      }
+
+      function bindEvents(){
+        el.form.addEventListener("submit", onSubmit);
+        el.duplicateCheckBtn.addEventListener("click", async () => {
+          await checkDuplicateAndRender(true);
+        });
+
+        el.useBrowserLineIdBtn.addEventListener("click", () => {
+          const v = clean(el.browserLineUserId.value);
+          if (!v) {
+            showLineStatus("⚠️", "テスト用LINE IDを入力してください", "ブラウザ確認モードでは、テスト用の line_user_id が必要です。");
+            return;
+          }
+          state.lineUserId = v;
+          state.lineDisplayName = "ブラウザ確認";
+          state.lineReady = true;
+          showLineStatus("✅", "ブラウザ確認用LINE IDを使用中", `line_user_id：${v}`);
+          updateSubmitState();
+        });
+
+        el.lineLoginBtn.addEventListener("click", () => {
+          if (window.liff && liffId) {
+            try {
+              window.liff.login({ redirectUri: location.href });
+            } catch (e) {
+              alert("LINEログインを開始できませんでした。LINEアプリ内で開いてください。");
+            }
+          }
+        });
+
+        ["guardianName","phone","petName","animalType","sex"].forEach((id) => {
+          const node = document.getElementById(id);
+          if (node) {
+            node.addEventListener("input", () => {
+              state.duplicateChecked = false;
+              state.duplicateBlocked = false;
+              hide(el.duplicateCard);
+              updateSubmitState();
+            });
+          }
+        });
+      }
+
+      async function loadClinic(){
+        try {
+          const data = await apiGet(`/api/public/clinic?clinic_code=${encodeURIComponent(clinicCode)}`);
+          state.clinic = data.clinic || null;
+          const name = state.clinic?.clinic_name || state.clinic?.name || CONFIG?.clinic?.clinicName || "動物病院";
+          el.clinicName.textContent = `🏥 ${name}`;
+        } catch (error) {
+          el.clinicName.textContent = `🏥 ${CONFIG?.clinic?.clinicName || "動物病院"}`;
+        }
+      }
+
+      async function initLine(){
+        if (state.lineUserId) {
+          state.lineReady = true;
+          state.lineDisplayName = clean(url.searchParams.get("line_display_name")) || "URL指定";
+          showLineStatus("✅", "LINE情報を確認しました", "URLで指定されたLINE userIdを使います。");
+          activateStep("form");
+          return;
+        }
+
+        if (!liffId || !window.liff) {
+          state.lineReady = false;
+          if (isDemoMode) {
+            show(el.browserTestBox);
+            showLineStatus("⚠️", "LIFF IDが未設定、またはLINE外で開いています", "デモ確認ではブラウザ確認モードを使えます。本番ではLIFF IDを設定し、LINEアプリ内で開いてください。");
+          } else {
+            showLineStatus("⚠️", "LINEアプリ内で開いてください", "本番登録にはLINE userIdの取得が必要です。受付スタッフにご確認ください。");
+          }
+          return;
+        }
+
+        try {
+          await window.liff.init({ liffId });
+
+          if (!window.liff.isLoggedIn()) {
+            show(el.lineLoginBox);
+            showLineStatus("⚠️", "LINEログインが必要です", "LINEログイン後に登録できます。");
+            return;
+          }
+
+          const profile = await window.liff.getProfile();
+          state.lineUserId = profile.userId || "";
+          state.lineDisplayName = profile.displayName || "";
+          state.linePictureUrl = profile.pictureUrl || "";
+          state.lineReady = Boolean(state.lineUserId);
+
+          if (state.lineReady) {
+            showLineStatus("✅", "LINEアカウントを確認しました", `${state.lineDisplayName || "LINEユーザー"} として登録します。`);
+            activateStep("form");
+          } else {
+            showLineStatus("⚠️", "LINE userIdを取得できませんでした", "LINEアプリ内で開き直してください。");
+          }
+        } catch (error) {
+          state.lineReady = false;
+          if (isDemoMode) show(el.browserTestBox);
+          showLineStatus("⚠️", "LIFF初期化に失敗しました", error.message || "LIFF設定を確認してください。");
+        }
+      }
+
+      async function onSubmit(event){
+        event.preventDefault();
+        if (state.registering) return;
+
+        const payload = collectPayload();
+        const validation = validatePayload(payload);
+        if (!validation.ok) {
+          showAlert(validation.message);
+          return;
+        }
+
+        try {
+          state.registering = true;
+          updateSubmitState("登録中...");
+
+          const duplicateOk = await checkDuplicateAndRender(false);
+          if (!duplicateOk) {
+            state.registering = false;
+            updateSubmitState();
+            scrollToElement(el.duplicateCard);
+            return;
+          }
+
+          const data = await apiPost("/api/public/register", payload);
+
+          showSuccess(data, payload);
+        } catch (error) {
+          const message = error.message || "登録に失敗しました。";
+          if (message.includes("duplicate") || message.includes("同じ電話番号") || message.includes("DUPLICATE")) {
+            show(el.duplicateCard);
+            el.duplicateList.innerHTML = `<div class="duplicateItem">同じ電話番号の登録があります。受付スタッフにご確認ください。</div>`;
+            scrollToElement(el.duplicateCard);
+          } else {
+            showAlert(message);
+          }
+        } finally {
+          state.registering = false;
+          updateSubmitState();
+        }
+      }
+
+      function collectPayload(){
+        return {
+          clinic_code: clinicCode,
+          line_user_id: state.lineUserId,
+          line_display_name: state.lineDisplayName,
+          line_picture_url: state.linePictureUrl,
+          guardian_name: clean(document.getElementById("guardianName").value),
+          phone: clean(document.getElementById("phone").value),
+          pet_name: clean(document.getElementById("petName").value),
+          animal_type: clean(document.getElementById("animalType").value),
+          age_text: clean(document.getElementById("ageText").value),
+          sex: clean(document.getElementById("sex").value),
+          medical_note: clean(document.getElementById("medicalNote").value),
+          allergy_note: clean(document.getElementById("allergyNote").value),
+          consent_checked: document.getElementById("consentChecked").checked,
+          consent_text_version: "step-vet-34d-v1"
+        };
+      }
+
+      function validatePayload(payload){
+        if (!state.lineReady || !payload.line_user_id) return { ok:false, message:"LINEアカウントを確認できていません。LINEアプリ内で開いてください。" };
+        if (!payload.guardian_name) return { ok:false, message:"飼い主名を入力してください。" };
+        if (!payload.phone) return { ok:false, message:"電話番号を入力してください。" };
+        if (!payload.pet_name) return { ok:false, message:"ペット名を入力してください。" };
+        if (!payload.animal_type) return { ok:false, message:"ペットの種類を選択してください。" };
+        if (!payload.sex) return { ok:false, message:"性別を選択してください。" };
+        if (!payload.consent_checked) return { ok:false, message:"同意チェックが必要です。" };
+        return { ok:true };
+      }
+
+      async function checkDuplicateAndRender(manual){
+        const phone = clean(document.getElementById("phone").value);
+        const petName = clean(document.getElementById("petName").value);
+
+        if (!phone && !petName) {
+          if (manual) showAlert("電話番号またはペット名を入力してから確認してください。");
+          return true;
+        }
+
+        try {
+          const data = await apiPost("/api/public/register/check-duplicate", {
+            clinic_code: clinicCode,
+            phone,
+            pet_name: petName
+          });
+
+          const items = data.items || [];
+          state.duplicateChecked = true;
+          state.duplicateBlocked = items.length > 0;
+
+          if (items.length > 0) {
+            renderDuplicates(items);
+            show(el.duplicateCard);
+            activateStep("form");
+            if (manual) scrollToElement(el.duplicateCard);
+            return false;
+          }
+
+          hide(el.duplicateCard);
+          if (manual) {
+            showToast("重複候補は見つかりませんでした。このまま登録できます。", "ok");
+          }
+          return true;
+        } catch (error) {
+          if (manual) showAlert(error.message || "重複確認に失敗しました。");
+          return true;
+        }
+      }
+
+      function renderDuplicates(items){
+        el.duplicateList.innerHTML = items.map((item, index) => {
+          const guardian = escapeHtml(item.guardian_name || "登録済み飼い主");
+          const pet = escapeHtml(item.pet_name || "ペット情報");
+          const phone = escapeHtml(item.phone || item.phone_normalized || "");
+          const reason = escapeHtml(item.match_reason || item.reason || "候補");
+          return `
+            <div class="duplicateItem">
+              <strong>候補 ${index + 1}</strong><br>
+              飼い主：${guardian}<br>
+              ペット：${pet}<br>
+              電話：${phone || "未表示"}<br>
+              理由：${reason}
+            </div>
+          `;
+        }).join("");
+      }
+
+      async function showSuccess(data, payload){
+        activateStep("done");
+        hide(el.duplicateCard);
+        show(el.successCard);
+        hide(el.submitArea);
+
+        const reg = data.registration || data.item || {};
+        const qrPayload = reg.qr_payload || reg.qrPayload || "";
+        const cardNo = reg.card_no || "";
+        const petName = payload.pet_name || "ペット";
+
+        el.successPetTitle.textContent = `${petName}ちゃんの診察券`;
+
+        el.successInfo.textContent = [
+          `飼い主名：${payload.guardian_name}`,
+          `ペット名：${payload.pet_name}`,
+          `種類：${payload.animal_type}`,
+          `性別：${payload.sex}`,
+          cardNo ? `診察券番号：${cardNo}` : "",
+          qrPayload ? `QR：${qrPayload}` : ""
+        ].filter(Boolean).join("\n");
+
+        const memberUrl = data.member_url || `${siteBase}/member.html?clinic_code=${encodeURIComponent(clinicCode)}`;
+        setHref(el.goMemberSuccess, memberUrl);
+        setHref(el.goWaitingSuccess, `${siteBase}/waiting.html?clinic_code=${encodeURIComponent(clinicCode)}&mode=today_queue`);
+
+        if (window.QRCode && qrPayload) {
+          try {
+            await window.QRCode.toCanvas(el.qrCanvas, qrPayload, {
+              width: 220,
+              margin: 2,
+              errorCorrectionLevel: "M"
+            });
+          } catch (e) {
+            el.qrCanvas.replaceWith(document.createTextNode(qrPayload));
+          }
+        }
+
+        scrollToElement(el.successCard);
+      }
+
+      function updateSubmitState(label){
+        const ready = state.lineReady && !state.registering;
+        el.submitBtn.disabled = !ready;
+        el.duplicateCheckBtn.disabled = state.registering;
+        el.submitBtn.textContent = label || (ready ? "LINE診察券を作成する" : "LINE確認後に登録できます");
+      }
+
+      function activateStep(name){
+        [el.stepLine, el.stepForm, el.stepDone].forEach((node) => node.classList.remove("active"));
+        if (name === "line") el.stepLine.classList.add("active");
+        if (name === "form") el.stepForm.classList.add("active");
+        if (name === "done") el.stepDone.classList.add("active");
+      }
+
+      function showLineStatus(icon, title, text){
+        el.lineStatusIcon.textContent = icon;
+        el.lineStatusTitle.textContent = title;
+        el.lineStatusText.textContent = text;
+      }
+
+      async function apiGet(path){
+        const fullUrl = path.startsWith("http") ? path : `${apiBase}${path}`;
+        const res = await fetch(fullUrl, { method:"GET", headers:{ "Accept":"application/json" } });
+        const data = await res.json().catch(() => null);
+        if (!res.ok || !data || data.ok === false) {
+          throw new Error((data && (data.message || data.error)) || `APIエラー status=${res.status}`);
+        }
+        return data;
+      }
+
+      async function apiPost(path, body){
+        const fullUrl = path.startsWith("http") ? path : `${apiBase}${path}`;
+        const res = await fetch(fullUrl, {
+          method:"POST",
+          headers:{ "Content-Type":"application/json", "Accept":"application/json" },
+          body: JSON.stringify({ clinic_code: clinicCode, ...(body || {}) })
+        });
+        const data = await res.json().catch(() => null);
+        if (!res.ok || !data || data.ok === false) {
+          const err = new Error((data && (data.message || data.error)) || `APIエラー status=${res.status}`);
+          err.data = data;
+          throw err;
+        }
+        return data;
+      }
+
+      function trimSlash(value){
+        return String(value || "").replace(/\/+$/,"");
+      }
+      function clean(value){
+        return String(value ?? "").trim();
+      }
+      function setHref(node, href){
+        if (node) node.href = href;
+      }
+      function show(node){
+        if (node) node.classList.remove("hidden");
+      }
+      function hide(node){
+        if (node) node.classList.add("hidden");
+      }
+      function scrollToElement(node){
+        if (!node) return;
+        node.scrollIntoView({ behavior:"smooth", block:"start" });
+      }
+      function showAlert(message){
+        alert(message);
+      }
+      function showToast(message, type){
+        const div = document.createElement("div");
+        div.className = `alert ${type === "ok" ? "ok" : "warn"}`;
+        div.textContent = message;
+        div.style.position = "fixed";
+        div.style.left = "14px";
+        div.style.right = "14px";
+        div.style.bottom = "88px";
+        div.style.zIndex = "20";
+        div.style.boxShadow = "0 15px 35px rgba(0,0,0,.14)";
+        document.body.appendChild(div);
+        setTimeout(() => div.remove(), 2600);
+      }
+      function escapeHtml(value){
+        return String(value ?? "")
+          .replaceAll("&","&amp;")
+          .replaceAll("<","&lt;")
+          .replaceAll(">","&gt;")
+          .replaceAll('"',"&quot;")
+          .replaceAll("'","&#039;");
+      }
+    })();
+  </script>
+</body>
+</html>
