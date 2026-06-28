@@ -1,848 +1,1356 @@
 <!doctype html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>DPRO PET CARE LINE｜system-check STEP VET-27</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#2f6f5e">
+  <title>DPRO PET CARE LINE｜本番導入 system-check</title>
+
+  <!--
+    STEP VET-34I
+    DPRO PET CARE LINE 動物病院版
+    system-check.html 本番版 完全版
+
+    目的：
+    ・営業DEMOチェックではなく、本番導入前チェックに寄せる
+    ・登録導線、受付登録、LINE連携、QR照会、本番安全ガードを確認する
+    ・本番 clinic_code と demo clinic_code の混同を防ぐ
+    ・ADMIN_TOKEN や service_role key をGitHubに書かない
+
+    前提：
+    ・STEP VET-34B SQL 実行済み
+    ・STEP VET-34C-R2 Worker 反映済み
+    ・STEP VET-34D register.html 追加済み
+    ・STEP VET-34E line-setup.html 追加済み
+    ・STEP VET-34F link.html 追加済み
+    ・STEP VET-34G member.html 反映済み
+    ・STEP VET-34H scan-pc.html / scan-ipad.html 反映済み
+    ・config.js 読み込み済み
+
+    注意：
+    ・ADMIN_TOKEN はこのHTMLに絶対に直書きしない
+    ・本番では demo reset を実行しない
+    ・本番clinic_codeでは、営業前DEMOリセットは無効化する
+    ・登録作成テストはデータを作るため、確認チェックを入れた時だけ実行する
+  -->
+
   <script src="./config.js"></script>
+
   <style>
     :root{
-      --bg:#f4f1ea; --panel:#ffffff; --ink:#22302c; --muted:#6f7b75; --line:#d9d2c4;
-      --main:#1f8f65; --main-dark:#223b34; --green:#18a765; --green-soft:#e8f7ef;
-      --blue:#2d68a6; --blue-soft:#edf5ff; --amber:#8a621f; --amber-soft:#fff6de;
-      --red:#b84a4a; --red-soft:#fff0ef; --black:#07100d; --shadow:0 24px 72px rgba(34,48,44,.13);
-      --radius:24px;
+      --bg:#f4f7f3;
+      --card:#ffffff;
+      --ink:#1f2a24;
+      --muted:#66746d;
+      --line:#dce7df;
+      --main:#2f6f5e;
+      --main2:#4f9a7f;
+      --soft:#e9f4ee;
+      --soft2:#f7fbf8;
+      --warn:#fff5dc;
+      --warn-line:#ead39a;
+      --danger:#b84a4a;
+      --danger-bg:#fff0f0;
+      --ok:#23694f;
+      --ok-bg:#eef8f2;
+      --shadow:0 18px 45px rgba(29,60,48,.13);
+      --radius:22px;
     }
+
     *{box-sizing:border-box}
     body{
-      margin:0; min-height:100vh; color:var(--ink);
-      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Yu Gothic","YuGothic","Noto Sans JP",Meiryo,sans-serif;
-      background:radial-gradient(circle at 10% 0%,rgba(31,143,101,.16),transparent 32%),
-      radial-gradient(circle at 88% 8%,rgba(231,151,36,.13),transparent 30%),
-      linear-gradient(180deg,#fbfaf6 0%,var(--bg) 100%);
+      margin:0;
+      min-height:100vh;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;
+      background:
+        radial-gradient(circle at top left,rgba(79,154,127,.20),transparent 34%),
+        linear-gradient(180deg,#f8fcf9 0%,var(--bg) 100%);
+      color:var(--ink);
+    }
+
+    a{color:inherit}
+    button,input,select,textarea{font:inherit}
+    button{cursor:pointer}
+    button:disabled{cursor:not-allowed;opacity:.62}
+    .app{
+      width:min(1180px,100%);
+      margin:0 auto;
+      padding:18px 14px 70px;
+    }
+
+    .hero{
+      position:relative;
+      overflow:hidden;
+      border-radius:28px;
+      background:
+        linear-gradient(135deg,rgba(47,111,94,.98),rgba(86,154,126,.92)),
+        radial-gradient(circle at 88% 12%,rgba(255,255,255,.25),transparent 30%);
+      color:#fff;
+      padding:24px 20px 22px;
+      box-shadow:var(--shadow);
+    }
+    .hero::after{
+      content:"CHECK";
+      position:absolute;
+      right:18px;
+      top:8px;
+      font-size:82px;
+      font-weight:950;
+      opacity:.08;
+      letter-spacing:-.08em;
+    }
+    .heroTop{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:flex-start;
+      position:relative;
+      z-index:1;
+      flex-wrap:wrap;
+    }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      border:1px solid rgba(255,255,255,.34);
+      background:rgba(255,255,255,.15);
+      padding:7px 11px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:850;
+      letter-spacing:.03em;
+    }
+    .hero h1{
+      margin:14px 0 8px;
+      font-size:clamp(25px,5vw,42px);
+      line-height:1.12;
+      letter-spacing:-.03em;
+      position:relative;
+      z-index:1;
+    }
+    .hero p{
+      margin:0;
+      color:rgba(255,255,255,.9);
+      line-height:1.75;
+      font-weight:650;
+      position:relative;
+      z-index:1;
+      max-width:880px;
+    }
+    .heroActions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top:18px;
+      position:relative;
+      z-index:1;
+    }
+
+    .btn{
+      border:0;
+      border-radius:16px;
+      padding:12px 14px;
+      font-weight:900;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      min-height:46px;
+      transition:.15s transform ease,.15s box-shadow ease,.15s opacity ease;
+      text-decoration:none;
+      white-space:nowrap;
+    }
+    .btn:hover{transform:translateY(-1px)}
+    .btnPrimary{
+      background:var(--main);
+      color:#fff;
+      box-shadow:0 12px 28px rgba(47,111,94,.22);
+    }
+    .btnWhite{
+      background:#fff;
+      color:var(--main);
+      box-shadow:0 10px 24px rgba(10,40,28,.13);
+    }
+    .btnGhost{
+      background:rgba(255,255,255,.16);
+      color:#fff;
+      border:1px solid rgba(255,255,255,.28);
+    }
+    .btnSoft{
+      background:var(--soft);
+      color:var(--main);
+      border:1px solid #cfe4d6;
+    }
+    .btnDanger{
+      background:#fff0f0;
+      color:var(--danger);
+      border:1px solid #f0c7c7;
+    }
+    .btnMini{
+      min-height:36px;
+      padding:8px 10px;
+      border-radius:12px;
+      font-size:13px;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:14px;
+      margin-top:14px;
+    }
+    @media (min-width:920px){
+      .grid.two{grid-template-columns:1fr 1fr}
+      .grid.three{grid-template-columns:repeat(3,1fr)}
+      .grid.side{grid-template-columns:340px 1fr}
+    }
+
+    .card{
+      background:rgba(255,255,255,.94);
+      border:1px solid rgba(220,231,223,.95);
+      border-radius:var(--radius);
+      box-shadow:0 14px 34px rgba(29,60,48,.08);
+      padding:18px;
+      backdrop-filter: blur(8px);
+    }
+    .card h2{
+      margin:0 0 10px;
+      font-size:20px;
+      letter-spacing:-.02em;
+    }
+    .card h3{
+      margin:0 0 8px;
+      font-size:16px;
+    }
+    .lead{
+      color:var(--muted);
+      line-height:1.75;
+      font-weight:650;
+      margin:0;
+    }
+    .small{
+      color:var(--muted);
+      font-size:13px;
       line-height:1.7;
     }
-    a{color:inherit} button,input{font:inherit}
-    .wrap{width:min(1280px,calc(100% - 28px));margin:18px auto 54px}
-    .topbar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:14px}
-    .brand{display:flex;align-items:center;gap:12px;min-width:0}
-    .logo{width:52px;height:52px;border-radius:18px;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,#1f8f65,#83c99f);box-shadow:0 14px 26px rgba(31,143,101,.23);font-size:26px;flex:0 0 auto}
-    .brand small{display:block;color:var(--muted);font-weight:950;font-size:12px;letter-spacing:.08em}
-    .brand strong{display:block;font-size:clamp(19px,2.4vw,30px);line-height:1.12;letter-spacing:-.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .nav{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px}
-    .pill,.btn{
-      display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1px solid var(--line);
-      border-radius:999px;padding:9px 13px;background:rgba(255,255,255,.86);color:var(--ink);text-decoration:none;
-      font-size:13px;font-weight:950;line-height:1.15;cursor:pointer;transition:.15s transform,.15s box-shadow,.15s background;
+
+    .alert{
+      border-radius:18px;
+      padding:14px;
+      border:1px solid var(--line);
+      background:#fff;
+      line-height:1.7;
+      font-weight:650;
     }
-    .pill:hover,.btn:hover{transform:translateY(-1px);box-shadow:0 10px 22px rgba(34,48,44,.11);background:#fff}
-    .btn-main{border-color:transparent;background:var(--main);color:#fff;box-shadow:0 14px 28px rgba(31,143,101,.24)}
-    .btn-sub{border-color:#bfe3cc;background:var(--green-soft);color:#11704c}
-    .btn-warn{border-color:#efd89e;background:var(--amber-soft);color:var(--amber)}
-    .btn-danger{border-color:#ecc0bc;background:var(--red-soft);color:#9f3939}
-    .btn-dark{border-color:#234038;background:#07100d;color:#eafff4}
-    .hero{
-      display:grid;grid-template-columns:1.06fr .94fr;gap:16px;align-items:stretch;margin-bottom:16px;
+    .alert.warn{background:var(--warn);border-color:var(--warn-line);color:#6b4c00}
+    .alert.danger{background:var(--danger-bg);border-color:#f0c7c7;color:#7c2323}
+    .alert.ok{background:var(--ok-bg);border-color:#bfe1ca;color:#1f6045}
+
+    .field{margin-bottom:12px}
+    label{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      font-weight:850;
+      margin-bottom:6px;
+      font-size:14px;
     }
-    .hero-card{
-      position:relative;overflow:hidden;border-radius:32px;background:linear-gradient(135deg,rgba(34,59,52,.98),rgba(31,143,101,.92));
-      color:#fff;padding:clamp(22px,3.6vw,42px);box-shadow:var(--shadow);
+    .req,.opt{
+      border-radius:999px;
+      padding:2px 7px;
+      font-size:11px;
+      line-height:1.4;
+      flex:0 0 auto;
     }
-    .hero-card::after{content:"CHECK";position:absolute;right:-26px;bottom:-42px;font-size:clamp(76px,13vw,170px);font-weight:1000;letter-spacing:.06em;opacity:.06;pointer-events:none}
-    .badge{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:8px 12px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.24);color:#fff;font-size:12px;font-weight:950;letter-spacing:.04em;margin-bottom:14px}
-    .badge-dark{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:7px 11px;background:var(--green-soft);color:#11704c;font-size:12px;font-weight:950;margin-bottom:12px}
-    h1{position:relative;z-index:1;margin:0 0 14px;font-size:clamp(31px,4.5vw,60px);line-height:1.08;letter-spacing:-.055em}
-    h2{margin:0 0 10px;font-size:clamp(22px,2.6vw,32px);line-height:1.2;letter-spacing:-.03em}
-    h3{margin:0 0 8px;font-size:18px}
-    .lead{position:relative;z-index:1;margin:0;color:rgba(255,255,255,.88);font-size:clamp(14px,1.7vw,17px);font-weight:770;line-height:1.9}
-    .plain-lead{margin:0;color:#5a6862;font-size:14px;font-weight:780;line-height:1.8}
-    .panel{border:1px solid rgba(217,210,196,.88);border-radius:var(--radius);background:rgba(255,255,255,.92);box-shadow:var(--shadow);padding:clamp(18px,2.5vw,28px);margin:16px 0}
-    .setup-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    .full{grid-column:1/-1}
-    label{display:block;margin-bottom:6px;color:#46534d;font-size:13px;font-weight:950}
-    input{width:100%;border:1px solid #d8d0c0;border-radius:15px;padding:11px 12px;background:#fff;color:var(--ink);font-size:14px;font-weight:800;outline:none}
-    input:focus{border-color:rgba(31,143,101,.65);box-shadow:0 0 0 4px rgba(31,143,101,.11)}
-    .button-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;align-items:center}
-    .quick-nav{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:16px 0}
-    .nav-card{background:rgba(255,255,255,.88);border:1px solid rgba(217,210,196,.9);border-radius:18px;padding:14px;cursor:pointer;min-height:84px;transition:.15s ease}
-    .nav-card:hover{transform:translateY(-1px);box-shadow:0 12px 26px rgba(34,48,44,.09)}
-    .nav-card strong{display:block;font-size:15px;margin-bottom:4px}.nav-card span{color:var(--muted);font-size:12px;font-weight:850;line-height:1.45}
-    .summary-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:16px 0}
-    .summary-card{background:#fff;border:1px solid rgba(217,210,196,.9);border-radius:20px;padding:14px;box-shadow:0 12px 36px rgba(34,48,44,.06)}
-    .summary-card .label{font-size:12px;color:var(--muted);font-weight:950}.summary-card .value{font-size:24px;font-weight:1000;letter-spacing:-.04em;margin-top:3px}
-    .summary-card.pass{border-color:#bfe3cc;background:#f0fbf5}.summary-card.warn{border-color:#efd89e;background:#fffaf0}.summary-card.fail{border-color:#ecc0bc;background:#fff5f3}.summary-card.info{border-color:#bdd5ef;background:#f4f9ff}
-    .panel-head{display:flex;gap:16px;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
-    .small{color:var(--muted);font-size:12px;font-weight:850}
-    .status-box{border:1px solid #e1d8c9;border-radius:16px;background:#fffdf9;padding:12px 14px;font-size:13px;font-weight:850;white-space:pre-wrap}
-    .status-box.ok{border-color:#bfe3cc;background:#f0fbf5;color:#11704c}.status-box.warn{border-color:#efd89e;background:#fffaf0;color:#8a621f}.status-box.ng{border-color:#ecc0bc;background:#fff5f3;color:#9f3939}.status-box.info{border-color:#bdd5ef;background:#f4f9ff;color:#2d68a6}
-    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-    .metric-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0}
-    .metric{background:#fff;border:1px solid rgba(217,210,196,.9);border-radius:16px;padding:12px}.metric span{display:block;color:var(--muted);font-size:11px;font-weight:950}.metric b{display:block;font-size:18px;margin-top:4px}
-    .check-list{display:grid;gap:8px;margin-top:12px}.check-item{display:grid;grid-template-columns:78px 210px minmax(0,1fr);gap:12px;align-items:start;border:1px solid rgba(217,210,196,.9);border-radius:14px;background:#fff;padding:10px 12px;font-size:13px}
-    .mini-pill{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;padding:5px 9px;font-size:11px;font-weight:1000;white-space:nowrap;background:#f4f0e8;color:#645443}
-    .mini-pill.pass{background:#dcfce7;color:#166534}.mini-pill.warn{background:#fef3c7;color:#92400e}.mini-pill.fail{background:#fee2e2;color:#991b1b}.mini-pill.info{background:#dbeafe;color:#1d4ed8}
-    .url-list{display:grid;gap:9px;margin-top:12px}.url-row{display:grid;grid-template-columns:170px minmax(0,1fr) auto auto;gap:8px;align-items:center;background:#fff;border:1px solid rgba(217,210,196,.9);border-radius:14px;padding:10px}.url-title{font-weight:1000;font-size:13px}.url-desc{color:var(--muted);font-size:11px;font-weight:850}.url-value{background:#fbfaf6;border:1px solid rgba(217,210,196,.9);border-radius:12px;padding:9px;font-size:12px;font-weight:800;color:#166534;word-break:break-all}
-    textarea.copy-box{width:100%;min-height:170px;margin-top:12px;background:#07100d;color:#eafff4;border:0;border-radius:16px;padding:14px;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:12px;line-height:1.65;resize:vertical}
-    details{border:1px solid rgba(217,210,196,.9);border-radius:18px;background:#fff;margin:14px 0;overflow:hidden}summary{cursor:pointer;padding:14px 16px;font-weight:1000;color:var(--ink);background:#fbfaf6}details .detail-body{padding:14px 16px;border-top:1px solid rgba(217,210,196,.9)}
-    pre.log{background:#07100d;color:#eafff4;border-radius:18px;padding:16px;overflow:auto;max-height:540px;font-size:12px;line-height:1.55;white-space:pre-wrap}
-    .debug-card{background:#07100d;color:#eafff4;border:1px solid #234038;border-radius:20px;padding:14px}.debug-card h3{color:#43e886}.debug-card .status-box{background:#0b1513;border-color:#234038;color:#cce8dc}
+    .req{color:#fff;background:var(--main)}
+    .opt{color:var(--muted);background:#eef3ef}
+    input,select,textarea{
+      width:100%;
+      border:1px solid var(--line);
+      border-radius:16px;
+      background:#fff;
+      color:var(--ink);
+      padding:12px 13px;
+      outline:none;
+      transition:.15s border-color ease,.15s box-shadow ease;
+    }
+    textarea{
+      min-height:86px;
+      resize:vertical;
+      line-height:1.65;
+    }
+    input:focus,select:focus,textarea:focus{
+      border-color:#8dc6a3;
+      box-shadow:0 0 0 4px rgba(79,154,127,.13);
+    }
+    .row{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:12px;
+    }
+    @media (min-width:700px){
+      .row.two{grid-template-columns:1fr 1fr}
+      .row.three{grid-template-columns:1fr 1fr 1fr}
+    }
+
+    .checkList{
+      display:grid;
+      gap:10px;
+      margin-top:12px;
+    }
+    .checkItem{
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:14px;
+      background:#fff;
+      display:grid;
+      gap:10px;
+    }
+    .checkHeader{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:flex-start;
+      flex-wrap:wrap;
+    }
+    .checkHeader strong{
+      display:block;
+      font-size:15px;
+      line-height:1.45;
+    }
+    .checkHeader span{
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.55;
+    }
+    .status{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      border-radius:999px;
+      padding:5px 8px;
+      background:#eef3ef;
+      color:var(--muted);
+      font-size:12px;
+      font-weight:900;
+      white-space:nowrap;
+    }
+    .status.ok{background:#e8f7ee;color:#1f6045}
+    .status.ng{background:#fff0f0;color:#8b2e2e}
+    .status.warn{background:#fff5dc;color:#765c1f}
+    .status.run{background:#eef4ff;color:#315180}
+
+    .result{
+      background:#f6f8f6;
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:10px;
+      color:#52625a;
+      font-size:12px;
+      line-height:1.55;
+      white-space:pre-wrap;
+      word-break:break-word;
+      max-height:260px;
+      overflow:auto;
+    }
+    .mono{
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    }
     .hidden{display:none!important}
-    .footer{text-align:center;color:var(--muted);font-size:12px;margin-top:28px;font-weight:850}
-    @media(max-width:980px){.hero,.two-col{grid-template-columns:1fr}.quick-nav{grid-template-columns:1fr 1fr}.summary-grid,.metric-row{grid-template-columns:1fr 1fr}.url-row{grid-template-columns:1fr}.check-item{grid-template-columns:1fr}.setup-grid{grid-template-columns:1fr}}
-    @media(max-width:620px){.wrap{width:min(100% - 18px,1280px);margin-top:10px}.hero-card,.panel{border-radius:22px}.quick-nav,.summary-grid,.metric-row{grid-template-columns:1fr}.topbar{align-items:flex-start;flex-direction:column}.nav{justify-content:flex-start}.btn,.pill{width:100%}}
+
+    .scoreBox{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:10px;
+      margin-top:14px;
+    }
+    @media (min-width:720px){
+      .scoreBox{grid-template-columns:repeat(4,1fr)}
+    }
+    .score{
+      border:1px solid var(--line);
+      background:#fff;
+      border-radius:18px;
+      padding:14px;
+    }
+    .score strong{
+      display:block;
+      font-size:28px;
+      letter-spacing:-.04em;
+    }
+    .score span{
+      color:var(--muted);
+      font-size:12px;
+      font-weight:850;
+    }
+
+    .linkGrid{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:8px;
+      margin-top:10px;
+    }
+    @media (min-width:720px){
+      .linkGrid{grid-template-columns:1fr 1fr}
+    }
+    .linkCard{
+      border:1px solid var(--line);
+      background:#fff;
+      border-radius:16px;
+      padding:12px;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:center;
+    }
+    .linkCard div{
+      min-width:0;
+    }
+    .linkCard strong{
+      display:block;
+      font-size:13px;
+    }
+    .linkCard span{
+      display:block;
+      font-size:11px;
+      color:var(--muted);
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      max-width:420px;
+    }
+
+    .dangerZone{
+      border:1px solid #efc3c3;
+      background:#fff7f7;
+      border-radius:20px;
+      padding:14px;
+      margin-top:12px;
+    }
+
+    .toggle{
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      margin-top:10px;
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:12px;
+      background:#fff;
+    }
+    .toggle input{
+      width:22px;
+      height:22px;
+      margin:2px 0 0;
+      accent-color:var(--main);
+      flex:0 0 auto;
+    }
+    .footer{
+      margin-top:18px;
+      text-align:center;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.7;
+    }
   </style>
 </head>
 
 <body>
-  <div class="wrap">
-    <header class="topbar">
-      <div class="brand">
-        <div class="logo">✅</div>
-        <div>
-          <small>STEP VET-28B｜営業前DEMOリセット確認欄追加版</small>
-          <strong>DPRO PET CARE LINE</strong>
-        </div>
-      </div>
-      <nav class="nav">
-        <a class="pill" href="./index.html?v=step-vet-28b">管理トップ</a>
-        <a class="pill" href="./rich-menu.html?v=step-vet-28b">LINE入口</a>
-        <a class="pill" href="./scan-pc.html?v=step-vet-28b">受付PC</a>
-        <a class="pill" href="./doctor.html?v=step-vet-28b">ドクター</a>
-        <a class="pill" href="./owner.html?v=step-vet-28b">オーナー</a>
-      </nav>
-    </header>
-
+  <div class="app">
     <section class="hero">
-      <div class="hero-card">
-        <span class="badge">通常チェック + 黒画面デバッグ統合</span>
-        <h1>NGの場所まで<br>この画面で分かる。</h1>
-        <p class="lead">
-          歯科版のように、上から順に確認できる system-check に整理しました。
-          Worker、診察券、順番受付、QR受付、ドクター、オーナー、LINEフォロー、予防案内を確認し、NG時は黒い診断ログで原因を見ます。
-        </p>
-        <div class="button-row">
-          <button class="btn btn-main" id="runAllButton" type="button">一括チェック</button>
-          <button class="btn btn-dark" id="runDebugButton" type="button">黒ログ付きチェック</button>
-          <button class="btn btn-sub" id="saveAdminButton" type="button">管理コード保存</button>
-          <button class="btn btn-danger" id="forgetAdminButton" type="button">管理コード削除</button>
-        </div>
+      <div class="heroTop">
+        <div class="badge">🐾 DPRO PET CARE LINE</div>
+        <div class="badge">STEP VET-34I</div>
       </div>
+      <h1>本番導入 system-check</h1>
+      <p>
+        営業DEMOではなく、契約後に動物病院で本当に使うための確認画面です。
+        登録・受付登録・LINE連携・QR診察券照会・本番安全ガードを順番に確認します。
+      </p>
+      <div class="heroActions">
+        <a class="btn btnWhite" id="goMember" href="./member.html">診察券</a>
+        <a class="btn btnGhost" id="goRegister" href="./register.html">初回登録</a>
+        <a class="btn btnGhost" id="goLineSetup" href="./line-setup.html">受付登録</a>
+        <a class="btn btnGhost" id="goScanPc" href="./scan-pc.html">受付PC</a>
+        <a class="btn btnGhost" id="goOwner" href="./owner.html">オーナー</a>
+      </div>
+    </section>
 
-      <div class="panel" style="margin:0;">
-        <span class="badge-dark">基本設定</span>
-        <div class="setup-grid">
-          <div class="full">
-            <label for="apiBaseInput">Worker API URL</label>
-            <input id="apiBaseInput" autocomplete="off" />
+    <div class="grid side">
+      <aside>
+        <section class="card">
+          <h2>基本設定</h2>
+
+          <div class="field">
+            <label for="clinicCode">clinic_code <span class="req">必須</span></label>
+            <input id="clinicCode" type="text" value="dpro_vet_demo">
           </div>
-          <div>
-            <label for="clinicCodeInput">clinic_code</label>
-            <input id="clinicCodeInput" autocomplete="off" />
+
+          <div class="field">
+            <label for="apiBase">Worker API URL <span class="req">必須</span></label>
+            <input id="apiBase" type="url" value="https://dpro-vet-qr-api.dpromstk2000.workers.dev">
           </div>
-          <div>
-            <label for="adminCodeInput">管理コード</label>
-            <input id="adminCodeInput" type="text" placeholder="DPRO-VET-2026-PETCARE-9147" autocomplete="off" spellcheck="false" />
+
+          <div class="field">
+            <label for="siteBase">GitHub Pages URL <span class="req">必須</span></label>
+            <input id="siteBase" type="url" placeholder="https://dpromstk2000-lab.github.io/DPRO-VET-QR">
           </div>
-          <div class="full">
-            <label for="staffNameInput">スタッフ名</label>
-            <input id="staffNameInput" value="管理スタッフ" autocomplete="off" />
+
+          <div class="field">
+            <label for="adminCode">管理コード <span class="req">必須</span></label>
+            <input id="adminCode" type="password" placeholder="ADMIN_TOKEN">
           </div>
-        </div>
-        <div id="configStatus" class="status-box info" style="margin-top:12px;">設定確認中です。</div>
-      </div>
-    </section>
 
-    <nav class="quick-nav">
-      <div class="nav-card" data-scroll="#urlSetPanel"><strong>1. URLセット</strong><span>端末別URLを作る</span></div>
-      <div class="nav-card" data-scroll="#apiPanel"><strong>2. API・件数</strong><span>主要APIを確認</span></div>
-      <div class="nav-card" data-scroll="#demoResetPanel"><strong>3. DEMOリセット</strong><span>営業前に再生成</span></div>
-      <div class="nav-card" data-scroll="#debugPanel"><strong>4. 黒ログ</strong><span>NGの原因を見る</span></div>
-      <div class="nav-card" data-scroll="#latestLinksPanel"><strong>5. 最新リンク</strong><span>営業前に開くURL</span></div>
-    </nav>
+          <div class="row two">
+            <button class="btn btnPrimary" type="button" id="saveConfigBtn">保存</button>
+            <button class="btn btnSoft" type="button" id="loadConfigBtn">再読込</button>
+          </div>
 
-    <section class="summary-grid">
-      <div class="summary-card info"><div class="label">Worker</div><div class="value" id="sumWorker">未確認</div></div>
-      <div class="summary-card info"><div class="label">公開API</div><div class="value" id="sumPublic">未確認</div></div>
-      <div class="summary-card info"><div class="label">管理API</div><div class="value" id="sumAdmin">未確認</div></div>
-      <div class="summary-card info"><div class="label">フォロー</div><div class="value" id="sumFollow">未確認</div></div>
-      <div class="summary-card info"><div class="label">総合判定</div><div class="value" id="sumTotal">未確認</div></div>
-    </section>
+          <div id="envNotice" class="alert warn" style="margin-top:12px"></div>
+        </section>
 
-    <section class="panel" id="urlSetPanel">
-      <div class="panel-head">
-        <div>
-          <h2>端末別URLセット</h2>
-          <div class="small">お客スマホ、受付PC、受付タブレット、ドクター、オーナーのURLをまとめます。</div>
-        </div>
-        <div class="button-row" style="margin:0;">
-          <button class="btn btn-main" id="generateUrlsButton" type="button">URLセット生成</button>
-          <button class="btn btn-sub" id="copyUrlsButton" type="button">URL一覧コピー</button>
-        </div>
-      </div>
+        <section class="card" style="margin-top:14px">
+          <h2>一括チェック</h2>
+          <p class="lead">
+            まずは安全な確認だけを実行します。登録作成テストは下の危険ゾーンで個別に実行します。
+          </p>
+          <div style="display:grid;gap:8px;margin-top:12px">
+            <button class="btn btnPrimary" type="button" id="runSafeChecksBtn">安全チェックを一括実行</button>
+            <button class="btn btnSoft" type="button" id="runLinkChecksBtn">画面URLチェック</button>
+            <button class="btn btnDanger" type="button" id="clearResultsBtn">結果クリア</button>
+          </div>
 
-      <div class="metric-row">
-        <div class="metric"><span>clinic_code</span><b id="urlClinicCode">-</b></div>
-        <div class="metric"><span>GitHub Pages</span><b>DPRO-VET-QR</b></div>
-        <div class="metric"><span>Worker</span><b>VET API</b></div>
-        <div class="metric"><span>状態</span><b id="urlState">未生成</b></div>
-      </div>
+          <div class="scoreBox">
+            <div class="score"><strong id="scoreOk">0</strong><span>OK</span></div>
+            <div class="score"><strong id="scoreWarn">0</strong><span>確認</span></div>
+            <div class="score"><strong id="scoreNg">0</strong><span>NG</span></div>
+            <div class="score"><strong id="scoreTotal">0</strong><span>合計</span></div>
+          </div>
+        </section>
+      </aside>
 
-      <div id="urlWarning" class="status-box warn">
-        DEMOでは dpro_vet_demo を使います。本番医院では契約後の病院専用 clinic_code に変更します。
-      </div>
+      <main>
+        <section class="card">
+          <h2>本番導入チェック一覧</h2>
+          <p class="lead">
+            本番環境では、登録・LINE連携・QR受付だけでなく、デモリセットが本番clinic_codeで動かないことも重要です。
+          </p>
 
-      <div class="url-list" id="urlList">
-        <div class="status-box info">URLセットを生成すると、ここに各画面のフルURLが表示されます。</div>
-      </div>
+          <div class="checkList" id="checkList"></div>
+        </section>
 
-      <details>
-        <summary>コピペ用URL一覧を開く</summary>
-        <div class="detail-body">
-          <textarea id="urlCopyBox" class="copy-box" readonly>まだ生成していません。</textarea>
-        </div>
-      </details>
-    </section>
+        <section class="card" style="margin-top:14px">
+          <h2>画面URLチェック</h2>
+          <p class="lead">
+            GitHub直下に追加・上書きした画面が開けるか確認します。
+          </p>
+          <div class="linkGrid" id="linkGrid"></div>
+        </section>
 
-    <section class="panel" id="apiPanel">
-      <div class="panel-head">
-        <div>
-          <h2>API・件数チェック</h2>
-          <div class="small">公開系と管理系を分けて確認します。NG時は診断ログにURL・ステータス・JSONが残ります。管理コード欄に入力されていれば、ボタン実行時に自動保存してから確認します。</div>
-        </div>
-        <div class="button-row" style="margin:0;">
-          <button class="btn btn-main" id="apiCheckButton" type="button">APIチェック</button>
-          <button class="btn btn-dark" id="apiDebugButton" type="button">黒ログ付き実行</button>
-        </div>
-      </div>
+        <section class="card" style="margin-top:14px">
+          <h2>個別テスト</h2>
+          <p class="lead">
+            QR照会・既存患者検索・LINE連携QR発行など、必要な時だけ実行します。
+          </p>
 
-      <div class="metric-row">
-        <div class="metric"><span>ペット診察券</span><b id="memberCount">-</b></div>
-        <div class="metric"><span>本日の受付</span><b id="queueCount">-</b></div>
-        <div class="metric"><span>LINEフォロー</span><b id="followCount">-</b></div>
-        <div class="metric"><span>予防案内</span><b id="preventionCount">-</b></div>
-      </div>
+          <div class="grid two">
+            <div>
+              <h3>QR診察券照会</h3>
+              <div class="field">
+                <label for="cardToken">card_token / vetcard文字列 <span class="opt">任意</span></label>
+                <input id="cardToken" type="text" placeholder="card_xxx または vetcard:clinic:card_xxx">
+              </div>
+              <button class="btn btnPrimary" type="button" id="cardLookupBtn">QR照会テスト</button>
+              <div id="cardLookupResult" class="result mono" style="margin-top:10px">未実行</div>
+            </div>
 
-      <div class="check-list" id="apiChecks">
-        <div class="status-box info">まだAPIチェックを実行していません。</div>
-      </div>
-    </section>
+            <div>
+              <h3>既存患者検索</h3>
+              <div class="field">
+                <label for="searchKeyword">検索キーワード <span class="opt">任意</span></label>
+                <input id="searchKeyword" type="text" placeholder="飼い主名・電話番号・ペット名">
+              </div>
+              <button class="btn btnPrimary" type="button" id="searchBtn">検索テスト</button>
+              <div id="searchResult" class="result mono" style="margin-top:10px">未実行</div>
+            </div>
+          </div>
 
+          <div class="grid two" style="margin-top:14px">
+            <div>
+              <h3>LINE連携QR発行</h3>
+              <div class="field">
+                <label for="guardianId">guardian_id <span class="opt">任意</span></label>
+                <input id="guardianId" type="text" placeholder="guardian_id">
+              </div>
+              <div class="field">
+                <label for="petId">pet_id <span class="opt">任意</span></label>
+                <input id="petId" type="text" placeholder="pet_id">
+              </div>
+              <button class="btn btnPrimary" type="button" id="issueLinkBtn">LINE連携QR発行テスト</button>
+              <div id="issueLinkResult" class="result mono" style="margin-top:10px">未実行</div>
+            </div>
 
-    <section class="panel" id="demoResetPanel">
-      <div class="panel-head">
-        <div>
-          <h2>営業前DEMOリセット</h2>
-          <div class="small">営業前にボタン1つで、今日基準の受付・診察中・診療済み・LINEフォロー・予防案内を再作成します。</div>
-        </div>
-        <div class="button-row" style="margin:0;">
-          <button class="btn btn-dark" id="demoResetButton" type="button">営業前DEMOリセット実行</button>
-          <button class="btn btn-sub" id="demoResetCheckButton" type="button">リセット後チェック</button>
-        </div>
-      </div>
+            <div>
+              <h3>重複確認リスト</h3>
+              <button class="btn btnPrimary" type="button" id="duplicateReviewsBtn">重複確認を取得</button>
+              <div id="duplicateReviewsResult" class="result mono" style="margin-top:10px">未実行</div>
+            </div>
+          </div>
 
-      <div class="metric-row">
-        <div class="metric"><span>対象clinic_code</span><b id="demoClinicCode">-</b></div>
-        <div class="metric"><span>本日の受付</span><b id="demoQueueCount">-</b></div>
-        <div class="metric"><span>LINEフォロー</span><b id="demoFollowCount">-</b></div>
-        <div class="metric"><span>予防案内</span><b id="demoPreventionCount">-</b></div>
-      </div>
+          <div class="dangerZone">
+            <h3>登録作成テスト</h3>
+            <p class="lead">
+              このテストは実際に飼い主・ペット・診察券QRを作成します。
+              本番clinic_codeでは慎重に実行してください。通常はデモ環境か、テスト用clinic_codeで確認します。
+            </p>
 
-      <div class="setup-grid" style="margin-top:12px;">
-        <div class="full">
-          <label for="demoConfirmInput">安全確認の文言</label>
-          <input id="demoConfirmInput" type="text" placeholder="DEMO動物病院だけ実行" autocomplete="off" />
-        </div>
-      </div>
+            <div class="toggle">
+              <input id="allowCreateTest" type="checkbox">
+              <div>
+                <strong>登録作成テストを許可する</strong>
+                <div class="small">チェックを入れた場合だけ `/api/admin/register-by-staff` を実行します。</div>
+              </div>
+            </div>
 
-      <div class="button-row">
-        <button class="btn btn-sub" id="fillDemoConfirmButton" type="button">確認文言を入れる</button>
-      </div>
+            <div class="row two" style="margin-top:12px">
+              <div class="field">
+                <label for="testGuardianName">テスト飼い主名</label>
+                <input id="testGuardianName" type="text" value="本番確認 テスト">
+              </div>
+              <div class="field">
+                <label for="testPhone">テスト電話番号</label>
+                <input id="testPhone" type="tel" value="090-0000-3434">
+              </div>
+            </div>
 
-      <div id="demoResetStatus" class="status-box info">
-        まだ実行していません。dpro_vet_demo の時だけ実行できます。実行前に「DEMO動物病院だけ実行」と入力してください。
-      </div>
-    </section>
+            <div class="row two">
+              <div class="field">
+                <label for="testPetName">テストペット名</label>
+                <input id="testPetName" type="text" value="チェックちゃん">
+              </div>
+              <div class="field">
+                <label for="testAnimalType">種類</label>
+                <input id="testAnimalType" type="text" value="犬">
+              </div>
+            </div>
 
-    <section class="panel" id="rolePanel">
-      <div class="panel-head">
-        <div>
-          <h2>役割別チェック</h2>
-          <div class="small">画面ごとに何ができる状態かを確認します。</div>
-        </div>
-      </div>
-      <div class="two-col">
-        <div class="status-box" id="roleStatusBox">まだ確認していません。</div>
-        <div class="status-box" id="roleNextBox">確認後に次の作業を表示します。</div>
-      </div>
-    </section>
-
-    <section class="panel" id="debugPanel">
-      <div class="panel-head">
-        <div>
-          <h2>黒画面デバッグ統合</h2>
-          <div class="small">歯科版の診断ログと同じ役割です。APIごとのURL・HTTPステータス・レスポンスJSONを表示します。</div>
-        </div>
-        <div class="button-row" style="margin:0;">
-          <button class="btn btn-dark" id="debugAdminButton" type="button">管理系だけ黒ログ</button>
-          <button class="btn btn-sub" id="copyLogButton" type="button">ログコピー</button>
-          <button class="btn btn-danger" id="clearLogButton" type="button">ログ消去</button>
-        </div>
-      </div>
-
-      <div class="debug-card">
-        <h3>診断ログ</h3>
-        <div id="debugSummary" class="status-box">まだ実行していません。</div>
-        <pre class="log" id="logBox">まだログはありません。</pre>
-      </div>
-    </section>
-
-    <section class="panel" id="latestLinksPanel">
-      <div class="panel-head">
-        <div>
-          <h2>最新版画面リンク</h2>
-          <div class="small">営業前に開く画面です。上から順に確認すると流れが伝わります。</div>
-        </div>
-      </div>
-      <div class="url-list" id="latestLinks"></div>
-    </section>
+            <button class="btn btnDanger" type="button" id="createTestBtn">登録作成テストを実行</button>
+            <div id="createTestResult" class="result mono" style="margin-top:10px">未実行</div>
+          </div>
+        </section>
+      </main>
+    </div>
 
     <div class="footer">
-      DPRO PET CARE LINE / 動物病院LINE受付・診察券・フォロー管理 / system-check.html STEP VET-28B<br />
-      この画面には Supabase Service Role Key は書き出していません。
+      STEP VET-34I system-check.html production complete<br>
+      DPRO PET CARE LINE / 動物病院版
     </div>
   </div>
 
   <script>
-    const CONFIG = window.DPRO_CONFIG || {};
-    const DEFAULTS = {
-      apiBase: (CONFIG.API_BASE_URL || "https://dpro-vet-qr-api.dpromstk2000.workers.dev").replace(/\/$/, ""),
-      clinicCode: CONFIG.CLINIC_CODE || CONFIG.DEFAULT_CLINIC_CODE || "dpro_vet_demo",
-      adminStorageKey: "dpro_vet_system_check_admin_code_step27",
-      staffStorageKey: "dpro_vet_system_check_staff_name_step27"
-    };
-    const GITHUB_BASE = "https://dpromstk2000-lab.github.io/DPRO-VET-QR";
-    const DEMO_CLINIC_CODE = "dpro_vet_demo";
-    const CORRECT_DEMO_TOKEN = "DPRO-VET-2026-PETCARE-9147";
+    (function(){
+      "use strict";
 
-    const VERSION = {
-      index:"step-vet-28",
-      richMenu:"step-vet-28",
-      systemCheck:"step-vet-28b",
-      debug:"step-vet-26",
-      member:"step-vet-28",
-      waiting:"step-vet-28",
-      scanPc:"step-vet-28",
-      scanIpad:"step-vet-28",
-      doctor:"step-vet-28",
-      owner:"step-vet-28",
-      admin:"step-vet-28",
-      adminQueue:"step-vet-28"
-    };
+      const CONFIG = window.DPRO_VET_CONFIG || window.DPRO_CONFIG || window.APP_CONFIG || {};
+      const DEFAULT_API_BASE = "https://dpro-vet-qr-api.dpromstk2000.workers.dev";
+      const DEFAULT_SITE_BASE = "https://dpromstk2000-lab.github.io/DPRO-VET-QR";
+      const DEFAULT_CLINIC_CODE = "dpro_vet_demo";
+      const DEMO_CONFIRM_TEXT = "DEMO動物病院だけ実行";
 
-    const tests = [
-      {id:"health", label:"Worker health", area:"公開", admin:false, path:"/api/health", okHint:"Worker起動OK"},
-      {id:"clinic", label:"病院情報", area:"公開", admin:false, path:"/api/public/clinic", okHint:"病院情報OK"},
-      {id:"member", label:"ペット診察券", area:"公開", admin:false, path:"/api/member/pet-cards", params:{demo:"true"}, okHint:"診察券OK"},
-      {id:"queueSummary", label:"混雑目安", area:"公開", admin:false, path:"/api/public/queue/summary", params:()=>({date:todayString()}), okHint:"混雑目安OK"},
-      {id:"queueEntries", label:"本日の受付一覧", area:"公開", admin:false, path:"/api/public/queue/entries", params:()=>({date:todayString(),limit:30}), okHint:"受付一覧OK"},
-      {id:"ownerToday", label:"オーナー今日やること", area:"管理", admin:true, path:"/api/owner/today", params:()=>({date:todayString()}), okHint:"owner.html API OK"},
-      {id:"scanLookup", label:"QR診察券 lookup", area:"管理", admin:true, path:"/api/scan/lookup", params:{qr_token:"vet_demo_coco_qr_token"}, okHint:"QR受付入口OK"},
-      {id:"doctorQueue", label:"ドクター受付一覧", area:"管理", admin:true, path:"/api/doctor/queue/today", params:()=>({date:todayString()}), okHint:"doctor.html API OK"},
-      {id:"queueSettings", label:"受付ルール設定", area:"管理", admin:true, path:"/api/admin/queue/settings", okHint:"受付設定OK"},
-      {id:"followupsStandalone", label:"LINEフォロー単独API", area:"管理", admin:true, path:"/api/owner/followups", params:{limit:20}, okHint:"LINEフォローOK", optional:true},
-      {id:"preventionsStandalone", label:"予防案内単独API", area:"管理", admin:true, path:"/api/admin/prevention-schedules", params:{limit:20}, okHint:"予防案内OK", optional:true},
-      {id:"unlinkedStandalone", label:"LINE未連携単独API", area:"管理", admin:true, path:"/api/owner/line-unlinked-guardians", params:{limit:20}, okHint:"LINE未連携OK", optional:true},
-      {id:"safetyCheck", label:"安全チェック", area:"管理", admin:true, path:"/api/admin/safety-check", okHint:"安全チェックOK", optional:true}
-    ];
-
-    let lastUrls = [];
-    let lastResults = {};
-    let logs = [];
-
-    const $ = (id) => document.getElementById(id);
-
-    function apiBase(){ return ($("apiBaseInput").value.trim() || DEFAULTS.apiBase).replace(/\/+$/, ""); }
-    function clinicCode(){ return $("clinicCodeInput").value.trim() || DEFAULTS.clinicCode; }
-    function adminCode(){
-      const inputValue = ($("adminCodeInput")?.value || "").trim();
-      const sessionValue = sessionStorage.getItem(DEFAULTS.adminStorageKey) || "";
-      const localValue = localStorage.getItem(DEFAULTS.adminStorageKey) || "";
-      return inputValue || sessionValue || localValue || "";
-    }
-    function autoSaveAdminCodeFromInput(){
-      const input = $("adminCodeInput");
-      const value = (input?.value || "").trim();
-      if (value) {
-        sessionStorage.setItem(DEFAULTS.adminStorageKey, value);
-        localStorage.setItem(DEFAULTS.adminStorageKey, value);
-        return value;
-      }
-      const saved = sessionStorage.getItem(DEFAULTS.adminStorageKey) || localStorage.getItem(DEFAULTS.adminStorageKey) || "";
-      if (saved && input && !input.value) input.value = saved;
-      return saved;
-    }
-    function staffName(){ return $("staffNameInput").value.trim() || "管理スタッフ"; }
-    function todayString(){
-      const d = new Date();
-      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
-    }
-    function escapeHtml(value){
-      return String(value ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
-    }
-    function setText(id,value){ const el=$(id); if(el) el.textContent=value; }
-    function setStatus(id,message,tone="info"){ const el=$(id); if(!el)return; el.className=`status-box ${tone}`; el.textContent=message; }
-    function setSummary(id,value,tone="info"){
-      const valueEl=$(id); if(!valueEl)return; valueEl.textContent=value;
-      const card=valueEl.closest(".summary-card"); if(card) card.className=`summary-card ${tone}`;
-    }
-    function statusTone(status){
-      const s=String(status||"").toLowerCase();
-      if(["pass","ok","success"].includes(s)) return "pass";
-      if(["warn","warning"].includes(s)) return "warn";
-      if(["fail","ng","error"].includes(s)) return "fail";
-      return "info";
-    }
-    function log(type,title,data=null){
-      const now = new Date().toLocaleString("ja-JP",{timeZone:"Asia/Tokyo"});
-      logs.unshift({type,title,data,now});
-      renderLog();
-    }
-    function renderLog(){
-      const box=$("logBox");
-      if(!box)return;
-      if(!logs.length){ box.textContent="まだログはありません。"; return; }
-      box.textContent = logs.map(item => {
-        const head = `[${item.now}] ${item.type.toUpperCase()} ${item.title}`;
-        return item.data ? `${head}\n${JSON.stringify(item.data,null,2)}` : head;
-      }).join("\n\n");
-    }
-    function buildUrl(path,params={},admin=false){
-      const url = new URL(apiBase()+path);
-      const p = typeof params === "function" ? params() : (params || {});
-      Object.entries({clinic_code:clinicCode(),...p}).forEach(([key,value])=>{
-        if(value!==undefined && value!==null && String(value).trim()!=="") url.searchParams.set(key,String(value));
-      });
-      const code=adminCode();
-      if(admin && code){
-        url.searchParams.set("admin_code",code);
-        url.searchParams.set("admin_token",code);
-      }
-      url.searchParams.set("_ts",Date.now());
-      return url;
-    }
-    function authHeaders(){
-      const h = {"Accept":"application/json"};
-      const code=adminCode();
-      if(code){
-        h["X-DPRO-Admin-Code"]=code;
-        h["x-dpro-admin-code"]=code;
-        h["X-Admin-Token"]=code;
-        h["x-admin-token"]=code;
-        h["X-Admin-Code"]=code;
-        h["Authorization"]=`Bearer ${code}`;
-      }
-      return h;
-    }
-    async function apiGet(path,params={},needsAuth=false,debug=false){
-      const url=buildUrl(path,params,needsAuth);
-      const safeUrl=url.toString().replaceAll(adminCode(),"***ADMIN***");
-      if(debug) log("info",`REQUEST GET ${safeUrl}`);
-      const started=performance.now();
-      const res=await fetch(url.toString(),{method:"GET",headers:needsAuth?authHeaders():{"Accept":"application/json"},cache:"no-store"});
-      const text=await res.text();
-      let data=null;
-      try{data=text?JSON.parse(text):null;}catch{data={raw:text};}
-      const ms=Math.round(performance.now()-started);
-      if(debug) log(res.ok?"ok":"ng",`RESPONSE ${res.status} ${res.statusText} / ${ms}ms`,data);
-      if(!res.ok || data?.ok===false){
-        const message=data?.message||data?.error||data?.raw||text||`HTTP ${res.status}`;
-        const error=new Error(message);
-        error.status=res.status;
-        error.data=data;
-        error.url=safeUrl;
-        throw error;
-      }
-      return data;
-    }
-    async function apiPost(path,body={},needsAuth=true,debug=false){
-      const url=buildUrl(path,{},false);
-      const safeUrl=url.toString().replaceAll(adminCode(),"***ADMIN***");
-      const payload={
-        clinic_code:clinicCode(),
-        staff_name:staffName(),
-        source_screen:"system-check-step-vet-28",
-        ...body
+      const storageKeys = {
+        clinicCode: "dpro_vet_system_check_clinic_code",
+        apiBase: "dpro_vet_system_check_api_base",
+        siteBase: "dpro_vet_system_check_site_base",
+        adminCode: "dpro_vet_admin_code"
       };
-      if(debug) log("info",`REQUEST POST ${safeUrl}`,payload);
-      const started=performance.now();
-      const res=await fetch(url.toString(),{
-        method:"POST",
-        headers:{
-          ...(needsAuth?authHeaders():{"Accept":"application/json"}),
-          "Content-Type":"application/json",
-          "Accept":"application/json"
-        },
-        body:JSON.stringify(payload),
-        cache:"no-store"
-      });
-      const text=await res.text();
-      let data=null;
-      try{data=text?JSON.parse(text):null;}catch{data={raw:text};}
-      const ms=Math.round(performance.now()-started);
-      if(debug) log(res.ok?"ok":"ng",`RESPONSE ${res.status} ${res.statusText} / ${ms}ms`,data);
-      if(!res.ok || data?.ok===false){
-        const message=data?.message||data?.error||data?.raw||text||`HTTP ${res.status}`;
-        const error=new Error(message);
-        error.status=res.status;
-        error.data=data;
-        error.url=safeUrl;
-        throw error;
-      }
-      return data;
-    }
-    function ensureAdminCode(){
-      const code = autoSaveAdminCodeFromInput();
-      if(!code){
-        setSummary("sumAdmin","未入力","fail");
-        setStatus("configStatus","管理コードが未入力です。上の管理コード欄に入力してから実行してください。","ng");
-        $("adminCodeInput").focus();
-        throw new Error("管理コードが未入力です。");
-      }
-      setSummary("sumAdmin","保存済み","pass");
-      return code;
-    }
-    function saveAdminCode(){
-      const code=autoSaveAdminCodeFromInput();
-      if(!code){ alert("管理コードを入力してください。"); $("adminCodeInput").focus(); return; }
-      sessionStorage.setItem(DEFAULTS.staffStorageKey,staffName());
-      localStorage.setItem(DEFAULTS.staffStorageKey,staffName());
-      setStatus("configStatus",`管理コードを保存しました。文字数 ${code.length} / 末尾 ${code.slice(-4)}\nこの状態で一括チェックできます。`,"ok");
-      setSummary("sumAdmin","保存済み","pass");
-      log("ok","管理コードを保存しました。");
-    }
-    function forgetAdminCode(){
-      sessionStorage.removeItem(DEFAULTS.adminStorageKey);
-      sessionStorage.removeItem(DEFAULTS.staffStorageKey);
-      localStorage.removeItem(DEFAULTS.adminStorageKey);
-      localStorage.removeItem(DEFAULTS.staffStorageKey);
-      $("adminCodeInput").value="";
-      setStatus("configStatus","管理コードを削除しました。","warn");
-      setSummary("sumAdmin","未入力","fail");
-      log("warn","管理コードを削除しました。");
-    }
-    function updateConfigStatus(){
-      const code=autoSaveAdminCodeFromInput();
-      const api=apiBase();
-      const clinic=clinicCode();
-      const codeInfo=code?`保存/入力あり：文字数 ${code.length} / 末尾 ${code.slice(-4)}`:"未入力";
-      const demoNote=clinic===DEMO_CLINIC_CODE?"DEMO医院です。":"本番用 clinic_code です。";
-      setStatus("configStatus",`API：${api}\nclinic_code：${clinic}\n管理コード：${codeInfo}\n${demoNote}`,code?"ok":"info");
-    }
 
-    function pageUrl(page,params={}){
-      const url=new URL(`${GITHUB_BASE}/${page}`);
-      Object.entries(params).forEach(([k,v])=>{ if(v!==undefined && v!==null && String(v).trim()!=="") url.searchParams.set(k,String(v).trim()); });
-      return url.toString();
-    }
-    function buildProductionUrls(){
-      const code=clinicCode();
-      const common={clinic_code:code};
-      return [
-        {key:"index",label:"管理トップ",desc:"全体入口",url:pageUrl("index.html",{...common,v:VERSION.index})},
-        {key:"rich-menu",label:"お客スマホ LINE入口",desc:"リッチメニュー想定",url:pageUrl("rich-menu.html",{...common,v:VERSION.richMenu})},
-        {key:"member",label:"お客スマホ ペット診察券",desc:"QR診察券",url:pageUrl("member.html",{...common,demo:"true",v:VERSION.member})},
-        {key:"waiting",label:"お客スマホ 順番受付",desc:"今日の順番受付",url:pageUrl("waiting.html",{...common,demo:"true",mode:"today_queue",v:VERSION.waiting})},
-        {key:"scan-pc",label:"受付PC QRリーダー",desc:"USB QR受付",url:pageUrl("scan-pc.html",{...common,v:VERSION.scanPc})},
-        {key:"scan-ipad",label:"受付タブレット",desc:"iPad QR受付",url:pageUrl("scan-ipad.html",{...common,v:VERSION.scanIpad})},
-        {key:"doctor",label:"ドクタータブレット",desc:"問診・診察・フォロー指示",url:pageUrl("doctor.html",{...common,v:VERSION.doctor})},
-        {key:"owner",label:"オーナー管理",desc:"今日やること・フォロー",url:pageUrl("owner.html",{...common,v:VERSION.owner})},
-        {key:"admin",label:"管理設定",desc:"飼い主・ペット・診察券",url:pageUrl("admin.html",{...common,v:VERSION.admin})},
-        {key:"admin-queue",label:"受付ルール設定",desc:"順番受付・混雑目安",url:pageUrl("admin-queue.html",{...common,v:VERSION.adminQueue})},
-        {key:"system-check",label:"システム確認",desc:"本画面",url:pageUrl("system-check.html",{...common,v:VERSION.systemCheck})},
-        {key:"debug",label:"黒画面デバッグ",desc:"詳細ログ専用",url:pageUrl("debug.html",{...common,v:VERSION.debug})}
+      const adminHeaderNames = [
+        "X-DPRO-Admin-Code",
+        "X-Admin-Token",
+        "X-Admin-Code"
       ];
-    }
-    function urlsToText(urls){
-      return [
-        "DPRO PET CARE LINE URLセット",
-        `clinic_code: ${clinicCode()}`,
-        `作成日: ${todayString()}`,
-        "",
-        ...urls.flatMap(item=>[item.label,item.url,""])
-      ].join("\n");
-    }
-    function renderUrls(){
-      const urls=buildProductionUrls();
-      lastUrls=urls;
-      const isDemo=clinicCode()===DEMO_CLINIC_CODE;
-      setText("urlClinicCode",clinicCode());
-      setText("urlState",isDemo?"DEMO":"生成済み");
-      setStatus("urlWarning",isDemo?"現在は dpro_vet_demo です。営業デモ用としてOKです。本番では病院専用 clinic_code に変更します。":"本番用 clinic_code でURLを生成しています。","warn");
-      $("urlList").innerHTML=urls.map(item=>`
-        <div class="url-row">
-          <div><div class="url-title">${escapeHtml(item.label)}</div><div class="url-desc">${escapeHtml(item.desc)}</div></div>
-          <div class="url-value">${escapeHtml(item.url)}</div>
-          <button class="btn btn-sub" type="button" data-copy="${escapeHtml(item.url)}">コピー</button>
-          <a class="btn" href="${escapeHtml(item.url)}" target="_blank" rel="noopener">開く</a>
-        </div>
-      `).join("");
-      document.querySelectorAll("[data-copy]").forEach(btn=>{
-        btn.addEventListener("click",async()=>{ await copyText(btn.getAttribute("data-copy")||""); log("ok","URLをコピーしました。"); });
-      });
-      $("urlCopyBox").value=urlsToText(urls);
-      return urls;
-    }
-    async function copyText(text){
-      if(navigator.clipboard && window.isSecureContext){ await navigator.clipboard.writeText(String(text||"")); return true; }
-      const temp=document.createElement("textarea"); temp.value=String(text||""); temp.style.position="fixed"; temp.style.left="-9999px"; document.body.appendChild(temp); temp.focus(); temp.select(); document.execCommand("copy"); temp.remove(); return true;
-    }
-    async function copyUrlSet(){ const urls=lastUrls.length?lastUrls:renderUrls(); await copyText(urlsToText(urls)); log("ok","URL一覧をまとめてコピーしました。"); }
-    function toneFromError(test,error){
-      const msg=String(error?.message||"");
-      const status=error?.status;
-      if(status===401 || msg.includes("管理コード")) return "管理コードNG：WorkerのADMIN_TOKEN、保存コード、送信方式を確認";
-      if(status===404 || msg.includes("Not Found")) return test.optional?"任意API未実装：owner/today内データで代替できます":"API名/Workerルート未実装";
-      if(status>=500 || msg.includes("Supabase") || msg.includes("database")) return "DB/SQL側NG：テーブル・関数・ビューを確認";
-      if(msg.includes("Failed to fetch") || msg.includes("CORS")) return "通信/CORS/URL NG：Worker URLを確認";
-      return msg || "原因未特定";
-    }
-    async function runTest(test,debug=false){
-      try{
-        if(test.admin) ensureAdminCode();
-        const data=await apiGet(test.path,test.params||{},test.admin,debug);
-        lastResults[test.id]=data;
-        const count=Array.isArray(data.items)?data.items.length:Array.isArray(data.cards)?data.cards.length:Array.isArray(data.queue_entries)?data.queue_entries.length:"";
-        return {id:test.id,label:test.label,area:test.area,status:test.optional && data?.ok===false?"warn":"pass",message:count!==""?`${test.okHint} / ${count}件`:test.okHint,data};
-      }catch(e){
-        const msg=toneFromError(test,e);
-        log(test.optional?"warn":"ng",`${test.label} NG`,{message:e.message,status:e.status,url:e.url,data:e.data,diagnosis:msg});
-        return {id:test.id,label:test.label,area:test.area,status:test.optional?"warn":"fail",message:msg,error:e};
-      }
-    }
-    function renderApiChecks(results){
-      $("apiChecks").innerHTML=results.map(item=>{
-        const tone=statusTone(item.status);
-        return `<div class="check-item"><span class="mini-pill ${tone}">${escapeHtml(String(item.status).toUpperCase())}</span><b>${escapeHtml(item.label)}</b><span>${escapeHtml(item.message)}</span></div>`;
-      }).join("");
-      const pass=results.filter(x=>statusTone(x.status)==="pass").length;
-      const warn=results.filter(x=>statusTone(x.status)==="warn").length;
-      const fail=results.filter(x=>statusTone(x.status)==="fail").length;
-      setSummary("sumPublic", results.filter(x=>x.area==="公開" && statusTone(x.status)==="pass").length + "/5", fail ? "warn" : "pass");
-      setSummary("sumAdmin", results.filter(x=>x.area==="管理" && statusTone(x.status)==="pass").length + "/8", fail ? "fail" : (warn ? "warn":"pass"));
-      setSummary("sumTotal", fail ? "NG" : (warn ? "注意" : "OK"), fail ? "fail" : (warn ? "warn":"pass"));
-      const member=lastResults.member?.cards?.length || 0;
-      const queue=lastResults.queueEntries?.items?.length || 0;
-      const owner=lastResults.ownerToday || {};
-      const follow=Array.isArray(owner.followup_todos)?owner.followup_todos.length:(Array.isArray(lastResults.followupsStandalone?.items)?lastResults.followupsStandalone.items.length:0);
-      const prev=Array.isArray(owner.prevention_todos)?owner.prevention_todos.length:(Array.isArray(lastResults.preventionsStandalone?.items)?lastResults.preventionsStandalone.items.length:0);
-      setText("memberCount",member+"件");
-      setText("queueCount",queue+"件");
-      setText("followCount",follow+"件");
-      setText("preventionCount",prev+"件");
-      setSummary("sumFollow",`${follow}/${prev}`, fail ? "warn" : "pass");
-      renderRoleStatus(results);
-    }
-    function renderRoleStatus(results){
-      const failed=results.filter(x=>statusTone(x.status)==="fail");
-      const warn=results.filter(x=>statusTone(x.status)==="warn");
-      const owner=lastResults.ownerToday || {};
-      const queue=Array.isArray(owner.queue_entries)?owner.queue_entries:[];
-      const active=queue.filter(x=>["reserved","waiting","checked_in","examining"].includes(x.status)).length;
-      const follow=Array.isArray(owner.followup_todos)?owner.followup_todos.length:0;
-      const prev=Array.isArray(owner.prevention_todos)?owner.prevention_todos.length:0;
-      const unlinked=Array.isArray(owner.line_unlinked_guardians)?owner.line_unlinked_guardians.length:0;
 
-      setStatus("roleStatusBox",[
-        `お客スマホ：ペット診察券 ${lastResults.member?.cards?.length || 0}件 / 順番受付 ${lastResults.queueEntries?.items?.length || 0}件`,
-        `受付PC/タブレット：QR lookup ${lastResults.scanLookup ? "OK" : "未確認"}`,
-        `ドクター：受付一覧 ${lastResults.doctorQueue ? "OK" : "未確認"}`,
-        `オーナー：受付中 ${active}件 / LINEフォロー ${follow}件 / 予防案内 ${prev}件 / 未連携 ${unlinked}件`
-      ].join("\n"), failed.length ? "ng" : (warn.length ? "warn":"ok"));
+      const checks = [
+        {
+          id:"health",
+          title:"Worker health",
+          desc:"/api/health が正常に返るか",
+          safe:true,
+          run: checkHealth
+        },
+        {
+          id:"publicClinic",
+          title:"公開clinic取得",
+          desc:"/api/public/clinic で対象clinic_codeが取得できるか",
+          safe:true,
+          run: checkPublicClinic
+        },
+        {
+          id:"prodRegister",
+          title:"本番登録APIチェック",
+          desc:"/api/admin/prod-register-check が通るか",
+          safe:true,
+          admin:true,
+          run: checkProdRegister
+        },
+        {
+          id:"safety",
+          title:"本番安全チェック",
+          desc:"/api/admin/safety-check で管理コード・環境・安全ガードを確認",
+          safe:true,
+          admin:true,
+          run: checkSafety
+        },
+        {
+          id:"readiness",
+          title:"導入準備チェック",
+          desc:"/api/admin/production-readiness-check または clinic-readiness-check を確認",
+          safe:true,
+          admin:true,
+          run: checkReadiness
+        },
+        {
+          id:"duplicateCheck",
+          title:"重複候補チェックAPI",
+          desc:"/api/public/register/check-duplicate が使えるか",
+          safe:true,
+          run: checkDuplicateApi
+        },
+        {
+          id:"memberPage",
+          title:"member.html URL",
+          desc:"診察券画面のURLを生成できるか",
+          safe:true,
+          local:true,
+          run: () => checkLocalPage("member.html")
+        },
+        {
+          id:"registerPage",
+          title:"register.html URL",
+          desc:"初回登録画面のURLを生成できるか",
+          safe:true,
+          local:true,
+          run: () => checkLocalPage("register.html")
+        },
+        {
+          id:"lineSetupPage",
+          title:"line-setup.html URL",
+          desc:"受付登録・LINE連携画面のURLを生成できるか",
+          safe:true,
+          local:true,
+          run: () => checkLocalPage("line-setup.html")
+        },
+        {
+          id:"linkPage",
+          title:"link.html URL",
+          desc:"LINE連携確認画面のURLを生成できるか",
+          safe:true,
+          local:true,
+          run: () => checkLocalPage("link.html")
+        },
+        {
+          id:"scanPcPage",
+          title:"scan-pc.html URL",
+          desc:"受付PC画面のURLを生成できるか",
+          safe:true,
+          local:true,
+          run: () => checkLocalPage("scan-pc.html")
+        },
+        {
+          id:"scanIpadPage",
+          title:"scan-ipad.html URL",
+          desc:"受付タブレット画面のURLを生成できるか",
+          safe:true,
+          local:true,
+          run: () => checkLocalPage("scan-ipad.html")
+        }
+      ];
 
-      if(failed.length){
-        setStatus("roleNextBox",`NGがあります。黒ログの診断を見て、最初に失敗した項目から直してください。\n最初のNG：${failed[0].label}\n原因：${failed[0].message}`,"ng");
-      }else if(warn.length){
-        setStatus("roleNextBox",`主要機能はOKです。WARNは任意APIまたは代替可能な項目です。\n営業DEMOは進められます。`,"warn");
-      }else{
-        setStatus("roleNextBox","主要チェックはOKです。営業DEMOに進めます。","ok");
-      }
-    }
-    async function checkHealth(debug=false){
-      const data=await apiGet("/api/health",{},false,debug);
-      lastResults.health=data;
-      setSummary("sumWorker","OK","pass");
-      log("ok","Worker health OK",data);
-      return data;
-    }
-    async function checkApiCounts(debug=false){
-      autoSaveAdminCodeFromInput();
-      updateConfigStatus();
-      const results=[];
-      try{
-        await checkHealth(debug);
-      }catch(e){
-        setSummary("sumWorker","NG","fail");
-        log("ng","Worker health NG",{message:e.message,status:e.status,data:e.data});
-      }
-      for(const test of tests.filter(x=>x.id!=="health")){
-        const result=await runTest(test,debug);
-        results.push(result);
-      }
-      renderApiChecks([{id:"health",label:"Worker health",area:"公開",status:lastResults.health?"pass":"fail",message:lastResults.health?"Worker起動OK":"Worker NG"},...results]);
-      setStatus("debugSummary", "APIチェックを実行しました。NGがある場合は下のログにURL・ステータス・レスポンスが残っています。", results.some(x=>statusTone(x.status)==="fail")?"ng":"ok");
-    }
+      const state = {
+        results:{}
+      };
 
-    function renderDemoCountsFromOwner(owner){
-      const queue=Array.isArray(owner?.queue_entries)?owner.queue_entries:[];
-      const follow=Array.isArray(owner?.followup_todos)?owner.followup_todos:[];
-      const prev=Array.isArray(owner?.prevention_todos)?owner.prevention_todos:[];
-      setText("demoClinicCode",clinicCode());
-      setText("demoQueueCount",queue.length+"件");
-      setText("demoFollowCount",follow.length+"件");
-      setText("demoPreventionCount",prev.length+"件");
-    }
-    async function runDemoReset(){
-      try{
-        autoSaveAdminCodeFromInput();
-        ensureAdminCode();
-        if(clinicCode()!==DEMO_CLINIC_CODE){
-          setStatus("demoResetStatus","安全ガード：営業前DEMOリセットは dpro_vet_demo のみ実行できます。本番 clinic_code では実行しません。","ng");
+      const el = {
+        clinicCode: document.getElementById("clinicCode"),
+        apiBase: document.getElementById("apiBase"),
+        siteBase: document.getElementById("siteBase"),
+        adminCode: document.getElementById("adminCode"),
+        envNotice: document.getElementById("envNotice"),
+        checkList: document.getElementById("checkList"),
+        linkGrid: document.getElementById("linkGrid"),
+        saveConfigBtn: document.getElementById("saveConfigBtn"),
+        loadConfigBtn: document.getElementById("loadConfigBtn"),
+        runSafeChecksBtn: document.getElementById("runSafeChecksBtn"),
+        runLinkChecksBtn: document.getElementById("runLinkChecksBtn"),
+        clearResultsBtn: document.getElementById("clearResultsBtn"),
+        scoreOk: document.getElementById("scoreOk"),
+        scoreWarn: document.getElementById("scoreWarn"),
+        scoreNg: document.getElementById("scoreNg"),
+        scoreTotal: document.getElementById("scoreTotal"),
+
+        cardToken: document.getElementById("cardToken"),
+        cardLookupBtn: document.getElementById("cardLookupBtn"),
+        cardLookupResult: document.getElementById("cardLookupResult"),
+
+        searchKeyword: document.getElementById("searchKeyword"),
+        searchBtn: document.getElementById("searchBtn"),
+        searchResult: document.getElementById("searchResult"),
+
+        guardianId: document.getElementById("guardianId"),
+        petId: document.getElementById("petId"),
+        issueLinkBtn: document.getElementById("issueLinkBtn"),
+        issueLinkResult: document.getElementById("issueLinkResult"),
+
+        duplicateReviewsBtn: document.getElementById("duplicateReviewsBtn"),
+        duplicateReviewsResult: document.getElementById("duplicateReviewsResult"),
+
+        allowCreateTest: document.getElementById("allowCreateTest"),
+        testGuardianName: document.getElementById("testGuardianName"),
+        testPhone: document.getElementById("testPhone"),
+        testPetName: document.getElementById("testPetName"),
+        testAnimalType: document.getElementById("testAnimalType"),
+        createTestBtn: document.getElementById("createTestBtn"),
+        createTestResult: document.getElementById("createTestResult")
+      };
+
+      init();
+
+      function init(){
+        loadConfig();
+        renderCheckList();
+        renderLinkGrid();
+        setupTopLinks();
+        bindEvents();
+        updateEnvNotice();
+        updateScore();
+      }
+
+      function bindEvents(){
+        el.saveConfigBtn.addEventListener("click", saveConfig);
+        el.loadConfigBtn.addEventListener("click", () => {
+          loadConfig();
+          renderCheckList();
+          renderLinkGrid();
+          setupTopLinks();
+          updateEnvNotice();
+        });
+        el.runSafeChecksBtn.addEventListener("click", runSafeChecks);
+        el.runLinkChecksBtn.addEventListener("click", runLinkChecks);
+        el.clearResultsBtn.addEventListener("click", clearResults);
+
+        el.clinicCode.addEventListener("input", () => {
+          setupTopLinks();
+          renderLinkGrid();
+          updateEnvNotice();
+        });
+        el.apiBase.addEventListener("input", updateEnvNotice);
+        el.siteBase.addEventListener("input", () => {
+          setupTopLinks();
+          renderLinkGrid();
+        });
+
+        el.cardLookupBtn.addEventListener("click", cardLookupTest);
+        el.searchBtn.addEventListener("click", searchTest);
+        el.issueLinkBtn.addEventListener("click", issueLinkTest);
+        el.duplicateReviewsBtn.addEventListener("click", duplicateReviewsTest);
+        el.createTestBtn.addEventListener("click", createRegisterTest);
+      }
+
+      function loadConfig(){
+        const configApi =
+          CONFIG?.api?.baseUrl ||
+          CONFIG?.urls?.apiBaseUrl ||
+          DEFAULT_API_BASE;
+
+        const configSite =
+          CONFIG?.urls?.siteBaseUrl ||
+          DEFAULT_SITE_BASE;
+
+        const configClinic =
+          CONFIG?.clinic?.clinicCode ||
+          CONFIG?.demo?.clinicCode ||
+          DEFAULT_CLINIC_CODE;
+
+        el.clinicCode.value = localStorage.getItem(storageKeys.clinicCode) || configClinic;
+        el.apiBase.value = localStorage.getItem(storageKeys.apiBase) || configApi;
+        el.siteBase.value = localStorage.getItem(storageKeys.siteBase) || configSite;
+        el.adminCode.value =
+          localStorage.getItem(storageKeys.adminCode) ||
+          localStorage.getItem("DPRO_VET_ADMIN_CODE") ||
+          localStorage.getItem("DPRO_VET_ADMIN_TOKEN") ||
+          "";
+      }
+
+      function saveConfig(){
+        localStorage.setItem(storageKeys.clinicCode, clean(el.clinicCode.value));
+        localStorage.setItem(storageKeys.apiBase, trimSlash(el.apiBase.value));
+        localStorage.setItem(storageKeys.siteBase, trimSlash(el.siteBase.value));
+        localStorage.setItem(storageKeys.adminCode, clean(el.adminCode.value));
+        localStorage.setItem("DPRO_VET_ADMIN_CODE", clean(el.adminCode.value));
+        localStorage.setItem("DPRO_VET_ADMIN_TOKEN", clean(el.adminCode.value));
+        updateEnvNotice();
+        alert("設定を保存しました。");
+      }
+
+      function getConfig(){
+        return {
+          clinicCode: clean(el.clinicCode.value) || DEFAULT_CLINIC_CODE,
+          apiBase: trimSlash(el.apiBase.value || DEFAULT_API_BASE),
+          siteBase: trimSlash(el.siteBase.value || DEFAULT_SITE_BASE),
+          adminCode: clean(el.adminCode.value)
+        };
+      }
+
+      function updateEnvNotice(){
+        const cfg = getConfig();
+        const isDemo = cfg.clinicCode === DEFAULT_CLINIC_CODE;
+        el.envNotice.className = `alert ${isDemo ? "warn" : "ok"}`;
+        el.envNotice.innerHTML = isDemo
+          ? `現在の clinic_code は <strong>${escapeHtml(cfg.clinicCode)}</strong> です。これは営業DEMO用です。本番病院では専用clinic_codeに変更してください。`
+          : `現在の clinic_code は <strong>${escapeHtml(cfg.clinicCode)}</strong> です。本番用の場合、demo reset が無効になっていることを必ず確認してください。`;
+      }
+
+      function renderCheckList(){
+        el.checkList.innerHTML = checks.map((check) => `
+          <div class="checkItem" id="check-${check.id}">
+            <div class="checkHeader">
+              <div>
+                <strong>${escapeHtml(check.title)}</strong>
+                <span>${escapeHtml(check.desc)}</span>
+              </div>
+              <span class="status" id="status-${check.id}">未実行</span>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn btnSoft btnMini" type="button" data-run="${escapeAttr(check.id)}">個別実行</button>
+            </div>
+            <div class="result mono" id="result-${check.id}">未実行</div>
+          </div>
+        `).join("");
+
+        el.checkList.querySelectorAll("[data-run]").forEach((btn) => {
+          btn.addEventListener("click", async () => {
+            const id = btn.dataset.run;
+            const check = checks.find((c) => c.id === id);
+            if (check) await runOne(check);
+          });
+        });
+      }
+
+      function renderLinkGrid(){
+        const pages = [
+          ["index.html","管理トップ"],
+          ["rich-menu.html","LINE入口"],
+          ["member.html","ペット診察券"],
+          ["register.html","初回登録"],
+          ["line-setup.html","受付登録・LINE連携"],
+          ["link.html","LINE連携確認"],
+          ["waiting.html","今日の受付"],
+          ["scan-pc.html","受付PC"],
+          ["scan-ipad.html","受付タブレット"],
+          ["doctor.html","ドクター"],
+          ["owner.html","オーナー"],
+          ["admin.html","管理設定"],
+          ["admin-queue.html","受付ルール"]
+        ];
+
+        el.linkGrid.innerHTML = pages.map(([file,label]) => {
+          const href = pageUrl(file);
+          return `
+            <div class="linkCard">
+              <div>
+                <strong>${escapeHtml(label)}</strong>
+                <span>${escapeHtml(href)}</span>
+              </div>
+              <a class="btn btnSoft btnMini" href="${escapeAttr(href)}" target="_blank" rel="noopener">開く</a>
+            </div>
+          `;
+        }).join("");
+      }
+
+      function setupTopLinks(){
+        setHref("goMember", pageUrl("member.html"));
+        setHref("goRegister", pageUrl("register.html"));
+        setHref("goLineSetup", pageUrl("line-setup.html"));
+        setHref("goScanPc", pageUrl("scan-pc.html"));
+        setHref("goOwner", pageUrl("owner.html"));
+      }
+
+      async function runSafeChecks(){
+        for (const check of checks.filter((c) => c.safe && !c.local)) {
+          await runOne(check);
+        }
+        for (const check of checks.filter((c) => c.safe && c.local)) {
+          await runOne(check);
+        }
+      }
+
+      async function runLinkChecks(){
+        for (const check of checks.filter((c) => c.local)) {
+          await runOne(check);
+        }
+      }
+
+      async function runOne(check){
+        setCheckStatus(check.id, "run", "実行中");
+        setResult(check.id, "実行中...");
+        try {
+          const data = await check.run();
+          const grade = data.grade || "ok";
+          setCheckStatus(check.id, grade, grade === "ok" ? "OK" : grade === "warn" ? "確認" : "NG");
+          setResult(check.id, JSON.stringify(data, null, 2));
+          state.results[check.id] = grade;
+        } catch (error) {
+          setCheckStatus(check.id, "ng", "NG");
+          setResult(check.id, error.message || String(error));
+          state.results[check.id] = "ng";
+        }
+        updateScore();
+      }
+
+      function clearResults(){
+        state.results = {};
+        checks.forEach((check) => {
+          setCheckStatus(check.id, "", "未実行");
+          setResult(check.id, "未実行");
+        });
+        [el.cardLookupResult, el.searchResult, el.issueLinkResult, el.duplicateReviewsResult, el.createTestResult].forEach((node) => {
+          node.textContent = "未実行";
+        });
+        updateScore();
+      }
+
+      function setCheckStatus(id, type, text){
+        const node = document.getElementById(`status-${id}`);
+        if (!node) return;
+        node.className = `status ${type || ""}`;
+        node.textContent = text;
+      }
+
+      function setResult(id, text){
+        const node = document.getElementById(`result-${id}`);
+        if (node) node.textContent = text;
+      }
+
+      function updateScore(){
+        const values = Object.values(state.results);
+        const ok = values.filter((v) => v === "ok").length;
+        const warn = values.filter((v) => v === "warn").length;
+        const ng = values.filter((v) => v === "ng").length;
+        el.scoreOk.textContent = ok;
+        el.scoreWarn.textContent = warn;
+        el.scoreNg.textContent = ng;
+        el.scoreTotal.textContent = values.length;
+      }
+
+      async function checkHealth(){
+        const data = await apiGet("/api/health", false);
+        return {
+          grade: data.ok ? "ok" : "ng",
+          endpoint: "/api/health",
+          service: data.service,
+          version: data.version,
+          data
+        };
+      }
+
+      async function checkPublicClinic(){
+        const cfg = getConfig();
+        const data = await apiGet(`/api/public/clinic?clinic_code=${encodeURIComponent(cfg.clinicCode)}`, false);
+        return {
+          grade: data.ok && data.clinic ? "ok" : "warn",
+          endpoint: "/api/public/clinic",
+          clinic_code: cfg.clinicCode,
+          data
+        };
+      }
+
+      async function checkProdRegister(){
+        const cfg = getConfig();
+        const data = await apiGet(`/api/admin/prod-register-check?clinic_code=${encodeURIComponent(cfg.clinicCode)}`, true);
+        return {
+          grade: data.ok ? "ok" : "warn",
+          endpoint: "/api/admin/prod-register-check",
+          data
+        };
+      }
+
+      async function checkSafety(){
+        const cfg = getConfig();
+        const data = await apiGet(`/api/admin/safety-check?clinic_code=${encodeURIComponent(cfg.clinicCode)}`, true);
+        return {
+          grade: data.ok ? "ok" : "warn",
+          endpoint: "/api/admin/safety-check",
+          data
+        };
+      }
+
+      async function checkReadiness(){
+        const cfg = getConfig();
+        try {
+          const data = await apiGet(`/api/admin/production-readiness-check?clinic_code=${encodeURIComponent(cfg.clinicCode)}`, true);
+          return {
+            grade: data.ok ? "ok" : "warn",
+            endpoint: "/api/admin/production-readiness-check",
+            data
+          };
+        } catch (error) {
+          const data = await apiGet(`/api/admin/clinic-readiness-check?clinic_code=${encodeURIComponent(cfg.clinicCode)}`, true);
+          return {
+            grade: data.ok ? "ok" : "warn",
+            endpoint: "/api/admin/clinic-readiness-check",
+            data
+          };
+        }
+      }
+
+      async function checkDuplicateApi(){
+        const cfg = getConfig();
+        const data = await apiPost("/api/public/register/check-duplicate", {
+          clinic_code: cfg.clinicCode,
+          phone: "090-0000-3434",
+          pet_name: "チェックちゃん"
+        }, false);
+
+        return {
+          grade: data.ok ? "ok" : "warn",
+          endpoint: "/api/public/register/check-duplicate",
+          note: "検索のみ。登録は作成していません。",
+          data
+        };
+      }
+
+      async function checkLocalPage(file){
+        const href = pageUrl(file);
+        return {
+          grade:"ok",
+          file,
+          url: href,
+          note:"URL生成OK。実際の404確認は右側リンクから開いて確認してください。"
+        };
+      }
+
+      async function cardLookupTest(){
+        const cfg = getConfig();
+        const raw = clean(el.cardToken.value);
+        if (!raw) {
+          el.cardLookupResult.textContent = "card_token または vetcard文字列を入力してください。";
           return;
         }
 
-        const confirmText = ($("demoConfirmInput")?.value || "").trim();
-        if(confirmText !== "DEMO動物病院だけ実行"){
-          setStatus("demoResetStatus","安全確認の文言が一致しません。下の入力欄に「DEMO動物病院だけ実行」と入力してから実行してください。","ng");
-          $("demoConfirmInput")?.focus();
+        const cardToken = extractCardToken(raw);
+        try {
+          const data = await apiPost("/api/public/card-lookup", {
+            clinic_code: cfg.clinicCode,
+            card_token: cardToken
+          }, false);
+          el.cardLookupResult.textContent = JSON.stringify(data, null, 2);
+        } catch (error) {
+          el.cardLookupResult.textContent = error.message || String(error);
+        }
+      }
+
+      async function searchTest(){
+        const cfg = getConfig();
+        const keyword = clean(el.searchKeyword.value);
+        if (!keyword) {
+          el.searchResult.textContent = "検索キーワードを入力してください。";
+          return;
+        }
+        try {
+          const data = await apiPost("/api/admin/guardians/search", {
+            clinic_code: cfg.clinicCode,
+            keyword,
+            q: keyword,
+            limit: 30
+          }, true);
+          el.searchResult.textContent = JSON.stringify(data, null, 2);
+        } catch (error) {
+          el.searchResult.textContent = error.message || String(error);
+        }
+      }
+
+      async function issueLinkTest(){
+        const cfg = getConfig();
+        const guardianId = clean(el.guardianId.value);
+        const petId = clean(el.petId.value);
+        if (!guardianId) {
+          el.issueLinkResult.textContent = "guardian_id を入力してください。";
           return;
         }
 
-        const ok=confirm("営業前DEMOリセットを実行します。dpro_vet_demo のDEMOデータを今日基準で再作成します。よろしいですか？");
-        if(!ok)return;
-
-        setStatus("demoResetStatus","営業前DEMOリセット実行中です...","info");
-        const data=await apiPost("/api/admin/demo/sales-setup",{
-          confirm_text:confirmText,
-          reset_type:"step_vet_28_sales_demo_reset_final"
-        },true,true);
-
-        log("ok","営業前DEMOリセット OK",data);
-        setStatus("demoResetStatus",data.message || "営業前DEMOリセットを実行しました。リセット後チェックを実行してください。","ok");
-
-        const owner=await apiGet("/api/owner/today",{date:todayString()},true,true);
-        lastResults.ownerToday=owner;
-        renderDemoCountsFromOwner(owner);
-        await checkApiCounts(false);
-      }catch(e){
-        setStatus("demoResetStatus",e.message || "営業前DEMOリセットに失敗しました。","ng");
-        log("ng","営業前DEMOリセット NG",{message:e.message,status:e.status,url:e.url,data:e.data});
+        try {
+          const data = await apiPost("/api/admin/line-link-token", {
+            clinic_code: cfg.clinicCode,
+            guardian_id: guardianId,
+            pet_id: petId,
+            expires_minutes: 60,
+            staff_name: "system-check"
+          }, true);
+          el.issueLinkResult.textContent = JSON.stringify(data, null, 2);
+        } catch (error) {
+          el.issueLinkResult.textContent = error.message || String(error);
+        }
       }
-    }
-    async function checkDemoResetResult(){
-      try{
-        autoSaveAdminCodeFromInput();
-        ensureAdminCode();
-        const owner=await apiGet("/api/owner/today",{date:todayString()},true,true);
-        lastResults.ownerToday=owner;
-        renderDemoCountsFromOwner(owner);
-        setStatus("demoResetStatus","リセット後チェックOKです。owner/today から受付・フォロー・予防案内を取得できました。","ok");
-        await checkApiCounts(false);
-      }catch(e){
-        setStatus("demoResetStatus",e.message || "リセット後チェックに失敗しました。","ng");
-        log("ng","リセット後チェック NG",{message:e.message,status:e.status,url:e.url,data:e.data});
+
+      async function duplicateReviewsTest(){
+        const cfg = getConfig();
+        try {
+          const data = await apiGet(`/api/admin/duplicate-reviews?clinic_code=${encodeURIComponent(cfg.clinicCode)}&status=pending&limit=50`, true);
+          el.duplicateReviewsResult.textContent = JSON.stringify(data, null, 2);
+        } catch (error) {
+          el.duplicateReviewsResult.textContent = error.message || String(error);
+        }
       }
-    }
-    async function runAllChecks(){
-      autoSaveAdminCodeFromInput();
-      updateConfigStatus();
-      renderUrls();
-      await checkApiCounts(false);
-    }
-    async function runDebugChecks(){
-      autoSaveAdminCodeFromInput();
-      logs=[];
-      renderLog();
-      updateConfigStatus();
-      renderUrls();
-      log("info","===== STEP VET-27 DEBUG START =====",{apiBase:apiBase(),clinicCode:clinicCode(),adminCodeLength:adminCode().length,adminCodeTail:adminCode().slice(-4)});
-      await checkApiCounts(true);
-      log("info","===== DEBUG END =====");
-    }
-    async function runDebugAdminOnly(){
-      autoSaveAdminCodeFromInput();
-      logs=[];
-      renderLog();
-      updateConfigStatus();
-      log("info","===== ADMIN DEBUG START =====",{apiBase:apiBase(),clinicCode:clinicCode(),adminCodeLength:adminCode().length,adminCodeTail:adminCode().slice(-4)});
-      const results=[];
-      for(const test of tests.filter(x=>x.admin)){
-        const result=await runTest(test,true);
-        results.push(result);
+
+      async function createRegisterTest(){
+        if (!el.allowCreateTest.checked) {
+          el.createTestResult.textContent = "登録作成テストを実行するには、確認チェックを入れてください。";
+          return;
+        }
+
+        const cfg = getConfig();
+        const isDemo = cfg.clinicCode === DEFAULT_CLINIC_CODE;
+        if (!isDemo) {
+          const ok = confirm("本番clinic_codeで登録作成テストを実行します。テストデータが作成されます。本当に実行しますか？");
+          if (!ok) {
+            el.createTestResult.textContent = "本番clinic_codeでの登録作成テストを中止しました。";
+            return;
+          }
+        }
+
+        try {
+          const data = await apiPost("/api/admin/register-by-staff", {
+            clinic_code: cfg.clinicCode,
+            staff_name: "system-check",
+            guardian_name: clean(el.testGuardianName.value) || "本番確認 テスト",
+            phone: clean(el.testPhone.value) || "090-0000-3434",
+            pet_name: clean(el.testPetName.value) || "チェックちゃん",
+            animal_type: clean(el.testAnimalType.value) || "犬",
+            age_text: "確認用",
+            sex: "不明",
+            medical_note: "system-check 登録作成テスト",
+            allergy_note: ""
+          }, true);
+          el.createTestResult.textContent = JSON.stringify(data, null, 2);
+
+          const reg = data.registration || {};
+          if (reg.card_token || reg.qr_payload) {
+            el.cardToken.value = reg.qr_payload || reg.card_token;
+          }
+          if (reg.guardian_id) el.guardianId.value = reg.guardian_id;
+          if (reg.pet_id) el.petId.value = reg.pet_id;
+        } catch (error) {
+          el.createTestResult.textContent = error.message || String(error);
+        }
       }
-      renderApiChecks(results);
-      log("info","===== ADMIN DEBUG END =====");
-    }
-    function renderLatestLinks(){
-      const links=buildProductionUrls();
-      $("latestLinks").innerHTML=links.map(item=>`
-        <div class="url-row">
-          <div><div class="url-title">${escapeHtml(item.label)}</div><div class="url-desc">${escapeHtml(item.desc)}</div></div>
-          <div class="url-value">${escapeHtml(item.url)}</div>
-          <button class="btn btn-sub" type="button" data-copy-latest="${escapeHtml(item.url)}">コピー</button>
-          <a class="btn" href="${escapeHtml(item.url)}" target="_blank" rel="noopener">開く</a>
-        </div>
-      `).join("");
-      document.querySelectorAll("[data-copy-latest]").forEach(btn=>{
-        btn.addEventListener("click",async()=>{await copyText(btn.getAttribute("data-copy-latest")||"");log("ok","リンクをコピーしました。");});
-      });
-    }
-    function applyQueryParams(){
-      const url=new URL(location.href);
-      const clinic=url.searchParams.get("clinic_code") || url.searchParams.get("clinic");
-      const api=url.searchParams.get("api");
-      if(clinic) $("clinicCodeInput").value=clinic;
-      if(api) $("apiBaseInput").value=api;
-    }
-    function restoreSession(){
-      $("apiBaseInput").value=DEFAULTS.apiBase;
-      $("clinicCodeInput").value=DEFAULTS.clinicCode;
-      const code=sessionStorage.getItem(DEFAULTS.adminStorageKey) || localStorage.getItem(DEFAULTS.adminStorageKey);
-      const staff=sessionStorage.getItem(DEFAULTS.staffStorageKey) || localStorage.getItem(DEFAULTS.staffStorageKey);
-      if(code){ $("adminCodeInput").value=code; setSummary("sumAdmin","保存済み","pass"); }
-      if(staff) $("staffNameInput").value=staff;
-    }
-    function bindEvents(){
-      $("runAllButton").addEventListener("click",runAllChecks);
-      $("runDebugButton").addEventListener("click",runDebugChecks);
-      $("demoResetButton").addEventListener("click",runDemoReset);
-      $("demoResetCheckButton").addEventListener("click",checkDemoResetResult);
-      $("fillDemoConfirmButton").addEventListener("click",()=>{$("demoConfirmInput").value="DEMO動物病院だけ実行";});
-      $("saveAdminButton").addEventListener("click",saveAdminCode);
-      $("forgetAdminButton").addEventListener("click",forgetAdminCode);
-      $("generateUrlsButton").addEventListener("click",renderUrls);
-      $("copyUrlsButton").addEventListener("click",async()=>{const urls=lastUrls.length?lastUrls:renderUrls();await copyText(urlsToText(urls));log("ok","URL一覧をコピーしました。");});
-      $("apiCheckButton").addEventListener("click",()=>checkApiCounts(false));
-      $("apiDebugButton").addEventListener("click",()=>checkApiCounts(true));
-      $("debugAdminButton").addEventListener("click",runDebugAdminOnly);
-      $("copyLogButton").addEventListener("click",async()=>{await copyText($("logBox").textContent);alert("ログをコピーしました。");});
-      $("clearLogButton").addEventListener("click",()=>{logs=[];renderLog();});
-      $("clinicCodeInput").addEventListener("input",()=>{updateConfigStatus();renderUrls();renderLatestLinks();});
-      $("apiBaseInput").addEventListener("input",updateConfigStatus);
-      document.querySelectorAll("[data-scroll]").forEach(card=>{
-        card.addEventListener("click",()=>{const target=document.querySelector(card.getAttribute("data-scroll")); if(target) target.scrollIntoView({behavior:"smooth",block:"start"});});
-      });
-    }
-    function init(){
-      restoreSession();
-      applyQueryParams();
-      bindEvents();
-      updateConfigStatus();
-      setText("demoClinicCode", clinicCode());
-      renderUrls();
-      renderLatestLinks();
-      log("info","system-check STEP VET-28B を起動しました。");
-    }
-    init();
+
+      async function apiGet(path, admin){
+        const cfg = getConfig();
+        const fullUrl = path.startsWith("http") ? path : `${cfg.apiBase}${path}`;
+        const res = await fetch(fullUrl, {
+          method:"GET",
+          headers: buildHeaders(admin)
+        });
+        return parseResponse(res);
+      }
+
+      async function apiPost(path, body, admin){
+        const cfg = getConfig();
+        const fullUrl = path.startsWith("http") ? path : `${cfg.apiBase}${path}`;
+        const res = await fetch(fullUrl, {
+          method:"POST",
+          headers: buildHeaders(admin, { "Content-Type":"application/json" }),
+          body: JSON.stringify(body || {})
+        });
+        return parseResponse(res);
+      }
+
+      function buildHeaders(admin, extra){
+        const headers = {
+          "Accept":"application/json",
+          ...(extra || {})
+        };
+        if (admin) {
+          const code = clean(el.adminCode.value);
+          if (code) {
+            adminHeaderNames.forEach((name) => headers[name] = code);
+            headers["Authorization"] = `Bearer ${code}`;
+          }
+        }
+        return headers;
+      }
+
+      async function parseResponse(res){
+        const text = await res.text();
+        let data = null;
+        if (text) {
+          try { data = JSON.parse(text); } catch { data = { raw:text }; }
+        }
+        if (!res.ok || !data || data.ok === false) {
+          throw new Error((data && (data.message || data.error)) || `APIエラー status=${res.status}`);
+        }
+        return data;
+      }
+
+      function pageUrl(file, params){
+        const cfg = getConfig();
+        const target = new URL(`${cfg.siteBase}/${file}`);
+        const merged = { clinic_code: cfg.clinicCode, ...(params || {}) };
+        Object.entries(merged).forEach(([key, value]) => {
+          if (value !== undefined && value !== null && String(value).trim() !== "") {
+            target.searchParams.set(key, String(value));
+          }
+        });
+        return target.toString();
+      }
+
+      function extractCardToken(raw){
+        const text = clean(raw);
+        if (!text) return "";
+        if (text.startsWith("vetcard:")) {
+          const parts = text.split(":");
+          return parts[2] || "";
+        }
+        if (text.startsWith("http://") || text.startsWith("https://")) {
+          try {
+            const u = new URL(text);
+            return clean(u.searchParams.get("card_token")) ||
+              clean(u.searchParams.get("token")) ||
+              clean(u.searchParams.get("qr_token")) ||
+              text;
+          } catch {
+            return text;
+          }
+        }
+        return text;
+      }
+
+      function setHref(id, href){
+        const node = document.getElementById(id);
+        if (node) node.href = href;
+      }
+
+      function trimSlash(value){
+        return String(value || "").replace(/\/+$/,"");
+      }
+
+      function clean(value){
+        return String(value ?? "").trim();
+      }
+
+      function escapeHtml(value){
+        return String(value ?? "")
+          .replaceAll("&","&amp;")
+          .replaceAll("<","&lt;")
+          .replaceAll(">","&gt;")
+          .replaceAll('"',"&quot;")
+          .replaceAll("'","&#039;");
+      }
+
+      function escapeAttr(value){
+        return escapeHtml(value).replaceAll("`","&#096;");
+      }
+    })();
   </script>
 </body>
 </html>
