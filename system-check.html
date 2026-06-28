@@ -4,12 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#2f6f5e">
-  <title>DPRO PET CARE LINE｜本番導入 system-check</title>
+  <title>DPRO PET CARE LINE｜本番導入 system-check R2</title>
 
   <!--
-    STEP VET-34I
+    STEP VET-34I-R2
     DPRO PET CARE LINE 動物病院版
-    system-check.html 本番版 完全版
+    system-check.html 本番版 完全版 R2 通信安定化
 
     目的：
     ・営業DEMOチェックではなく、本番導入前チェックに寄せる
@@ -460,7 +460,7 @@
     <section class="hero">
       <div class="heroTop">
         <div class="badge">🐾 DPRO PET CARE LINE</div>
-        <div class="badge">STEP VET-34I</div>
+        <div class="badge">STEP VET-34I-R2</div>
       </div>
       <h1>本番導入 system-check</h1>
       <p>
@@ -642,7 +642,7 @@
     </div>
 
     <div class="footer">
-      STEP VET-34I system-check.html production complete<br>
+      STEP VET-34I-R2 system-check.html production complete<br>
       DPRO PET CARE LINE / 動物病院版
     </div>
   </div>
@@ -664,11 +664,10 @@
         adminCode: "dpro_vet_admin_code"
       };
 
-      const adminHeaderNames = [
-        "X-DPRO-Admin-Code",
-        "X-Admin-Token",
-        "X-Admin-Code"
-      ];
+      // STEP VET-34I-R2:
+      // POSTのCORS事前確認を安定させるため、管理コード送信ヘッダーは1つだけに統一します。
+      // Worker側 requireAdmin は X-DPRO-Admin-Code を受け取れるため、これだけでOKです。
+      const ADMIN_HEADER_NAME = "X-DPRO-Admin-Code";
 
       const checks = [
         {
@@ -1240,7 +1239,7 @@
           if (reg.guardian_id) el.guardianId.value = reg.guardian_id;
           if (reg.pet_id) el.petId.value = reg.pet_id;
         } catch (error) {
-          el.createTestResult.textContent = error.message || String(error);
+          el.createTestResult.textContent = buildNetworkErrorMessage(error, "/api/admin/register-by-staff");
         }
       }
 
@@ -1249,6 +1248,8 @@
         const fullUrl = path.startsWith("http") ? path : `${cfg.apiBase}${path}`;
         const res = await fetch(fullUrl, {
           method:"GET",
+          mode:"cors",
+          cache:"no-store",
           headers: buildHeaders(admin)
         });
         return parseResponse(res);
@@ -1259,6 +1260,8 @@
         const fullUrl = path.startsWith("http") ? path : `${cfg.apiBase}${path}`;
         const res = await fetch(fullUrl, {
           method:"POST",
+          mode:"cors",
+          cache:"no-store",
           headers: buildHeaders(admin, { "Content-Type":"application/json" }),
           body: JSON.stringify(body || {})
         });
@@ -1270,13 +1273,14 @@
           "Accept":"application/json",
           ...(extra || {})
         };
+
         if (admin) {
           const code = clean(el.adminCode.value);
           if (code) {
-            adminHeaderNames.forEach((name) => headers[name] = code);
-            headers["Authorization"] = `Bearer ${code}`;
+            headers[ADMIN_HEADER_NAME] = code;
           }
         }
+
         return headers;
       }
 
@@ -1290,6 +1294,27 @@
           throw new Error((data && (data.message || data.error)) || `APIエラー status=${res.status}`);
         }
         return data;
+      }
+
+      function buildNetworkErrorMessage(error, endpoint){
+        const message = error && error.message ? error.message : String(error || "");
+        if (message === "Failed to fetch" || message.includes("Failed to fetch")) {
+          return [
+            "Failed to fetch",
+            "",
+            "これはSupabaseの登録内容エラーではなく、ブラウザからWorkerへのPOST通信が成立していない状態です。",
+            "",
+            "確認ポイント:",
+            `1. Worker URL: ${getConfig().apiBase}`,
+            `2. endpoint: ${endpoint}`,
+            "3. system-check.htmlはSTEP VET-34I-R2に更新済みか",
+            "4. Cloudflare Worker側のCORSがPOST/OPTIONSを許可しているか",
+            "5. 管理コードは X-DPRO-Admin-Code で送信しています",
+            "",
+            "次にブラウザの開発者ツール Network で OPTIONS / POST のステータスを確認してください。"
+          ].join("\n");
+        }
+        return message;
       }
 
       function pageUrl(file, params){
