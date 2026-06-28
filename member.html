@@ -7,7 +7,7 @@
   <title>DPRO PET CARE LINE｜ペット診察券</title>
 
   <!--
-    STEP VET-34G-R2
+    STEP VET-34G-R3
     DPRO PET CARE LINE 動物病院版
     member.html 修正版 完全版
 
@@ -762,7 +762,7 @@
     </main>
 
     <div class="footer">
-      STEP VET-34G-R2 member.html R2 syntax fixed complete<br>
+      STEP VET-34G-R3 member.html R3 QR image fallback complete<br>
       DPRO PET CARE LINE / 動物病院版
     </div>
   </div>
@@ -1224,6 +1224,13 @@
         });
       }
 
+      function buildQrImageUrl(text, size = 220) {
+        return "https://api.qrserver.com/v1/create-qr-code/?size="
+          + encodeURIComponent(`${size}x${size}`)
+          + "&margin=10&data="
+          + encodeURIComponent(text || "");
+      }
+
       function renderQr(card) {
         const target = $("qrcode");
         target.innerHTML = "";
@@ -1232,26 +1239,39 @@
         state.selectedQrPayload = qrPayload;
         $("qrText").textContent = qrPayload || "QR情報がありません";
 
-        if (window.QRCode && window.QRCode.toCanvas && qrPayload) {
+        if (!qrPayload) {
+          const div = document.createElement("div");
+          div.style.padding = "12px";
+          div.style.fontSize = "11px";
+          div.style.wordBreak = "break-all";
+          div.textContent = "QR未発行";
+          target.appendChild(div);
+          return;
+        }
+
+        // 外部CDNのQRライブラリが読み込めない環境でも、受付で読めるQR画像を必ず表示する。
+        const img = document.createElement("img");
+        img.className = "qrImg";
+        img.alt = "ペット診察券QR";
+        img.src = buildQrImageUrl(qrPayload, 220);
+        target.appendChild(img);
+
+        // QRライブラリが使える場合は、後からcanvasに差し替える。
+        // 失敗しても上の画像QRは残るので、文字だけになることを防ぐ。
+        if (window.QRCode && window.QRCode.toCanvas) {
           const canvas = document.createElement("canvas");
-          target.appendChild(canvas);
           window.QRCode.toCanvas(canvas, qrPayload, {
             width: 148,
             margin: 1,
             errorCorrectionLevel: "M"
           }, function (error) {
-            if (error) {
-              console.error(error);
-              target.textContent = "QR表示エラー";
+            if (!error) {
+              target.innerHTML = "";
+              target.appendChild(canvas);
+            } else {
+              console.warn("QR canvas fallback kept:", error);
             }
           });
-        } else {
-          const div = document.createElement("div");
-          div.style.padding = "12px";
-          div.style.fontSize = "11px";
-          div.style.wordBreak = "break-all";
-          div.textContent = qrPayload || "QR未発行";
-          target.appendChild(div);
         }
       }
 
