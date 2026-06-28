@@ -7,7 +7,7 @@
   <title>DPRO PET CARE LINE｜受付登録・LINE連携</title>
 
   <!--
-    STEP VET-34E-R3
+    STEP VET-34E-R4
     DPRO PET CARE LINE 動物病院版
     line-setup.html 完全版
 
@@ -400,6 +400,21 @@
       text-align:center;
     }
     canvas{max-width:100%;height:auto}
+    .qrFallbackImg{
+      display:block;
+      width:220px;
+      height:220px;
+      max-width:100%;
+      margin:0 auto;
+      border-radius:12px;
+      background:#fff;
+    }
+    .qrHint{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:6px;
+      line-height:1.5;
+    }
     .petList{
       display:grid;
       gap:8px;
@@ -432,7 +447,7 @@
     <section class="hero">
       <div class="heroTop">
         <div class="badge">🐾 DPRO PET CARE LINE</div>
-        <div class="badge">STEP VET-34E-R3</div>
+        <div class="badge">STEP VET-34E-R4</div>
       </div>
       <h1>受付登録・LINE連携</h1>
       <p>
@@ -510,6 +525,7 @@
           <div class="qrWrap" style="margin-top:14px">
             <div class="qrBox">
               <canvas id="registerQrCanvas" width="220" height="220"></canvas>
+              <img id="registerQrImg" class="qrFallbackImg hidden" alt="新規登録案内QR">
               <div class="small" style="margin-top:8px">初回登録QR</div>
             </div>
             <div>
@@ -641,6 +657,7 @@
             <div class="qrWrap">
               <div class="qrBox">
                 <canvas id="staffCardQrCanvas" width="220" height="220"></canvas>
+                <img id="staffCardQrImg" class="qrFallbackImg hidden" alt="診察券QR">
                 <div class="small" style="margin-top:8px">ペット診察券QR</div>
               </div>
               <div>
@@ -658,6 +675,7 @@
             <div class="qrWrap">
               <div class="qrBox">
                 <canvas id="lineLinkQrCanvas" width="220" height="220"></canvas>
+                <img id="lineLinkQrImg" class="qrFallbackImg hidden" alt="LINE連携QR">
                 <div class="small" style="margin-top:8px">LINE連携QR</div>
               </div>
               <div>
@@ -699,6 +717,8 @@
           <div class="qrWrap">
             <div class="qrBox">
               <canvas id="searchLineLinkQrCanvas" width="220" height="220"></canvas>
+              <img id="searchLineLinkQrImg" class="qrFallbackImg hidden" alt="既存患者LINE連携QR">
+              <div class="qrHint">QRが表示されない場合は「連携画面を開く」でも確認できます。</div>
               <div class="small" style="margin-top:8px">LINE連携QR</div>
             </div>
             <div>
@@ -751,6 +771,7 @@
             <div class="qrWrap">
               <div class="qrBox">
                 <canvas id="manualLinkQrCanvas" width="220" height="220"></canvas>
+              <img id="manualLinkQrImg" class="qrFallbackImg hidden" alt="手動LINE連携QR">
                 <div class="small" style="margin-top:8px">LINE連携QR</div>
               </div>
               <div>
@@ -777,7 +798,7 @@
     </section>
 
     <div class="footer">
-      STEP VET-34E-R3 line-setup.html R3 existing patient guardian id fixed complete<br>
+      STEP VET-34E-R4 line-setup.html R4 QR image fallback complete<br>
       DPRO PET CARE LINE / 動物病院版
     </div>
   </div>
@@ -838,6 +859,7 @@
         goMember: document.getElementById("goMember"),
 
         registerQrCanvas: document.getElementById("registerQrCanvas"),
+        registerQrImg: document.getElementById("registerQrImg"),
         registerUrlText: document.getElementById("registerUrlText"),
         copyRegisterUrlBtn: document.getElementById("copyRegisterUrlBtn"),
         openRegisterUrlBtn: document.getElementById("openRegisterUrlBtn"),
@@ -847,12 +869,14 @@
         staffRegisterResult: document.getElementById("staffRegisterResult"),
         staffQrArea: document.getElementById("staffQrArea"),
         staffCardQrCanvas: document.getElementById("staffCardQrCanvas"),
+        staffCardQrImg: document.getElementById("staffCardQrImg"),
         staffCardInfo: document.getElementById("staffCardInfo"),
         issueLinkForLastRegisteredBtn: document.getElementById("issueLinkForLastRegisteredBtn"),
         copyStaffCardQrTextBtn: document.getElementById("copyStaffCardQrTextBtn"),
 
         lineLinkResult: document.getElementById("lineLinkResult"),
         lineLinkQrCanvas: document.getElementById("lineLinkQrCanvas"),
+        lineLinkQrImg: document.getElementById("lineLinkQrImg"),
         lineLinkInfo: document.getElementById("lineLinkInfo"),
         copyLineLinkUrlBtn: document.getElementById("copyLineLinkUrlBtn"),
         openLineLinkUrlBtn: document.getElementById("openLineLinkUrlBtn"),
@@ -862,6 +886,7 @@
         searchResult: document.getElementById("searchResult"),
         searchLinkResult: document.getElementById("searchLinkResult"),
         searchLineLinkQrCanvas: document.getElementById("searchLineLinkQrCanvas"),
+        searchLineLinkQrImg: document.getElementById("searchLineLinkQrImg"),
         searchLineLinkInfo: document.getElementById("searchLineLinkInfo"),
         copySearchLineLinkUrlBtn: document.getElementById("copySearchLineLinkUrlBtn"),
         openSearchLineLinkUrlBtn: document.getElementById("openSearchLineLinkUrlBtn"),
@@ -873,12 +898,52 @@
         manualLinkResult: document.getElementById("manualLinkResult"),
         manualQrArea: document.getElementById("manualQrArea"),
         manualLinkQrCanvas: document.getElementById("manualLinkQrCanvas"),
+        manualLinkQrImg: document.getElementById("manualLinkQrImg"),
         manualLinkInfo: document.getElementById("manualLinkInfo"),
 
         loadReviewsBtn: document.getElementById("loadReviewsBtn"),
         clearReviewsBtn: document.getElementById("clearReviewsBtn"),
         reviewsResult: document.getElementById("reviewsResult")
       };
+
+
+      function qrImageUrl(text){
+        return "https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=10&data=" + encodeURIComponent(text || "");
+      }
+
+      async function renderQr(canvas, img, text){
+        const value = String(text || "").trim();
+        if (!value) return;
+
+        // 先に画像QRを表示しておく。
+        // CDNのQRCodeライブラリが読み込めない場合でも、QRが空白にならないようにする。
+        if (img) {
+          img.src = qrImageUrl(value);
+          img.classList.remove("hidden");
+        }
+
+        if (!canvas) return;
+
+        try {
+          if (window.QRCode && typeof window.QRCode.toCanvas === "function") {
+            await QRCode.toCanvas(canvas, value, {
+              width: 220,
+              margin: 2,
+              errorCorrectionLevel: "M",
+              color: {
+                dark: "#0f2d22",
+                light: "#ffffff"
+              }
+            });
+
+            // canvas描画が成功した場合はcanvasを優先表示。
+            if (img) img.classList.add("hidden");
+          }
+        } catch (error) {
+          // canvasが失敗しても画像QRが残るので、画面上ではQRを表示できる。
+          if (img) img.classList.remove("hidden");
+        }
+      }
 
       init();
 
@@ -964,13 +1029,7 @@
         el.registerUrlText.textContent = registerUrl;
         setHref(el.openRegisterUrlBtn, registerUrl);
 
-        if (window.QRCode) {
-          await QRCode.toCanvas(el.registerQrCanvas, registerUrl, {
-            width: 220,
-            margin: 2,
-            errorCorrectionLevel: "M"
-          });
-        }
+        await renderQr(el.registerQrCanvas, el.registerQrImg, registerUrl);
       }
 
       async function onStaffRegister(event){
@@ -1083,7 +1142,7 @@
         }
 
         el.searchResult.innerHTML = items.map((guardian, index) => {
-          // STEP VET-34E-R3:
+          // STEP VET-34E-R4:
           // guardian.guardian_id は旧カラム・別IDの場合があるため、
           // LINE連携APIに渡すIDは Supabase主キーの guardian.id を最優先する。
           const guardianId = guardian.id || guardian.guardian_id || "";
@@ -1141,7 +1200,7 @@
 
         el.searchResult.querySelectorAll("[data-action='issue-link']").forEach((btn) => {
           btn.addEventListener("click", async () => {
-            // STEP VET-34E-R3:
+            // STEP VET-34E-R4:
             // 既存患者検索からLINE連携QRを押した場合は、
             // 「受付で新規登録」タブへ移動せず、この検索画面内にQRを表示する。
             await issueLineLink({
@@ -1190,13 +1249,7 @@
               `url: ${linkUrl}`
             ].join("\n");
 
-            if (window.QRCode) {
-              await QRCode.toCanvas(el.manualLinkQrCanvas, linkUrl, {
-                width: 220,
-                margin: 2,
-                errorCorrectionLevel: "M"
-              });
-            }
+            await renderQr(el.manualLinkQrCanvas, el.manualLinkQrImg, linkUrl);
           } else if (mode === "search") {
             state.searchLineLinkUrl = linkUrl;
             show(el.searchLinkResult);
@@ -1209,13 +1262,7 @@
             ].join("\n");
             setHref(el.openSearchLineLinkUrlBtn, linkUrl);
 
-            if (window.QRCode) {
-              await QRCode.toCanvas(el.searchLineLinkQrCanvas, linkUrl, {
-                width: 220,
-                margin: 2,
-                errorCorrectionLevel: "M"
-              });
-            }
+            await renderQr(el.searchLineLinkQrCanvas, el.searchLineLinkQrImg, linkUrl);
 
             el.searchLinkResult.scrollIntoView({ behavior: "smooth", block: "start" });
           } else {
@@ -1229,13 +1276,7 @@
             ].join("\n");
             setHref(el.openLineLinkUrlBtn, linkUrl);
 
-            if (window.QRCode) {
-              await QRCode.toCanvas(el.lineLinkQrCanvas, linkUrl, {
-                width: 220,
-                margin: 2,
-                errorCorrectionLevel: "M"
-              });
-            }
+            await renderQr(el.lineLinkQrCanvas, el.lineLinkQrImg, linkUrl);
           }
         } catch (error) {
           if (mode === "manual") {
@@ -1246,7 +1287,7 @@
               error.message || "LINE連携QRの発行に失敗しました。",
               "",
               "確認：検索結果の連携用guardian_idが実際の飼い主IDになっているか確認してください。",
-              "STEP VET-34E-R3では guardian.id を優先して使用します。"
+              "STEP VET-34E-R4では guardian.id を優先して使用します。"
             ].join("\n");
           } else {
             show(el.lineLinkResult);
