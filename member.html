@@ -7,7 +7,7 @@
   <title>DPRO PET CARE LINE｜ペット診察券</title>
 
   <!--
-    STEP VET-40E
+    STEP VET-52.5F
     DPRO PET CARE LINE 動物病院版
     member.html 修正版 完全版
 
@@ -886,7 +886,7 @@
     </main>
 
     <div class="footer">
-      STEP VET-40E member.html step vet 40e demo multi pet reflected complete<br>
+      STEP VET-52.5F member.html waiting demo handoff complete<br>
       DPRO PET CARE LINE / 動物病院版
     </div>
   </div>
@@ -1082,7 +1082,7 @@
       }
 
       function setupStaticLinks() {
-        setHref("waitingLink", buildPageUrl("waiting.html", { mode:"today_queue" }));
+        setHref("waitingLink", buildPageUrl("waiting.html", { mode:"today_queue", v:"step-vet-52-5f", line_user_id: state.lineUserId || (isStep40DemoReady() ? DEMO_LINE_USER_ID : ""), demo: isStep40DemoReady() ? "ready" : "" }));
         setHref("richMenuLink", buildPageUrl("rich-menu.html"));
         setHref("registerLinkTop", buildPageUrl("register.html"));
         setHref("registerLink", buildPageUrl("register.html"));
@@ -1471,16 +1471,19 @@
       }
 
       function renderActionLinks(card){
+        const demoReady = isStep40DemoReady();
         const base = {
           clinic_code: clinicCode,
+          line_user_id: state.lineUserId || (demoReady ? DEMO_LINE_USER_ID : ""),
+          demo: demoReady ? "ready" : "",
           pet_id: card.pet_id || "",
           card_token: card.card_token || card.qr_token || ""
         };
-        setHref("todayQueueLink", buildPageUrl("waiting.html", { ...base, mode:"today_queue" }));
-        setHref("previsitLink", buildPageUrl("waiting.html", { ...base, mode:"previsit" }));
-        setHref("medicineLink", buildPageUrl("waiting.html", { ...base, mode:"medicine_prevention" }));
-        setHref("addPetLink", buildPageUrl("register.html", { add_pet:"true" }));
-        setHref("waitingLink", buildPageUrl("waiting.html", { ...base, mode:"today_queue" }));
+        setHref("todayQueueLink", buildPageUrl("waiting.html", { ...base, mode:"today_queue", v:"step-vet-52-5f" }));
+        setHref("previsitLink", buildPageUrl("waiting.html", { ...base, mode:"previsit", v:"step-vet-52-5f" }));
+        setHref("medicineLink", buildPageUrl("waiting.html", { ...base, mode:"medicine_prevention", v:"step-vet-52-5f" }));
+        setHref("addPetLink", buildPageUrl("register.html", { add_pet:"true", line_user_id: base.line_user_id, demo: base.demo }));
+        setHref("waitingLink", buildPageUrl("waiting.html", { ...base, mode:"today_queue", v:"step-vet-52-5f" }));
         renderClinicStatus();
       }
 
