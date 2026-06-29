@@ -67,6 +67,30 @@
     label{display:block;margin-bottom:6px;color:#46534d;font-size:13px;font-weight:950}
     .scan-input{font-size:17px;padding:14px 16px;border-radius:18px}
     .button-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:12px}
+    .clinic-status-box{
+      margin-top:14px;
+      border:1px solid #cfe4d6;
+      background:linear-gradient(180deg,#ffffff,#f3faf6);
+      border-radius:20px;
+      padding:14px;
+    }
+    .clinic-status-box.closed{border-color:#f0c7c7;background:linear-gradient(180deg,#fff,#fff4f4)}
+    .clinic-status-box.half{border-color:#ead39a;background:linear-gradient(180deg,#fff,#fffaf0)}
+    .clinic-status-title{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+    .clinic-status-title strong{font-size:16px;line-height:1.35}
+    .clinic-tag{display:inline-flex;align-items:center;border-radius:999px;padding:5px 9px;background:var(--green-soft);color:var(--main);font-size:12px;font-weight:900;white-space:nowrap}
+    .clinic-status-box.closed .clinic-tag{background:var(--red-soft);color:var(--red)}
+    .clinic-status-box.half .clinic-tag{background:var(--amber-soft);color:var(--amber)}
+    .clinic-time-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+    .clinic-time{border:1px solid var(--line);border-radius:14px;background:#fff;padding:10px}
+    .clinic-time small{display:block;color:var(--muted);font-size:11px;font-weight:900;margin-bottom:2px}
+    .clinic-time b{display:block;font-size:14px;line-height:1.35}
+    .clinic-time.off{background:#fff6f5;border-color:#f0c7c7;color:var(--red)}
+    .next-closed-list{margin-top:10px;display:flex;flex-wrap:wrap;gap:6px}
+    .closed-chip{display:inline-flex;align-items:center;border-radius:999px;padding:4px 8px;background:#f7f6f2;border:1px solid var(--line);color:#56645e;font-size:11px;font-weight:850}
+    .reception-disabled-reason{margin-top:10px;color:var(--red);font-size:13px;font-weight:900;line-height:1.6}
+    @media (max-width:760px){.clinic-time-grid{grid-template-columns:1fr}}
+
     .readerless-box{margin-top:14px;padding:14px;border:1px solid #cfe6d8;background:linear-gradient(180deg,#f8fffb,#eef9f3);border-radius:20px}
     .readerless-box h3{margin:0 0 6px;font-size:17px}
     .readerless-box p{margin:0;color:#5e6a65;font-size:13px;font-weight:800;line-height:1.75}
@@ -111,22 +135,22 @@
       <div class="brand">
         <div class="logo">📷</div>
         <div>
-          <small>scan-pc.html / STEP VET-34H-R2</small>
+          <small>scan-pc.html / STEP VET-36D-3</small>
           <strong>DPRO PET CARE LINE</strong>
         </div>
       </div>
       <nav class="actions" aria-label="関連画面">
-        <a class="pill" href="./index.html?v=step-vet-34h">管理トップ</a>
-        <a class="pill" href="./waiting.html?demo=true&v=step-vet-34h">飼い主受付</a>
-        <a class="pill" href="./doctor.html?v=step-vet-34h">獣医師画面</a>
-        <a class="pill" href="./owner.html?v=step-vet-34h">オーナー画面</a>
-        <a class="pill" href="./system-check.html?v=step-vet-34h">システム確認</a>
+        <a class="pill" href="./index.html?v=step-vet-36d-3">管理トップ</a>
+        <a class="pill" href="./waiting.html?v=step-vet-36d-2-r3&clinic_code=dpro_vet_demo">飼い主受付</a>
+        <a class="pill" href="./doctor.html?v=step-vet-36d-3">獣医師画面</a>
+        <a class="pill" href="./owner.html?v=step-vet-36c&clinic_code=dpro_vet_demo">オーナー画面</a>
+        <a class="pill" href="./system-check.html?v=step-vet-34i-r4&clinic_code=dpro_vet_demo">システム確認</a>
       </nav>
     </header>
 
     <section class="hero">
       <div class="hero-card">
-        <span class="badge">STEP VET-34H-R2｜受付PC QRリーダー受付</span>
+        <span class="badge">STEP VET-36D-3｜受付PC 医院設定反映</span>
         <h1>診察券QRを読んで、<br>そのまま来院受付。</h1>
         <p class="lead">
           USB QRリーダーで読み取り、来院受付・受付番号発行まで行います。
@@ -191,6 +215,25 @@
       <div class="card">
         <h2>来院受付</h2>
         <p class="plain-lead">QRで確認したペットを、今日の受付番号に入れます。</p>
+
+        <div id="clinicReceptionStatus" class="clinic-status-box">
+          <div class="clinic-status-title">
+            <strong>本日の受付状態を確認中です</strong>
+            <span class="clinic-tag">確認中</span>
+          </div>
+          <div class="clinic-time-grid">
+            <div class="clinic-time">
+              <small>午前受付</small>
+              <b>確認中</b>
+            </div>
+            <div class="clinic-time">
+              <small>午後受付</small>
+              <b>確認中</b>
+            </div>
+          </div>
+        </div>
+
+        <div id="clinicReceptionDisabledReason" class="reception-disabled-reason hidden"></div>
 
         <div class="form-grid" style="margin-top:14px;">
           <div>
@@ -287,7 +330,10 @@
       CONFIG?.urls?.apiBaseUrl ||
       "https://dpro-vet-qr-api.dpromstk2000.workers.dev"
     ).replace(/\/$/, "");
+
+    const URL_PARAMS = new URLSearchParams(location.search);
     const CLINIC_CODE =
+      URL_PARAMS.get("clinic_code") ||
       CONFIG.CLINIC_CODE ||
       CONFIG.DEFAULT_CLINIC_CODE ||
       CONFIG?.clinic?.clinicCode ||
@@ -298,6 +344,13 @@
     const state = {
       selected: null,
       entries: [],
+      clinic: null,
+      clinicSettings: null,
+      clinicCalendar: [],
+      todayStatus: null,
+      canAcceptAny: true,
+      canAcceptMorning: true,
+      canAcceptAfternoon: true,
       cameraStream: null,
       detectTimer: null
     };
@@ -335,9 +388,25 @@
       return `${y}-${m}-${day}`;
     }
 
+    function addMonthsString(dateText, months){
+      const [y,m,d] = String(dateText || todayString()).split("-").map(Number);
+      const date = new Date(y, m - 1 + Number(months || 0), d);
+      const yy = date.getFullYear();
+      const mm = String(date.getMonth()+1).padStart(2,"0");
+      const dd = String(date.getDate()).padStart(2,"0");
+      return `${yy}-${mm}-${dd}`;
+    }
+
     function defaultDayPart(){
       const h = new Date().getHours();
+      if (h >= 13 && state.canAcceptAfternoon) return "afternoon";
+      if (state.canAcceptMorning) return "morning";
+      if (state.canAcceptAfternoon) return "afternoon";
       return h >= 13 ? "afternoon" : "morning";
+    }
+
+    function timeText(value){
+      return String(value || "").slice(0,5) || "-";
     }
 
     function escapeHtml(value){
@@ -414,6 +483,148 @@
       const data = await res.json().catch(() => ({}));
       if (!res.ok || data.ok === false) throw new Error(data.message || data.error || `API Error ${res.status}`);
       return data;
+    }
+
+    async function loadClinicSettings(){
+      try {
+        const data = await apiGet("/api/public/clinic-settings", {
+          from: todayString(),
+          to: addMonthsString(todayString(), 2)
+        }, false);
+
+        state.clinic = data.clinic || null;
+        state.clinicSettings = data.settings || null;
+        state.clinicCalendar = Array.isArray(data.calendar) ? data.calendar : [];
+        state.todayStatus = data.today_status || state.clinicCalendar.find((row) => row.target_date === todayString()) || null;
+        renderClinicReceptionStatus();
+        return data;
+      } catch (error) {
+        state.todayStatus = null;
+        renderClinicReceptionStatus();
+        const box = document.getElementById("clinicReceptionStatus");
+        if (box) {
+          box.className = "clinic-status-box half";
+          box.innerHTML = `
+            <div class="clinic-status-title">
+              <strong>医院設定の読み込みに失敗しました</strong>
+              <span class="clinic-tag">要確認</span>
+            </div>
+            <div class="notice warn" style="margin-top:8px;">${escapeHtml(error.message || "医院設定APIを確認してください。")}</div>
+          `;
+        }
+        return null;
+      }
+    }
+
+    function renderClinicReceptionStatus(){
+      const status = state.todayStatus || {};
+      const settings = state.clinicSettings || {};
+      const label = status.reception_label || "確認中";
+      const isFullClosed = status.is_full_closed === true || label === "休診";
+      const isMorningClosed = status.is_morning_closed === true || isFullClosed;
+      const isAfternoonClosed = status.is_afternoon_closed === true || isFullClosed;
+      const hasStatus = Boolean(state.todayStatus);
+
+      const canMorning = status.can_accept_morning === true || (!isFullClosed && !isMorningClosed && hasStatus);
+      const canAfternoon = status.can_accept_afternoon === true || (!isFullClosed && !isAfternoonClosed && hasStatus);
+      const canAny = hasStatus ? (canMorning || canAfternoon) : true;
+
+      state.canAcceptMorning = canMorning;
+      state.canAcceptAfternoon = canAfternoon;
+      state.canAcceptAny = canAny;
+
+      const morningText = isMorningClosed ? "受付できません" : `${timeText(settings.morning_open_time || status.morning_open_time || "09:00")}〜${timeText(settings.morning_last_accept_time || status.morning_last_accept_time || "11:30")}`;
+      const afternoonText = isAfternoonClosed ? "受付できません" : `${timeText(settings.afternoon_open_time || status.afternoon_open_time || "15:00")}〜${timeText(settings.afternoon_last_accept_time || status.afternoon_last_accept_time || "18:00")}`;
+      const message = status.display_message || settings.public_notice || "本日の受付状態を確認してください。";
+      const boxClass = isFullClosed ? "clinic-status-box closed" : (!canMorning || !canAfternoon) ? "clinic-status-box half" : "clinic-status-box";
+      const tagText = !hasStatus ? "確認中" : isFullClosed ? "本日休診" : (!canMorning || !canAfternoon) ? label : "受付中";
+
+      const box = document.getElementById("clinicReceptionStatus");
+      if (box) {
+        box.className = boxClass;
+        box.innerHTML = `
+          <div class="clinic-status-title">
+            <strong>${escapeHtml(message)}</strong>
+            <span class="clinic-tag">${escapeHtml(tagText)}</span>
+          </div>
+          <div class="clinic-time-grid">
+            <div class="clinic-time ${isMorningClosed ? "off" : ""}">
+              <small>午前受付</small>
+              <b>${escapeHtml(morningText)}</b>
+            </div>
+            <div class="clinic-time ${isAfternoonClosed ? "off" : ""}">
+              <small>午後受付</small>
+              <b>${escapeHtml(afternoonText)}</b>
+            </div>
+          </div>
+          ${buildNextClosedChips()}
+        `;
+      }
+      updateReceptionAvailability();
+    }
+
+    function buildNextClosedChips(){
+      const rows = (state.clinicCalendar || [])
+        .filter((row) => row.target_date && row.target_date >= todayString())
+        .filter((row) => row.reception_label && row.reception_label !== "通常受付")
+        .slice(0, 5);
+
+      if (!rows.length) return "";
+
+      return `
+        <div class="next-closed-list">
+          ${rows.map((row) => `<span class="closed-chip">${escapeHtml(String(row.target_date).slice(5))} ${escapeHtml(row.reception_label)}${row.special_title ? "：" + escapeHtml(row.special_title) : ""}</span>`).join("")}
+        </div>
+      `;
+    }
+
+    function currentDayPartCanAccept(){
+      const dayPart = el.dayPart?.value || defaultDayPart();
+      if (!state.canAcceptAny) return false;
+      if (dayPart === "morning" && !state.canAcceptMorning) return false;
+      if (dayPart === "afternoon" && !state.canAcceptAfternoon) return false;
+      return true;
+    }
+
+    function clinicReceptionBlockMessage(){
+      const dayPart = el.dayPart?.value || defaultDayPart();
+      if (!state.canAcceptAny) return state.todayStatus?.display_message || "本日は受付できません。";
+      if (dayPart === "morning" && !state.canAcceptMorning) return "本日は午前受付ができません。";
+      if (dayPart === "afternoon" && !state.canAcceptAfternoon) return "本日は午後受付ができません。";
+      return "";
+    }
+
+    function updateReceptionAvailability(){
+      const canByClinic = currentDayPartCanAccept();
+      const hasSelected = Boolean(state.selected?.card);
+      const disabled = !canByClinic || !hasSelected;
+      if (el.createReceptionBtn) el.createReceptionBtn.disabled = disabled;
+
+      const reason = document.getElementById("clinicReceptionDisabledReason");
+      if (reason) {
+        const message = clinicReceptionBlockMessage();
+        if (message) {
+          reason.classList.remove("hidden");
+          reason.textContent = message;
+        } else {
+          reason.classList.add("hidden");
+          reason.textContent = "";
+        }
+      }
+
+      if (!hasSelected && el.createStatus && canByClinic) {
+        el.createStatus.className = "notice";
+        el.createStatus.textContent = "ペット確認後に受付できます。";
+      }
+    }
+
+    function ensureClinicCanAcceptSelectedPart(){
+      if (currentDayPartCanAccept()) return true;
+      const message = clinicReceptionBlockMessage() || "現在はこの時間帯の受付ができません。";
+      el.createStatus.className = "notice ng";
+      el.createStatus.textContent = message;
+      updateReceptionAvailability();
+      return false;
     }
 
     function parseQrValue(value){
@@ -597,6 +808,7 @@
           </div>
         </div>
       `;
+      updateReceptionAvailability();
     }
 
     async function lookupQr(){
@@ -640,6 +852,11 @@
       }
       if (!state.selected?.card) {
         alert("先にQRを読み取ってペットを確認してください。");
+        updateReceptionAvailability();
+        return;
+      }
+
+      if (!ensureClinicCanAcceptSelectedPart()) {
         return;
       }
 
@@ -693,8 +910,8 @@
         el.createStatus.className = "notice ng";
         el.createStatus.textContent = error.message || "受付に失敗しました。";
       } finally {
-        el.createReceptionBtn.disabled = false;
         el.createReceptionBtn.textContent = "QR来院受付する";
+        updateReceptionAvailability();
       }
     }
 
@@ -858,6 +1075,8 @@
     }
 
     async function loadAll(){
+      await loadClinicSettings();
+
       try {
         const [summaryData, entriesData] = await Promise.all([
           apiGet("/api/public/queue/summary", { date: todayString() }, false),
@@ -915,6 +1134,7 @@
       el.petPanel.classList.add("hidden");
       el.createStatus.className = "notice";
       el.createStatus.textContent = "ペット確認後に受付できます。";
+      updateReceptionAvailability();
       el.qrInput.focus();
     }
 
@@ -971,6 +1191,9 @@
 
     function init(){
       el.dayPart.value = defaultDayPart();
+      if (el.dayPart) {
+        el.dayPart.addEventListener("change", updateReceptionAvailability);
+      }
       renderAuthStatus();
       el.saveAdminTokenBtn = document.getElementById("saveAdminTokenBtn");
       el.clearAdminTokenBtn = document.getElementById("clearAdminTokenBtn");
