@@ -67,6 +67,42 @@
     label{display:block;margin-bottom:6px;color:#46534d;font-size:13px;font-weight:950}
     .scan-input{font-size:17px;padding:14px 16px;border-radius:18px}
     .button-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:12px}
+    .btn.loading,
+    .btnMain.loading,
+    button.loading{
+      background:var(--main)!important;
+      border-color:var(--main)!important;
+      color:#fff!important;
+      opacity:1!important;
+      filter:none!important;
+      box-shadow:0 14px 28px rgba(47,125,100,.24)!important;
+      position:relative;
+      overflow:hidden;
+    }
+    .btn.loading::after,
+    .btnMain.loading::after,
+    button.loading::after{
+      content:"";
+      width:14px;
+      height:14px;
+      border:2px solid rgba(255,255,255,.45);
+      border-top-color:#fff;
+      border-radius:50%;
+      animation:dproSpin .75s linear infinite;
+      margin-left:8px;
+      display:inline-block;
+      vertical-align:-2px;
+    }
+    @keyframes dproSpin{to{transform:rotate(360deg)}}
+
+    .btnMain:disabled:not(.loading){
+      background:#8fbfac!important;
+      border-color:#8fbfac!important;
+      color:#fff!important;
+      opacity:.78!important;
+      filter:none!important;
+    }
+
     .clinic-status-box{
       margin-top:14px;
       border:1px solid #cfe4d6;
@@ -135,14 +171,14 @@
       <div class="brand">
         <div class="logo">📷</div>
         <div>
-          <small>scan-pc.html / STEP VET-36D-3</small>
+          <small>scan-pc.html / STEP VET-36D-3-R2</small>
           <strong>DPRO PET CARE LINE</strong>
         </div>
       </div>
       <nav class="actions" aria-label="関連画面">
-        <a class="pill" href="./index.html?v=step-vet-36d-3">管理トップ</a>
+        <a class="pill" href="./index.html?v=step-vet-36d-3-r2">管理トップ</a>
         <a class="pill" href="./waiting.html?v=step-vet-36d-2-r3&clinic_code=dpro_vet_demo">飼い主受付</a>
-        <a class="pill" href="./doctor.html?v=step-vet-36d-3">獣医師画面</a>
+        <a class="pill" href="./doctor.html?v=step-vet-36d-3-r2">獣医師画面</a>
         <a class="pill" href="./owner.html?v=step-vet-36c&clinic_code=dpro_vet_demo">オーナー画面</a>
         <a class="pill" href="./system-check.html?v=step-vet-34i-r4&clinic_code=dpro_vet_demo">システム確認</a>
       </nav>
@@ -150,7 +186,7 @@
 
     <section class="hero">
       <div class="hero-card">
-        <span class="badge">STEP VET-36D-3｜受付PC 医院設定反映</span>
+        <span class="badge">STEP VET-36D-3-R2-R2｜受付PC ボタン表示修正</span>
         <h1>診察券QRを読んで、<br>そのまま来院受付。</h1>
         <p class="lead">
           USB QRリーダーで読み取り、来院受付・受付番号発行まで行います。
@@ -886,6 +922,7 @@
       };
 
       el.createReceptionBtn.disabled = true;
+      el.createReceptionBtn.classList.add("loading");
       el.createReceptionBtn.textContent = "受付中...";
       el.createStatus.className = "notice info";
       el.createStatus.textContent = "受付番号を発行しています...";
@@ -910,6 +947,7 @@
         el.createStatus.className = "notice ng";
         el.createStatus.textContent = error.message || "受付に失敗しました。";
       } finally {
+        el.createReceptionBtn.classList.remove("loading");
         el.createReceptionBtn.textContent = "QR来院受付する";
         updateReceptionAvailability();
       }
