@@ -160,6 +160,13 @@
     .follow-card{border:1px solid rgba(217,210,196,.88);border-radius:18px;background:#fffdf9;padding:13px}
     .follow-card h4{margin:0 0 4px;font-size:15px}
     .follow-card p{margin:0;color:#61706a;font-size:12px;font-weight:800}
+    .follow-message-box{margin-top:10px;border:1px solid rgba(31,143,101,.18);background:linear-gradient(180deg,#f8fffb,#fffdf9);border-radius:16px;padding:10px}
+    .follow-message-label{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:7px;color:#2b5d4b;font-size:12px;font-weight:950}
+    .follow-message-label span{display:inline-flex;border-radius:999px;background:var(--green-soft);color:#11704c;padding:3px 8px;font-size:11px;font-weight:950}
+    .follow-message-text{width:100%;min-height:118px;resize:vertical;border:1px solid rgba(217,210,196,.9);border-radius:14px;padding:10px;background:#fff;color:var(--ink);font:inherit;font-size:13px;font-weight:780;line-height:1.65;box-sizing:border-box}
+    .follow-message-hint{margin-top:6px!important;color:#66726d!important;font-size:11px!important;font-weight:800!important;line-height:1.55!important}
+    .follow-copy-status{margin-top:7px;border-radius:12px;padding:8px 10px;background:var(--green-soft);color:#11704c;font-size:12px;font-weight:900;display:none}
+    .follow-copy-status.is-visible{display:block}
     .footer-note{margin-top:18px;border:1px solid rgba(217,210,196,.88);background:rgba(255,255,255,.78);border-radius:22px;padding:14px;color:#56645e;font-size:13px;font-weight:780;line-height:1.7}
     @media(max-width:980px){.hero,.layout,.follow-grid{grid-template-columns:1fr}.status-grid{grid-template-columns:repeat(2,1fr)}.section-title{align-items:flex-start;flex-direction:column}.section-title p{text-align:left}.entry{grid-template-columns:58px 1fr}.entry-actions{grid-column:1/-1;justify-content:flex-start;max-width:none}}
     @media(max-width:640px){.topbar{align-items:flex-start;flex-direction:column}.actions{justify-content:flex-start}.auth-box,.form-grid,.status-grid{grid-template-columns:1fr}.brand strong{white-space:normal}.hero-card,.card{border-radius:22px}.pet-main{grid-template-columns:1fr}}
@@ -710,7 +717,7 @@
   
 
     /* =========================================================
-      STEP VET-52.5K：受付PC 既存飼い主検索追加版
+      STEP VET-52.5L：受付PC LINEフォロー文面プレビュー・編集版
       目的：長い縦スクロールをやめ、左メニューで必要な操作だけ表示する
     ========================================================= */
     .ops-workbench{display:grid;grid-template-columns:270px minmax(0,1fr);gap:18px;align-items:start;margin-top:18px}
@@ -766,7 +773,7 @@
 <div class="brand">
 <div class="logo">📷</div>
 <div>
-<small>scan-pc.html / STEP VET-52.5K</small>
+<small>scan-pc.html / STEP VET-52.5L</small>
 <strong>DPRO PET CARE LINE</strong>
 </div>
 </div>
@@ -779,7 +786,7 @@
 </nav>
 </header><section class="hero">
 <div class="hero-card">
-<span class="badge">STEP VET-52.5K｜受付PC 既存飼い主検索追加版</span>
+<span class="badge">STEP VET-52.5L｜受付PC LINEフォロー文面編集版</span>
 <h1>今日の受付を中心に、<br/>必要な操作だけ開く。</h1>
 <p class="lead">受付スタッフが迷わないように、最初は「今日の受付」だけを表示します。QR受付・窓口受付・電話受付・既存患者検索・代理登録・フォローは、左メニューから必要な時だけ開きます。既存APIと登録処理はそのまま保持しています。</p>
 </div>
@@ -1303,14 +1310,11 @@
 <div>
 <span class="panel-kicker">受付PC</span>
 <h2>受付が送るLINEフォロー</h2>
-<p>先生・システムが作った文面を、受付がコピーして送信済みにします。</p>
+<p>文面を画面で確認・編集してからコピーし、送信後に送信済みにできます。</p>
 </div>
-</div>
-<div class="section-title">
-<h2>受付が送るLINEフォロー</h2>
-<p>先生・システムが作った文面を、受付がコピーして送信済みにします。</p>
 </div>
 <section class="card">
+<div class="notice">文面はこの画面で編集できます。編集後に「文面コピー」を押すと、直した内容がコピーされます。</div>
 <div class="follow-grid">
 <div>
 <h3>診察後・再診フォロー</h3>
@@ -2337,27 +2341,66 @@
       return `${guardian}様\n${pet}ちゃんのその後の様子はいかがでしょうか。気になる変化がありましたらLINEでご相談ください。`;
     }
 
+    async function copyTextToClipboard(text){
+      const value = String(text || "");
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(value);
+        return true;
+      }
+      const ta = document.createElement("textarea");
+      ta.value = value;
+      ta.setAttribute("readonly", "");
+      ta.style.position = "fixed";
+      ta.style.left = "-9999px";
+      document.body.appendChild(ta);
+      ta.select();
+      const ok = document.execCommand("copy");
+      document.body.removeChild(ta);
+      return ok;
+    }
+
+    function showFollowCopyStatus(card, message){
+      const status = card?.querySelector(".follow-copy-status");
+      if (!status) return;
+      status.textContent = message || "コピーしました。";
+      status.classList.add("is-visible");
+      window.clearTimeout(status._timer);
+      status._timer = window.setTimeout(() => status.classList.remove("is-visible"), 2600);
+    }
+
     function renderFollowups(items){
       if (!items.length) {
         el.followupList.innerHTML = '<div class="empty">診察後・再診フォローはありません。</div>';
         return;
       }
-      el.followupList.innerHTML = items.slice(0, 12).map(item => `
+      el.followupList.innerHTML = items.slice(0, 12).map(item => {
+        const id = item.followup_id || item.id;
+        const message = makeFollowMessage(item, "follow");
+        return `
         <div class="follow-card">
           <h4>${escapeHtml(item.title || "再診フォロー")}</h4>
           <p>${escapeHtml(item.guardian_name || "")} / ${escapeHtml(item.pet_name || "")} / 予定日：${escapeHtml(item.due_date || "-")}</p>
-          <div class="button-row">
-            <button class="btn btn-sub" data-copy-follow="${escapeHtml(item.followup_id || item.id)}">文面コピー</button>
-            <button class="btn btn-main" data-done-follow="${escapeHtml(item.followup_id || item.id)}">送信済み</button>
+          <div class="follow-message-box">
+            <div class="follow-message-label">送信文面 <span>編集OK</span></div>
+            <textarea class="follow-message-text" data-follow-message="${escapeHtml(id)}">${escapeHtml(message)}</textarea>
+            <p class="follow-message-hint">必要に応じて文面を直してからコピーしてください。編集内容はこの画面上でコピーに反映されます。</p>
           </div>
+          <div class="button-row">
+            <button class="btn btn-sub" data-copy-follow="${escapeHtml(id)}">文面コピー</button>
+            <button class="btn btn-main" data-done-follow="${escapeHtml(id)}">送信済み</button>
+          </div>
+          <div class="follow-copy-status">コピーしました。</div>
         </div>
-      `).join("");
+      `;
+      }).join("");
 
       el.followupList.querySelectorAll("[data-copy-follow]").forEach(btn => {
         btn.addEventListener("click", async () => {
-          const item = items.find(x => String(x.followup_id || x.id) === String(btn.dataset.copyFollow));
-          await navigator.clipboard.writeText(makeFollowMessage(item, "follow"));
-          alert("LINEフォロー文面をコピーしました。");
+          const card = btn.closest(".follow-card");
+          const textarea = card?.querySelector(".follow-message-text");
+          const text = textarea ? textarea.value : makeFollowMessage(items.find(x => String(x.followup_id || x.id) === String(btn.dataset.copyFollow)), "follow");
+          await copyTextToClipboard(text);
+          showFollowCopyStatus(card, "編集後のLINEフォロー文面をコピーしました。");
         });
       });
       el.followupList.querySelectorAll("[data-done-follow]").forEach(btn => {
@@ -2375,22 +2418,34 @@
         el.preventionList.innerHTML = '<div class="empty">予防・お薬フォローはありません。</div>';
         return;
       }
-      el.preventionList.innerHTML = items.slice(0, 12).map(item => `
+      el.preventionList.innerHTML = items.slice(0, 12).map(item => {
+        const id = item.prevention_id || item.id;
+        const message = makeFollowMessage(item, "prevention");
+        return `
         <div class="follow-card">
           <h4>${escapeHtml(item.title || "予防予定")}</h4>
           <p>${escapeHtml(item.guardian_name || "")} / ${escapeHtml(item.pet_name || "")} / 予定日：${escapeHtml(item.due_date || "-")}</p>
-          <div class="button-row">
-            <button class="btn btn-sub" data-copy-prevention="${escapeHtml(item.prevention_id || item.id)}">文面コピー</button>
-            <button class="btn btn-main" data-done-prevention="${escapeHtml(item.prevention_id || item.id)}">案内済み</button>
+          <div class="follow-message-box">
+            <div class="follow-message-label">送信文面 <span>編集OK</span></div>
+            <textarea class="follow-message-text" data-prevention-message="${escapeHtml(id)}">${escapeHtml(message)}</textarea>
+            <p class="follow-message-hint">必要に応じて文面を直してからコピーしてください。編集内容はこの画面上でコピーに反映されます。</p>
           </div>
+          <div class="button-row">
+            <button class="btn btn-sub" data-copy-prevention="${escapeHtml(id)}">文面コピー</button>
+            <button class="btn btn-main" data-done-prevention="${escapeHtml(id)}">案内済み</button>
+          </div>
+          <div class="follow-copy-status">コピーしました。</div>
         </div>
-      `).join("");
+      `;
+      }).join("");
 
       el.preventionList.querySelectorAll("[data-copy-prevention]").forEach(btn => {
         btn.addEventListener("click", async () => {
-          const item = items.find(x => String(x.prevention_id || x.id) === String(btn.dataset.copyPrevention));
-          await navigator.clipboard.writeText(makeFollowMessage(item, "prevention"));
-          alert("予防案内文面をコピーしました。");
+          const card = btn.closest(".follow-card");
+          const textarea = card?.querySelector(".follow-message-text");
+          const text = textarea ? textarea.value : makeFollowMessage(items.find(x => String(x.prevention_id || x.id) === String(btn.dataset.copyPrevention)), "prevention");
+          await copyTextToClipboard(text);
+          showFollowCopyStatus(card, "編集後の予防案内文面をコピーしました。");
         });
       });
 
