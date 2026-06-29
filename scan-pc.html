@@ -1,12 +1,13 @@
-<!doctype html>
+<!DOCTYPE html>
+
 <html lang="ja">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <meta name="theme-color" content="#223b34" />
-  <title>DPRO PET CARE LINE｜受付PC・QRリーダー受付</title>
-  <script src="./config.js"></script>
-  <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
+<meta content="#223b34" name="theme-color"/>
+<title>DPRO PET CARE LINE｜受付PC・QRリーダー受付</title>
+<script src="./config.js"></script>
+<style>
     :root {
       --bg:#f4f1ea; --card:#fff; --ink:#22302c; --muted:#6f7b75; --line:#d9d2c4;
       --main:#1f8f65; --main-dark:#223b34; --green-soft:#e8f7ef; --blue:#3d74a8; --blue-soft:#edf5ff;
@@ -701,519 +702,592 @@
     }
 
 
-  </style>
+  
+
+    /* =========================================================
+      STEP VET-52.5B：受付PC 画面整理版
+      目的：長い縦スクロールをやめ、左メニューで必要な操作だけ表示する
+    ========================================================= */
+    .ops-workbench{display:grid;grid-template-columns:270px minmax(0,1fr);gap:18px;align-items:start;margin-top:18px}
+    .ops-side{position:sticky;top:16px;z-index:10}
+    .ops-side-card{border:1px solid rgba(217,210,196,.92);border-radius:24px;background:rgba(255,255,255,.94);box-shadow:0 18px 42px rgba(34,48,44,.10);padding:14px}
+    .ops-side-title{padding:8px 8px 12px;border-bottom:1px solid rgba(217,210,196,.8);margin-bottom:10px}
+    .ops-side-title span{display:inline-flex;align-items:center;border-radius:999px;padding:5px 9px;background:var(--green-soft);color:#11704c;font-size:11px;font-weight:1000;letter-spacing:.04em;margin-bottom:8px}
+    .ops-side-title strong{display:block;font-size:16px;line-height:1.35;letter-spacing:-.02em}
+    .ops-nav{display:grid;gap:8px}
+    .ops-nav-btn{width:100%;border:1px solid rgba(217,210,196,.9);border-radius:18px;background:#fff;padding:11px 10px;display:grid;grid-template-columns:30px 1fr;grid-template-areas:"num title" "num sub";gap:0 9px;text-align:left;color:var(--ink);transition:.15s transform,.15s box-shadow,.15s border-color,.15s background}
+    .ops-nav-btn:hover{transform:translateY(-1px);box-shadow:0 12px 24px rgba(34,48,44,.10);border-color:#bfe3cc}
+    .ops-nav-btn span{grid-area:num;width:30px;height:30px;border-radius:12px;background:#eef6f1;color:#11704c;display:grid;place-items:center;font-weight:1000;font-size:13px}
+    .ops-nav-btn b{grid-area:title;font-size:14px;line-height:1.25;letter-spacing:-.01em}
+    .ops-nav-btn small{grid-area:sub;color:var(--muted);font-weight:850;font-size:11px;line-height:1.35;margin-top:2px}
+    .ops-nav-btn.active{background:linear-gradient(135deg,#1f8f65,#2c7a60);border-color:transparent;color:#fff;box-shadow:0 14px 26px rgba(31,143,101,.24)}
+    .ops-nav-btn.active span{background:rgba(255,255,255,.22);color:#fff}
+    .ops-nav-btn.active small{color:rgba(255,255,255,.82)}
+    .ops-side-note{margin-top:12px;border-radius:18px;background:#f8f5ed;border:1px solid rgba(217,210,196,.8);padding:12px;color:#5b675f;font-size:12px;font-weight:820;line-height:1.65}
+    .ops-main{min-width:0}
+    .ops-panel{display:none}
+    .ops-panel.active{display:block;animation:opsFade .16s ease-out}
+    @keyframes opsFade{from{opacity:.15;transform:translateY(4px)}to{opacity:1;transform:none}}
+    .panel-heading{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin:0 0 12px}
+    .panel-heading h2{margin:0;font-size:clamp(23px,2.6vw,34px)}
+    .panel-heading p{margin:6px 0 0;color:var(--muted);font-size:13px;font-weight:850;line-height:1.7}
+    .panel-kicker{display:inline-flex;align-items:center;border-radius:999px;padding:5px 10px;background:var(--green-soft);color:#11704c;font-size:11px;font-weight:1000;letter-spacing:.05em;margin-bottom:8px}
+    .ops-card-grid{display:grid;gap:16px}
+    .ops-card-grid.two{grid-template-columns:1fr 1fr;align-items:start}
+    .ops-card-grid.one{grid-template-columns:minmax(0,1fr)}
+    .ops-panel .section-title{margin:0 0 12px}
+    .ops-panel .section-title p{text-align:left}
+
+    .status-collapse{border-top:1px solid rgba(217,210,196,.72);margin-top:8px;padding-top:10px}
+    .status-collapse summary{list-style:none;display:flex;align-items:center;justify-content:center;border:1px solid #d7eadf;border-radius:999px;background:#f3fbf6;color:#11704c;font-size:13px;font-weight:1000;padding:9px 12px;cursor:pointer}
+    .status-collapse summary::-webkit-details-marker{display:none}
+    .status-collapse[open] summary{margin-bottom:10px;background:#e8f7ef}
+    .is-collapsed-group .status-section-body{padding-top:0}
+    @media (max-width:980px){
+      .ops-workbench{grid-template-columns:1fr}
+      .ops-side{position:static}
+      .ops-nav{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .ops-card-grid.two{grid-template-columns:1fr}
+    }
+    @media (max-width:620px){
+      .ops-nav{grid-template-columns:1fr}
+      .ops-nav-btn{grid-template-columns:28px 1fr}
+      .panel-heading{display:block}
+    }
+</style>
 </head>
-
 <body>
-  <main class="page">
-    <header class="topbar">
-      <div class="brand">
-        <div class="logo">📷</div>
-        <div>
-          <small>scan-pc.html / STEP VET-46</small>
-          <strong>DPRO PET CARE LINE</strong>
-        </div>
-      </div>
-      <nav class="actions" aria-label="関連画面">
-        <a class="pill" href="./index.html?v=step-vet-46">管理トップ</a>
-        <a class="pill" href="./waiting.html?v=step-vet-36d-2-r3&clinic_code=dpro_vet_demo">飼い主受付</a>
-        <a class="pill" href="./doctor.html?v=step-vet-46">獣医師画面</a>
-        <a class="pill" href="./owner.html?v=step-vet-36c&clinic_code=dpro_vet_demo">オーナー画面</a>
-        <a class="pill" href="./system-check.html?v=step-vet-34i-r4&clinic_code=dpro_vet_demo">システム確認</a>
-      </nav>
-    </header>
-
-    <section class="hero">
-      <div class="hero-card">
-        <span class="badge">STEP VET-46-R2｜受付PC ボタン表示修正</span>
-        <h1>診察券QRを読んで、<br>そのまま来院受付。</h1>
-        <p class="lead">
-          USB QRリーダーで読み取り、来院受付・受付番号発行まで行います。
-          さらに、リーダーがない場合でも member.html でコピーした QR文字列（vetcard:...）を貼り付けて、
-          ペット情報確認、受付番号発行、院内受付済み、診察中、診療済みまで確認できます。
-        </p>
-      </div>
-
-      <div class="card">
-        <span class="badge-dark">管理コード</span>
-        <p class="plain-lead">QR受付・窓口受付・電話受付・ステータス更新には管理コードが必要です。</p>
-        <div id="authStatus" class="notice">管理コード確認中</div>
-        <div class="auth-box">
-          <input id="adminTokenInput" type="password" placeholder="管理コードを入力" autocomplete="off" />
-          <button class="btn btn-main" id="saveAdminTokenBtn" type="button">保存</button>
-          <button class="btn btn-danger" id="clearAdminTokenBtn" type="button">削除</button>
-        </div>
-      </div>
-    </section>
-
-    <section class="layout">
-      <div class="card">
-        <h2>QR読み取り受付</h2>
-        <p class="plain-lead">診察券QRを読み取るか、QRのURL/tokenを貼り付けてEnterを押してください。</p>
-
-        <label for="qrInput" style="margin-top:14px;">QR URL / token / card_no</label>
-        <input id="qrInput" class="scan-input" type="text" placeholder="QRリーダーで読み取り、または貼り付け" autocomplete="off" autofocus />
-
-        <div class="button-row">
-          <button class="btn btn-main" id="lookupBtn" type="button">ペット確認</button>
-          <button class="btn btn-sub" id="clearScanBtn" type="button">クリア</button>
-        </div>
-
-        <div class="readerless-box">
-          <h3>リーダーなし確認モード</h3>
-          <p>
+<main class="page"><header class="topbar">
+<div class="brand">
+<div class="logo">📷</div>
+<div>
+<small>scan-pc.html / STEP VET-52.5B</small>
+<strong>DPRO PET CARE LINE</strong>
+</div>
+</div>
+<nav aria-label="関連画面" class="actions">
+<a class="pill" href="./index.html?clinic_code=dpro_vet_demo&amp;demo=ready&amp;v=step-vet-52-5b">管理トップ</a>
+<a class="pill" href="./waiting.html?clinic_code=dpro_vet_demo&amp;line_user_id=demo_line_link_001&amp;demo=ready&amp;v=step-vet-52-5b">飼い主受付</a>
+<a class="pill" href="./doctor.html?clinic_code=dpro_vet_demo&amp;demo=ready&amp;v=step-vet-52-5b">獣医師画面</a>
+<a class="pill" href="./owner.html?clinic_code=dpro_vet_demo&amp;demo=ready&amp;v=step-vet-52-5b">オーナー画面</a>
+<a class="pill" href="./system-check.html?clinic_code=dpro_vet_demo&amp;demo=ready&amp;v=step-vet-52-5b">システム確認</a>
+</nav>
+</header><section class="hero">
+<div class="hero-card">
+<span class="badge">STEP VET-52.5B｜受付PC 画面整理版</span>
+<h1>今日の受付を中心に、<br/>必要な操作だけ開く。</h1>
+<p class="lead">受付スタッフが迷わないように、最初は「今日の受付」だけを表示します。QR受付・窓口受付・電話受付・既存患者検索・代理登録・フォローは、左メニューから必要な時だけ開きます。既存APIと登録処理はそのまま保持しています。</p>
+</div>
+<div class="card">
+<span class="badge-dark">管理コード</span>
+<p class="plain-lead">QR受付・窓口受付・電話受付・ステータス更新には管理コードが必要です。</p>
+<div class="notice" id="authStatus">管理コード確認中</div>
+<div class="auth-box">
+<input autocomplete="off" id="adminTokenInput" placeholder="管理コードを入力" type="password"/>
+<button class="btn btn-main" id="saveAdminTokenBtn" type="button">保存</button>
+<button class="btn btn-danger" id="clearAdminTokenBtn" type="button">削除</button>
+</div>
+</div>
+</section><section aria-label="受付PC操作メニュー" class="ops-workbench">
+<aside aria-label="受付PCメニュー" class="ops-side">
+<div class="ops-side-card">
+<div class="ops-side-title">
+<span>受付メニュー</span>
+<strong>必要な画面だけ開く</strong>
+</div>
+<div class="ops-nav">
+<button class="ops-nav-btn active" data-open-panel="today" type="button"><span>1</span><b>今日の受付</b><small>最初に見る画面</small></button>
+<button class="ops-nav-btn" data-open-panel="qr" type="button"><span>2</span><b>QR受付</b><small>診察券QR・来院受付</small></button>
+<button class="ops-nav-btn" data-open-panel="manual" type="button"><span>3</span><b>窓口・電話受付</b><small>LINEなしの受付追加</small></button>
+<button class="ops-nav-btn" data-open-panel="existing" type="button"><span>4</span><b>既存患者検索</b><small>このペットで受付</small></button>
+<button class="ops-nav-btn" data-open-panel="proxy" type="button"><span>5</span><b>代理登録・ペット追加</b><small>スタッフが登録補助</small></button>
+<button class="ops-nav-btn" data-open-panel="follow" type="button"><span>6</span><b>LINEフォロー</b><small>文面コピー・送信済み</small></button>
+</div>
+<div class="ops-side-note">
+<strong>通常業務は「今日の受付」から。</strong><br/>
+            新しい受付を追加するときだけ、必要なメニューを開いてください。
+          </div>
+</div>
+</aside>
+<div class="ops-main">
+<section class="ops-panel active" data-panel="today">
+<div class="panel-heading">
+<div>
+<span class="panel-kicker">受付PC</span>
+<h2>今日の受付状況</h2>
+<p>LINE受付・QR受付・窓口受付・電話受付を同じ一覧で確認し、ステータスを変更します。</p>
+</div>
+</div>
+<div class="section-title">
+<h2>本日の受付状況</h2>
+<p>LINE受付・QR受付・窓口受付・電話受付を同じ一覧で確認できます。</p>
+</div>
+<section class="card">
+<div class="status-grid">
+<div class="metric"><small>通常診察</small><b id="generalExamCount">-</b><span>診察・再診</span></div>
+<div class="metric"><small>現在診察中</small><b id="currentExamNumber">-</b><span>受付番号</span></div>
+<div class="metric"><small>お薬・予防</small><b id="medicineCount">-</b><span>薬・フード等</span></div>
+<div class="metric"><small>ケア・優先枠</small><b id="careReserveCount">-</b><span>処置・後日予約</span></div>
+</div>
+<div class="notice info" id="summaryMessage">混雑状況を読み込み中です。</div>
+<div class="entry-list" id="entryList" style="margin-top:14px;"><div class="empty">読み込み中です。</div></div>
+</section>
+</section>
+<section class="ops-panel" data-panel="qr">
+<div class="panel-heading">
+<div>
+<span class="panel-kicker">受付PC</span>
+<h2>QR読み取り・来院受付</h2>
+<p>診察券QRを読んでペットを確認し、そのまま今日の受付番号に入れます。</p>
+</div>
+</div>
+<div class="ops-card-grid two"><div class="card">
+<h2>QR読み取り受付</h2>
+<p class="plain-lead">診察券QRを読み取るか、QRのURL/tokenを貼り付けてEnterを押してください。</p>
+<label for="qrInput" style="margin-top:14px;">QR URL / token / card_no</label>
+<input autocomplete="off" autofocus="" class="scan-input" id="qrInput" placeholder="QRリーダーで読み取り、または貼り付け" type="text"/>
+<div class="button-row">
+<button class="btn btn-main" id="lookupBtn" type="button">ペット確認</button>
+<button class="btn btn-sub" id="clearScanBtn" type="button">クリア</button>
+</div>
+<div class="readerless-box">
+<h3>リーダーなし確認モード</h3>
+<p>
             QRリーダーがない場合は、飼い主さんの診察券画面
             <strong>member.html</strong> にある「QR文字列をコピー」で取得した
             <strong>vetcard:clinic_code:card_token</strong> をここへ貼り付けて確認できます。
           </p>
-
-          <label for="readerlessInput" style="margin-top:10px;">member.html でコピーした QR文字列</label>
-          <textarea id="readerlessInput" class="mono-input" placeholder="例：vetcard:dpro_vet_demo:card_xxxxx"></textarea>
-
-          <div class="button-row">
-            <button class="btn btn-sub" id="useReaderlessBtn" type="button">上の入力欄へ反映</button>
-            <button class="btn btn-main" id="lookupReaderlessBtn" type="button">リーダーなしで確認する</button>
-            <button class="btn" id="sampleReaderlessBtn" type="button">例を入れる</button>
-          </div>
-
-          <div class="notice info" style="margin-top:10px;">
+<label for="readerlessInput" style="margin-top:10px;">member.html でコピーした QR文字列</label>
+<textarea class="mono-input" id="readerlessInput" placeholder="例：vetcard:dpro_vet_demo:card_xxxxx"></textarea>
+<div class="button-row">
+<button class="btn btn-sub" id="useReaderlessBtn" type="button">上の入力欄へ反映</button>
+<button class="btn btn-main" id="lookupReaderlessBtn" type="button">リーダーなしで確認する</button>
+<button class="btn" id="sampleReaderlessBtn" type="button">例を入れる</button>
+</div>
+<div class="notice info" style="margin-top:10px;">
             貼り付ける内容は URL ではなく、
             <strong>vetcard:dpro_vet_demo:card_...</strong>
             のような QR文字列そのものです。
           </div>
-        </div>
-
-        <div id="lookupStatus" class="notice info">QR待機中です。</div>
-        <div id="petPanel" class="hidden"></div>
-      </div>
-
-      <div class="card">
-        <h2>来院受付</h2>
-        <p class="plain-lead">QRで確認したペットを、今日の受付番号に入れます。</p>
-
-        <div id="clinicReceptionStatus" class="clinic-status-box">
-          <div class="clinic-status-title">
-            <strong>本日の受付状態を確認中です</strong>
-            <span class="clinic-tag">確認中</span>
-          </div>
-          <div class="clinic-time-grid">
-            <div class="clinic-time">
-              <small>午前受付</small>
-              <b>確認中</b>
-            </div>
-            <div class="clinic-time">
-              <small>午後受付</small>
-              <b>確認中</b>
-            </div>
-          </div>
-        </div>
-
-        <div id="clinicReceptionDisabledReason" class="reception-disabled-reason hidden"></div>
-
-        <div class="form-grid" style="margin-top:14px;">
-          <div>
-            <label for="entryKind">受付種別</label>
-            <select id="entryKind">
-              <option value="today_queue">通常診察・再診</option>
-              <option value="medicine_prevention">お薬・予防受付</option>
-              <option value="care_consult">ケア処置相談</option>
-            </select>
-          </div>
-          <div>
-            <label for="requestCategory">来院目的</label>
-            <select id="requestCategory">
-              <option value="general_exam">通常診察</option>
-              <option value="recheck">再診</option>
-              <option value="vaccination">予防接種</option>
-              <option value="prevention_medicine">予防薬</option>
-              <option value="medicine_food">お薬・フード</option>
-              <option value="hygiene_care">衛生処置</option>
-              <option value="health_check">健康診断</option>
-              <option value="other">その他</option>
-            </select>
-          </div>
-          <div>
-            <label for="dayPart">時間帯</label>
-            <select id="dayPart">
-              <option value="morning">午前</option>
-              <option value="afternoon">午後</option>
-            </select>
-          </div>
-          <div>
-            <label for="purpose">受付メモ</label>
-            <input id="purpose" type="text" placeholder="例：来院QR受付、皮膚再診、フィラリア薬" />
-          </div>
-          <div class="full">
-            <label for="receptionMemo">受付メモ・注意</label>
-            <textarea id="receptionMemo" placeholder="受付で気づいたこと、飼い主さんからの補足など"></textarea>
-          </div>
-        </div>
-
-        <div class="button-row">
-          <button class="btn btn-main" id="createReceptionBtn" type="button">QR来院受付する</button>
-          <button class="btn btn-sub" id="refreshBtn" type="button">一覧更新</button>
-        </div>
-
-        <div id="createStatus" class="notice">ペット確認後に受付できます。</div>
-      </div>
-
-      <div class="card existing-search-card">
-        <h2>既存患者検索・このペットで受付</h2>
-        <p class="plain-lead">
-          すでに登録済みの飼い主・ペットを、飼い主名・電話番号・ペット名・診察券番号で検索し、打ち直さずに受付できます。
-        </p>
-
-        <div class="search-row">
-          <div>
-            <label for="existingPatientSearchInput">検索キーワード</label>
-            <input id="existingPatientSearchInput" type="text" placeholder="例：本番確認、チェック、090、VET-000005" autocomplete="off" />
-          </div>
-          <button class="btn btn-main" id="existingPatientSearchBtn" type="button">既存患者を検索</button>
-          <button class="btn btn-sub" id="existingPatientClearBtn" type="button">クリア</button>
-        </div>
-
-        <div id="existingPatientResults" class="patient-result-list">
-          <div class="empty">検索すると、登録済みの飼い主・ペットが表示されます。</div>
-        </div>
-
-        <div id="existingReceptionPanel" style="display:none; margin-top:14px;">
-          <div id="selectedExistingPatientBox" class="selected-patient-box"></div>
-
-          <div class="manual-mode-row" role="radiogroup" aria-label="既存患者の受付方法">
-            <label class="manual-mode">
-              <input type="radio" name="existingReceptionSource" value="front_desk" checked />
-              <span>
-                <strong>窓口受付</strong>
-                <span>既存ペットを来院済みとして受付します。</span>
-              </span>
-            </label>
-            <label class="manual-mode">
-              <input type="radio" name="existingReceptionSource" value="phone" />
-              <span>
-                <strong>電話受付</strong>
-                <span>既存ペットを来院予定として受付します。</span>
-              </span>
-            </label>
-          </div>
-
-          <div class="form-grid" style="margin-top:14px;">
-            <div>
-              <label for="existingRequestCategory">来院目的</label>
-              <select id="existingRequestCategory">
-                <option value="general_exam">通常診察</option>
-                <option value="recheck">再診</option>
-                <option value="vaccination">予防接種</option>
-                <option value="prevention_medicine">予防薬</option>
-                <option value="medicine_food">お薬・フード</option>
-                <option value="hygiene_care">衛生処置</option>
-                <option value="health_check">健康診断</option>
-                <option value="other">その他</option>
-              </select>
-            </div>
-            <div>
-              <label for="existingDayPart">時間帯</label>
-              <select id="existingDayPart">
-                <option value="morning">午前</option>
-                <option value="afternoon">午後</option>
-              </select>
-            </div>
-            <div>
-              <label for="existingVisitTime">来院予定時刻</label>
-              <input id="existingVisitTime" type="time" step="900" />
-            </div>
-            <div class="full">
-              <label for="existingMemo">受付メモ</label>
-              <textarea id="existingMemo" placeholder="例：再診。前回と同じ症状。電話で16時頃来院予定。"></textarea>
-            </div>
-          </div>
-
-          <div class="button-row">
-            <button class="btn btn-main" id="existingReceptionCreateBtn" type="button">このペットで受付する</button>
-          </div>
-
-          <div id="existingReceptionStatus" class="notice info">
-            検索結果からペットを選ぶと受付できます。
-          </div>
-        </div>
-      </div>
-
-      <div class="card proxy-registration-card">
-        <h2>スタッフ代理登録・ペット追加</h2>
-        <p class="plain-lead">
-          LINEが苦手な方の代わりに、受付スタッフが飼い主・ペット・診察券を登録できます。既存の飼い主に新しいペットを追加することもできます。
-        </p>
-
-        <div class="proxy-mode-row" role="radiogroup" aria-label="代理登録モード">
-          <label class="proxy-mode">
-            <input type="radio" name="proxyRegistrationMode" value="new_guardian" checked />
-            <span>
-              <strong>新規飼い主＋ペット登録</strong>
-              <span>LINE未連携の飼い主とペットを代理登録します。</span>
-            </span>
-          </label>
-          <label class="proxy-mode">
-            <input type="radio" name="proxyRegistrationMode" value="existing_guardian" />
-            <span>
-              <strong>既存飼い主にペット追加</strong>
-              <span>検索で選んだ飼い主に、新しいペットを追加します。</span>
-            </span>
-          </label>
-        </div>
-
-        <div id="selectedGuardianForPetAddBox" class="selected-guardian-box" style="display:none;">
-          <strong>既存飼い主が未選択です</strong>
-          <span>上の既存患者検索から「この飼い主にペット追加」を押してください。</span>
-        </div>
-
-        <div class="subsection-title" id="proxyGuardianTitle">飼い主情報</div>
-        <div class="form-grid" id="proxyGuardianFields">
-          <div>
-            <label for="proxyGuardianName">飼い主名 <span style="color:#c62828;">必須</span></label>
-            <input id="proxyGuardianName" type="text" placeholder="例：佐藤 花子" autocomplete="off" />
-          </div>
-          <div>
-            <label for="proxyPhone">電話番号</label>
-            <input id="proxyPhone" type="tel" placeholder="例：090-1234-5678" autocomplete="off" />
-          </div>
-        </div>
-
-        <div class="subsection-title">ペット情報</div>
-        <div class="form-grid">
-          <div>
-            <label for="proxyPetName">ペット名 <span style="color:#c62828;">必須</span></label>
-            <input id="proxyPetName" type="text" placeholder="例：ムギ" autocomplete="off" />
-          </div>
-          <div>
-            <label for="proxyAnimalType">動物種</label>
-            <select id="proxyAnimalType">
-              <option value="犬">犬</option>
-              <option value="猫">猫</option>
-              <option value="うさぎ">うさぎ</option>
-              <option value="ハムスター">ハムスター</option>
-              <option value="鳥">鳥</option>
-              <option value="その他">その他</option>
-            </select>
-          </div>
-          <div>
-            <label for="proxyBreed">品種</label>
-            <input id="proxyBreed" type="text" placeholder="例：柴犬、ミックス" />
-          </div>
-          <div>
-            <label for="proxySex">性別</label>
-            <select id="proxySex">
-              <option value="">未設定</option>
-              <option value="male">男の子</option>
-              <option value="female">女の子</option>
-              <option value="unknown">不明</option>
-            </select>
-          </div>
-          <div>
-            <label for="proxyAgeText">年齢メモ</label>
-            <input id="proxyAgeText" type="text" placeholder="例：6歳、子猫、年齢不明" />
-          </div>
-          <div>
-            <label for="proxyAllergyNote">アレルギー</label>
-            <input id="proxyAllergyNote" type="text" placeholder="例：特になし、薬剤注意" />
-          </div>
-          <div class="full">
-            <label for="proxyMemo">登録メモ</label>
-            <textarea id="proxyMemo" placeholder="例：受付スタッフが代理登録。LINE未連携。"></textarea>
-          </div>
-        </div>
-
-        <label style="display:flex; gap:8px; align-items:flex-start; margin-top:14px; font-weight:900; color:#33423a;">
-          <input id="proxyCreateReceptionCheck" type="checkbox" style="width:auto; margin-top:3px;" />
-          登録後、そのまま今日の受付にも追加する
-        </label>
-
-        <div id="proxyReceptionOptions" style="display:none; margin-top:12px;">
-          <div class="manual-mode-row" role="radiogroup" aria-label="代理登録後の受付方法">
-            <label class="manual-mode">
-              <input type="radio" name="proxyReceptionSource" value="front_desk" checked />
-              <span>
-                <strong>窓口受付</strong>
-                <span>来院済みとして受付番号を発行します。</span>
-              </span>
-            </label>
-            <label class="manual-mode">
-              <input type="radio" name="proxyReceptionSource" value="phone" />
-              <span>
-                <strong>電話受付</strong>
-                <span>来院予定として受付一覧に追加します。</span>
-              </span>
-            </label>
-          </div>
-
-          <div class="form-grid" style="margin-top:14px;">
-            <div>
-              <label for="proxyRequestCategory">来院目的</label>
-              <select id="proxyRequestCategory">
-                <option value="general_exam">通常診察</option>
-                <option value="recheck">再診</option>
-                <option value="vaccination">予防接種</option>
-                <option value="prevention_medicine">予防薬</option>
-                <option value="medicine_food">お薬・フード</option>
-                <option value="hygiene_care">衛生処置</option>
-                <option value="health_check">健康診断</option>
-                <option value="other">その他</option>
-              </select>
-            </div>
-            <div>
-              <label for="proxyDayPart">時間帯</label>
-              <select id="proxyDayPart">
-                <option value="morning">午前</option>
-                <option value="afternoon">午後</option>
-              </select>
-            </div>
-            <div>
-              <label for="proxyVisitTime">来院予定時刻</label>
-              <input id="proxyVisitTime" type="time" step="900" />
-            </div>
-          </div>
-        </div>
-
-        <div class="button-row">
-          <button class="btn btn-main" id="proxyRegistrationCreateBtn" type="button">代理登録する</button>
-          <button class="btn btn-sub" id="proxyRegistrationClearBtn" type="button">入力クリア</button>
-        </div>
-
-        <div id="proxyRegistrationStatus" class="notice">
-          新規飼い主＋ペットをLINE未連携で代理登録します。
-        </div>
-      </div>
-
-      <div class="card manual-reception-card">
-        <h2>新規・未連携の窓口・電話受付を追加</h2>
-        <p class="plain-lead">
+</div>
+<div class="notice info" id="lookupStatus">QR待機中です。</div>
+<div class="hidden" id="petPanel"></div>
+</div>
+<div class="card">
+<h2>来院受付</h2>
+<p class="plain-lead">QRで確認したペットを、今日の受付番号に入れます。</p>
+<div class="clinic-status-box" id="clinicReceptionStatus">
+<div class="clinic-status-title">
+<strong>本日の受付状態を確認中です</strong>
+<span class="clinic-tag">確認中</span>
+</div>
+<div class="clinic-time-grid">
+<div class="clinic-time">
+<small>午前受付</small>
+<b>確認中</b>
+</div>
+<div class="clinic-time">
+<small>午後受付</small>
+<b>確認中</b>
+</div>
+</div>
+</div>
+<div class="reception-disabled-reason hidden" id="clinicReceptionDisabledReason"></div>
+<div class="form-grid" style="margin-top:14px;">
+<div>
+<label for="entryKind">受付種別</label>
+<select id="entryKind">
+<option value="today_queue">通常診察・再診</option>
+<option value="medicine_prevention">お薬・予防受付</option>
+<option value="care_consult">ケア処置相談</option>
+</select>
+</div>
+<div>
+<label for="requestCategory">来院目的</label>
+<select id="requestCategory">
+<option value="general_exam">通常診察</option>
+<option value="recheck">再診</option>
+<option value="vaccination">予防接種</option>
+<option value="prevention_medicine">予防薬</option>
+<option value="medicine_food">お薬・フード</option>
+<option value="hygiene_care">衛生処置</option>
+<option value="health_check">健康診断</option>
+<option value="other">その他</option>
+</select>
+</div>
+<div>
+<label for="dayPart">時間帯</label>
+<select id="dayPart">
+<option value="morning">午前</option>
+<option value="afternoon">午後</option>
+</select>
+</div>
+<div>
+<label for="purpose">受付メモ</label>
+<input id="purpose" placeholder="例：来院QR受付、皮膚再診、フィラリア薬" type="text"/>
+</div>
+<div class="full">
+<label for="receptionMemo">受付メモ・注意</label>
+<textarea id="receptionMemo" placeholder="受付で気づいたこと、飼い主さんからの補足など"></textarea>
+</div>
+</div>
+<div class="button-row">
+<button class="btn btn-main" id="createReceptionBtn" type="button">QR来院受付する</button>
+<button class="btn btn-sub" id="refreshBtn" type="button">一覧更新</button>
+</div>
+<div class="notice" id="createStatus">ペット確認後に受付できます。</div>
+</div></div>
+</section>
+<section class="ops-panel" data-panel="manual">
+<div class="panel-heading">
+<div>
+<span class="panel-kicker">受付PC</span>
+<h2>窓口受付・電話受付</h2>
+<p>LINEを使わない方、スマホ操作が苦手な方、電話で来院予定を入れたい方を追加します。</p>
+</div>
+</div>
+<div class="ops-card-grid one"><div class="card manual-reception-card">
+<h2>新規・未連携の窓口・電話受付を追加</h2>
+<p class="plain-lead">
           LINEを使わない方、スマホ操作が苦手な方、電話で来院予定を入れたい方を、受付PCから今日の受付一覧に追加します。
         </p>
-
-        <div class="manual-mode-row" role="radiogroup" aria-label="受付方法">
-          <label class="manual-mode">
-            <input type="radio" name="manualReceptionSource" value="front_desk" checked />
-            <span>
-              <strong>窓口受付</strong>
-              <span>来院済みとして受付番号を発行します。</span>
-            </span>
-          </label>
-          <label class="manual-mode">
-            <input type="radio" name="manualReceptionSource" value="phone" />
-            <span>
-              <strong>電話受付</strong>
-              <span>来院予定として受付一覧に追加します。</span>
-            </span>
-          </label>
-        </div>
-
-        <div class="form-grid" style="margin-top:14px;">
-          <div>
-            <label for="manualGuardianName">飼い主名 <span style="color:#c62828;">必須</span></label>
-            <input id="manualGuardianName" type="text" placeholder="例：佐藤 花子" autocomplete="off" />
-          </div>
-          <div>
-            <label for="manualPhone">電話番号</label>
-            <input id="manualPhone" type="tel" placeholder="例：090-1234-5678" autocomplete="off" />
-          </div>
-          <div>
-            <label for="manualPetName">ペット名 <span style="color:#c62828;">必須</span></label>
-            <input id="manualPetName" type="text" placeholder="例：ポチ" autocomplete="off" />
-          </div>
-          <div>
-            <label for="manualAnimalType">動物種</label>
-            <select id="manualAnimalType">
-              <option value="犬">犬</option>
-              <option value="猫">猫</option>
-              <option value="うさぎ">うさぎ</option>
-              <option value="ハムスター">ハムスター</option>
-              <option value="鳥">鳥</option>
-              <option value="その他">その他</option>
-            </select>
-          </div>
-          <div>
-            <label for="manualRequestCategory">来院目的</label>
-            <select id="manualRequestCategory">
-              <option value="general_exam">通常診察</option>
-              <option value="recheck">再診</option>
-              <option value="vaccination">予防接種</option>
-              <option value="prevention_medicine">予防薬</option>
-              <option value="medicine_food">お薬・フード</option>
-              <option value="hygiene_care">衛生処置</option>
-              <option value="health_check">健康診断</option>
-              <option value="other">その他</option>
-            </select>
-          </div>
-          <div>
-            <label for="manualDayPart">時間帯</label>
-            <select id="manualDayPart">
-              <option value="morning">午前</option>
-              <option value="afternoon">午後</option>
-            </select>
-          </div>
-          <div>
-            <label for="manualVisitTime">来院予定時刻</label>
-            <input id="manualVisitTime" type="time" step="900" />
-          </div>
-          <div>
-            <label for="manualAgeText">年齢メモ</label>
-            <input id="manualAgeText" type="text" placeholder="例：6歳、子犬、年齢不明" />
-          </div>
-          <div class="full">
-            <label for="manualMemo">症状・受付メモ</label>
-            <textarea id="manualMemo" placeholder="例：電話で皮膚のかゆみ相談。到着後に問診票確認。"></textarea>
-          </div>
-        </div>
-
-        <div class="button-row">
-          <button class="btn btn-main" id="manualReceptionCreateBtn" type="button">窓口・電話受付を追加</button>
-          <button class="btn btn-sub" id="manualReceptionClearBtn" type="button">入力クリア</button>
-        </div>
-
-        <div id="manualReceptionStatus" class="notice">
+<div aria-label="受付方法" class="manual-mode-row" role="radiogroup">
+<label class="manual-mode">
+<input checked="" name="manualReceptionSource" type="radio" value="front_desk"/>
+<span>
+<strong>窓口受付</strong>
+<span>来院済みとして受付番号を発行します。</span>
+</span>
+</label>
+<label class="manual-mode">
+<input name="manualReceptionSource" type="radio" value="phone"/>
+<span>
+<strong>電話受付</strong>
+<span>来院予定として受付一覧に追加します。</span>
+</span>
+</label>
+</div>
+<div class="form-grid" style="margin-top:14px;">
+<div>
+<label for="manualGuardianName">飼い主名 <span style="color:#c62828;">必須</span></label>
+<input autocomplete="off" id="manualGuardianName" placeholder="例：佐藤 花子" type="text"/>
+</div>
+<div>
+<label for="manualPhone">電話番号</label>
+<input autocomplete="off" id="manualPhone" placeholder="例：090-1234-5678" type="tel"/>
+</div>
+<div>
+<label for="manualPetName">ペット名 <span style="color:#c62828;">必須</span></label>
+<input autocomplete="off" id="manualPetName" placeholder="例：ポチ" type="text"/>
+</div>
+<div>
+<label for="manualAnimalType">動物種</label>
+<select id="manualAnimalType">
+<option value="犬">犬</option>
+<option value="猫">猫</option>
+<option value="うさぎ">うさぎ</option>
+<option value="ハムスター">ハムスター</option>
+<option value="鳥">鳥</option>
+<option value="その他">その他</option>
+</select>
+</div>
+<div>
+<label for="manualRequestCategory">来院目的</label>
+<select id="manualRequestCategory">
+<option value="general_exam">通常診察</option>
+<option value="recheck">再診</option>
+<option value="vaccination">予防接種</option>
+<option value="prevention_medicine">予防薬</option>
+<option value="medicine_food">お薬・フード</option>
+<option value="hygiene_care">衛生処置</option>
+<option value="health_check">健康診断</option>
+<option value="other">その他</option>
+</select>
+</div>
+<div>
+<label for="manualDayPart">時間帯</label>
+<select id="manualDayPart">
+<option value="morning">午前</option>
+<option value="afternoon">午後</option>
+</select>
+</div>
+<div>
+<label for="manualVisitTime">来院予定時刻</label>
+<input id="manualVisitTime" step="900" type="time"/>
+</div>
+<div>
+<label for="manualAgeText">年齢メモ</label>
+<input id="manualAgeText" placeholder="例：6歳、子犬、年齢不明" type="text"/>
+</div>
+<div class="full">
+<label for="manualMemo">症状・受付メモ</label>
+<textarea id="manualMemo" placeholder="例：電話で皮膚のかゆみ相談。到着後に問診票確認。"></textarea>
+</div>
+</div>
+<div class="button-row">
+<button class="btn btn-main" id="manualReceptionCreateBtn" type="button">窓口・電話受付を追加</button>
+<button class="btn btn-sub" id="manualReceptionClearBtn" type="button">入力クリア</button>
+</div>
+<div class="notice" id="manualReceptionStatus">
           LINE未連携の飼い主・ペットとして登録し、今日の受付一覧に追加します。
         </div>
-      </div>
-    </section>
-
-    <div class="section-title">
-      <h2>本日の受付状況</h2>
-      <p>LINE受付・QR受付・窓口受付・電話受付を同じ一覧で確認できます。</p>
-    </div>
-
-    <section class="card">
-      <div class="status-grid">
-        <div class="metric"><small>通常診察</small><b id="generalExamCount">-</b><span>診察・再診</span></div>
-        <div class="metric"><small>現在診察中</small><b id="currentExamNumber">-</b><span>受付番号</span></div>
-        <div class="metric"><small>お薬・予防</small><b id="medicineCount">-</b><span>薬・フード等</span></div>
-        <div class="metric"><small>ケア・優先枠</small><b id="careReserveCount">-</b><span>処置・後日予約</span></div>
-      </div>
-      <div id="summaryMessage" class="notice info">混雑状況を読み込み中です。</div>
-      <div id="entryList" class="entry-list" style="margin-top:14px;"><div class="empty">読み込み中です。</div></div>
-    </section>
-
-    <div class="section-title">
-      <h2>受付が送るLINEフォロー</h2>
-      <p>先生・システムが作った文面を、受付がコピーして送信済みにします。</p>
-    </div>
-
-    <section class="card">
-      <div class="follow-grid">
-        <div>
-          <h3>診察後・再診フォロー</h3>
-          <div id="followupList" class="entry-list"><div class="empty">読み込み中です。</div></div>
+</div></div>
+</section>
+<section class="ops-panel" data-panel="existing">
+<div class="panel-heading">
+<div>
+<span class="panel-kicker">受付PC</span>
+<h2>既存患者検索</h2>
+<p>登録済みの飼い主・ペットを検索し、打ち直さずにこのペットで受付できます。</p>
+</div>
+</div>
+<div class="ops-card-grid one"><div class="card existing-search-card">
+<h2>既存患者検索・このペットで受付</h2>
+<p class="plain-lead">
+          すでに登録済みの飼い主・ペットを、飼い主名・電話番号・ペット名・診察券番号で検索し、打ち直さずに受付できます。
+        </p>
+<div class="search-row">
+<div>
+<label for="existingPatientSearchInput">検索キーワード</label>
+<input autocomplete="off" id="existingPatientSearchInput" placeholder="例：本番確認、チェック、090、VET-000005" type="text"/>
+</div>
+<button class="btn btn-main" id="existingPatientSearchBtn" type="button">既存患者を検索</button>
+<button class="btn btn-sub" id="existingPatientClearBtn" type="button">クリア</button>
+</div>
+<div class="patient-result-list" id="existingPatientResults">
+<div class="empty">検索すると、登録済みの飼い主・ペットが表示されます。</div>
+</div>
+<div id="existingReceptionPanel" style="display:none; margin-top:14px;">
+<div class="selected-patient-box" id="selectedExistingPatientBox"></div>
+<div aria-label="既存患者の受付方法" class="manual-mode-row" role="radiogroup">
+<label class="manual-mode">
+<input checked="" name="existingReceptionSource" type="radio" value="front_desk"/>
+<span>
+<strong>窓口受付</strong>
+<span>既存ペットを来院済みとして受付します。</span>
+</span>
+</label>
+<label class="manual-mode">
+<input name="existingReceptionSource" type="radio" value="phone"/>
+<span>
+<strong>電話受付</strong>
+<span>既存ペットを来院予定として受付します。</span>
+</span>
+</label>
+</div>
+<div class="form-grid" style="margin-top:14px;">
+<div>
+<label for="existingRequestCategory">来院目的</label>
+<select id="existingRequestCategory">
+<option value="general_exam">通常診察</option>
+<option value="recheck">再診</option>
+<option value="vaccination">予防接種</option>
+<option value="prevention_medicine">予防薬</option>
+<option value="medicine_food">お薬・フード</option>
+<option value="hygiene_care">衛生処置</option>
+<option value="health_check">健康診断</option>
+<option value="other">その他</option>
+</select>
+</div>
+<div>
+<label for="existingDayPart">時間帯</label>
+<select id="existingDayPart">
+<option value="morning">午前</option>
+<option value="afternoon">午後</option>
+</select>
+</div>
+<div>
+<label for="existingVisitTime">来院予定時刻</label>
+<input id="existingVisitTime" step="900" type="time"/>
+</div>
+<div class="full">
+<label for="existingMemo">受付メモ</label>
+<textarea id="existingMemo" placeholder="例：再診。前回と同じ症状。電話で16時頃来院予定。"></textarea>
+</div>
+</div>
+<div class="button-row">
+<button class="btn btn-main" id="existingReceptionCreateBtn" type="button">このペットで受付する</button>
+</div>
+<div class="notice info" id="existingReceptionStatus">
+            検索結果からペットを選ぶと受付できます。
+          </div>
+</div>
+</div></div>
+</section>
+<section class="ops-panel" data-panel="proxy">
+<div class="panel-heading">
+<div>
+<span class="panel-kicker">受付PC</span>
+<h2>スタッフ代理登録・ペット追加</h2>
+<p>受付スタッフが飼い主・ペット・診察券を代理登録します。既存飼い主へのペット追加にも使います。</p>
+</div>
+</div>
+<div class="ops-card-grid one"><div class="card proxy-registration-card">
+<h2>スタッフ代理登録・ペット追加</h2>
+<p class="plain-lead">
+          LINEが苦手な方の代わりに、受付スタッフが飼い主・ペット・診察券を登録できます。既存の飼い主に新しいペットを追加することもできます。
+        </p>
+<div aria-label="代理登録モード" class="proxy-mode-row" role="radiogroup">
+<label class="proxy-mode">
+<input checked="" name="proxyRegistrationMode" type="radio" value="new_guardian"/>
+<span>
+<strong>新規飼い主＋ペット登録</strong>
+<span>LINE未連携の飼い主とペットを代理登録します。</span>
+</span>
+</label>
+<label class="proxy-mode">
+<input name="proxyRegistrationMode" type="radio" value="existing_guardian"/>
+<span>
+<strong>既存飼い主にペット追加</strong>
+<span>検索で選んだ飼い主に、新しいペットを追加します。</span>
+</span>
+</label>
+</div>
+<div class="selected-guardian-box" id="selectedGuardianForPetAddBox" style="display:none;">
+<strong>既存飼い主が未選択です</strong>
+<span>上の既存患者検索から「この飼い主にペット追加」を押してください。</span>
+</div>
+<div class="subsection-title" id="proxyGuardianTitle">飼い主情報</div>
+<div class="form-grid" id="proxyGuardianFields">
+<div>
+<label for="proxyGuardianName">飼い主名 <span style="color:#c62828;">必須</span></label>
+<input autocomplete="off" id="proxyGuardianName" placeholder="例：佐藤 花子" type="text"/>
+</div>
+<div>
+<label for="proxyPhone">電話番号</label>
+<input autocomplete="off" id="proxyPhone" placeholder="例：090-1234-5678" type="tel"/>
+</div>
+</div>
+<div class="subsection-title">ペット情報</div>
+<div class="form-grid">
+<div>
+<label for="proxyPetName">ペット名 <span style="color:#c62828;">必須</span></label>
+<input autocomplete="off" id="proxyPetName" placeholder="例：ムギ" type="text"/>
+</div>
+<div>
+<label for="proxyAnimalType">動物種</label>
+<select id="proxyAnimalType">
+<option value="犬">犬</option>
+<option value="猫">猫</option>
+<option value="うさぎ">うさぎ</option>
+<option value="ハムスター">ハムスター</option>
+<option value="鳥">鳥</option>
+<option value="その他">その他</option>
+</select>
+</div>
+<div>
+<label for="proxyBreed">品種</label>
+<input id="proxyBreed" placeholder="例：柴犬、ミックス" type="text"/>
+</div>
+<div>
+<label for="proxySex">性別</label>
+<select id="proxySex">
+<option value="">未設定</option>
+<option value="male">男の子</option>
+<option value="female">女の子</option>
+<option value="unknown">不明</option>
+</select>
+</div>
+<div>
+<label for="proxyAgeText">年齢メモ</label>
+<input id="proxyAgeText" placeholder="例：6歳、子猫、年齢不明" type="text"/>
+</div>
+<div>
+<label for="proxyAllergyNote">アレルギー</label>
+<input id="proxyAllergyNote" placeholder="例：特になし、薬剤注意" type="text"/>
+</div>
+<div class="full">
+<label for="proxyMemo">登録メモ</label>
+<textarea id="proxyMemo" placeholder="例：受付スタッフが代理登録。LINE未連携。"></textarea>
+</div>
+</div>
+<label style="display:flex; gap:8px; align-items:flex-start; margin-top:14px; font-weight:900; color:#33423a;">
+<input id="proxyCreateReceptionCheck" style="width:auto; margin-top:3px;" type="checkbox"/>
+          登録後、そのまま今日の受付にも追加する
+        </label>
+<div id="proxyReceptionOptions" style="display:none; margin-top:12px;">
+<div aria-label="代理登録後の受付方法" class="manual-mode-row" role="radiogroup">
+<label class="manual-mode">
+<input checked="" name="proxyReceptionSource" type="radio" value="front_desk"/>
+<span>
+<strong>窓口受付</strong>
+<span>来院済みとして受付番号を発行します。</span>
+</span>
+</label>
+<label class="manual-mode">
+<input name="proxyReceptionSource" type="radio" value="phone"/>
+<span>
+<strong>電話受付</strong>
+<span>来院予定として受付一覧に追加します。</span>
+</span>
+</label>
+</div>
+<div class="form-grid" style="margin-top:14px;">
+<div>
+<label for="proxyRequestCategory">来院目的</label>
+<select id="proxyRequestCategory">
+<option value="general_exam">通常診察</option>
+<option value="recheck">再診</option>
+<option value="vaccination">予防接種</option>
+<option value="prevention_medicine">予防薬</option>
+<option value="medicine_food">お薬・フード</option>
+<option value="hygiene_care">衛生処置</option>
+<option value="health_check">健康診断</option>
+<option value="other">その他</option>
+</select>
+</div>
+<div>
+<label for="proxyDayPart">時間帯</label>
+<select id="proxyDayPart">
+<option value="morning">午前</option>
+<option value="afternoon">午後</option>
+</select>
+</div>
+<div>
+<label for="proxyVisitTime">来院予定時刻</label>
+<input id="proxyVisitTime" step="900" type="time"/>
+</div>
+</div>
+</div>
+<div class="button-row">
+<button class="btn btn-main" id="proxyRegistrationCreateBtn" type="button">代理登録する</button>
+<button class="btn btn-sub" id="proxyRegistrationClearBtn" type="button">入力クリア</button>
+</div>
+<div class="notice" id="proxyRegistrationStatus">
+          新規飼い主＋ペットをLINE未連携で代理登録します。
         </div>
-        <div>
-          <h3>予防・お薬フォロー</h3>
-          <div id="preventionList" class="entry-list"><div class="empty">読み込み中です。</div></div>
-        </div>
-      </div>
-    </section>
-
-    <div class="footer-note">
+</div></div>
+</section>
+<section class="ops-panel" data-panel="follow">
+<div class="panel-heading">
+<div>
+<span class="panel-kicker">受付PC</span>
+<h2>受付が送るLINEフォロー</h2>
+<p>先生・システムが作った文面を、受付がコピーして送信済みにします。</p>
+</div>
+</div>
+<div class="section-title">
+<h2>受付が送るLINEフォロー</h2>
+<p>先生・システムが作った文面を、受付がコピーして送信済みにします。</p>
+</div>
+<section class="card">
+<div class="follow-grid">
+<div>
+<h3>診察後・再診フォロー</h3>
+<div class="entry-list" id="followupList"><div class="empty">読み込み中です。</div></div>
+</div>
+<div>
+<h3>予防・お薬フォロー</h3>
+<div class="entry-list" id="preventionList"><div class="empty">読み込み中です。</div></div>
+</div>
+</div>
+</section>
+</section>
+</div>
+</section><div class="footer-note">
       STEP VET-46：受付の流れを、来院待ち・院内受付済み・診察中・会計待ち・完了・取消/不在で管理できます。
-    </div>
-  </main>
-
-  <script>
+    </div></main>
+<script>
     const CONFIG = window.DPRO_VET_CONFIG || window.DPRO_CONFIG || window.APP_CONFIG || {};
     const API_BASE_URL = (
       CONFIG.API_BASE_URL ||
@@ -2144,8 +2218,13 @@
         ? groupItems.map(renderEntryCard).join("")
         : `<div class="empty">${escapeHtml(group.title)}の受付はありません。</div>`;
 
+      const shouldCollapse = ["completed", "cancelled"].includes(group.key) && groupItems.length > 0;
+      const bodyHtml = shouldCollapse
+        ? `<details class="status-collapse"><summary>${escapeHtml(group.title)} ${groupItems.length}件を開く</summary><div class="status-section-body">${body}</div></details>`
+        : `<div class="status-section-body">${body}</div>`;
+
       return `
-        <section class="status-section">
+        <section class="status-section ${shouldCollapse ? "is-collapsed-group" : ""}">
           <div class="status-section-header">
             <div>
               <h3><span class="status-dot ${escapeHtml(group.dot)}"></span>${escapeHtml(group.title)}</h3>
@@ -2153,9 +2232,7 @@
             </div>
             <div class="status-count">${groupItems.length}</div>
           </div>
-          <div class="status-section-body">
-            ${body}
-          </div>
+          ${bodyHtml}
         </section>
       `;
     }
@@ -2975,5 +3052,40 @@
 
     init();
   </script>
-</body>
+<script>
+(function(){
+  const buttons = Array.from(document.querySelectorAll('[data-open-panel]'));
+  const panels = Array.from(document.querySelectorAll('[data-panel]'));
+  if (!buttons.length || !panels.length) return;
+
+  function openPanel(name, shouldScroll){
+    const target = panels.find(panel => panel.dataset.panel === name) ? name : 'today';
+    buttons.forEach(btn => btn.classList.toggle('active', btn.dataset.openPanel === target));
+    panels.forEach(panel => panel.classList.toggle('active', panel.dataset.panel === target));
+
+    if (target === 'qr') {
+      setTimeout(() => {
+        const input = document.getElementById('qrInput');
+        if (input && typeof input.focus === 'function') input.focus({ preventScroll: true });
+      }, 80);
+    }
+
+    if (shouldScroll) {
+      const workbench = document.querySelector('.ops-workbench');
+      if (workbench) workbench.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const panel = btn.dataset.openPanel || 'today';
+      if (history.replaceState) history.replaceState(null, '', '#' + panel);
+      openPanel(panel, true);
+    });
+  });
+
+  const firstPanel = (location.hash || '').replace('#','') || 'today';
+  openPanel(firstPanel, false);
+})();
+</script></body>
 </html>
