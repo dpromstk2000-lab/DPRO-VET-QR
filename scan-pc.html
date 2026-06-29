@@ -163,7 +163,7 @@
     @media(max-width:980px){.hero,.layout,.follow-grid{grid-template-columns:1fr}.status-grid{grid-template-columns:repeat(2,1fr)}.section-title{align-items:flex-start;flex-direction:column}.section-title p{text-align:left}.entry{grid-template-columns:58px 1fr}.entry-actions{grid-column:1/-1;justify-content:flex-start;max-width:none}}
     @media(max-width:640px){.topbar{align-items:flex-start;flex-direction:column}.actions{justify-content:flex-start}.auth-box,.form-grid,.status-grid{grid-template-columns:1fr}.brand strong{white-space:normal}.hero-card,.card{border-radius:22px}.pet-main{grid-template-columns:1fr}}
   
-    /* STEP VET-43：全ボタンの白化防止。disabledでも背景色と文字色を維持する */
+    /* STEP VET-44：全ボタンの白化防止。disabledでも背景色と文字色を維持する */
     button.btn:disabled,
     .btn:disabled{
       opacity:.86!important;
@@ -234,7 +234,7 @@
     }
 
   
-    /* STEP VET-43：選択中・フォーカス中の白化防止 */
+    /* STEP VET-44：選択中・フォーカス中の白化防止 */
     button.btn,
     .btn{
       -webkit-tap-highlight-color:rgba(47,125,100,.14);
@@ -337,7 +337,7 @@
     }
 
   
-    /* STEP VET-43：取消済み受付は本日の受付一覧から分離 */
+    /* STEP VET-44：取消済み受付は本日の受付一覧から分離 */
     .cancelled-history{
       margin-top:12px;
       border:1px solid var(--line);
@@ -375,7 +375,7 @@
     }
 
   
-    /* STEP VET-43：窓口・電話受付追加 */
+    /* STEP VET-44：窓口・電話受付追加 */
     .manual-reception-card{
       border:2px solid #d8eadf;
       background:linear-gradient(180deg,#ffffff,#f7fbf8);
@@ -456,6 +456,78 @@
     }
 
 
+  
+    /* STEP VET-44：既存患者検索 */
+    .existing-search-card{
+      border:2px solid #dbe7ff;
+      background:linear-gradient(180deg,#ffffff,#f7f9ff);
+    }
+    .search-row{
+      display:grid;
+      grid-template-columns:1fr auto auto;
+      gap:10px;
+      align-items:end;
+      margin-top:12px;
+    }
+    .patient-result-list{
+      display:grid;
+      gap:10px;
+      margin-top:14px;
+    }
+    .patient-result{
+      border:1px solid var(--line);
+      background:#fff;
+      border-radius:16px;
+      padding:12px;
+      display:grid;
+      grid-template-columns:1fr auto;
+      gap:12px;
+      align-items:center;
+    }
+    .patient-result h4{
+      margin:0;
+      font-size:15px;
+      color:var(--ink);
+    }
+    .patient-result p{
+      margin:5px 0 0;
+      color:var(--muted);
+      font-size:12px;
+      font-weight:800;
+      line-height:1.55;
+    }
+    .selected-patient-box{
+      margin-top:12px;
+      border:1px solid #bfd0ff;
+      background:#f3f6ff;
+      border-radius:16px;
+      padding:12px;
+    }
+    .selected-patient-box strong{
+      display:block;
+      color:#1e3a8a;
+      font-size:15px;
+    }
+    .selected-patient-box span{
+      display:block;
+      color:#52607a;
+      font-size:12px;
+      font-weight:800;
+      margin-top:4px;
+      line-height:1.5;
+    }
+    .line-linked-tag{
+      background:#ecf8f0;
+      color:#157044;
+      border-color:#bfe4cf;
+    }
+
+    @media (max-width:720px){
+      .search-row{grid-template-columns:1fr;}
+      .patient-result{grid-template-columns:1fr;}
+    }
+
+
   </style>
 </head>
 
@@ -465,14 +537,14 @@
       <div class="brand">
         <div class="logo">📷</div>
         <div>
-          <small>scan-pc.html / STEP VET-43</small>
+          <small>scan-pc.html / STEP VET-44</small>
           <strong>DPRO PET CARE LINE</strong>
         </div>
       </div>
       <nav class="actions" aria-label="関連画面">
-        <a class="pill" href="./index.html?v=step-vet-43">管理トップ</a>
+        <a class="pill" href="./index.html?v=step-vet-44">管理トップ</a>
         <a class="pill" href="./waiting.html?v=step-vet-36d-2-r3&clinic_code=dpro_vet_demo">飼い主受付</a>
-        <a class="pill" href="./doctor.html?v=step-vet-43">獣医師画面</a>
+        <a class="pill" href="./doctor.html?v=step-vet-44">獣医師画面</a>
         <a class="pill" href="./owner.html?v=step-vet-36c&clinic_code=dpro_vet_demo">オーナー画面</a>
         <a class="pill" href="./system-check.html?v=step-vet-34i-r4&clinic_code=dpro_vet_demo">システム確認</a>
       </nav>
@@ -480,7 +552,7 @@
 
     <section class="hero">
       <div class="hero-card">
-        <span class="badge">STEP VET-43-R2｜受付PC ボタン表示修正</span>
+        <span class="badge">STEP VET-44-R2｜受付PC ボタン表示修正</span>
         <h1>診察券QRを読んで、<br>そのまま来院受付。</h1>
         <p class="lead">
           USB QRリーダーで読み取り、来院受付・受付番号発行まで行います。
@@ -612,8 +684,88 @@
         <div id="createStatus" class="notice">ペット確認後に受付できます。</div>
       </div>
 
+      <div class="card existing-search-card">
+        <h2>既存患者検索・このペットで受付</h2>
+        <p class="plain-lead">
+          すでに登録済みの飼い主・ペットを、飼い主名・電話番号・ペット名・診察券番号で検索し、打ち直さずに受付できます。
+        </p>
+
+        <div class="search-row">
+          <div>
+            <label for="existingPatientSearchInput">検索キーワード</label>
+            <input id="existingPatientSearchInput" type="text" placeholder="例：本番確認、チェック、090、VET-000005" autocomplete="off" />
+          </div>
+          <button class="btn btn-main" id="existingPatientSearchBtn" type="button">既存患者を検索</button>
+          <button class="btn btn-sub" id="existingPatientClearBtn" type="button">クリア</button>
+        </div>
+
+        <div id="existingPatientResults" class="patient-result-list">
+          <div class="empty">検索すると、登録済みの飼い主・ペットが表示されます。</div>
+        </div>
+
+        <div id="existingReceptionPanel" style="display:none; margin-top:14px;">
+          <div id="selectedExistingPatientBox" class="selected-patient-box"></div>
+
+          <div class="manual-mode-row" role="radiogroup" aria-label="既存患者の受付方法">
+            <label class="manual-mode">
+              <input type="radio" name="existingReceptionSource" value="front_desk" checked />
+              <span>
+                <strong>窓口受付</strong>
+                <span>既存ペットを来院済みとして受付します。</span>
+              </span>
+            </label>
+            <label class="manual-mode">
+              <input type="radio" name="existingReceptionSource" value="phone" />
+              <span>
+                <strong>電話受付</strong>
+                <span>既存ペットを来院予定として受付します。</span>
+              </span>
+            </label>
+          </div>
+
+          <div class="form-grid" style="margin-top:14px;">
+            <div>
+              <label for="existingRequestCategory">来院目的</label>
+              <select id="existingRequestCategory">
+                <option value="general_exam">通常診察</option>
+                <option value="recheck">再診</option>
+                <option value="vaccination">予防接種</option>
+                <option value="prevention_medicine">予防薬</option>
+                <option value="medicine_food">お薬・フード</option>
+                <option value="hygiene_care">衛生処置</option>
+                <option value="health_check">健康診断</option>
+                <option value="other">その他</option>
+              </select>
+            </div>
+            <div>
+              <label for="existingDayPart">時間帯</label>
+              <select id="existingDayPart">
+                <option value="morning">午前</option>
+                <option value="afternoon">午後</option>
+              </select>
+            </div>
+            <div>
+              <label for="existingVisitTime">来院予定時刻</label>
+              <input id="existingVisitTime" type="time" step="900" />
+            </div>
+            <div class="full">
+              <label for="existingMemo">受付メモ</label>
+              <textarea id="existingMemo" placeholder="例：再診。前回と同じ症状。電話で16時頃来院予定。"></textarea>
+            </div>
+          </div>
+
+          <div class="button-row">
+            <button class="btn btn-main" id="existingReceptionCreateBtn" type="button">このペットで受付する</button>
+          </div>
+
+          <div id="existingReceptionStatus" class="notice info">
+            検索結果からペットを選ぶと受付できます。
+          </div>
+        </div>
+      </div>
+
       <div class="card manual-reception-card">
-        <h2>窓口・電話受付を追加</h2>
+        <h2>新規・未連携の窓口・電話受付を追加</h2>
         <p class="plain-lead">
           LINEを使わない方、スマホ操作が苦手な方、電話で来院予定を入れたい方を、受付PCから今日の受付一覧に追加します。
         </p>
@@ -739,7 +891,7 @@
     </section>
 
     <div class="footer-note">
-      STEP VET-43：LINE受付だけでなく、LINEを使わない方の窓口受付・電話受付を受付PCから追加できます。
+      STEP VET-44：既存患者を検索し、登録済みペットを選んで受付できます。新規・未連携の方は下の窓口・電話受付から追加できます。
     </div>
   </main>
 
@@ -773,7 +925,9 @@
       canAcceptMorning: true,
       canAcceptAfternoon: true,
       cameraStream: null,
-      detectTimer: null
+      detectTimer: null,
+      existingPatients: [],
+      selectedExistingPatient: null
     };
 
     const el = {
@@ -810,7 +964,19 @@
       manualMemo: document.getElementById("manualMemo"),
       manualReceptionCreateBtn: document.getElementById("manualReceptionCreateBtn"),
       manualReceptionClearBtn: document.getElementById("manualReceptionClearBtn"),
-      manualReceptionStatus: document.getElementById("manualReceptionStatus")
+      manualReceptionStatus: document.getElementById("manualReceptionStatus"),
+      existingPatientSearchInput: document.getElementById("existingPatientSearchInput"),
+      existingPatientSearchBtn: document.getElementById("existingPatientSearchBtn"),
+      existingPatientClearBtn: document.getElementById("existingPatientClearBtn"),
+      existingPatientResults: document.getElementById("existingPatientResults"),
+      existingReceptionPanel: document.getElementById("existingReceptionPanel"),
+      selectedExistingPatientBox: document.getElementById("selectedExistingPatientBox"),
+      existingRequestCategory: document.getElementById("existingRequestCategory"),
+      existingDayPart: document.getElementById("existingDayPart"),
+      existingVisitTime: document.getElementById("existingVisitTime"),
+      existingMemo: document.getElementById("existingMemo"),
+      existingReceptionCreateBtn: document.getElementById("existingReceptionCreateBtn"),
+      existingReceptionStatus: document.getElementById("existingReceptionStatus")
     };
 
     function todayString(){
@@ -1451,7 +1617,7 @@
       const id = item.waiting_entry_id || item.id;
       const src = inferReceptionSource(item);
       const lineStatus = String(item.line_link_status || item.line_status || "").toLowerCase();
-      const isUnlinked = lineStatus && !lineStatus.includes("linked");
+      const isUnlinked = lineStatus === "unlinked" || lineStatus === "not_linked" || lineStatus.includes("未");
       return `
         <article class="entry ${escapeHtml(item.status || "")}">
           <div class="entry-no">${escapeHtml(item.queue_number || "-")}</div>
@@ -1727,6 +1893,181 @@
     }
 
 
+
+    function selectedExistingReceptionSource(){
+      const checked = document.querySelector('input[name="existingReceptionSource"]:checked');
+      return checked ? checked.value : "front_desk";
+    }
+
+    function lineStatusLabel(value){
+      const text = String(value || "").toLowerCase();
+      if (text === "linked") return "LINE連携済み";
+      if (text === "unlinked" || text === "not_linked") return "LINE未連携";
+      return value ? value : "LINE未連携";
+    }
+
+    function lineStatusClass(value){
+      return String(value || "").toLowerCase() === "linked" ? "line-linked-tag" : "line-unlinked-tag";
+    }
+
+    function renderExistingPatientResults(){
+      const items = state.existingPatients || [];
+
+      if (!items.length) {
+        el.existingPatientResults.innerHTML = '<div class="empty">該当する既存患者が見つかりません。</div>';
+        return;
+      }
+
+      el.existingPatientResults.innerHTML = items.map((item, index) => {
+        const phone = item.phone ? `電話：${escapeHtml(item.phone)}` : "電話：未登録";
+        const cardNo = item.card_no ? `診察券：${escapeHtml(item.card_no)}` : "診察券：未発行";
+        const species = item.species_label || item.species || "動物種未設定";
+        return `
+          <article class="patient-result">
+            <div>
+              <h4>${escapeHtml(item.pet_name || "ペット")}｜${escapeHtml(item.guardian_name || "飼い主")}</h4>
+              <p>${phone} / ${cardNo} / ${escapeHtml(species)} ${item.breed ? ` / ${escapeHtml(item.breed)}` : ""}</p>
+              <div class="tagline" style="margin-top:8px;">
+                <span class="source-tag ${escapeHtml(lineStatusClass(item.line_link_status))}">${escapeHtml(lineStatusLabel(item.line_link_status))}</span>
+                ${item.pet_no ? `<span class="tag">ペット番号 ${escapeHtml(item.pet_no)}</span>` : ""}
+                ${item.guardian_no ? `<span class="tag">飼い主番号 ${escapeHtml(item.guardian_no)}</span>` : ""}
+              </div>
+            </div>
+            <div>
+              <button class="btn btn-main" type="button" data-existing-patient-index="${index}">このペットで受付</button>
+            </div>
+          </article>
+        `;
+      }).join("");
+
+      el.existingPatientResults.querySelectorAll("[data-existing-patient-index]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const index = Number(btn.dataset.existingPatientIndex || 0);
+          selectExistingPatient(index);
+        });
+      });
+    }
+
+    async function searchExistingPatients(){
+      if (!getAdminToken()) {
+        el.existingPatientResults.innerHTML = '<div class="empty">先に管理コードを保存してください。</div>';
+        return;
+      }
+
+      const q = el.existingPatientSearchInput.value.trim();
+      startButtonLoading(el.existingPatientSearchBtn, "検索中...");
+
+      try {
+        const data = await apiGet("/api/admin/patients/search", { q, limit: 50 }, true);
+        state.existingPatients = data.items || [];
+        state.selectedExistingPatient = null;
+        el.existingReceptionPanel.style.display = "none";
+        renderExistingPatientResults();
+      } catch (error) {
+        el.existingPatientResults.innerHTML = `<div class="empty">検索エラー：${escapeHtml(error.message || "検索に失敗しました。")}</div>`;
+      } finally {
+        stopButtonLoading(el.existingPatientSearchBtn, "既存患者を検索");
+      }
+    }
+
+    function clearExistingPatientSearch(){
+      state.existingPatients = [];
+      state.selectedExistingPatient = null;
+      el.existingPatientSearchInput.value = "";
+      el.existingReceptionPanel.style.display = "none";
+      el.existingPatientResults.innerHTML = '<div class="empty">検索すると、登録済みの飼い主・ペットが表示されます。</div>';
+    }
+
+    function selectExistingPatient(index){
+      const item = state.existingPatients[index];
+      if (!item) return;
+
+      state.selectedExistingPatient = item;
+      el.existingReceptionPanel.style.display = "";
+      el.existingDayPart.value = defaultDayPart();
+      el.existingReceptionStatus.className = "notice info";
+      el.existingReceptionStatus.textContent = "受付方法・来院目的を確認して「このペットで受付する」を押してください。";
+
+      const phone = item.phone ? `電話：${escapeHtml(item.phone)}` : "電話：未登録";
+      const cardNo = item.card_no ? `診察券：${escapeHtml(item.card_no)}` : "診察券：未発行";
+      el.selectedExistingPatientBox.innerHTML = `
+        <strong>${escapeHtml(item.pet_name || "ペット")}｜${escapeHtml(item.guardian_name || "飼い主")}</strong>
+        <span>${phone} / ${cardNo} / ${escapeHtml(lineStatusLabel(item.line_link_status))}</span>
+      `;
+    }
+
+    function normalizeExistingReceptionModeChange(){
+      const source = selectedExistingReceptionSource();
+      if (source === "phone" && !el.existingVisitTime.value) {
+        const d = new Date();
+        d.setMinutes(Math.ceil(d.getMinutes() / 15) * 15);
+        const hh = String(Math.min(d.getHours() + 1, 23)).padStart(2, "0");
+        const mm = String(d.getMinutes()).padStart(2, "0");
+        el.existingVisitTime.value = `${hh}:${mm}`;
+      }
+      el.existingReceptionStatus.className = "notice info";
+      el.existingReceptionStatus.textContent = source === "phone"
+        ? "既存患者の電話受付として追加します。来院したら一覧で「院内受付」を押してください。"
+        : "既存患者の窓口受付として追加します。登録後は院内受付済みとして一覧に表示します。";
+    }
+
+    async function createExistingPetReception(){
+      const item = state.selectedExistingPatient;
+
+      if (!getAdminToken()) {
+        el.existingReceptionStatus.className = "notice ng";
+        el.existingReceptionStatus.textContent = "先に管理コードを保存してください。";
+        return;
+      }
+
+      if (!item || !item.pet_id) {
+        el.existingReceptionStatus.className = "notice ng";
+        el.existingReceptionStatus.textContent = "先に検索結果からペットを選んでください。";
+        return;
+      }
+
+      const source = selectedExistingReceptionSource();
+      const category = el.existingRequestCategory.value;
+      const sourceLabelText = source === "phone" ? "電話受付" : "窓口受付";
+
+      const body = {
+        reception_source: source,
+        guardian_id: item.guardian_id,
+        pet_id: item.pet_id,
+        card_id: item.card_id,
+        card_token: item.card_token || item.qr_token,
+        request_category: category,
+        entry_kind: category === "medicine_food" || category === "prevention_medicine" ? "medicine_prevention" : "today_queue",
+        target_date: todayString(),
+        day_part: el.existingDayPart.value || defaultDayPart(),
+        visit_time: el.existingVisitTime.value,
+        purpose: `既存患者${sourceLabelText}：${requestCategoryLabel(category)}`,
+        memo: el.existingMemo.value.trim(),
+        staff_note: el.existingMemo.value.trim(),
+        staff_name: "受付PC",
+        actor_name: "受付PC"
+      };
+
+      startButtonLoading(el.existingReceptionCreateBtn, "受付中...");
+      el.existingReceptionStatus.className = "notice info";
+      el.existingReceptionStatus.textContent = `${item.pet_name} を${sourceLabelText}として追加しています...`;
+
+      try {
+        const data = await apiPost("/api/admin/existing-pet-reception/create", body, true);
+        const num = data.entry?.queue_number || data.result?.queue_number || "-";
+        el.existingReceptionStatus.className = "notice ok";
+        el.existingReceptionStatus.textContent = `${item.pet_name} の${sourceLabelText}を追加しました。受付番号：${num}`;
+        el.existingMemo.value = "";
+        await loadAll();
+      } catch (error) {
+        el.existingReceptionStatus.className = "notice ng";
+        el.existingReceptionStatus.textContent = error.message || "既存患者の受付追加に失敗しました。";
+      } finally {
+        stopButtonLoading(el.existingReceptionCreateBtn, "このペットで受付する");
+      }
+    }
+
+
     function selectedManualReceptionSource(){
       const checked = document.querySelector('input[name="manualReceptionSource"]:checked');
       return checked ? checked.value : "front_desk";
@@ -1855,6 +2196,21 @@
         clearAdminToken();
         renderAuthStatus();
         loadAll();
+      });
+
+      if (el.existingPatientSearchBtn) el.existingPatientSearchBtn.addEventListener("click", searchExistingPatients);
+      if (el.existingPatientClearBtn) el.existingPatientClearBtn.addEventListener("click", clearExistingPatientSearch);
+      if (el.existingPatientSearchInput) {
+        el.existingPatientSearchInput.addEventListener("keydown", (event) => {
+          if (event.key === "Enter") {
+            event.preventDefault();
+            searchExistingPatients();
+          }
+        });
+      }
+      if (el.existingReceptionCreateBtn) el.existingReceptionCreateBtn.addEventListener("click", createExistingPetReception);
+      document.querySelectorAll('input[name="existingReceptionSource"]').forEach((input) => {
+        input.addEventListener("change", normalizeExistingReceptionModeChange);
       });
 
       if (el.manualReceptionCreateBtn) el.manualReceptionCreateBtn.addEventListener("click", createManualReception);
