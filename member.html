@@ -7,7 +7,7 @@
   <title>DPRO PET CARE LINE｜ペット診察券</title>
 
   <!--
-    STEP VET-34G-R3
+    STEP VET-36D-1
     DPRO PET CARE LINE 動物病院版
     member.html 修正版 完全版
 
@@ -559,6 +559,102 @@
       font-weight:650;
     }
 
+    .clinicStatusBox{
+      margin-top:14px;
+      border:1px solid #cfe4d6;
+      background:linear-gradient(180deg,#ffffff,#f3faf6);
+      border-radius:20px;
+      padding:14px;
+    }
+    .clinicStatusBox.closed{
+      border-color:#f0c7c7;
+      background:linear-gradient(180deg,#fff,#fff4f4);
+    }
+    .clinicStatusBox.half{
+      border-color:#ead39a;
+      background:linear-gradient(180deg,#fff,#fffaf0);
+    }
+    .clinicStatusTitle{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-bottom:8px;
+    }
+    .clinicStatusTitle strong{font-size:16px;line-height:1.35}
+    .clinicStatusTag{
+      display:inline-flex;
+      align-items:center;
+      border-radius:999px;
+      padding:5px 9px;
+      background:var(--ok-bg);
+      color:var(--ok);
+      font-size:12px;
+      font-weight:900;
+      white-space:nowrap;
+    }
+    .clinicStatusBox.closed .clinicStatusTag{background:var(--danger-bg);color:var(--danger)}
+    .clinicStatusBox.half .clinicStatusTag{background:var(--warn);color:#8a6515}
+    .clinicTimeGrid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:8px;
+      margin-top:10px;
+    }
+    .clinicTime{
+      border:1px solid var(--line);
+      border-radius:14px;
+      background:#fff;
+      padding:10px;
+    }
+    .clinicTime small{
+      display:block;
+      color:var(--muted);
+      font-size:11px;
+      font-weight:900;
+      margin-bottom:2px;
+    }
+    .clinicTime b{display:block;font-size:14px;line-height:1.35}
+    .clinicTime.off{
+      background:#fff6f5;
+      border-color:#f0c7c7;
+      color:var(--danger);
+    }
+    .nextClosedList{
+      margin-top:10px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:6px;
+    }
+    .closedChip{
+      display:inline-flex;
+      align-items:center;
+      border-radius:999px;
+      padding:4px 8px;
+      background:#f6f8f6;
+      border:1px solid var(--line);
+      color:#53645c;
+      font-size:11px;
+      font-weight:850;
+    }
+    .btnDisabled{
+      pointer-events:none;
+      opacity:.52!important;
+      filter:grayscale(.25);
+      box-shadow:none!important;
+    }
+    .disabledReason{
+      margin-top:8px;
+      font-size:12px;
+      color:var(--danger);
+      font-weight:850;
+      line-height:1.6;
+    }
+    @media (max-width:620px){
+      .clinicTimeGrid{grid-template-columns:1fr}
+    }
+
     .debug{
       margin-top:14px;
       border-top:1px solid var(--line);
@@ -609,6 +705,16 @@
         <a class="btn btnWhite" id="waitingLink" href="./waiting.html">今日の受付へ</a>
         <a class="btn btnGhost" id="richMenuLink" href="./rich-menu.html">メニューへ</a>
         <a class="btn btnGhost" id="registerLinkTop" href="./register.html">初回登録</a>
+      </div>
+
+      <div id="heroClinicStatus" class="clinicStatusBox" style="background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.28);color:#fff;">
+        <div class="clinicStatusTitle">
+          <strong>本日の受付状態を確認中です</strong>
+          <span class="clinicStatusTag" style="background:rgba(255,255,255,.18);color:#fff;">確認中</span>
+        </div>
+        <div style="font-size:13px;font-weight:750;line-height:1.65;color:rgba(255,255,255,.92);">
+          定休日・臨時休業・受付時間を読み込んでいます。
+        </div>
       </div>
     </section>
 
@@ -728,12 +834,30 @@
             </div>
           </div>
 
+          <div id="clinicReceptionStatus" class="clinicStatusBox">
+            <div class="clinicStatusTitle">
+              <strong>本日の受付状態を確認中です</strong>
+              <span class="clinicStatusTag">確認中</span>
+            </div>
+            <div class="clinicTimeGrid">
+              <div class="clinicTime">
+                <small>午前受付</small>
+                <b>確認中</b>
+              </div>
+              <div class="clinicTime">
+                <small>午後受付</small>
+                <b>確認中</b>
+              </div>
+            </div>
+          </div>
+
           <div class="actionGrid">
             <a class="btn btnPrimary" id="todayQueueLink" href="./waiting.html">今日の順番受付</a>
             <a class="btn btnSoft" id="previsitLink" href="./waiting.html">来院前問診</a>
             <a class="btn btnSoft" id="medicineLink" href="./waiting.html">お薬・予防受付</a>
             <a class="btn btnSoft" id="addPetLink" href="./register.html">ペット追加・登録</a>
           </div>
+          <div id="receptionDisabledReason" class="disabledReason hidden"></div>
         </section>
       </div>
 
@@ -762,7 +886,7 @@
     </main>
 
     <div class="footer">
-      STEP VET-34G-R3 member.html R3 QR image fallback complete<br>
+      STEP VET-36D-1 member.html clinic settings reflected complete<br>
       DPRO PET CARE LINE / 動物病院版
     </div>
   </div>
@@ -806,6 +930,9 @@
 
       const state = {
         clinic: null,
+        clinicSettings: null,
+        clinicCalendar: [],
+        todayStatus: null,
         guardian: null,
         cards: [],
         selectedIndex: 0,
@@ -848,6 +975,8 @@
         setApiStatus("API接続中", true);
 
         try {
+          await fetchClinicSettings();
+
           const token = getParam("t") || getParam("token") || getParam("qr_token") || "";
           const cardToken = extractCardToken(token);
           const guardianId = getParam("guardian_id");
@@ -935,6 +1064,47 @@
         }
       }
 
+      async function fetchClinicSettings(){
+        const apiUrl = new URL(`${apiBase}/api/public/clinic-settings`);
+        apiUrl.searchParams.set("clinic_code", clinicCode);
+        apiUrl.searchParams.set("from", todayString());
+        apiUrl.searchParams.set("to", addMonthsString(todayString(), 2));
+
+        try {
+          const data = await apiGet(apiUrl.toString());
+          state.clinic = data?.clinic || state.clinic || null;
+          state.clinicSettings = data?.settings || null;
+          state.clinicCalendar = Array.isArray(data?.calendar) ? data.calendar : [];
+          state.todayStatus = data?.today_status || state.clinicCalendar.find((row) => row.target_date === todayString()) || null;
+          renderClinicStatus();
+          return data;
+        } catch (error) {
+          console.warn("clinic settings load failed:", error);
+          state.clinicSettings = state.clinicSettings || null;
+          state.clinicCalendar = state.clinicCalendar || [];
+          state.todayStatus = state.todayStatus || null;
+          renderClinicStatus();
+          return null;
+        }
+      }
+
+      function todayString(){
+        const d = new Date();
+        const y = d.getFullYear();
+        const m = String(d.getMonth()+1).padStart(2,"0");
+        const day = String(d.getDate()).padStart(2,"0");
+        return `${y}-${m}-${day}`;
+      }
+
+      function addMonthsString(dateText, months){
+        const [y,m,d] = String(dateText || todayString()).split("-").map(Number);
+        const date = new Date(y, m - 1 + Number(months || 0), d);
+        const yy = date.getFullYear();
+        const mm = String(date.getMonth()+1).padStart(2,"0");
+        const dd = String(date.getDate()).padStart(2,"0");
+        return `${yy}-${mm}-${dd}`;
+      }
+
       async function fetchMyCards(lineUserId) {
         const endpoint = `${apiBase}/api/public/my-cards`;
         const apiUrl = new URL(endpoint);
@@ -1007,7 +1177,10 @@
 
       function normalizeAndStore(data){
         state.raw = data || {};
-        state.clinic = data?.clinic || data?.item?.clinic || state.clinic || null;
+        state.clinic = {
+          ...(state.clinic || {}),
+          ...(data?.clinic || data?.item?.clinic || {})
+        };
         state.guardian = data?.guardian || data?.item?.guardian || null;
 
         let cards = [];
@@ -1075,9 +1248,12 @@
         renderTabs();
         renderSelectedCard();
         renderClinic();
+        renderClinicStatus();
         $("debugJson").textContent = JSON.stringify({
           mode: state.lastMode,
           line_user_id_found: Boolean(state.lineUserId),
+          clinic_settings: state.clinicSettings,
+          today_status: state.todayStatus,
           raw: state.raw
         }, null, 2);
       }
@@ -1173,6 +1349,7 @@
         setHref("medicineLink", buildPageUrl("waiting.html", { ...base, mode:"medicine_prevention" }));
         setHref("addPetLink", buildPageUrl("register.html", { add_pet:"true" }));
         setHref("waitingLink", buildPageUrl("waiting.html", { ...base, mode:"today_queue" }));
+        renderClinicStatus();
       }
 
       function buildCautionText(card) {
@@ -1310,14 +1487,154 @@
         }
       }
 
+      function renderClinicStatus(){
+        const status = state.todayStatus || {};
+        const settings = state.clinicSettings || {};
+        const label = status.reception_label || "確認中";
+        const isFullClosed = status.is_full_closed === true || label === "休診";
+        const isMorningClosed = status.is_morning_closed === true || isFullClosed;
+        const isAfternoonClosed = status.is_afternoon_closed === true || isFullClosed;
+        const hasStatus = Boolean(state.todayStatus);
+
+        const canMorning = status.can_accept_morning === true || (!isFullClosed && !isMorningClosed && hasStatus);
+        const canAfternoon = status.can_accept_afternoon === true || (!isFullClosed && !isAfternoonClosed && hasStatus);
+        const canAny = hasStatus ? (canMorning || canAfternoon) : true;
+
+        const morningText = isMorningClosed
+          ? "受付できません"
+          : `${timeText(settings.morning_open_time || status.morning_open_time || "09:00")}〜${timeText(settings.morning_last_accept_time || status.morning_last_accept_time || "11:30")}`;
+
+        const afternoonText = isAfternoonClosed
+          ? "受付できません"
+          : `${timeText(settings.afternoon_open_time || status.afternoon_open_time || "15:00")}〜${timeText(settings.afternoon_last_accept_time || status.afternoon_last_accept_time || "18:00")}`;
+
+        const message = status.display_message || settings.public_notice || "本日の受付状態を確認してください。";
+        const special = status.special_title ? `<div class="nextClosedList"><span class="closedChip">本日：${escapeHtml(status.special_title)}</span></div>` : "";
+        const nextClosed = buildNextClosedChips();
+
+        const boxClass = isFullClosed ? "clinicStatusBox closed" : (!canMorning || !canAfternoon) ? "clinicStatusBox half" : "clinicStatusBox";
+        const tagText = !hasStatus ? "確認中" : isFullClosed ? "本日休診" : (!canMorning || !canAfternoon) ? label : "受付中";
+
+        const bodyHtml = `
+          <div class="clinicStatusTitle">
+            <strong>${escapeHtml(message)}</strong>
+            <span class="clinicStatusTag">${escapeHtml(tagText)}</span>
+          </div>
+          <div class="clinicTimeGrid">
+            <div class="clinicTime ${isMorningClosed ? "off" : ""}">
+              <small>午前受付</small>
+              <b>${escapeHtml(morningText)}</b>
+            </div>
+            <div class="clinicTime ${isAfternoonClosed ? "off" : ""}">
+              <small>午後受付</small>
+              <b>${escapeHtml(afternoonText)}</b>
+            </div>
+          </div>
+          ${special}
+          ${nextClosed}
+        `;
+
+        const mainBox = $("clinicReceptionStatus");
+        if (mainBox) {
+          mainBox.className = boxClass;
+          mainBox.innerHTML = bodyHtml;
+        }
+
+        const heroBox = $("heroClinicStatus");
+        if (heroBox) {
+          heroBox.className = boxClass;
+          heroBox.style.background = isFullClosed
+            ? "rgba(184,74,74,.22)"
+            : (!canMorning || !canAfternoon)
+              ? "rgba(255,245,220,.18)"
+              : "rgba(255,255,255,.16)";
+          heroBox.style.borderColor = "rgba(255,255,255,.28)";
+          heroBox.style.color = "#fff";
+          heroBox.innerHTML = `
+            <div class="clinicStatusTitle">
+              <strong>${escapeHtml(message)}</strong>
+              <span class="clinicStatusTag" style="background:rgba(255,255,255,.18);color:#fff;">${escapeHtml(tagText)}</span>
+            </div>
+            <div style="font-size:13px;font-weight:750;line-height:1.65;color:rgba(255,255,255,.92);">
+              午前 ${escapeHtml(morningText)} / 午後 ${escapeHtml(afternoonText)}
+            </div>
+          `;
+        }
+
+        applyReceptionAvailability(canAny, message);
+      }
+
+      function applyReceptionAvailability(canAny, reason){
+        const ids = ["todayQueueLink", "previsitLink", "medicineLink", "waitingLink"];
+        ids.forEach((id) => {
+          const link = $(id);
+          if (!link) return;
+          link.classList.toggle("btnDisabled", !canAny);
+          link.setAttribute("aria-disabled", canAny ? "false" : "true");
+          if (!canAny) {
+            link.dataset.originalHref = link.dataset.originalHref || link.getAttribute("href") || "";
+            link.setAttribute("href", "javascript:void(0)");
+            link.setAttribute("title", "本日は受付できません");
+          } else if (link.dataset.originalHref) {
+            link.setAttribute("href", link.dataset.originalHref);
+            link.removeAttribute("title");
+          }
+        });
+
+        const reasonBox = $("receptionDisabledReason");
+        if (reasonBox) {
+          if (!canAny) {
+            reasonBox.classList.remove("hidden");
+            reasonBox.textContent = reason || "本日は受付できません。";
+          } else {
+            reasonBox.classList.add("hidden");
+            reasonBox.textContent = "";
+          }
+        }
+      }
+
+      function timeText(value){
+        return String(value || "").slice(0,5) || "-";
+      }
+
+      function buildNextClosedChips(){
+        const rows = (state.clinicCalendar || [])
+          .filter((row) => row.target_date && row.target_date >= todayString())
+          .filter((row) => row.reception_label && row.reception_label !== "通常受付")
+          .slice(0, 4);
+
+        if (!rows.length) return "";
+
+        return `
+          <div class="nextClosedList">
+            ${rows.map((row) => `<span class="closedChip">${escapeHtml(row.target_date.slice(5))} ${escapeHtml(row.reception_label)}${row.special_title ? "：" + escapeHtml(row.special_title) : ""}</span>`).join("")}
+          </div>
+        `;
+      }
+
       function renderClinic() {
         const clinic = state.clinic || {};
+        const settings = state.clinicSettings || {};
+        const name =
+          settings.display_name ||
+          settings.clinic_name ||
+          clinic.clinic_name ||
+          clinic.name ||
+          CONFIG?.clinic?.clinicName ||
+          "DPROどうぶつ病院";
+
+        const morning =
+          `${timeText(settings.morning_open_time || "09:00")}〜${timeText(settings.morning_last_accept_time || "11:30")}`;
+        const afternoon =
+          `${timeText(settings.afternoon_open_time || "15:00")}〜${timeText(settings.afternoon_last_accept_time || "18:00")}`;
+
         $("clinicInfo").innerHTML = `
-          <strong>${escapeHtml(clinic.clinic_name || clinic.name || CONFIG?.clinic?.clinicName || "DPROどうぶつ病院")}</strong><br>
-          ${escapeHtml(clinic.business_hours_note || CONFIG?.clinic?.businessHoursNote || "")}<br>
-          休診：${escapeHtml(clinic.closed_days_note || CONFIG?.clinic?.closedDaysNote || "")}<br>
-          ${escapeHtml(clinic.address || CONFIG?.clinic?.address || "")}<br>
-          TEL：${escapeHtml(clinic.phone || CONFIG?.clinic?.phone || "")}
+          <strong>${escapeHtml(name)}</strong><br>
+          午前受付：${escapeHtml(morning)}<br>
+          午後受付：${escapeHtml(afternoon)}<br>
+          受付単位：${escapeHtml(settings.time_slot_minutes || 30)}分単位<br>
+          ${escapeHtml(settings.address || clinic.address || CONFIG?.clinic?.address || "")}<br>
+          TEL：${escapeHtml(settings.phone || clinic.phone || CONFIG?.clinic?.phone || "")}
         `;
       }
 
@@ -1406,7 +1723,12 @@
 
       function setHref(id, href){
         const node = $(id);
-        if (node) node.href = href;
+        if (node) {
+          node.href = href;
+          if (href && href !== "javascript:void(0)") {
+            node.dataset.originalHref = href;
+          }
+        }
       }
 
       function trimSlash(value){
