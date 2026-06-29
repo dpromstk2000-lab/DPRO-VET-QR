@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="robots" content="noindex,nofollow">
-  <title>DPRO PET CARE LINE｜デモ・システム管理センター</title>
+  <title>DPRO PET CARE LINE｜デモ・システム管理センター R2</title>
   <style>
     :root{
       --bg:#f5f7f4;
@@ -635,7 +635,7 @@
           </div>
           <div class="status-pill">
             <span>STEP</span>
-            <b>STEP VET-38C</b>
+            <b>STEP VET-38C-R2</b>
           </div>
         </div>
       </div>
@@ -664,7 +664,7 @@
           <div class="field">
             <label class="label" for="confirmText">確認文言</label>
             <input id="confirmText" type="text" autocomplete="off" placeholder="DEMO動物病院だけ実行">
-            <div class="hint">誤操作防止のため、確認文言を入力した時だけ実行できます。</div>
+            <div class="hint">誤操作防止のため、確認文言を入力した時だけ実行できます。CORS対策済みの送信方式です。</div>
           </div>
 
           <button class="btn btn-main btn-wide" id="saveAdminBtn" type="button">管理コードを保存</button>
@@ -680,7 +680,7 @@
             <span class="badge muted" id="prepareBadge">未実行</span>
           </div>
           <div class="result-body" id="prepareResultBody">
-            管理コードを入力して、現在の状態を確認してください。
+            管理コードを入力して保存すると、デモ準備の状態確認ができます。
           </div>
         </div>
       </article>
@@ -817,7 +817,7 @@
   <script>
     "use strict";
 
-    const STEP = "STEP VET-38C";
+    const STEP = "STEP VET-38C-R2";
     const API_BASE = "https://dpro-vet-qr-api.dpromstk2000.workers.dev";
     const DEFAULT_CLINIC_CODE = "dpro_vet_demo";
     const DEFAULT_LINE_USER_ID = "demo_line_link_001";
@@ -833,7 +833,7 @@
       member: `https://dpromstk2000-lab.github.io/DPRO-VET-QR/member.html?v=step-vet-36d-1&clinic_code=${encodeURIComponent(clinicCode)}&line_user_id=${encodeURIComponent(lineUserId)}`,
       waiting: `https://dpromstk2000-lab.github.io/DPRO-VET-QR/waiting.html?v=step-vet-36d-2-r3&clinic_code=${encodeURIComponent(clinicCode)}&line_user_id=${encodeURIComponent(lineUserId)}`,
       scanPc: `https://dpromstk2000-lab.github.io/DPRO-VET-QR/scan-pc.html?v=step-vet-36f-2&clinic_code=${encodeURIComponent(clinicCode)}`,
-      systemCheck: `https://dpromstk2000-lab.github.io/DPRO-VET-QR/system-check.html?v=step-vet-38c&clinic_code=${encodeURIComponent(clinicCode)}`
+      systemCheck: `https://dpromstk2000-lab.github.io/DPRO-VET-QR/system-check.html?v=step-vet-38c-r2&clinic_code=${encodeURIComponent(clinicCode)}`
     };
 
     const el = {
@@ -899,6 +899,7 @@
     function saveAdminCode(){
       saveAdminCodeQuietly();
       toast("管理コードを保存しました。");
+      loadAll();
     }
 
     function saveAdminCodeQuietly(){
@@ -911,13 +912,26 @@
     }
 
     async function loadAll(){
+      const adminCode = el.adminCode.value.trim();
       setLoading(true, "現在の状態を確認中です。");
+
       try {
-        const [health, status] = await Promise.all([
-          apiGet("/api/health"),
-          apiGet(`/api/admin/demo/prepare-status?clinic_code=${encodeURIComponent(clinicCode)}`)
-        ]);
+        const health = await apiGet("/api/health");
         state.health = health;
+
+        if (!adminCode) {
+          state.status = null;
+          renderState();
+          renderNoAdminState();
+          setPrepareResult(
+            "管理コードを入力して「管理コードを保存」を押すと、営業前デモ準備の状態確認ができます。",
+            "管理コード待ち",
+            "warn"
+          );
+          return;
+        }
+
+        const status = await apiGet(`/api/admin/demo/prepare-status?clinic_code=${encodeURIComponent(clinicCode)}&admin_code=${encodeURIComponent(adminCode)}`);
         state.status = status;
         renderState();
         setPrepareResult("現在の状態を確認しました。営業前は「営業デモを準備する」を押してください。", "確認済み", "ok");
@@ -928,6 +942,49 @@
       } finally {
         setLoading(false);
       }
+    }
+
+    function renderNoAdminState(){
+      const health = state.health || {};
+      const healthOk = Boolean(health.ok);
+      const version = health.version || "-";
+
+      el.clinicNameHero.textContent = "DPROどうぶつ病院";
+      el.apiStatusHero.textContent = healthOk ? "接続OK" : "未確認";
+      el.todayStatusHero.textContent = "管理コード待ち";
+
+      el.metricApi.textContent = healthOk ? "OK" : "NG";
+      el.metricApiSmall.textContent = version;
+      el.metricActive.textContent = "-";
+      el.metricHistory.textContent = "-";
+      el.metricCalendar.textContent = "-";
+
+      setBadge(el.overallBadge, "管理コード待ち", "warn");
+      setBadge(el.entryBadge, "-", "muted");
+      setBadge(el.calendarBadge, "-", "muted");
+
+      el.checkList.innerHTML = `
+        <div class="check-item">
+          <div class="check-icon ${healthOk ? "ok" : "danger"}">${healthOk ? "✓" : "!"}</div>
+          <div>
+            <b>Worker API接続</b>
+            <small>${escapeHtml(healthOk ? `APIは正常です。version: ${version}` : "API接続に失敗しています。")}</small>
+          </div>
+          <span class="badge ${healthOk ? "ok" : "danger"}">${healthOk ? "OK" : "NG"}</span>
+        </div>
+        <div class="check-item">
+          <div class="check-icon warn">!</div>
+          <div>
+            <b>管理コードが未保存です</b>
+            <small>営業前デモ準備の状態確認には管理コードが必要です。管理コードを入力して保存してください。</small>
+          </div>
+          <span class="badge warn">待機中</span>
+        </div>
+      `;
+
+      el.entryList.innerHTML = '<div class="hint">管理コードを保存すると、本日の受付状態を確認できます。</div>';
+      el.calendarList.innerHTML = '<div class="hint">管理コードを保存すると、休診カレンダーを確認できます。</div>';
+      renderDebugInfo();
     }
 
     async function prepareDemo(){
@@ -1187,12 +1244,17 @@
     }
 
     async function apiPost(path, body){
-      const response = await fetch(`${API_BASE}${path}`, {
+      const adminCode = body?.admin_code || "";
+      const joiner = path.includes("?") ? "&" : "?";
+      const safePath = adminCode
+        ? `${path}${joiner}admin_code=${encodeURIComponent(adminCode)}`
+        : path;
+
+      const response = await fetch(`${API_BASE}${safePath}`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json",
-          "X-Admin-Token": body.admin_code || ""
+          "Content-Type": "text/plain;charset=UTF-8",
+          "Accept": "application/json"
         },
         body: JSON.stringify(body || {})
       });
@@ -1224,7 +1286,7 @@
         clinic_code: clinicCode,
         api_base: API_BASE,
         health_url: `${API_BASE}/api/health`,
-        prepare_status_url: `${API_BASE}/api/admin/demo/prepare-status?clinic_code=${clinicCode}`,
+        prepare_status_url: `${API_BASE}/api/admin/demo/prepare-status?clinic_code=${clinicCode}&admin_code=管理コード`,
         system_check_url: urls.systemCheck,
         owner_url: urls.owner,
         member_url: urls.member,
