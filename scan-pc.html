@@ -705,7 +705,7 @@
   
 
     /* =========================================================
-      STEP VET-52.5B：受付PC 画面整理版
+      STEP VET-52.5D：受付PC 画面整理版・窓口受付修正
       目的：長い縦スクロールをやめ、左メニューで必要な操作だけ表示する
     ========================================================= */
     .ops-workbench{display:grid;grid-template-columns:270px minmax(0,1fr);gap:18px;align-items:start;margin-top:18px}
@@ -761,20 +761,20 @@
 <div class="brand">
 <div class="logo">📷</div>
 <div>
-<small>scan-pc.html / STEP VET-52.5B</small>
+<small>scan-pc.html / STEP VET-52.5D</small>
 <strong>DPRO PET CARE LINE</strong>
 </div>
 </div>
 <nav aria-label="関連画面" class="actions">
-<a class="pill" href="./index.html?clinic_code=dpro_vet_demo&amp;demo=ready&amp;v=step-vet-52-5b">管理トップ</a>
-<a class="pill" href="./waiting.html?clinic_code=dpro_vet_demo&amp;line_user_id=demo_line_link_001&amp;demo=ready&amp;v=step-vet-52-5b">飼い主受付</a>
-<a class="pill" href="./doctor.html?clinic_code=dpro_vet_demo&amp;demo=ready&amp;v=step-vet-52-5b">獣医師画面</a>
-<a class="pill" href="./owner.html?clinic_code=dpro_vet_demo&amp;demo=ready&amp;v=step-vet-52-5b">オーナー画面</a>
-<a class="pill" href="./system-check.html?clinic_code=dpro_vet_demo&amp;demo=ready&amp;v=step-vet-52-5b">システム確認</a>
+<a class="pill" href="./index.html?clinic_code=dpro_vet_demo&amp;demo=ready&amp;v=step-vet-52-5d">管理トップ</a>
+<a class="pill" href="./waiting.html?clinic_code=dpro_vet_demo&amp;line_user_id=demo_line_link_001&amp;demo=ready&amp;v=step-vet-52-5d">飼い主受付</a>
+<a class="pill" href="./doctor.html?clinic_code=dpro_vet_demo&amp;demo=ready&amp;v=step-vet-52-5d">獣医師画面</a>
+<a class="pill" href="./owner.html?clinic_code=dpro_vet_demo&amp;demo=ready&amp;v=step-vet-52-5d">オーナー画面</a>
+<a class="pill" href="./system-check.html?clinic_code=dpro_vet_demo&amp;demo=ready&amp;v=step-vet-52-5d">システム確認</a>
 </nav>
 </header><section class="hero">
 <div class="hero-card">
-<span class="badge">STEP VET-52.5B｜受付PC 画面整理版</span>
+<span class="badge">STEP VET-52.5D｜受付PC 画面整理版・窓口受付修正</span>
 <h1>今日の受付を中心に、<br/>必要な操作だけ開く。</h1>
 <p class="lead">受付スタッフが迷わないように、最初は「今日の受付」だけを表示します。QR受付・窓口受付・電話受付・既存患者検索・代理登録・フォローは、左メニューから必要な時だけ開きます。既存APIと登録処理はそのまま保持しています。</p>
 </div>
@@ -1013,7 +1013,105 @@
 </div>
 <div>
 <label for="manualVisitTime">来院予定時刻</label>
-<input id="manualVisitTime" step="900" type="time"/>
+<select id="manualVisitTime">
+<option value="">時刻を選択（15分単位）</option>
+<option value="00:00">00:00</option>
+<option value="00:15">00:15</option>
+<option value="00:30">00:30</option>
+<option value="00:45">00:45</option>
+<option value="01:00">01:00</option>
+<option value="01:15">01:15</option>
+<option value="01:30">01:30</option>
+<option value="01:45">01:45</option>
+<option value="02:00">02:00</option>
+<option value="02:15">02:15</option>
+<option value="02:30">02:30</option>
+<option value="02:45">02:45</option>
+<option value="03:00">03:00</option>
+<option value="03:15">03:15</option>
+<option value="03:30">03:30</option>
+<option value="03:45">03:45</option>
+<option value="04:00">04:00</option>
+<option value="04:15">04:15</option>
+<option value="04:30">04:30</option>
+<option value="04:45">04:45</option>
+<option value="05:00">05:00</option>
+<option value="05:15">05:15</option>
+<option value="05:30">05:30</option>
+<option value="05:45">05:45</option>
+<option value="06:00">06:00</option>
+<option value="06:15">06:15</option>
+<option value="06:30">06:30</option>
+<option value="06:45">06:45</option>
+<option value="07:00">07:00</option>
+<option value="07:15">07:15</option>
+<option value="07:30">07:30</option>
+<option value="07:45">07:45</option>
+<option value="08:00">08:00</option>
+<option value="08:15">08:15</option>
+<option value="08:30">08:30</option>
+<option value="08:45">08:45</option>
+<option value="09:00">09:00</option>
+<option value="09:15">09:15</option>
+<option value="09:30">09:30</option>
+<option value="09:45">09:45</option>
+<option value="10:00">10:00</option>
+<option value="10:15">10:15</option>
+<option value="10:30">10:30</option>
+<option value="10:45">10:45</option>
+<option value="11:00">11:00</option>
+<option value="11:15">11:15</option>
+<option value="11:30">11:30</option>
+<option value="11:45">11:45</option>
+<option value="12:00">12:00</option>
+<option value="12:15">12:15</option>
+<option value="12:30">12:30</option>
+<option value="12:45">12:45</option>
+<option value="13:00">13:00</option>
+<option value="13:15">13:15</option>
+<option value="13:30">13:30</option>
+<option value="13:45">13:45</option>
+<option value="14:00">14:00</option>
+<option value="14:15">14:15</option>
+<option value="14:30">14:30</option>
+<option value="14:45">14:45</option>
+<option value="15:00">15:00</option>
+<option value="15:15">15:15</option>
+<option value="15:30">15:30</option>
+<option value="15:45">15:45</option>
+<option value="16:00">16:00</option>
+<option value="16:15">16:15</option>
+<option value="16:30">16:30</option>
+<option value="16:45">16:45</option>
+<option value="17:00">17:00</option>
+<option value="17:15">17:15</option>
+<option value="17:30">17:30</option>
+<option value="17:45">17:45</option>
+<option value="18:00">18:00</option>
+<option value="18:15">18:15</option>
+<option value="18:30">18:30</option>
+<option value="18:45">18:45</option>
+<option value="19:00">19:00</option>
+<option value="19:15">19:15</option>
+<option value="19:30">19:30</option>
+<option value="19:45">19:45</option>
+<option value="20:00">20:00</option>
+<option value="20:15">20:15</option>
+<option value="20:30">20:30</option>
+<option value="20:45">20:45</option>
+<option value="21:00">21:00</option>
+<option value="21:15">21:15</option>
+<option value="21:30">21:30</option>
+<option value="21:45">21:45</option>
+<option value="22:00">22:00</option>
+<option value="22:15">22:15</option>
+<option value="22:30">22:30</option>
+<option value="22:45">22:45</option>
+<option value="23:00">23:00</option>
+<option value="23:15">23:15</option>
+<option value="23:30">23:30</option>
+<option value="23:45">23:45</option>
+</select>
 </div>
 <div>
 <label for="manualAgeText">年齢メモ</label>
@@ -1098,7 +1196,105 @@
 </div>
 <div>
 <label for="existingVisitTime">来院予定時刻</label>
-<input id="existingVisitTime" step="900" type="time"/>
+<select id="existingVisitTime">
+<option value="">時刻を選択（15分単位）</option>
+<option value="00:00">00:00</option>
+<option value="00:15">00:15</option>
+<option value="00:30">00:30</option>
+<option value="00:45">00:45</option>
+<option value="01:00">01:00</option>
+<option value="01:15">01:15</option>
+<option value="01:30">01:30</option>
+<option value="01:45">01:45</option>
+<option value="02:00">02:00</option>
+<option value="02:15">02:15</option>
+<option value="02:30">02:30</option>
+<option value="02:45">02:45</option>
+<option value="03:00">03:00</option>
+<option value="03:15">03:15</option>
+<option value="03:30">03:30</option>
+<option value="03:45">03:45</option>
+<option value="04:00">04:00</option>
+<option value="04:15">04:15</option>
+<option value="04:30">04:30</option>
+<option value="04:45">04:45</option>
+<option value="05:00">05:00</option>
+<option value="05:15">05:15</option>
+<option value="05:30">05:30</option>
+<option value="05:45">05:45</option>
+<option value="06:00">06:00</option>
+<option value="06:15">06:15</option>
+<option value="06:30">06:30</option>
+<option value="06:45">06:45</option>
+<option value="07:00">07:00</option>
+<option value="07:15">07:15</option>
+<option value="07:30">07:30</option>
+<option value="07:45">07:45</option>
+<option value="08:00">08:00</option>
+<option value="08:15">08:15</option>
+<option value="08:30">08:30</option>
+<option value="08:45">08:45</option>
+<option value="09:00">09:00</option>
+<option value="09:15">09:15</option>
+<option value="09:30">09:30</option>
+<option value="09:45">09:45</option>
+<option value="10:00">10:00</option>
+<option value="10:15">10:15</option>
+<option value="10:30">10:30</option>
+<option value="10:45">10:45</option>
+<option value="11:00">11:00</option>
+<option value="11:15">11:15</option>
+<option value="11:30">11:30</option>
+<option value="11:45">11:45</option>
+<option value="12:00">12:00</option>
+<option value="12:15">12:15</option>
+<option value="12:30">12:30</option>
+<option value="12:45">12:45</option>
+<option value="13:00">13:00</option>
+<option value="13:15">13:15</option>
+<option value="13:30">13:30</option>
+<option value="13:45">13:45</option>
+<option value="14:00">14:00</option>
+<option value="14:15">14:15</option>
+<option value="14:30">14:30</option>
+<option value="14:45">14:45</option>
+<option value="15:00">15:00</option>
+<option value="15:15">15:15</option>
+<option value="15:30">15:30</option>
+<option value="15:45">15:45</option>
+<option value="16:00">16:00</option>
+<option value="16:15">16:15</option>
+<option value="16:30">16:30</option>
+<option value="16:45">16:45</option>
+<option value="17:00">17:00</option>
+<option value="17:15">17:15</option>
+<option value="17:30">17:30</option>
+<option value="17:45">17:45</option>
+<option value="18:00">18:00</option>
+<option value="18:15">18:15</option>
+<option value="18:30">18:30</option>
+<option value="18:45">18:45</option>
+<option value="19:00">19:00</option>
+<option value="19:15">19:15</option>
+<option value="19:30">19:30</option>
+<option value="19:45">19:45</option>
+<option value="20:00">20:00</option>
+<option value="20:15">20:15</option>
+<option value="20:30">20:30</option>
+<option value="20:45">20:45</option>
+<option value="21:00">21:00</option>
+<option value="21:15">21:15</option>
+<option value="21:30">21:30</option>
+<option value="21:45">21:45</option>
+<option value="22:00">22:00</option>
+<option value="22:15">22:15</option>
+<option value="22:30">22:30</option>
+<option value="22:45">22:45</option>
+<option value="23:00">23:00</option>
+<option value="23:15">23:15</option>
+<option value="23:30">23:30</option>
+<option value="23:45">23:45</option>
+</select>
 </div>
 <div class="full">
 <label for="existingMemo">受付メモ</label>
@@ -1245,7 +1441,105 @@
 </div>
 <div>
 <label for="proxyVisitTime">来院予定時刻</label>
-<input id="proxyVisitTime" step="900" type="time"/>
+<select id="proxyVisitTime">
+<option value="">時刻を選択（15分単位）</option>
+<option value="00:00">00:00</option>
+<option value="00:15">00:15</option>
+<option value="00:30">00:30</option>
+<option value="00:45">00:45</option>
+<option value="01:00">01:00</option>
+<option value="01:15">01:15</option>
+<option value="01:30">01:30</option>
+<option value="01:45">01:45</option>
+<option value="02:00">02:00</option>
+<option value="02:15">02:15</option>
+<option value="02:30">02:30</option>
+<option value="02:45">02:45</option>
+<option value="03:00">03:00</option>
+<option value="03:15">03:15</option>
+<option value="03:30">03:30</option>
+<option value="03:45">03:45</option>
+<option value="04:00">04:00</option>
+<option value="04:15">04:15</option>
+<option value="04:30">04:30</option>
+<option value="04:45">04:45</option>
+<option value="05:00">05:00</option>
+<option value="05:15">05:15</option>
+<option value="05:30">05:30</option>
+<option value="05:45">05:45</option>
+<option value="06:00">06:00</option>
+<option value="06:15">06:15</option>
+<option value="06:30">06:30</option>
+<option value="06:45">06:45</option>
+<option value="07:00">07:00</option>
+<option value="07:15">07:15</option>
+<option value="07:30">07:30</option>
+<option value="07:45">07:45</option>
+<option value="08:00">08:00</option>
+<option value="08:15">08:15</option>
+<option value="08:30">08:30</option>
+<option value="08:45">08:45</option>
+<option value="09:00">09:00</option>
+<option value="09:15">09:15</option>
+<option value="09:30">09:30</option>
+<option value="09:45">09:45</option>
+<option value="10:00">10:00</option>
+<option value="10:15">10:15</option>
+<option value="10:30">10:30</option>
+<option value="10:45">10:45</option>
+<option value="11:00">11:00</option>
+<option value="11:15">11:15</option>
+<option value="11:30">11:30</option>
+<option value="11:45">11:45</option>
+<option value="12:00">12:00</option>
+<option value="12:15">12:15</option>
+<option value="12:30">12:30</option>
+<option value="12:45">12:45</option>
+<option value="13:00">13:00</option>
+<option value="13:15">13:15</option>
+<option value="13:30">13:30</option>
+<option value="13:45">13:45</option>
+<option value="14:00">14:00</option>
+<option value="14:15">14:15</option>
+<option value="14:30">14:30</option>
+<option value="14:45">14:45</option>
+<option value="15:00">15:00</option>
+<option value="15:15">15:15</option>
+<option value="15:30">15:30</option>
+<option value="15:45">15:45</option>
+<option value="16:00">16:00</option>
+<option value="16:15">16:15</option>
+<option value="16:30">16:30</option>
+<option value="16:45">16:45</option>
+<option value="17:00">17:00</option>
+<option value="17:15">17:15</option>
+<option value="17:30">17:30</option>
+<option value="17:45">17:45</option>
+<option value="18:00">18:00</option>
+<option value="18:15">18:15</option>
+<option value="18:30">18:30</option>
+<option value="18:45">18:45</option>
+<option value="19:00">19:00</option>
+<option value="19:15">19:15</option>
+<option value="19:30">19:30</option>
+<option value="19:45">19:45</option>
+<option value="20:00">20:00</option>
+<option value="20:15">20:15</option>
+<option value="20:30">20:30</option>
+<option value="20:45">20:45</option>
+<option value="21:00">21:00</option>
+<option value="21:15">21:15</option>
+<option value="21:30">21:30</option>
+<option value="21:45">21:45</option>
+<option value="22:00">22:00</option>
+<option value="22:15">22:15</option>
+<option value="22:30">22:30</option>
+<option value="22:45">22:45</option>
+<option value="23:00">23:00</option>
+<option value="23:15">23:15</option>
+<option value="23:30">23:30</option>
+<option value="23:45">23:45</option>
+</select>
 </div>
 </div>
 </div>
@@ -2141,7 +2435,7 @@
 
       if (status === "cancelled" || status === "no_show") {
         return [
-          button("checked_in", "受付に戻す", "btn-sub")
+          button("reserved", "受付待ちに戻す", "btn-sub")
         ].join("");
       }
 
@@ -2773,8 +3067,8 @@
       }
       el.existingReceptionStatus.className = "notice info";
       el.existingReceptionStatus.textContent = source === "phone"
-        ? "既存患者の電話受付として追加します。来院したら一覧で「院内受付」を押してください。"
-        : "既存患者の窓口受付として追加します。登録後は院内受付済みとして一覧に表示します。";
+        ? "既存患者の電話受付として追加します。来院したら一覧で「院内受付」を押してください。時刻は15分単位です。"
+        : "既存患者の窓口受付として追加します。登録後は院内受付済みとして一覧に表示します。時刻は15分単位です。";
     }
 
     async function createExistingPetReception(){
@@ -2864,8 +3158,8 @@
       }
       el.manualReceptionStatus.className = "notice info";
       el.manualReceptionStatus.textContent = source === "phone"
-        ? "電話受付として追加します。来院したら一覧で「院内受付」を押してください。"
-        : "窓口受付として追加します。登録後は院内受付済みとして一覧に表示します。";
+        ? "電話受付として追加します。来院したら一覧で「院内受付」を押してください。時刻は15分単位です。"
+        : "窓口受付として追加します。登録後は院内受付済みとして一覧に表示します。時刻は15分単位です。";
     }
 
     async function createManualReception(){
