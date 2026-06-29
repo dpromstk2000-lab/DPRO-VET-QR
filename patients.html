@@ -1,0 +1,955 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>DPROどうぶつ病院｜飼い主・ペット管理</title>
+  <style>
+    :root{
+      --bg:#f7f5ef;
+      --card:#fffefa;
+      --ink:#26312b;
+      --muted:#6d766f;
+      --line:#e5ded0;
+      --green:#1f8f57;
+      --green2:#0f6b3d;
+      --soft:#eef8f1;
+      --gold:#b9954d;
+      --danger:#c44747;
+      --warn:#b97818;
+      --blue:#2563eb;
+      --purple:#7c3aed;
+      --shadow:0 18px 45px rgba(45,38,25,.08);
+      --radius:22px;
+      --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      --sans:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      background:
+        radial-gradient(circle at top left,rgba(31,143,87,.13),transparent 34%),
+        linear-gradient(180deg,#fbfaf6 0%,#f3efe5 100%);
+      color:var(--ink);
+      font-family:var(--sans);
+      min-height:100vh;
+    }
+    header{
+      padding:22px 18px 12px;
+    }
+    .wrap{
+      max-width:1180px;
+      margin:0 auto;
+    }
+    .hero{
+      background:linear-gradient(135deg,#fffefa,#eef8f1);
+      border:1px solid rgba(217,210,196,.9);
+      border-radius:28px;
+      box-shadow:var(--shadow);
+      padding:20px;
+      display:grid;
+      grid-template-columns:1fr auto;
+      gap:16px;
+      align-items:center;
+    }
+    .eyebrow{
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
+      color:var(--green2);
+      font-size:12px;
+      font-weight:900;
+      letter-spacing:.05em;
+      background:#fff;
+      border:1px solid #d7e7db;
+      border-radius:999px;
+      padding:6px 10px;
+    }
+    h1{
+      margin:10px 0 6px;
+      font-size:clamp(22px,4vw,34px);
+      line-height:1.18;
+      letter-spacing:-.03em;
+    }
+    .lead{
+      margin:0;
+      color:var(--muted);
+      font-weight:800;
+      line-height:1.7;
+    }
+    .version{
+      text-align:right;
+      font-family:var(--mono);
+      color:#7c6f58;
+      font-size:12px;
+      font-weight:900;
+    }
+    main{
+      padding:12px 18px 40px;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns:minmax(320px,420px) 1fr;
+      gap:16px;
+      align-items:start;
+      max-width:1180px;
+      margin:0 auto;
+    }
+    .card{
+      background:rgba(255,254,250,.96);
+      border:1px solid rgba(217,210,196,.9);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:16px;
+      margin-bottom:16px;
+    }
+    .card h2{
+      font-size:18px;
+      margin:0 0 8px;
+      letter-spacing:-.02em;
+    }
+    .small{
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.65;
+      font-weight:800;
+      margin:0 0 12px;
+    }
+    label{
+      display:block;
+      font-size:12px;
+      color:#4b5a51;
+      font-weight:900;
+      margin:0 0 6px;
+    }
+    input,select,textarea{
+      width:100%;
+      border:1px solid #ddd4c3;
+      border-radius:14px;
+      background:#fff;
+      padding:11px 12px;
+      font-size:14px;
+      outline:none;
+      color:var(--ink);
+      font-family:var(--sans);
+    }
+    textarea{min-height:86px;resize:vertical}
+    input:focus,select:focus,textarea:focus{
+      border-color:#8fcaa6;
+      box-shadow:0 0 0 4px rgba(31,143,87,.09);
+    }
+    .row{
+      display:grid;
+      grid-template-columns:1fr auto;
+      gap:8px;
+      align-items:end;
+    }
+    .form-grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:10px;
+      margin-top:12px;
+    }
+    .full{grid-column:1/-1}
+    .btn{
+      border:0;
+      border-radius:14px;
+      padding:11px 14px;
+      font-weight:950;
+      cursor:pointer;
+      transition:.15s;
+      font-size:13px;
+      min-height:42px;
+      white-space:nowrap;
+    }
+    .btn-main{background:var(--green);color:#fff}
+    .btn-main:hover{background:var(--green2)}
+    .btn-sub{background:#fff;border:1px solid var(--line);color:var(--ink)}
+    .btn-sub:hover{background:#f8f6ef}
+    .btn-danger{background:#fff1f1;color:#9f3434;border:1px solid #f1c6c6}
+    .btn-blue{background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe}
+    .btn-purple{background:#f5f0ff;color:#5b21b6;border:1px solid #ddd6fe}
+    .button-row{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top:12px;
+    }
+    .notice{
+      border-radius:16px;
+      border:1px solid #d8dfd9;
+      background:#f7faf7;
+      color:#48554e;
+      padding:11px 12px;
+      font-size:12px;
+      font-weight:850;
+      line-height:1.6;
+      margin-top:12px;
+    }
+    .notice.ok{background:#edf9f0;border-color:#bfe4cf;color:#12683f}
+    .notice.ng{background:#fff1f1;border-color:#f1b7b7;color:#9f3434}
+    .notice.info{background:#f3f6ff;border-color:#cdd8ff;color:#304174}
+    .list{
+      display:grid;
+      gap:10px;
+      margin-top:12px;
+    }
+    .guardian-item{
+      border:1px solid var(--line);
+      background:#fff;
+      border-radius:18px;
+      padding:12px;
+      cursor:pointer;
+      transition:.15s;
+    }
+    .guardian-item:hover,.guardian-item.active{
+      border-color:#9ccfb0;
+      box-shadow:0 10px 25px rgba(31,143,87,.08);
+      background:#fbfffc;
+    }
+    .guardian-item h3{
+      margin:0;
+      font-size:15px;
+      color:var(--ink);
+    }
+    .guardian-item p{
+      margin:6px 0 0;
+      color:var(--muted);
+      font-size:12px;
+      font-weight:800;
+      line-height:1.5;
+    }
+    .tagline{
+      display:flex;
+      gap:6px;
+      flex-wrap:wrap;
+      margin-top:8px;
+    }
+    .tag{
+      display:inline-flex;
+      align-items:center;
+      min-height:22px;
+      border-radius:999px;
+      padding:3px 8px;
+      background:#f6f3ea;
+      border:1px solid var(--line);
+      color:#5c5342;
+      font-size:11px;
+      font-weight:950;
+    }
+    .tag.green{background:#ecf8f0;border-color:#bfe4cf;color:#157044}
+    .tag.gray{background:#f5f6f5;border-color:#d8ded8;color:#58635d}
+    .tag.red{background:#fff1f1;border-color:#f1b7b7;color:#9f3434}
+    .tag.blue{background:#eff6ff;border-color:#bfdbfe;color:#1d4ed8}
+    .detail-empty{
+      min-height:260px;
+      display:grid;
+      place-items:center;
+      text-align:center;
+      color:var(--muted);
+      font-weight:900;
+      border:1px dashed #d8cfbd;
+      border-radius:22px;
+      background:rgba(255,255,255,.55);
+    }
+    .section-title{
+      margin:18px 0 8px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      border-bottom:1px solid var(--line);
+      padding-bottom:8px;
+    }
+    .section-title h3{
+      margin:0;
+      font-size:15px;
+    }
+    .pet-card{
+      border:1px solid var(--line);
+      border-radius:20px;
+      padding:14px;
+      background:#fff;
+      margin-top:10px;
+    }
+    .pet-card-head{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:flex-start;
+    }
+    .pet-card h4{
+      margin:0;
+      font-size:17px;
+    }
+    .pet-card p{
+      color:var(--muted);
+      font-weight:800;
+      font-size:12px;
+      margin:6px 0 0;
+      line-height:1.5;
+    }
+    .accordion{
+      display:none;
+      margin-top:12px;
+      border-top:1px solid var(--line);
+      padding-top:12px;
+    }
+    .accordion.open{display:block}
+    .navlinks{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .navlinks a{
+      text-decoration:none;
+    }
+    .empty{
+      border:1px dashed #d8cfbd;
+      border-radius:16px;
+      padding:14px;
+      text-align:center;
+      color:var(--muted);
+      font-weight:900;
+      background:#fffaf0;
+    }
+    @media (max-width:900px){
+      .hero{grid-template-columns:1fr}
+      .version{text-align:left}
+      .grid{grid-template-columns:1fr}
+      .form-grid{grid-template-columns:1fr}
+      .row{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <section class="hero">
+        <div>
+          <span class="eyebrow">DPRO PET CARE LINE｜飼い主・ペット管理</span>
+          <h1>DPROどうぶつ病院 管理画面</h1>
+          <p class="lead">
+            飼い主検索、飼い主情報編集、ペット情報編集、診察券の有効/停止、既存飼い主へのペット追加を行います。
+          </p>
+        </div>
+        <div class="version">
+          STEP VET-47<br />
+          guardian / pet management
+          <div class="navlinks" style="margin-top:10px;">
+            <a class="btn btn-sub" id="openScanPcLink" href="#" target="_blank" rel="noopener">受付PC</a>
+            <a class="btn btn-sub" id="openOwnerLink" href="#" target="_blank" rel="noopener">医院設定</a>
+          </div>
+        </div>
+      </section>
+    </div>
+  </header>
+
+  <main>
+    <div class="grid">
+      <aside>
+        <section class="card">
+          <h2>管理コード</h2>
+          <p class="small">検索・編集には管理コードが必要です。HTML内には管理コードを埋め込んでいません。</p>
+          <div class="row">
+            <div>
+              <label for="adminToken">管理コード</label>
+              <input id="adminToken" type="password" placeholder="管理コードを入力" autocomplete="off" />
+            </div>
+            <button class="btn btn-main" id="saveAdminBtn" type="button">保存</button>
+          </div>
+          <div class="button-row">
+            <button class="btn btn-sub" id="clearAdminBtn" type="button">管理コード削除</button>
+            <button class="btn btn-blue" id="healthBtn" type="button">API確認</button>
+          </div>
+          <div id="authStatus" class="notice">管理コードを保存してください。</div>
+        </section>
+
+        <section class="card">
+          <h2>飼い主・ペット検索</h2>
+          <p class="small">飼い主名・電話番号・ペット名・診察券番号で検索できます。</p>
+          <div class="row">
+            <div>
+              <label for="searchInput">検索キーワード</label>
+              <input id="searchInput" type="text" placeholder="例：本番確認、チェック、090、VET-000005" autocomplete="off" />
+            </div>
+            <button class="btn btn-main" id="searchBtn" type="button">検索</button>
+          </div>
+          <div class="button-row">
+            <button class="btn btn-sub" id="clearSearchBtn" type="button">クリア</button>
+            <button class="btn btn-sub" id="loadRecentBtn" type="button">最近の一覧</button>
+          </div>
+          <div id="searchStatus" class="notice info">検索すると左側に一覧が出ます。</div>
+          <div id="guardianList" class="list">
+            <div class="empty">まだ検索していません。</div>
+          </div>
+        </section>
+      </aside>
+
+      <section>
+        <div id="detailArea" class="card">
+          <div class="detail-empty">
+            <div>
+              <div style="font-size:32px;">🐾</div>
+              <p>左の検索結果から飼い主を選んでください。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const url = new URL(location.href);
+    const clinicCode = url.searchParams.get("clinic_code") || "dpro_vet_demo";
+    const API_BASE = (url.searchParams.get("api") || "https://dpro-vet-qr-api.dpromstk2000.workers.dev").replace(/\/+$/,"");
+    const ADMIN_KEY = `DPRO_VET_ADMIN_CODE_${clinicCode}`;
+
+    const el = {
+      adminToken: document.getElementById("adminToken"),
+      saveAdminBtn: document.getElementById("saveAdminBtn"),
+      clearAdminBtn: document.getElementById("clearAdminBtn"),
+      healthBtn: document.getElementById("healthBtn"),
+      authStatus: document.getElementById("authStatus"),
+      searchInput: document.getElementById("searchInput"),
+      searchBtn: document.getElementById("searchBtn"),
+      clearSearchBtn: document.getElementById("clearSearchBtn"),
+      loadRecentBtn: document.getElementById("loadRecentBtn"),
+      searchStatus: document.getElementById("searchStatus"),
+      guardianList: document.getElementById("guardianList"),
+      detailArea: document.getElementById("detailArea"),
+      openScanPcLink: document.getElementById("openScanPcLink"),
+      openOwnerLink: document.getElementById("openOwnerLink")
+    };
+
+    const state = {
+      guardians: [],
+      selectedGuardianId: "",
+      detail: null
+    };
+
+    function getAdminToken(){
+      return localStorage.getItem(ADMIN_KEY) || "";
+    }
+
+    function adminHeaders(){
+      const token = getAdminToken();
+      return token ? { "X-DPRO-Admin-Code": token } : {};
+    }
+
+    function escapeHtml(value){
+      return String(value ?? "")
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
+    }
+
+    function setNotice(node, text, type=""){
+      node.className = `notice ${type}`.trim();
+      node.textContent = text;
+    }
+
+    function startButton(btn, text){
+      if (!btn) return;
+      btn.dataset.originalText = btn.textContent;
+      btn.textContent = text;
+      btn.disabled = true;
+    }
+
+    function stopButton(btn){
+      if (!btn) return;
+      btn.textContent = btn.dataset.originalText || btn.textContent;
+      btn.disabled = false;
+    }
+
+    async function apiGet(path, params = {}, auth = true){
+      const qs = new URLSearchParams({ clinic_code: clinicCode, ...params });
+      const res = await fetch(`${API_BASE}${path}?${qs.toString()}`, {
+        method:"GET",
+        headers: auth ? adminHeaders() : {}
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.ok === false) throw new Error(data.message || `APIエラー ${res.status}`);
+      return data;
+    }
+
+    async function apiPost(path, body = {}, auth = true){
+      const res = await fetch(`${API_BASE}${path}`, {
+        method:"POST",
+        headers:{
+          "Content-Type":"text/plain;charset=utf-8",
+          ...(auth ? adminHeaders() : {})
+        },
+        body: JSON.stringify({ clinic_code: clinicCode, ...body })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.ok === false) throw new Error(data.message || `APIエラー ${res.status}`);
+      return data;
+    }
+
+    function renderAuthStatus(){
+      const token = getAdminToken();
+      if (token) {
+        el.adminToken.value = token;
+        setNotice(el.authStatus, "管理コード保存済み。検索・編集できます。", "ok");
+      } else {
+        setNotice(el.authStatus, "管理コードを保存してください。", "");
+      }
+    }
+
+    async function checkHealth(){
+      startButton(el.healthBtn, "確認中...");
+      try {
+        const data = await apiGet("/api/health", {}, false);
+        setNotice(el.authStatus, `API OK：${data.version || "unknown"}`, "ok");
+      } catch (error) {
+        setNotice(el.authStatus, error.message || "API確認に失敗しました。", "ng");
+      } finally {
+        stopButton(el.healthBtn);
+      }
+    }
+
+    function lineStatusTag(status){
+      const text = String(status || "").toLowerCase();
+      if (text === "linked") return '<span class="tag green">LINE連携済み</span>';
+      return '<span class="tag gray">LINE未連携</span>';
+    }
+
+    function renderGuardianList(){
+      if (!state.guardians.length) {
+        el.guardianList.innerHTML = '<div class="empty">該当する飼い主が見つかりません。</div>';
+        return;
+      }
+
+      el.guardianList.innerHTML = state.guardians.map((item) => {
+        const active = item.guardian_id === state.selectedGuardianId ? " active" : "";
+        const petNames = (item.pets || []).slice(0,4).map(p => p.pet_name).join("、") || "ペット未登録";
+        return `
+          <article class="guardian-item${active}" data-guardian-id="${escapeHtml(item.guardian_id)}">
+            <h3>${escapeHtml(item.guardian_name || "飼い主")}</h3>
+            <p>${escapeHtml(item.phone || "電話未登録")} / ペット ${escapeHtml(item.pet_count || 0)}頭</p>
+            <p>${escapeHtml(petNames)}</p>
+            <div class="tagline">
+              ${lineStatusTag(item.line_link_status)}
+              ${item.guardian_no ? `<span class="tag">飼い主番号 ${escapeHtml(item.guardian_no)}</span>` : ""}
+            </div>
+          </article>
+        `;
+      }).join("");
+
+      el.guardianList.querySelectorAll("[data-guardian-id]").forEach((card) => {
+        card.addEventListener("click", () => loadGuardianDetail(card.dataset.guardianId));
+      });
+    }
+
+    async function searchGuardians(q = el.searchInput.value.trim()){
+      if (!getAdminToken()) {
+        setNotice(el.searchStatus, "先に管理コードを保存してください。", "ng");
+        return;
+      }
+
+      startButton(el.searchBtn, "検索中...");
+      setNotice(el.searchStatus, "検索しています...", "info");
+
+      try {
+        const data = await apiGet("/api/admin/guardians/search", { q, limit: 60 }, true);
+        state.guardians = data.items || [];
+        renderGuardianList();
+        setNotice(el.searchStatus, `${state.guardians.length}件見つかりました。`, "ok");
+      } catch (error) {
+        state.guardians = [];
+        renderGuardianList();
+        setNotice(el.searchStatus, error.message || "検索に失敗しました。", "ng");
+      } finally {
+        stopButton(el.searchBtn);
+      }
+    }
+
+    async function loadGuardianDetail(guardianId){
+      if (!guardianId) return;
+      state.selectedGuardianId = guardianId;
+      renderGuardianList();
+      el.detailArea.innerHTML = '<div class="detail-empty"><p>読み込み中...</p></div>';
+
+      try {
+        const data = await apiGet("/api/admin/guardian/detail", { guardian_id: guardianId }, true);
+        state.detail = data;
+        renderDetail();
+      } catch (error) {
+        el.detailArea.innerHTML = `<div class="notice ng">${escapeHtml(error.message || "詳細取得に失敗しました。")}</div>`;
+      }
+    }
+
+    function renderDetail(){
+      const data = state.detail;
+      if (!data || !data.guardian) {
+        el.detailArea.innerHTML = '<div class="detail-empty"><p>詳細がありません。</p></div>';
+        return;
+      }
+
+      const g = data.guardian;
+      const pets = data.pets || [];
+
+      el.detailArea.innerHTML = `
+        <section>
+          <div class="section-title">
+            <h3>飼い主情報</h3>
+            <div class="tagline">${lineStatusTag(g.line_link_status)}</div>
+          </div>
+
+          <div class="form-grid">
+            <div>
+              <label for="guardianName">飼い主名</label>
+              <input id="guardianName" value="${escapeHtml(g.guardian_name || "")}" />
+            </div>
+            <div>
+              <label for="guardianKana">ふりがな</label>
+              <input id="guardianKana" value="${escapeHtml(g.guardian_kana || "")}" />
+            </div>
+            <div>
+              <label for="guardianPhone">電話番号</label>
+              <input id="guardianPhone" value="${escapeHtml(g.phone || "")}" />
+            </div>
+            <div>
+              <label for="guardianEmail">メール</label>
+              <input id="guardianEmail" value="${escapeHtml(g.email || "")}" />
+            </div>
+            <div>
+              <label for="preferredContact">優先連絡</label>
+              <select id="preferredContact">
+                ${["line","phone","staff"].map(v => `<option value="${v}" ${String(g.preferred_contact || "") === v ? "selected" : ""}>${v === "line" ? "LINE" : v === "phone" ? "電話" : "スタッフ対応"}</option>`).join("")}
+              </select>
+            </div>
+            <div>
+              <label for="guardianStatus">状態</label>
+              <select id="guardianStatus">
+                ${["active","inactive"].map(v => `<option value="${v}" ${String(g.status || "active") === v ? "selected" : ""}>${v === "active" ? "有効" : "停止"}</option>`).join("")}
+              </select>
+            </div>
+            <div class="full">
+              <label for="guardianMemo">飼い主メモ</label>
+              <textarea id="guardianMemo">${escapeHtml(g.memo || "")}</textarea>
+            </div>
+          </div>
+
+          <div class="button-row">
+            <button class="btn btn-main" id="saveGuardianBtn" type="button">飼い主情報を保存</button>
+            <button class="btn btn-purple" id="openAddPetBtn" type="button">この飼い主にペット追加</button>
+          </div>
+          <div id="guardianSaveStatus" class="notice">編集後に保存してください。</div>
+
+          <div id="addPetPanel" class="accordion">
+            ${renderAddPetForm()}
+          </div>
+
+          <div class="section-title">
+            <h3>登録ペット ${pets.length}頭</h3>
+          </div>
+          <div id="petList">
+            ${pets.length ? pets.map(renderPetCard).join("") : '<div class="empty">ペットが登録されていません。</div>'}
+          </div>
+        </section>
+      `;
+
+      document.getElementById("saveGuardianBtn").addEventListener("click", saveGuardian);
+      document.getElementById("openAddPetBtn").addEventListener("click", () => {
+        document.getElementById("addPetPanel").classList.toggle("open");
+      });
+
+      const addPetBtn = document.getElementById("addPetCreateBtn");
+      if (addPetBtn) addPetBtn.addEventListener("click", addPetToSelectedGuardian);
+
+      el.detailArea.querySelectorAll("[data-open-pet]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          document.getElementById(`petEdit_${btn.dataset.openPet}`)?.classList.toggle("open");
+        });
+      });
+
+      el.detailArea.querySelectorAll("[data-save-pet]").forEach((btn) => {
+        btn.addEventListener("click", () => savePet(btn.dataset.savePet));
+      });
+
+      el.detailArea.querySelectorAll("[data-toggle-card]").forEach((btn) => {
+        btn.addEventListener("click", () => toggleCard(btn.dataset.toggleCard, btn.dataset.cardEnabled === "true"));
+      });
+    }
+
+    function renderAddPetForm(){
+      return `
+        <div class="form-grid">
+          <div>
+            <label for="addPetName">ペット名</label>
+            <input id="addPetName" placeholder="例：ムギ" />
+          </div>
+          <div>
+            <label for="addAnimalType">動物種</label>
+            <select id="addAnimalType">
+              <option value="犬">犬</option>
+              <option value="猫">猫</option>
+              <option value="うさぎ">うさぎ</option>
+              <option value="ハムスター">ハムスター</option>
+              <option value="鳥">鳥</option>
+              <option value="その他">その他</option>
+            </select>
+          </div>
+          <div>
+            <label for="addBreed">品種</label>
+            <input id="addBreed" placeholder="例：柴犬、ミックス" />
+          </div>
+          <div>
+            <label for="addSex">性別</label>
+            <select id="addSex">
+              <option value="">未設定</option>
+              <option value="male">男の子</option>
+              <option value="female">女の子</option>
+              <option value="unknown">不明</option>
+            </select>
+          </div>
+          <div>
+            <label for="addAllergy">アレルギー</label>
+            <input id="addAllergy" placeholder="例：特になし" />
+          </div>
+          <div>
+            <label for="addMemo">登録メモ</label>
+            <input id="addMemo" placeholder="例：受付スタッフが代理追加" />
+          </div>
+        </div>
+        <div class="button-row">
+          <button class="btn btn-main" id="addPetCreateBtn" type="button">ペットを追加して診察券発行</button>
+        </div>
+        <div id="addPetStatus" class="notice">既存飼い主にペットを追加します。</div>
+      `;
+    }
+
+    function renderPetCard(pet){
+      const id = pet.pet_id || "";
+      const enabled = pet.card_enabled !== false;
+      return `
+        <article class="pet-card">
+          <div class="pet-card-head">
+            <div>
+              <h4>${escapeHtml(pet.pet_name || "ペット")}</h4>
+              <p>${escapeHtml(pet.species_label || pet.species || "動物種未設定")} ${pet.breed ? ` / ${escapeHtml(pet.breed)}` : ""}</p>
+              <p>診察券：${escapeHtml(pet.card_no || "未発行")}</p>
+              <div class="tagline">
+                <span class="tag ${pet.pet_status === "active" ? "green" : "gray"}">${pet.pet_status === "active" ? "ペット有効" : "ペット停止"}</span>
+                <span class="tag ${enabled ? "green" : "red"}">${enabled ? "診察券有効" : "診察券停止"}</span>
+              </div>
+            </div>
+            <div class="button-row" style="margin-top:0;">
+              <button class="btn btn-sub" type="button" data-open-pet="${escapeHtml(id)}">編集</button>
+              <button class="btn ${enabled ? "btn-danger" : "btn-main"}" type="button" data-toggle-card="${escapeHtml(pet.card_id || "")}" data-card-enabled="${enabled}">
+                ${enabled ? "診察券停止" : "診察券有効化"}
+              </button>
+            </div>
+          </div>
+
+          <div class="accordion" id="petEdit_${escapeHtml(id)}">
+            <div class="form-grid">
+              <div>
+                <label>ペット名</label>
+                <input id="petName_${escapeHtml(id)}" value="${escapeHtml(pet.pet_name || "")}" />
+              </div>
+              <div>
+                <label>動物種</label>
+                <select id="petAnimal_${escapeHtml(id)}">
+                  ${["犬","猫","うさぎ","ハムスター","鳥","その他"].map(v => `<option value="${v}" ${String(pet.species_label || "") === v ? "selected" : ""}>${v}</option>`).join("")}
+                </select>
+              </div>
+              <div>
+                <label>品種</label>
+                <input id="petBreed_${escapeHtml(id)}" value="${escapeHtml(pet.breed || "")}" />
+              </div>
+              <div>
+                <label>性別</label>
+                <select id="petSex_${escapeHtml(id)}">
+                  ${["","male","female","unknown"].map(v => `<option value="${v}" ${String(pet.sex || "") === v ? "selected" : ""}>${v === "" ? "未設定" : v === "male" ? "男の子" : v === "female" ? "女の子" : "不明"}</option>`).join("")}
+                </select>
+              </div>
+              <div>
+                <label>体重kg</label>
+                <input id="petWeight_${escapeHtml(id)}" type="number" step="0.01" value="${escapeHtml(pet.weight_kg ?? "")}" />
+              </div>
+              <div>
+                <label>避妊・去勢</label>
+                <select id="petNeutered_${escapeHtml(id)}">
+                  ${["unknown","done","not_done"].map(v => `<option value="${v}" ${String(pet.neutered_status || "unknown") === v ? "selected" : ""}>${v === "unknown" ? "不明" : v === "done" ? "済み" : "未実施"}</option>`).join("")}
+                </select>
+              </div>
+              <div>
+                <label>状態</label>
+                <select id="petStatus_${escapeHtml(id)}">
+                  ${["active","inactive"].map(v => `<option value="${v}" ${String(pet.pet_status || "active") === v ? "selected" : ""}>${v === "active" ? "有効" : "停止"}</option>`).join("")}
+                </select>
+              </div>
+              <div>
+                <label>保険</label>
+                <input id="petInsurance_${escapeHtml(id)}" value="${escapeHtml(pet.insurance_status || "")}" />
+              </div>
+              <div class="full">
+                <label>アレルギー</label>
+                <textarea id="petAllergies_${escapeHtml(id)}">${escapeHtml(pet.allergies || "")}</textarea>
+              </div>
+              <div class="full">
+                <label>持病・注意事項</label>
+                <textarea id="petChronic_${escapeHtml(id)}">${escapeHtml(pet.chronic_conditions || "")}</textarea>
+              </div>
+              <div class="full">
+                <label>受付注意メモ</label>
+                <textarea id="petMemo_${escapeHtml(id)}">${escapeHtml(pet.caution_memo || "")}</textarea>
+              </div>
+            </div>
+            <div class="button-row">
+              <button class="btn btn-main" type="button" data-save-pet="${escapeHtml(id)}">ペット情報を保存</button>
+            </div>
+            <div id="petSaveStatus_${escapeHtml(id)}" class="notice">編集後に保存してください。</div>
+          </div>
+        </article>
+      `;
+    }
+
+    async function saveGuardian(){
+      const status = document.getElementById("guardianSaveStatus");
+      const g = state.detail?.guardian;
+      if (!g) return;
+      setNotice(status, "保存中...", "info");
+      try {
+        const data = await apiPost("/api/admin/guardian/update", {
+          guardian_id: g.id || g.guardian_id,
+          guardian_name: document.getElementById("guardianName").value,
+          guardian_kana: document.getElementById("guardianKana").value,
+          phone: document.getElementById("guardianPhone").value,
+          email: document.getElementById("guardianEmail").value,
+          preferred_contact: document.getElementById("preferredContact").value,
+          status: document.getElementById("guardianStatus").value,
+          memo: document.getElementById("guardianMemo").value,
+          staff_name: "飼い主・ペット管理画面"
+        }, true);
+        state.detail.guardian = data.guardian;
+        setNotice(status, "飼い主情報を保存しました。", "ok");
+        await searchGuardians(el.searchInput.value.trim());
+      } catch (error) {
+        setNotice(status, error.message || "保存に失敗しました。", "ng");
+      }
+    }
+
+    async function savePet(petId){
+      const status = document.getElementById(`petSaveStatus_${petId}`);
+      setNotice(status, "保存中...", "info");
+      try {
+        await apiPost("/api/admin/pet/update", {
+          pet_id: petId,
+          pet_name: document.getElementById(`petName_${petId}`).value,
+          animal_type: document.getElementById(`petAnimal_${petId}`).value,
+          breed: document.getElementById(`petBreed_${petId}`).value,
+          sex: document.getElementById(`petSex_${petId}`).value,
+          weight_kg: document.getElementById(`petWeight_${petId}`).value,
+          neutered_status: document.getElementById(`petNeutered_${petId}`).value,
+          insurance_status: document.getElementById(`petInsurance_${petId}`).value,
+          status: document.getElementById(`petStatus_${petId}`).value,
+          allergies: document.getElementById(`petAllergies_${petId}`).value,
+          chronic_conditions: document.getElementById(`petChronic_${petId}`).value,
+          caution_memo: document.getElementById(`petMemo_${petId}`).value,
+          staff_name: "飼い主・ペット管理画面"
+        }, true);
+        setNotice(status, "ペット情報を保存しました。", "ok");
+        await loadGuardianDetail(state.selectedGuardianId);
+      } catch (error) {
+        setNotice(status, error.message || "保存に失敗しました。", "ng");
+      }
+    }
+
+    async function toggleCard(cardId, currentlyEnabled){
+      if (!cardId) {
+        alert("診察券IDが見つかりません。");
+        return;
+      }
+      const ok = confirm(currentlyEnabled ? "この診察券を停止しますか？" : "この診察券を有効化しますか？");
+      if (!ok) return;
+
+      try {
+        await apiPost("/api/admin/pet-card/update", {
+          card_id: cardId,
+          card_enabled: !currentlyEnabled,
+          staff_name: "飼い主・ペット管理画面"
+        }, true);
+        await loadGuardianDetail(state.selectedGuardianId);
+      } catch (error) {
+        alert(error.message || "診察券更新に失敗しました。");
+      }
+    }
+
+    async function addPetToSelectedGuardian(){
+      const status = document.getElementById("addPetStatus");
+      const g = state.detail?.guardian;
+      if (!g) return;
+      const petName = document.getElementById("addPetName").value.trim();
+      if (!petName) {
+        setNotice(status, "ペット名を入力してください。", "ng");
+        return;
+      }
+      setNotice(status, "追加中...", "info");
+      try {
+        const data = await apiPost("/api/admin/existing-guardian/pet-add", {
+          guardian_id: g.id || g.guardian_id,
+          pet_name: petName,
+          animal_type: document.getElementById("addAnimalType").value,
+          breed: document.getElementById("addBreed").value,
+          sex: document.getElementById("addSex").value,
+          allergy_note: document.getElementById("addAllergy").value,
+          memo: document.getElementById("addMemo").value,
+          create_reception: false,
+          staff_name: "飼い主・ペット管理画面"
+        }, true);
+        setNotice(status, `ペットを追加しました。診察券：${data.card?.card_no || data.card_view?.card_no || "-"}`, "ok");
+        await loadGuardianDetail(state.selectedGuardianId);
+        await searchGuardians(el.searchInput.value.trim());
+      } catch (error) {
+        setNotice(status, error.message || "ペット追加に失敗しました。", "ng");
+      }
+    }
+
+    function bindEvents(){
+      el.saveAdminBtn.addEventListener("click", () => {
+        localStorage.setItem(ADMIN_KEY, el.adminToken.value.trim());
+        renderAuthStatus();
+      });
+      el.clearAdminBtn.addEventListener("click", () => {
+        localStorage.removeItem(ADMIN_KEY);
+        el.adminToken.value = "";
+        renderAuthStatus();
+      });
+      el.healthBtn.addEventListener("click", checkHealth);
+      el.searchBtn.addEventListener("click", () => searchGuardians());
+      el.loadRecentBtn.addEventListener("click", () => searchGuardians(""));
+      el.clearSearchBtn.addEventListener("click", () => {
+        el.searchInput.value = "";
+        state.guardians = [];
+        state.selectedGuardianId = "";
+        state.detail = null;
+        renderGuardianList();
+        el.detailArea.innerHTML = '<div class="detail-empty"><div><div style="font-size:32px;">🐾</div><p>左の検索結果から飼い主を選んでください。</p></div></div>';
+        setNotice(el.searchStatus, "検索すると左側に一覧が出ます。", "info");
+      });
+      el.searchInput.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          searchGuardians();
+        }
+      });
+    }
+
+    function init(){
+      el.openScanPcLink.href = `https://dpromstk2000-lab.github.io/DPRO-VET-QR/scan-pc.html?v=step-vet-46&clinic_code=${encodeURIComponent(clinicCode)}&demo=ready`;
+      el.openOwnerLink.href = `https://dpromstk2000-lab.github.io/DPRO-VET-QR/owner.html?v=step-vet-40e&clinic_code=${encodeURIComponent(clinicCode)}&demo=ready`;
+      bindEvents();
+      renderAuthStatus();
+    }
+
+    init();
+  </script>
+</body>
+</html>
