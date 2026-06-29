@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="robots" content="noindex,nofollow">
-  <title>DPRO PET CARE LINE｜デモ・システム管理センター R4</title>
+  <title>DPRO PET CARE LINE｜デモ・システム管理センター STEP39</title>
   <style>
     :root{
       --bg:#f5f7f4;
@@ -600,6 +600,153 @@
       .top-actions{display:grid}
       .linkbtn{width:100%}
     }
+  
+    /* STEP VET-39：営業デモ用ナビゲーション */
+    .demo-nav{
+      margin-top:18px;
+      background:
+        radial-gradient(circle at 90% 10%,rgba(184,145,76,.12),transparent 32%),
+        linear-gradient(180deg,#fff,#fbfdfb);
+      border:1px solid rgba(47,125,79,.18);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow2);
+      padding:20px;
+    }
+    .demo-route{
+      display:grid;
+      grid-template-columns:repeat(5,1fr);
+      gap:10px;
+      margin-top:14px;
+    }
+    .route-card{
+      position:relative;
+      border:1px solid var(--line2);
+      background:#fff;
+      border-radius:18px;
+      padding:14px;
+      min-height:132px;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      gap:12px;
+    }
+    .route-card:after{
+      content:"→";
+      position:absolute;
+      right:-13px;
+      top:50%;
+      transform:translateY(-50%);
+      width:26px;
+      height:26px;
+      border-radius:999px;
+      display:grid;
+      place-items:center;
+      background:var(--soft);
+      color:var(--main2);
+      border:1px solid #cde7d5;
+      font-weight:1000;
+      z-index:2;
+    }
+    .route-card:last-child:after{display:none}
+    .route-no{
+      width:30px;
+      height:30px;
+      border-radius:12px;
+      background:var(--soft);
+      color:var(--main2);
+      display:grid;
+      place-items:center;
+      font-weight:1000;
+      font-size:13px;
+    }
+    .route-card h3{
+      margin:8px 0 0;
+      font-size:15px;
+      letter-spacing:-.02em;
+    }
+    .route-card p{
+      margin:5px 0 0;
+      color:var(--muted);
+      font-size:12px;
+      font-weight:750;
+      line-height:1.55;
+    }
+    .route-actions{
+      display:grid;
+      gap:7px;
+      margin-top:8px;
+    }
+    .route-actions .btn{
+      min-height:36px;
+      padding:8px 10px;
+      border-radius:12px;
+      font-size:12px;
+    }
+    .talk-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+      margin-top:14px;
+    }
+    .talk-card{
+      border:1px solid var(--line2);
+      background:#fff;
+      border-radius:18px;
+      padding:14px;
+    }
+    .talk-card b{
+      display:block;
+      font-size:14px;
+      margin-bottom:6px;
+    }
+    .talk-card p{
+      margin:0;
+      color:#42534a;
+      font-size:13px;
+      font-weight:750;
+      line-height:1.75;
+    }
+    .qr-copy-box{
+      display:grid;
+      grid-template-columns:1fr auto;
+      gap:8px;
+      align-items:center;
+      border:1px solid var(--line);
+      background:#fff;
+      border-radius:16px;
+      padding:10px;
+      margin-top:12px;
+    }
+    .qr-copy-box code{
+      font-family:var(--mono);
+      font-size:12px;
+      color:#30433a;
+      word-break:break-all;
+    }
+    .mini-note{
+      margin-top:10px;
+      padding:10px 12px;
+      border-radius:14px;
+      background:var(--accent2);
+      color:#745326;
+      font-size:12px;
+      font-weight:850;
+      line-height:1.65;
+      border:1px solid rgba(184,145,76,.20);
+    }
+    @media (max-width:1050px){
+      .demo-route{grid-template-columns:1fr}
+      .route-card:after{
+        content:"↓";
+        right:50%;
+        top:auto;
+        bottom:-18px;
+        transform:translateX(50%);
+      }
+      .route-card{min-height:auto}
+      .talk-grid{grid-template-columns:1fr}
+    }
+
   </style>
 </head>
 <body>
@@ -611,7 +758,7 @@
           <h1>デモ・システム<br>管理センター</h1>
           <p class="hero-lead">
             動物病院向けLINE診察券・受付デモの接続状態、医院設定、休診カレンダー、受付データを1か所で確認できます。
-            営業前はこの画面からデモ環境を整えて、オーナーに見せやすい状態にします。
+            営業前はこの画面からデモ環境を整え、そのまま営業デモの順番どおりに各画面を開けます。
           </p>
           <div class="top-actions">
             <a class="linkbtn primary" id="openOwner" href="#">医院設定を開く</a>
@@ -635,11 +782,112 @@
           </div>
           <div class="status-pill">
             <span>STEP</span>
-            <b>STEP VET-38C-R4</b>
+            <b>STEP VET-39</b>
           </div>
         </div>
       </div>
     </section>
+
+    <section class="demo-nav">
+      <div class="card-head">
+        <div>
+          <h2>営業デモ・ナビゲーション</h2>
+          <p>
+            営業時はこの順番で開くと、オーナーに「LINE診察券 → 受付 → 院内管理 → 休診反映」まで自然に伝わります。
+            まず営業前デモ準備を押してから、下の順番で進めます。
+          </p>
+        </div>
+        <span class="badge ok">STEP VET-39</span>
+      </div>
+
+      <div class="demo-route">
+        <div class="route-card">
+          <div>
+            <div class="route-no">1</div>
+            <h3>営業前準備</h3>
+            <p>デモデータを整え、チェックちゃん1件だけにします。</p>
+          </div>
+          <div class="route-actions">
+            <button class="btn btn-main" type="button" id="scrollPrepareBtn">準備ボタンへ</button>
+          </div>
+        </div>
+
+        <div class="route-card">
+          <div>
+            <div class="route-no">2</div>
+            <h3>飼い主画面</h3>
+            <p>診察券・ペット情報・受付ボタンを見せます。</p>
+          </div>
+          <div class="route-actions">
+            <a class="btn btn-sub" id="routeMember" href="#" target="_blank" rel="noopener">開く</a>
+          </div>
+        </div>
+
+        <div class="route-card">
+          <div>
+            <div class="route-no">3</div>
+            <h3>LINE受付</h3>
+            <p>スマホから順番受付できる流れを見せます。</p>
+          </div>
+          <div class="route-actions">
+            <a class="btn btn-sub" id="routeWaiting" href="#" target="_blank" rel="noopener">開く</a>
+          </div>
+        </div>
+
+        <div class="route-card">
+          <div>
+            <div class="route-no">4</div>
+            <h3>受付PC</h3>
+            <p>QR受付・二重受付防止・受付状況を見せます。</p>
+          </div>
+          <div class="route-actions">
+            <a class="btn btn-sub" id="routeScanPc" href="#" target="_blank" rel="noopener">開く</a>
+          </div>
+        </div>
+
+        <div class="route-card">
+          <div>
+            <div class="route-no">5</div>
+            <h3>医院設定</h3>
+            <p>臨時休診・午後休診が各画面に反映されることを見せます。</p>
+          </div>
+          <div class="route-actions">
+            <a class="btn btn-sub" id="routeOwner" href="#" target="_blank" rel="noopener">開く</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="qr-copy-box">
+        <code id="demoQrText">vetcard:dpro_vet_demo:card_c175a6751639e545e8050e89bccda8705b0962cbc5c7cd8b</code>
+        <button class="btn btn-sub" type="button" id="copyQrBtn" style="min-height:36px;padding:8px 10px;border-radius:12px;font-size:12px">QR文字列コピー</button>
+      </div>
+
+      <div class="talk-grid">
+        <div class="talk-card">
+          <b>30秒版トーク</b>
+          <p>
+            こちらはLINE診察券と順番受付をつなげた動物病院向けのデモです。
+            飼い主さんはLINEから診察券を出せて、受付もできます。
+            受付側はQRを読むだけで来院確認ができ、休診日や午後休診も自動で反映されます。
+          </p>
+        </div>
+        <div class="talk-card">
+          <b>3分版トーク</b>
+          <p>
+            まず飼い主画面で診察券を見せます。次にLINE受付で順番受付をします。
+            その後、受付PCでQRを読み取ると、院内の受付状況に反映されます。
+            さらに医院設定で臨時休診や午後休診を入れると、飼い主画面と受付画面に反映されるため、電話確認や案内ミスを減らせます。
+          </p>
+        </div>
+      </div>
+
+      <div class="mini-note">
+        営業時の基本は「順番待ちだけ」ではなく、
+        <b>診察券・LINE受付・院内受付・休診案内までLINEでつながる</b>
+        と説明すると伝わりやすいです。
+      </div>
+    </section>
+
 
     <section class="grid">
       <article class="card demo">
@@ -817,7 +1065,7 @@
   <script>
     "use strict";
 
-    const STEP = "STEP VET-38C-R4";
+    const STEP = "STEP VET-39";
     const API_BASE = "https://dpro-vet-qr-api.dpromstk2000.workers.dev";
     const DEFAULT_CLINIC_CODE = "dpro_vet_demo";
     const DEFAULT_LINE_USER_ID = "demo_line_link_001";
@@ -833,7 +1081,7 @@
       member: `https://dpromstk2000-lab.github.io/DPRO-VET-QR/member.html?v=step-vet-36d-1&clinic_code=${encodeURIComponent(clinicCode)}&line_user_id=${encodeURIComponent(lineUserId)}`,
       waiting: `https://dpromstk2000-lab.github.io/DPRO-VET-QR/waiting.html?v=step-vet-36d-2-r3&clinic_code=${encodeURIComponent(clinicCode)}&line_user_id=${encodeURIComponent(lineUserId)}`,
       scanPc: `https://dpromstk2000-lab.github.io/DPRO-VET-QR/scan-pc.html?v=step-vet-36f-2&clinic_code=${encodeURIComponent(clinicCode)}`,
-      systemCheck: `https://dpromstk2000-lab.github.io/DPRO-VET-QR/system-check.html?v=step-vet-38c-r4&clinic_code=${encodeURIComponent(clinicCode)}`
+      systemCheck: `https://dpromstk2000-lab.github.io/DPRO-VET-QR/system-check.html?v=step-vet-39&clinic_code=${encodeURIComponent(clinicCode)}`
     };
 
     const el = {
@@ -864,7 +1112,14 @@
       openOwner: document.getElementById("openOwner"),
       openMember: document.getElementById("openMember"),
       openWaiting: document.getElementById("openWaiting"),
-      openScanPc: document.getElementById("openScanPc")
+      openScanPc: document.getElementById("openScanPc"),
+      routeMember: document.getElementById("routeMember"),
+      routeWaiting: document.getElementById("routeWaiting"),
+      routeScanPc: document.getElementById("routeScanPc"),
+      routeOwner: document.getElementById("routeOwner"),
+      scrollPrepareBtn: document.getElementById("scrollPrepareBtn"),
+      copyQrBtn: document.getElementById("copyQrBtn"),
+      demoQrText: document.getElementById("demoQrText")
     };
 
     let state = {
@@ -881,6 +1136,11 @@
       el.openWaiting.href = urls.waiting;
       el.openScanPc.href = urls.scanPc;
 
+      el.routeOwner.href = urls.owner;
+      el.routeMember.href = urls.member;
+      el.routeWaiting.href = urls.waiting;
+      el.routeScanPc.href = urls.scanPc;
+
       const savedCodeRaw = localStorage.getItem(ADMIN_CODE_STORAGE_KEY) || "";
       const savedCode = isOldNonVetAdminCode(savedCodeRaw) ? "" : savedCodeRaw;
       if (savedCodeRaw && !savedCode) {
@@ -896,6 +1156,11 @@
       el.prepareBtn.addEventListener("click", prepareDemo);
       el.refreshBtn.addEventListener("click", loadAll);
       el.copyInfoBtn.addEventListener("click", copyDebugInfo);
+      el.copyQrBtn.addEventListener("click", copyDemoQrText);
+      el.scrollPrepareBtn.addEventListener("click", () => {
+        document.getElementById("adminCode").scrollIntoView({ behavior: "smooth", block: "center" });
+        setTimeout(() => document.getElementById("adminCode").focus(), 450);
+      });
 
       el.adminCode.addEventListener("change", () => {
         try {
@@ -1331,6 +1596,11 @@
         worker_version: state.health?.version || "-"
       };
       el.debugInfo.textContent = JSON.stringify(info, null, 2);
+    }
+
+    async function copyDemoQrText(){
+      await navigator.clipboard.writeText(el.demoQrText.textContent.trim());
+      toast("診察券QR文字列をコピーしました。受付PCのリーダーなし確認に貼れます。");
     }
 
     async function copyDebugInfo(){
