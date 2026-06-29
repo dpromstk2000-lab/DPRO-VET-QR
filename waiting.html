@@ -346,7 +346,7 @@
 <body>
   <main class="page">
     <section class="hero">
-      <span class="badge">STEP VET-36D-2｜来院受付</span>
+      <span class="badge">STEP VET-36D-2-R2-R2｜来院受付</span>
       <h1>今日の来院受付</h1>
       <p class="lead">
         診察券を確認して、今日の受付番号を発行します。
@@ -579,7 +579,10 @@
         headers:headers(false, admin)
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok || data.ok === false) throw new Error(data.message || data.error || `API Error ${res.status}`);
+      if (!res.ok || data.ok === false) {
+        const msg = data.message || data.error || `API Error ${res.status}`;
+        throw new Error(msg === "API endpoint not found." ? "受付APIが見つかりません。最新版のWorker反映、または受付APIのURLを確認してください。" : msg);
+      }
       return data;
     }
 
@@ -592,7 +595,10 @@
         body:JSON.stringify({ clinic_code: CLINIC_CODE, ...body })
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok || data.ok === false) throw new Error(data.message || data.error || `API Error ${res.status}`);
+      if (!res.ok || data.ok === false) {
+        const msg = data.message || data.error || `API Error ${res.status}`;
+        throw new Error(msg === "API endpoint not found." ? "受付APIが見つかりません。最新版のWorker反映、または受付APIのURLを確認してください。" : msg);
+      }
       return data;
     }
 
@@ -900,7 +906,7 @@
       setNotice("submitStatus", "info", "受付番号を発行しています。");
 
       try {
-        const data = await apiPost("/api/admin/queue/create", {
+        const data = await apiPost("/api/member/queue/create", {
           qr_token: token,
           token,
           card_token: token,
