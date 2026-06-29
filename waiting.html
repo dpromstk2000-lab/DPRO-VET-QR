@@ -341,7 +341,7 @@
       .calendarMini{grid-template-columns:1fr}
     }
   
-    /* STEP VET-52.5F：飼い主側受付登録・DEMO遷移修正 */
+    /* STEP VET-52.5H：飼い主側受付登録・DEMO遷移修正 */
     .demoPetSelector{
       display:flex;
       flex-wrap:wrap;
@@ -384,7 +384,7 @@
 <body>
   <main class="page">
     <section class="hero">
-      <span class="badge">STEP VET-52.5F｜来院受付</span>
+      <span class="badge">STEP VET-52.5H｜来院受付</span>
       <h1>今日の来院受付</h1>
       <p class="lead">
         診察券を確認して、今日の受付番号を発行します。
@@ -525,7 +525,7 @@
         urlParams.get("demo") === "ready" ||
         urlParams.get("demo") === "true" ||
         urlParams.get("demo") === "1" ||
-        // STEP VET-52.5F:
+        // STEP VET-52.5H:
         // 営業DEMO用LINE IDで開いた場合は、member.htmlからdemo=readyが漏れても
         // waiting.html側で多頭診察券を補助表示する。
         urlParams.has("line_user_id")
@@ -701,7 +701,7 @@
 
     function updateLinks(){
       const common = {
-        v:"step-vet-52-5f",
+        v:"step-vet-52-5h",
         line_user_id: LINE_USER_ID
       };
       if (IS_DEMO_READY) common.demo = "ready";
@@ -726,7 +726,7 @@
     }
 
     async function loadMemberCards(){
-      // STEP VET-52.5F:
+      // STEP VET-52.5H:
       // 通常はAPIでLINE連携済み診察券を読む。
       // dpro_vet_demo / demo_line_link_001 のDEMO導線では、member.htmlからdemo=readyが漏れても
       // 営業デモ用の多頭診察券を補助表示する。
@@ -1081,13 +1081,28 @@
           staff_name: "飼い主LINE"
         }, false);
 
-        const num = data.entry?.queue_number || data.result?.queue_number || "-";
+        const duplicate = Boolean(
+          data.duplicate ||
+          data.already_registered ||
+          data.result?.duplicate ||
+          data.result?.already_registered ||
+          data.entry?.duplicate ||
+          data.entry?.already_registered
+        );
+        const num = data.entry?.queue_number || data.result?.queue_number || data.queue_number || "-";
+        const message = data.message || data.result?.message || data.entry?.message || "";
         state.entryCreated = data.entry || data.result || data;
-        renderSuccess(num);
-        setNotice("submitStatus", "ok", `受付が完了しました。受付番号：${num}`);
+
+        if (duplicate) {
+          renderSuccess(num, { duplicate: true, message });
+          setNotice("submitStatus", "ok", message || `本日はすでに受付済みです。受付番号：${num}`);
+        } else {
+          renderSuccess(num, { duplicate: false });
+          setNotice("submitStatus", "ok", `受付が完了しました。受付番号：${num}`);
+        }
       } catch (error) {
         const message = error && error.message ? error.message : "受付に失敗しました。";
-        setNotice("submitStatus", "ng", message.includes("Failed to fetch") ? "受付API通信に失敗しました。WorkerのSTEP VET-52.5F反映を確認してください。" : message);
+        setNotice("submitStatus", "ng", message.includes("Failed to fetch") ? "受付API通信に失敗しました。WorkerのSTEP VET-52.5H反映を確認してください。" : message);
       } finally {
         $("submitBtn").disabled = false;
         $("submitBtn").textContent = "この内容で受付する";
@@ -1095,18 +1110,28 @@
       }
     }
 
-    function renderSuccess(num){
+    function renderSuccess(num, options = {}){
       const card = state.selectedCard || {};
       const petName = cardValue(card, "pet_name", "pet.pet_name", "name", "pet.name") || "ペット";
+      const isDuplicate = Boolean(options.duplicate);
+      const title = isDuplicate ? "本日はすでに受付済みです" : "受付が完了しました";
+      const description = isDuplicate
+        ? `${petName}ちゃんは、すでに本日の受付が入っています。受付番号をご確認のうえ、院内でお待ちください。`
+        : `${petName}ちゃんの受付番号です。院内でお待ちください。`;
+      const statusText = isDuplicate
+        ? "重複登録はしていません。既存の受付番号を表示しています。"
+        : "受付番号を発行しました。";
+
       $("successBox").classList.remove("hidden");
       $("successBox").innerHTML = `
         <div class="queueBox">
           <div class="queueNo">${escapeHtml(num)}</div>
           <div>
-            <h3>受付が完了しました</h3>
-            <p>${escapeHtml(petName)}ちゃんの受付番号です。院内でお待ちください。</p>
+            <h3>${escapeHtml(title)}</h3>
+            <p>${escapeHtml(description)}</p>
+            <p style="margin-top:8px;font-weight:900;color:#2f7a5e;">${escapeHtml(statusText)}</p>
             <div class="buttonRow">
-              <a class="btn btnSoft" href="${escapeHtml(buildPageUrl("member.html", { v:"step-vet-52-5f", line_user_id: LINE_USER_ID, demo: IS_DEMO_READY ? "ready" : "" }))}">診察券へ戻る</a>
+              <a class="btn btnSoft" href="${escapeHtml(buildPageUrl("member.html", { v:"step-vet-52-5h", line_user_id: LINE_USER_ID, demo: IS_DEMO_READY ? "ready" : "" }))}">診察券へ戻る</a>
             </div>
           </div>
         </div>
