@@ -163,7 +163,7 @@
     @media(max-width:980px){.hero,.layout,.follow-grid{grid-template-columns:1fr}.status-grid{grid-template-columns:repeat(2,1fr)}.section-title{align-items:flex-start;flex-direction:column}.section-title p{text-align:left}.entry{grid-template-columns:58px 1fr}.entry-actions{grid-column:1/-1;justify-content:flex-start;max-width:none}}
     @media(max-width:640px){.topbar{align-items:flex-start;flex-direction:column}.actions{justify-content:flex-start}.auth-box,.form-grid,.status-grid{grid-template-columns:1fr}.brand strong{white-space:normal}.hero-card,.card{border-radius:22px}.pet-main{grid-template-columns:1fr}}
   
-    /* STEP VET-36D-3-R4：全ボタンの白化防止。disabledでも背景色と文字色を維持する */
+    /* STEP VET-36F-2：全ボタンの白化防止。disabledでも背景色と文字色を維持する */
     button.btn:disabled,
     .btn:disabled{
       opacity:.86!important;
@@ -234,7 +234,7 @@
     }
 
   
-    /* STEP VET-36D-3-R4：選択中・フォーカス中の白化防止 */
+    /* STEP VET-36F-2：選択中・フォーカス中の白化防止 */
     button.btn,
     .btn{
       -webkit-tap-highlight-color:rgba(47,125,100,.14);
@@ -336,6 +336,44 @@
       box-shadow:0 14px 28px rgba(47,125,100,.24)!important;
     }
 
+  
+    /* STEP VET-36F-2：取消済み受付は本日の受付一覧から分離 */
+    .cancelled-history{
+      margin-top:12px;
+      border:1px solid var(--line);
+      border-radius:18px;
+      background:#fff;
+      overflow:hidden;
+    }
+    .cancelled-history summary{
+      cursor:pointer;
+      padding:12px 14px;
+      font-weight:900;
+      color:var(--muted);
+      background:#fafbf8;
+      list-style:none;
+    }
+    .cancelled-history summary::-webkit-details-marker{display:none}
+    .cancelled-history-body{
+      padding:10px 14px 14px;
+      border-top:1px solid var(--line);
+      display:grid;
+      gap:8px;
+    }
+    .cancelled-history-item{
+      border:1px dashed #d8ded8;
+      border-radius:14px;
+      padding:9px 10px;
+      color:#6d7b74;
+      background:#fbfcfa;
+      font-size:12px;
+      font-weight:800;
+      line-height:1.55;
+    }
+    .cancelled-history-item b{
+      color:#4c5b54;
+    }
+
   </style>
 </head>
 
@@ -345,14 +383,14 @@
       <div class="brand">
         <div class="logo">📷</div>
         <div>
-          <small>scan-pc.html / STEP VET-36D-3-R4</small>
+          <small>scan-pc.html / STEP VET-36F-2</small>
           <strong>DPRO PET CARE LINE</strong>
         </div>
       </div>
       <nav class="actions" aria-label="関連画面">
-        <a class="pill" href="./index.html?v=step-vet-36d-3-r4">管理トップ</a>
+        <a class="pill" href="./index.html?v=step-vet-36f-2">管理トップ</a>
         <a class="pill" href="./waiting.html?v=step-vet-36d-2-r3&clinic_code=dpro_vet_demo">飼い主受付</a>
-        <a class="pill" href="./doctor.html?v=step-vet-36d-3-r4">獣医師画面</a>
+        <a class="pill" href="./doctor.html?v=step-vet-36f-2">獣医師画面</a>
         <a class="pill" href="./owner.html?v=step-vet-36c&clinic_code=dpro_vet_demo">オーナー画面</a>
         <a class="pill" href="./system-check.html?v=step-vet-34i-r4&clinic_code=dpro_vet_demo">システム確認</a>
       </nav>
@@ -360,7 +398,7 @@
 
     <section class="hero">
       <div class="hero-card">
-        <span class="badge">STEP VET-36D-3-R4-R2｜受付PC ボタン表示修正</span>
+        <span class="badge">STEP VET-36F-2-R2｜受付PC ボタン表示修正</span>
         <h1>診察券QRを読んで、<br>そのまま来院受付。</h1>
         <p class="lead">
           USB QRリーダーで読み取り、来院受付・受付番号発行まで行います。
@@ -1179,35 +1217,66 @@
       msg.textContent = summary.display_message || "混雑状況を確認できます。";
     }
 
+    function isCancelledEntry(item){
+      const status = String(item?.status || "").trim().toLowerCase();
+      return ["cancelled", "canceled", "no_show", "noshow"].includes(status);
+    }
+
+    function renderEntryCard(item){
+      const id = item.waiting_entry_id || item.id;
+      return `
+        <article class="entry ${escapeHtml(item.status || "")}">
+          <div class="entry-no">${escapeHtml(item.queue_number || "-")}</div>
+          <div>
+            <h4>${escapeHtml(item.pet_name || "ペット")}｜${escapeHtml(item.purpose || item.request_category_label || "受付")}</h4>
+            <p>${escapeHtml(item.guardian_name || item.line_display_name || "飼い主")} / ${escapeHtml(entryKindLabel(item.entry_kind))} / ${escapeHtml(statusLabel(item.status))}</p>
+            ${item.symptoms_summary ? `<p>${escapeHtml(item.symptoms_summary)}</p>` : ""}
+            <div class="tagline">
+              <span class="tag">${escapeHtml(item.day_part_label || item.day_part || "")}</span>
+              <span class="tag">${escapeHtml(item.request_category_label || "")}</span>
+            </div>
+          </div>
+          <div class="entry-actions">
+            <button class="btn btn-sub" data-status="checked_in" data-id="${escapeHtml(id)}">院内受付</button>
+            <button class="btn btn-warn" data-status="examining" data-id="${escapeHtml(id)}">診察中</button>
+            <button class="btn btn-main" data-status="completed" data-id="${escapeHtml(id)}">診療済み</button>
+            <button class="btn btn-danger" data-status="cancelled" data-id="${escapeHtml(id)}">取消</button>
+          </div>
+        </article>
+      `;
+    }
+
+    function renderCancelledHistory(items){
+      if (!items.length) return "";
+      return `
+        <details class="cancelled-history">
+          <summary>取消済み履歴 ${items.length}件を表示</summary>
+          <div class="cancelled-history-body">
+            ${items.map(item => `
+              <div class="cancelled-history-item">
+                <b>${escapeHtml(item.queue_number || "-")}｜${escapeHtml(item.pet_name || "ペット")}</b><br>
+                ${escapeHtml(item.guardian_name || item.line_display_name || "飼い主")} / ${escapeHtml(statusLabel(item.status))} / ${escapeHtml(item.purpose || item.request_category_label || "受付")}
+              </div>
+            `).join("")}
+          </div>
+        </details>
+      `;
+    }
+
     function renderEntries(){
-      if (!state.entries.length) {
-        el.entryList.innerHTML = '<div class="empty">本日の受付はありません。</div>';
+      const activeEntries = state.entries.filter(item => !isCancelledEntry(item));
+      const cancelledEntries = state.entries.filter(isCancelledEntry);
+
+      if (!activeEntries.length) {
+        el.entryList.innerHTML =
+          '<div class="empty">本日の有効な受付はありません。</div>' +
+          renderCancelledHistory(cancelledEntries);
         return;
       }
 
-      el.entryList.innerHTML = state.entries.map(item => {
-        const id = item.waiting_entry_id || item.id;
-        return `
-          <article class="entry ${escapeHtml(item.status || "")}">
-            <div class="entry-no">${escapeHtml(item.queue_number || "-")}</div>
-            <div>
-              <h4>${escapeHtml(item.pet_name || "ペット")}｜${escapeHtml(item.purpose || item.request_category_label || "受付")}</h4>
-              <p>${escapeHtml(item.guardian_name || item.line_display_name || "飼い主")} / ${escapeHtml(entryKindLabel(item.entry_kind))} / ${escapeHtml(statusLabel(item.status))}</p>
-              ${item.symptoms_summary ? `<p>${escapeHtml(item.symptoms_summary)}</p>` : ""}
-              <div class="tagline">
-                <span class="tag">${escapeHtml(item.day_part_label || item.day_part || "")}</span>
-                <span class="tag">${escapeHtml(item.request_category_label || "")}</span>
-              </div>
-            </div>
-            <div class="entry-actions">
-              <button class="btn btn-sub" data-status="checked_in" data-id="${escapeHtml(id)}">院内受付</button>
-              <button class="btn btn-warn" data-status="examining" data-id="${escapeHtml(id)}">診察中</button>
-              <button class="btn btn-main" data-status="completed" data-id="${escapeHtml(id)}">診療済み</button>
-              <button class="btn btn-danger" data-status="cancelled" data-id="${escapeHtml(id)}">取消</button>
-            </div>
-          </article>
-        `;
-      }).join("");
+      el.entryList.innerHTML =
+        activeEntries.map(renderEntryCard).join("") +
+        renderCancelledHistory(cancelledEntries);
 
       el.entryList.querySelectorAll("[data-status]").forEach(btn => {
         btn.addEventListener("click", async () => {
