@@ -340,13 +340,51 @@
       .queueNo{width:76px;height:76px;border-radius:24px;font-size:30px}
       .calendarMini{grid-template-columns:1fr}
     }
+  
+    /* STEP VET-40E：登録済みペット選択デモ */
+    .demoPetSelector{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top:12px;
+    }
+    .demoPetButton{
+      border:1px solid var(--line);
+      background:#fff;
+      color:var(--ink);
+      border-radius:999px;
+      padding:8px 11px;
+      font-size:12px;
+      font-weight:900;
+      cursor:pointer;
+    }
+    .demoPetButton.active{
+      background:var(--soft);
+      color:var(--green);
+      border-color:#bfe4cf;
+    }
+    .demoBadge{
+      display:inline-flex;
+      align-items:center;
+      gap:5px;
+      min-height:22px;
+      padding:3px 8px;
+      border-radius:999px;
+      background:#eaf8ef;
+      color:#157044;
+      border:1px solid #bfe4cf;
+      font-size:11px;
+      font-weight:900;
+      margin-top:8px;
+    }
+
   </style>
 </head>
 
 <body>
   <main class="page">
     <section class="hero">
-      <span class="badge">STEP VET-36D-2-R3｜来院受付</span>
+      <span class="badge">STEP VET-40E｜来院受付</span>
       <h1>今日の来院受付</h1>
       <p class="lead">
         診察券を確認して、今日の受付番号を発行します。
@@ -479,6 +517,39 @@
       urlParams.get("lineUserId") ||
       urlParams.get("uid") ||
       "demo_line_link_001";
+
+    const IS_DEMO_READY =
+      (urlParams.get("demo") === "ready" || urlParams.get("demo") === "true" || urlParams.get("demo") === "1") &&
+      CLINIC_CODE === "dpro_vet_demo" &&
+      LINE_USER_ID === "demo_line_link_001";
+
+    function buildStep40DemoCardsData(){
+      return {
+        guardian: {
+          guardian_id: "demo_guardian_step40",
+          guardian_name: "本番確認 テスト",
+          line_user_id: "demo_line_link_001",
+          line_link_status: "linked"
+        },
+        cards: [
+          { card_id:"demo_card_check", card_no:"VET-000005", card_token:"card_c175a6751639e545e8050e89bccda8705b0962cbc5c7cd8b", qr_token:"card_c175a6751639e545e8050e89bccda8705b0962cbc5c7cd8b", qr_payload:"vetcard:dpro_vet_demo:card_c175a6751639e545e8050e89bccda8705b0962cbc5c7cd8b", guardian_id:"demo_guardian_step40", guardian_name:"本番確認 テスト", pet_id:"demo_pet_check", pet_name:"チェックちゃん", species:"dog", species_label:"犬", breed:"トイプードル", multi_pet_demo:true },
+          { card_id:"demo_card_cocoa", card_no:"VET-DEMO-COCOA", card_token:"card_demo_cocoa_vet_step40", qr_token:"card_demo_cocoa_vet_step40", qr_payload:"vetcard:dpro_vet_demo:card_demo_cocoa_vet_step40", guardian_id:"demo_guardian_step40", guardian_name:"本番確認 テスト", pet_id:"demo_pet_cocoa", pet_name:"ココアちゃん", species:"cat", species_label:"猫", breed:"ミックス", multi_pet_demo:true },
+          { card_id:"demo_card_hana", card_no:"VET-DEMO-HANA", card_token:"card_demo_hana_vet_step40", qr_token:"card_demo_hana_vet_step40", qr_payload:"vetcard:dpro_vet_demo:card_demo_hana_vet_step40", guardian_id:"demo_guardian_step40", guardian_name:"本番確認 テスト", pet_id:"demo_pet_hana", pet_name:"ハナちゃん", species:"dog", species_label:"犬", breed:"柴犬" },
+          { card_id:"demo_card_momo", card_no:"VET-DEMO-MOMO", card_token:"card_demo_momo_vet_step40", qr_token:"card_demo_momo_vet_step40", qr_payload:"vetcard:dpro_vet_demo:card_demo_momo_vet_step40", guardian_id:"demo_guardian_step40", guardian_name:"本番確認 テスト", pet_id:"demo_pet_momo", pet_name:"モモちゃん", species:"dog", species_label:"犬", breed:"チワワ" }
+        ]
+      };
+    }
+
+    function applyStep40DemoCards(reason){
+      const data = buildStep40DemoCardsData();
+      state.guardian = data.guardian;
+      state.cards = data.cards;
+      state.selectedCard = pickSelectedCard(state.cards);
+      state.demoFallbackReason = reason || "demo_ready";
+      renderPetArea();
+      return data;
+    }
+
 
     const ADMIN_TOKEN_KEYS = [
       "dpro_vet_admin_code",
@@ -622,11 +693,11 @@
 
     function updateLinks(){
       $("memberLink").href = buildPageUrl("member.html", {
-        v:"step-vet-36d-1",
+        v:"step-vet-40e",
         line_user_id: LINE_USER_ID
       });
       $("richMenuLink").href = buildPageUrl("rich-menu.html", {
-        v:"step-vet-36d-2",
+        v:"step-vet-40e",
         line_user_id: LINE_USER_ID
       });
     }
@@ -647,41 +718,55 @@
     }
 
     async function loadMemberCards(){
-      // STEP VET-36D-2-R3:
-      // 正しい診察券取得APIは /api/public/my-cards。
-      // 古いWorker互換として /api/member/pet-cards へフォールバックする。
+      // STEP VET-40E:
+      // 通常はAPIでLINE連携済み診察券を読む。
+      // demo=ready / dpro_vet_demo / demo_line_link_001 の時だけ、
+      // APIが空でも営業デモ用の多頭診察券を補助表示する。
       let data = null;
 
       try {
-        data = await apiGet("/api/public/my-cards", {
-          line_user_id: LINE_USER_ID
-        }, false);
+        try {
+          data = await apiGet("/api/public/my-cards", {
+            line_user_id: LINE_USER_ID
+          }, false);
+        } catch (error) {
+          console.warn("public my-cards failed, fallback to member pet-cards:", error);
+          data = await apiGet("/api/member/pet-cards", {
+            line_user_id: LINE_USER_ID
+          }, false);
+        }
+
+        state.guardian = data.guardian || data.owner || data.item?.guardian || null;
+
+        let cards = [];
+        if (Array.isArray(data.cards)) {
+          cards = data.cards;
+        } else if (Array.isArray(data.items)) {
+          cards = data.items;
+        } else if (data.card) {
+          cards = [data.card];
+        } else if (data.item && (data.item.pet_id || data.item.card_token || data.item.qr_payload || data.item.card_no)) {
+          cards = [data.item];
+        } else if (data.pet_id || data.card_token || data.qr_payload || data.card_no) {
+          cards = [data];
+        }
+
+        state.cards = cards.filter(Boolean);
+        state.selectedCard = pickSelectedCard(state.cards);
+
+        if (!state.cards.length && IS_DEMO_READY) {
+          return applyStep40DemoCards("empty_api_result");
+        }
+
+        renderPetArea();
+        return data;
       } catch (error) {
-        console.warn("public my-cards failed, fallback to member pet-cards:", error);
-        data = await apiGet("/api/member/pet-cards", {
-          line_user_id: LINE_USER_ID
-        }, false);
+        console.warn("member cards load failed:", error);
+        if (IS_DEMO_READY) {
+          return applyStep40DemoCards("api_error");
+        }
+        throw error;
       }
-
-      state.guardian = data.guardian || data.owner || data.item?.guardian || null;
-
-      let cards = [];
-      if (Array.isArray(data.cards)) {
-        cards = data.cards;
-      } else if (Array.isArray(data.items)) {
-        cards = data.items;
-      } else if (data.card) {
-        cards = [data.card];
-      } else if (data.item && (data.item.pet_id || data.item.card_token || data.item.qr_payload || data.item.card_no)) {
-        cards = [data.item];
-      } else if (data.pet_id || data.card_token || data.qr_payload || data.card_no) {
-        cards = [data];
-      }
-
-      state.cards = cards.filter(Boolean);
-      state.selectedCard = pickSelectedCard(state.cards);
-      renderPetArea();
-      return data;
     }
 
     function pickSelectedCard(cards){
@@ -741,10 +826,37 @@
               <div class="petSub">${escapeHtml(species)} ${breed ? "/ " + escapeHtml(breed) : ""}</div>
               <div class="petSub">飼い主：${escapeHtml(guardianName)}</div>
               <div class="petSub">診察券：${escapeHtml(cardNo)}</div>
+              ${card.multi_pet_demo ? '<span class="demoBadge">多頭デモ</span>' : ''}
             </div>
           </div>
+          ${renderPetSelector()}
         </div>
       `;
+
+      bindPetSelector();
+    }
+
+    function renderPetSelector(){
+      if (!Array.isArray(state.cards) || state.cards.length <= 1) return "";
+      return `
+        <div class="demoPetSelector">
+          ${state.cards.map((item, index) => {
+            const name = cardValue(item, "pet_name", "pet.pet_name", "name", "pet.name") || `ペット${index + 1}`;
+            const isActive = item === state.selectedCard;
+            return `<button type="button" class="demoPetButton ${isActive ? "active" : ""}" data-pet-index="${index}">${escapeHtml(name)}</button>`;
+          }).join("")}
+        </div>
+      `;
+    }
+
+    function bindPetSelector(){
+      document.querySelectorAll("[data-pet-index]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const index = Number(btn.dataset.petIndex || 0);
+          state.selectedCard = state.cards[index] || state.selectedCard;
+          renderPetArea();
+        });
+      });
     }
 
     function renderClinicStatus(){
@@ -976,7 +1088,7 @@
             <h3>受付が完了しました</h3>
             <p>${escapeHtml(petName)}ちゃんの受付番号です。院内でお待ちください。</p>
             <div class="buttonRow">
-              <a class="btn btnSoft" href="${escapeHtml(buildPageUrl("member.html", { v:"step-vet-36d-1", line_user_id: LINE_USER_ID }))}">診察券へ戻る</a>
+              <a class="btn btnSoft" href="${escapeHtml(buildPageUrl("member.html", { v:"step-vet-40e", line_user_id: LINE_USER_ID }))}">診察券へ戻る</a>
             </div>
           </div>
         </div>
