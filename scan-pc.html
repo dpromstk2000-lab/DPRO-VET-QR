@@ -163,7 +163,7 @@
     @media(max-width:980px){.hero,.layout,.follow-grid{grid-template-columns:1fr}.status-grid{grid-template-columns:repeat(2,1fr)}.section-title{align-items:flex-start;flex-direction:column}.section-title p{text-align:left}.entry{grid-template-columns:58px 1fr}.entry-actions{grid-column:1/-1;justify-content:flex-start;max-width:none}}
     @media(max-width:640px){.topbar{align-items:flex-start;flex-direction:column}.actions{justify-content:flex-start}.auth-box,.form-grid,.status-grid{grid-template-columns:1fr}.brand strong{white-space:normal}.hero-card,.card{border-radius:22px}.pet-main{grid-template-columns:1fr}}
   
-    /* STEP VET-45：全ボタンの白化防止。disabledでも背景色と文字色を維持する */
+    /* STEP VET-46：全ボタンの白化防止。disabledでも背景色と文字色を維持する */
     button.btn:disabled,
     .btn:disabled{
       opacity:.86!important;
@@ -234,7 +234,7 @@
     }
 
   
-    /* STEP VET-45：選択中・フォーカス中の白化防止 */
+    /* STEP VET-46：選択中・フォーカス中の白化防止 */
     button.btn,
     .btn{
       -webkit-tap-highlight-color:rgba(47,125,100,.14);
@@ -337,7 +337,7 @@
     }
 
   
-    /* STEP VET-45：取消済み受付は本日の受付一覧から分離 */
+    /* STEP VET-46：取消済み受付は本日の受付一覧から分離 */
     .cancelled-history{
       margin-top:12px;
       border:1px solid var(--line);
@@ -375,7 +375,7 @@
     }
 
   
-    /* STEP VET-45：窓口・電話受付追加 */
+    /* STEP VET-46：窓口・電話受付追加 */
     .manual-reception-card{
       border:2px solid #d8eadf;
       background:linear-gradient(180deg,#ffffff,#f7fbf8);
@@ -457,7 +457,7 @@
 
 
   
-    /* STEP VET-45：既存患者検索 */
+    /* STEP VET-46：既存患者検索 */
     .existing-search-card{
       border:2px solid #dbe7ff;
       background:linear-gradient(180deg,#ffffff,#f7f9ff);
@@ -529,7 +529,7 @@
 
 
   
-    /* STEP VET-45：スタッフ代理登録・ペット追加 */
+    /* STEP VET-46：スタッフ代理登録・ペット追加 */
     .proxy-registration-card{
       border:2px solid #eadffc;
       background:linear-gradient(180deg,#ffffff,#fbf8ff);
@@ -617,6 +617,90 @@
     }
 
 
+  
+    /* STEP VET-46：受付ステータス強化 */
+    .status-board{
+      display:grid;
+      gap:14px;
+      margin-top:14px;
+    }
+    .status-section{
+      border:1px solid rgba(217,210,196,.88);
+      border-radius:20px;
+      background:#fffdf9;
+      overflow:hidden;
+    }
+    .status-section-header{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:center;
+      padding:12px 14px;
+      background:#f8f5ee;
+      border-bottom:1px solid rgba(217,210,196,.72);
+    }
+    .status-section-header h3{
+      margin:0;
+      font-size:15px;
+      color:var(--ink);
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .status-section-header p{
+      margin:3px 0 0;
+      color:var(--muted);
+      font-size:12px;
+      font-weight:800;
+      line-height:1.45;
+    }
+    .status-count{
+      min-width:34px;
+      height:28px;
+      border-radius:999px;
+      display:grid;
+      place-items:center;
+      background:#fff;
+      border:1px solid var(--line);
+      font-weight:950;
+      color:var(--ink);
+    }
+    .status-section-body{
+      display:grid;
+      gap:10px;
+      padding:12px;
+    }
+    .status-dot{
+      width:10px;
+      height:10px;
+      border-radius:999px;
+      background:#9ca3af;
+      display:inline-block;
+    }
+    .status-dot.reserved{background:#f59e0b;}
+    .status-dot.checked_in{background:#10b981;}
+    .status-dot.examining{background:#f97316;}
+    .status-dot.accounting{background:#6366f1;}
+    .status-dot.completed{background:#64748b;}
+    .status-dot.cancelled{background:#ef4444;}
+    .entry.accounting .entry-no{background:#eef2ff;color:#4338ca}
+    .entry.reserved .entry-no,.entry.waiting .entry-no{background:#fff7e8;color:#8a5a00}
+    .entry.checked_in .entry-no{background:#eaf8ef;color:#157044}
+    .entry.no_show .entry-no,.entry.cancelled .entry-no,.entry.canceled .entry-no{background:#fdecec;color:#a33b3b}
+    .entry.completed .entry-no{background:#f1f5f9;color:#475569}
+    .status-flow-note{
+      border:1px solid #dbe7ff;
+      background:#f7f9ff;
+      color:#334155;
+      border-radius:16px;
+      padding:11px 12px;
+      font-size:12px;
+      font-weight:850;
+      line-height:1.6;
+      margin-top:12px;
+    }
+
+
   </style>
 </head>
 
@@ -626,14 +710,14 @@
       <div class="brand">
         <div class="logo">📷</div>
         <div>
-          <small>scan-pc.html / STEP VET-45</small>
+          <small>scan-pc.html / STEP VET-46</small>
           <strong>DPRO PET CARE LINE</strong>
         </div>
       </div>
       <nav class="actions" aria-label="関連画面">
-        <a class="pill" href="./index.html?v=step-vet-45">管理トップ</a>
+        <a class="pill" href="./index.html?v=step-vet-46">管理トップ</a>
         <a class="pill" href="./waiting.html?v=step-vet-36d-2-r3&clinic_code=dpro_vet_demo">飼い主受付</a>
-        <a class="pill" href="./doctor.html?v=step-vet-45">獣医師画面</a>
+        <a class="pill" href="./doctor.html?v=step-vet-46">獣医師画面</a>
         <a class="pill" href="./owner.html?v=step-vet-36c&clinic_code=dpro_vet_demo">オーナー画面</a>
         <a class="pill" href="./system-check.html?v=step-vet-34i-r4&clinic_code=dpro_vet_demo">システム確認</a>
       </nav>
@@ -641,7 +725,7 @@
 
     <section class="hero">
       <div class="hero-card">
-        <span class="badge">STEP VET-45-R2｜受付PC ボタン表示修正</span>
+        <span class="badge">STEP VET-46-R2｜受付PC ボタン表示修正</span>
         <h1>診察券QRを読んで、<br>そのまま来院受付。</h1>
         <p class="lead">
           USB QRリーダーで読み取り、来院受付・受付番号発行まで行います。
@@ -1125,7 +1209,7 @@
     </section>
 
     <div class="footer-note">
-      STEP VET-45：既存患者検索に加えて、スタッフ代理登録・既存飼い主へのペット追加・そのまま受付追加までできます。
+      STEP VET-46：受付の流れを、来院待ち・院内受付済み・診察中・会計待ち・完了・取消/不在で管理できます。
     </div>
   </main>
 
@@ -1801,9 +1885,27 @@
       }
     }
 
+    function normalizeStatusForView(status){
+      const text = String(status || "").trim().toLowerCase();
+      if (["payment_waiting", "checkout_waiting", "billing", "kaikei"].includes(text)) return "accounting";
+      if (text === "canceled") return "cancelled";
+      if (text === "noshow") return "no_show";
+      return text || "waiting";
+    }
+
     function statusLabel(status){
-      const map = { reserved:"予約済み", waiting:"受付済み", checked_in:"院内受付済み", examining:"診察中", completed:"診療済み", cancelled:"取消", no_show:"来院なし" };
-      return map[status] || status || "-";
+      const map = {
+        reserved:"電話受付・来院予定",
+        waiting:"来院待ち",
+        checked_in:"院内受付済み",
+        examining:"診察中",
+        accounting:"会計待ち",
+        completed:"完了",
+        cancelled:"取消",
+        no_show:"不在"
+      };
+      const key = normalizeStatusForView(status);
+      return map[key] || status || "-";
     }
 
     function entryKindLabel(kind){
@@ -1864,8 +1966,118 @@
     }
 
     function isCancelledEntry(item){
-      const status = String(item?.status || "").trim().toLowerCase();
-      return ["cancelled", "canceled", "no_show", "noshow"].includes(status);
+      const status = normalizeStatusForView(item?.status);
+      return ["cancelled", "no_show"].includes(status);
+    }
+
+    function statusFlowGroups(){
+      return [
+        {
+          key:"waiting",
+          title:"来院待ち・電話受付",
+          hint:"電話受付、来院予定、まだ院内受付前の受付です。",
+          statuses:["reserved","waiting"],
+          dot:"reserved"
+        },
+        {
+          key:"checked_in",
+          title:"院内受付済み",
+          hint:"来院して受付が済んだ状態です。次は診察中へ進めます。",
+          statuses:["checked_in"],
+          dot:"checked_in"
+        },
+        {
+          key:"examining",
+          title:"診察中",
+          hint:"先生が診察中の患者です。診察後は会計待ちへ進めます。",
+          statuses:["examining"],
+          dot:"examining"
+        },
+        {
+          key:"accounting",
+          title:"会計待ち",
+          hint:"診察が終わり、会計・お薬待ちの状態です。",
+          statuses:["accounting"],
+          dot:"accounting"
+        },
+        {
+          key:"completed",
+          title:"完了",
+          hint:"本日の対応が完了した受付です。",
+          statuses:["completed"],
+          dot:"completed"
+        },
+        {
+          key:"cancelled",
+          title:"取消・不在",
+          hint:"取消、不在、来院なしの履歴です。",
+          statuses:["cancelled","no_show"],
+          dot:"cancelled"
+        }
+      ];
+    }
+
+    function renderStatusActions(id, currentStatus){
+      const status = normalizeStatusForView(currentStatus);
+
+      const button = (next, label, cls = "btn-sub") =>
+        `<button class="btn ${cls}" data-status="${escapeHtml(next)}" data-id="${escapeHtml(id)}">${escapeHtml(label)}</button>`;
+
+      if (status === "reserved" || status === "waiting") {
+        return [
+          button("checked_in", "院内受付", "btn-sub"),
+          button("examining", "診察中", "btn-warn"),
+          button("cancelled", "取消", "btn-danger"),
+          button("no_show", "不在", "btn-danger")
+        ].join("");
+      }
+
+      if (status === "checked_in") {
+        return [
+          button("examining", "診察中", "btn-warn"),
+          button("accounting", "会計待ち", "btn-sub"),
+          button("completed", "完了", "btn-main"),
+          button("cancelled", "取消", "btn-danger")
+        ].join("");
+      }
+
+      if (status === "examining") {
+        return [
+          button("accounting", "会計待ち", "btn-sub"),
+          button("completed", "完了", "btn-main"),
+          button("checked_in", "受付に戻す", "btn-sub"),
+          button("cancelled", "取消", "btn-danger")
+        ].join("");
+      }
+
+      if (status === "accounting") {
+        return [
+          button("completed", "完了", "btn-main"),
+          button("examining", "診察中に戻す", "btn-warn"),
+          button("cancelled", "取消", "btn-danger")
+        ].join("");
+      }
+
+      if (status === "completed") {
+        return [
+          button("accounting", "会計待ちに戻す", "btn-sub"),
+          button("checked_in", "受付に戻す", "btn-sub")
+        ].join("");
+      }
+
+      if (status === "cancelled" || status === "no_show") {
+        return [
+          button("checked_in", "受付に戻す", "btn-sub")
+        ].join("");
+      }
+
+      return [
+        button("checked_in", "院内受付", "btn-sub"),
+        button("examining", "診察中", "btn-warn"),
+        button("accounting", "会計待ち", "btn-sub"),
+        button("completed", "完了", "btn-main"),
+        button("cancelled", "取消", "btn-danger")
+      ].join("");
     }
 
     function renderEntryCard(item){
@@ -1873,25 +2085,24 @@
       const src = inferReceptionSource(item);
       const lineStatus = String(item.line_link_status || item.line_status || "").toLowerCase();
       const isUnlinked = lineStatus === "unlinked" || lineStatus === "not_linked" || lineStatus.includes("未");
+      const normalizedStatus = normalizeStatusForView(item.status);
       return `
-        <article class="entry ${escapeHtml(item.status || "")}">
+        <article class="entry ${escapeHtml(normalizedStatus)}">
           <div class="entry-no">${escapeHtml(item.queue_number || "-")}</div>
           <div>
             <h4>${escapeHtml(item.pet_name || "ペット")}｜${escapeHtml(item.purpose || item.request_category_label || "受付")}</h4>
-            <p>${escapeHtml(item.guardian_name || item.line_display_name || "飼い主")} / ${escapeHtml(entryKindLabel(item.entry_kind))} / ${escapeHtml(statusLabel(item.status))}</p>
+            <p>${escapeHtml(item.guardian_name || item.line_display_name || "飼い主")} / ${escapeHtml(entryKindLabel(item.entry_kind))} / ${escapeHtml(statusLabel(normalizedStatus))}</p>
             ${item.symptoms_summary ? `<p>${escapeHtml(item.symptoms_summary)}</p>` : ""}
             <div class="tagline">
               <span class="tag">${escapeHtml(item.day_part_label || item.day_part || "")}</span>
               <span class="tag">${escapeHtml(item.request_category_label || "")}</span>
+              <span class="source-tag ${escapeHtml(normalizedStatus)}">${escapeHtml(statusLabel(normalizedStatus))}</span>
               ${src ? `<span class="source-tag ${escapeHtml(src)}">${escapeHtml(sourceLabel(src))}</span>` : ""}
               ${isUnlinked ? `<span class="source-tag line-unlinked-tag">LINE未連携</span>` : ""}
             </div>
           </div>
           <div class="entry-actions">
-            <button class="btn btn-sub" data-status="checked_in" data-id="${escapeHtml(id)}">院内受付</button>
-            <button class="btn btn-warn" data-status="examining" data-id="${escapeHtml(id)}">診察中</button>
-            <button class="btn btn-main" data-status="completed" data-id="${escapeHtml(id)}">診療済み</button>
-            <button class="btn btn-danger" data-status="cancelled" data-id="${escapeHtml(id)}">取消</button>
+            ${renderStatusActions(id, normalizedStatus)}
           </div>
         </article>
       `;
@@ -1923,28 +2134,59 @@
       });
     }
 
-    function renderEntries(){
-      const activeEntries = sortEntriesByQueueNumber(state.entries.filter(item => !isCancelledEntry(item)));
-      const cancelledEntries = sortEntriesByQueueNumber(state.entries.filter(isCancelledEntry));
+    function renderStatusGroup(group, items){
+      const groupItems = sortEntriesByQueueNumber((items || []).filter((item) => {
+        const s = normalizeStatusForView(item.status);
+        return group.statuses.includes(s);
+      }));
 
-      if (!activeEntries.length) {
-        el.entryList.innerHTML =
-          '<div class="empty">本日の有効な受付はありません。</div>' +
-          renderCancelledHistory(cancelledEntries);
+      const body = groupItems.length
+        ? groupItems.map(renderEntryCard).join("")
+        : `<div class="empty">${escapeHtml(group.title)}の受付はありません。</div>`;
+
+      return `
+        <section class="status-section">
+          <div class="status-section-header">
+            <div>
+              <h3><span class="status-dot ${escapeHtml(group.dot)}"></span>${escapeHtml(group.title)}</h3>
+              <p>${escapeHtml(group.hint)}</p>
+            </div>
+            <div class="status-count">${groupItems.length}</div>
+          </div>
+          <div class="status-section-body">
+            ${body}
+          </div>
+        </section>
+      `;
+    }
+
+    function renderEntries(){
+      const items = sortEntriesByQueueNumber(state.entries || []);
+      const groups = statusFlowGroups();
+
+      if (!items.length) {
+        el.entryList.innerHTML = '<div class="empty">本日の受付はありません。</div>';
         return;
       }
 
-      el.entryList.innerHTML =
-        activeEntries.map(renderEntryCard).join("") +
-        renderCancelledHistory(cancelledEntries);
+      el.entryList.innerHTML = `
+        <div class="status-flow-note">
+          受付の流れ：来院待ち → 院内受付済み → 診察中 → 会計待ち → 完了。電話受付・窓口受付・LINE受付を同じ画面で管理できます。
+        </div>
+        <div class="status-board">
+          ${groups.map((group) => renderStatusGroup(group, items)).join("")}
+        </div>
+      `;
 
       el.entryList.querySelectorAll("[data-status]").forEach(btn => {
         btn.addEventListener("click", async () => {
+          const nextStatus = btn.dataset.status;
+          const nextLabel = statusLabel(nextStatus);
           try {
             await apiPost("/api/admin/queue/status", {
               waiting_entry_id: btn.dataset.id,
-              status: btn.dataset.status,
-              staff_note: "受付PCで更新",
+              status: nextStatus,
+              staff_note: `受付PCで${nextLabel}に更新`,
               staff_name: "受付PC"
             }, true);
             await loadAll();
