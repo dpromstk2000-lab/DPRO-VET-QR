@@ -7,7 +7,7 @@
   <title>DPRO PET CARE LINE｜ペット診察券</title>
 
   <!--
-    STEP VET-36D-1
+    STEP VET-40E
     DPRO PET CARE LINE 動物病院版
     member.html 修正版 完全版
 
@@ -886,7 +886,7 @@
     </main>
 
     <div class="footer">
-      STEP VET-36D-1 member.html clinic settings reflected complete<br>
+      STEP VET-40E member.html step vet 40e demo multi pet reflected complete<br>
       DPRO PET CARE LINE / 動物病院版
     </div>
   </div>
@@ -920,7 +920,10 @@
         DEFAULT_CLINIC_CODE;
 
       const demoClinicCode = CONFIG?.demo?.clinicCode || DEFAULT_CLINIC_CODE;
-      const isDemoMode = url.searchParams.get("demo") === "true" || url.searchParams.get("demo") === "1";
+      const isDemoMode =
+        url.searchParams.get("demo") === "ready" ||
+        url.searchParams.get("demo") === "true" ||
+        url.searchParams.get("demo") === "1";
       const allowDemoFallback = isDemoMode && clinicCode === demoClinicCode;
 
       const liffId =
@@ -944,6 +947,123 @@
         selectedQrPayload: "",
         lastMode: ""
       };
+
+
+      const DEMO_LINE_USER_ID = "demo_line_link_001";
+
+      function isStep40DemoReady(){
+        return clinicCode === demoClinicCode &&
+          (allowDemoFallback || state.lineUserId === DEMO_LINE_USER_ID);
+      }
+
+      function buildStep40DemoCardsData(){
+        return {
+          ok: true,
+          demo_ready: true,
+          clinic: {
+            clinic_code: clinicCode,
+            clinic_name: "DPROどうぶつ病院"
+          },
+          guardian: {
+            guardian_id: "demo_guardian_step40",
+            guardian_name: "本番確認 テスト",
+            line_user_id: DEMO_LINE_USER_ID,
+            line_link_status: "linked",
+            line_status: "linked",
+            phone: "090-0000-0000"
+          },
+          cards: [
+            {
+              card_id: "demo_card_check",
+              card_no: "VET-000005",
+              card_token: "card_c175a6751639e545e8050e89bccda8705b0962cbc5c7cd8b",
+              qr_token: "card_c175a6751639e545e8050e89bccda8705b0962cbc5c7cd8b",
+              qr_payload: "vetcard:dpro_vet_demo:card_c175a6751639e545e8050e89bccda8705b0962cbc5c7cd8b",
+              guardian_id: "demo_guardian_step40",
+              guardian_name: "本番確認 テスト",
+              pet_id: "demo_pet_check",
+              pet_name: "チェックちゃん",
+              species: "dog",
+              species_label: "犬",
+              animal_type: "犬",
+              breed: "トイプードル",
+              sex: "female",
+              age_text: "6歳",
+              medical_note: "営業デモ用：多頭登録の1頭目です。",
+              allergy_note: "特記事項なし",
+              multi_pet_demo: true
+            },
+            {
+              card_id: "demo_card_cocoa",
+              card_no: "VET-DEMO-COCOA",
+              card_token: "card_demo_cocoa_vet_step40",
+              qr_token: "card_demo_cocoa_vet_step40",
+              qr_payload: "vetcard:dpro_vet_demo:card_demo_cocoa_vet_step40",
+              guardian_id: "demo_guardian_step40",
+              guardian_name: "本番確認 テスト",
+              pet_id: "demo_pet_cocoa",
+              pet_name: "ココアちゃん",
+              species: "cat",
+              species_label: "猫",
+              animal_type: "猫",
+              breed: "ミックス",
+              sex: "male",
+              age_text: "4歳",
+              medical_note: "営業デモ用：多頭登録の2頭目です。",
+              allergy_note: "特記事項なし",
+              multi_pet_demo: true
+            },
+            {
+              card_id: "demo_card_hana",
+              card_no: "VET-DEMO-HANA",
+              card_token: "card_demo_hana_vet_step40",
+              qr_token: "card_demo_hana_vet_step40",
+              qr_payload: "vetcard:dpro_vet_demo:card_demo_hana_vet_step40",
+              guardian_id: "demo_guardian_step40",
+              guardian_name: "本番確認 テスト",
+              pet_id: "demo_pet_hana",
+              pet_name: "ハナちゃん",
+              species: "dog",
+              species_label: "犬",
+              animal_type: "犬",
+              breed: "柴犬",
+              sex: "female",
+              age_text: "8歳",
+              medical_note: "皮膚・耳相談のデモ用です。",
+              allergy_note: "特記事項なし"
+            },
+            {
+              card_id: "demo_card_momo",
+              card_no: "VET-DEMO-MOMO",
+              card_token: "card_demo_momo_vet_step40",
+              qr_token: "card_demo_momo_vet_step40",
+              qr_payload: "vetcard:dpro_vet_demo:card_demo_momo_vet_step40",
+              guardian_id: "demo_guardian_step40",
+              guardian_name: "本番確認 テスト",
+              pet_id: "demo_pet_momo",
+              pet_name: "モモちゃん",
+              species: "dog",
+              species_label: "犬",
+              animal_type: "犬",
+              breed: "チワワ",
+              sex: "female",
+              age_text: "7歳",
+              medical_note: "フィラリア・予防相談のデモ用です。",
+              allergy_note: "特記事項なし"
+            }
+          ]
+        };
+      }
+
+      function useStep40DemoCards(reason){
+        const data = buildStep40DemoCardsData();
+        state.lastMode = `step40e_demo_${reason || "fallback"}`;
+        state.lineUserId = DEMO_LINE_USER_ID;
+        state.lineDisplayName = state.lineDisplayName || "DPROデモ飼い主";
+        normalizeAndStore(data);
+        return data;
+      }
+
 
       const $ = (id) => document.getElementById(id);
 
@@ -1007,6 +1127,10 @@
 
           normalizeAndStore(data);
 
+          if (!state.cards.length && isStep40DemoReady()) {
+            useStep40DemoCards("empty_api_result");
+          }
+
           if (!state.cards.length) {
             const message =
               data?.message ||
@@ -1020,6 +1144,14 @@
           setApiStatus("API接続OK", true);
         } catch (error) {
           console.error(error);
+
+          if (isStep40DemoReady()) {
+            useStep40DemoCards("api_error");
+            render();
+            showCard();
+            setApiStatus("デモ診察券表示OK", true);
+            return;
+          }
 
           if (
             String(error.message || "").includes("not found") ||
