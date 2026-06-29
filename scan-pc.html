@@ -710,7 +710,7 @@
   
 
     /* =========================================================
-      STEP VET-52.5I：受付PC 既存患者重複メッセージ修正版
+      STEP VET-52.5K：受付PC 既存飼い主検索追加版
       目的：長い縦スクロールをやめ、左メニューで必要な操作だけ表示する
     ========================================================= */
     .ops-workbench{display:grid;grid-template-columns:270px minmax(0,1fr);gap:18px;align-items:start;margin-top:18px}
@@ -766,7 +766,7 @@
 <div class="brand">
 <div class="logo">📷</div>
 <div>
-<small>scan-pc.html / STEP VET-52.5I</small>
+<small>scan-pc.html / STEP VET-52.5K</small>
 <strong>DPRO PET CARE LINE</strong>
 </div>
 </div>
@@ -779,7 +779,7 @@
 </nav>
 </header><section class="hero">
 <div class="hero-card">
-<span class="badge">STEP VET-52.5I｜受付PC 既存患者重複メッセージ修正版</span>
+<span class="badge">STEP VET-52.5K｜受付PC 既存飼い主検索追加版</span>
 <h1>今日の受付を中心に、<br/>必要な操作だけ開く。</h1>
 <p class="lead">受付スタッフが迷わないように、最初は「今日の受付」だけを表示します。QR受付・窓口受付・電話受付・既存患者検索・代理登録・フォローは、左メニューから必要な時だけ開きます。既存APIと登録処理はそのまま保持しています。</p>
 </div>
@@ -1164,7 +1164,21 @@
 </div>
 <div class="selected-guardian-box" id="selectedGuardianForPetAddBox" style="display:none;">
 <strong>既存飼い主が未選択です</strong>
-<span>上の既存患者検索から「この飼い主にペット追加」を押してください。</span>
+<span>下の検索欄から飼い主名・電話番号で検索して選択してください。</span>
+</div>
+<div id="proxyGuardianSearchBox" style="display:none;">
+<div class="subsection-title">既存飼い主を検索</div>
+<div class="inline-search">
+<input autocomplete="off" id="proxyGuardianSearchInput" placeholder="例：本番確認、佐藤、090 など" type="search"/>
+<button class="btn btn-main" id="proxyGuardianSearchBtn" type="button">飼い主を検索</button>
+<button class="btn btn-sub" id="proxyGuardianSearchClearBtn" type="button">クリア</button>
+</div>
+<div class="notice info" style="margin-top:10px;">
+  検索結果から「この飼い主を選択」を押すと、下のペット登録フォームに反映されます。
+</div>
+<div class="search-results" id="proxyGuardianSearchResults" style="margin-top:12px;">
+  <div class="empty">飼い主名・電話番号で検索できます。</div>
+</div>
 </div>
 <div class="subsection-title" id="proxyGuardianTitle">飼い主情報</div>
 <div class="form-grid" id="proxyGuardianFields">
@@ -1346,7 +1360,8 @@
       detectTimer: null,
       existingPatients: [],
       selectedExistingPatient: null,
-      selectedGuardianForPetAdd: null
+      selectedGuardianForPetAdd: null,
+      proxyGuardianResults: []
     };
 
     const el = {
@@ -1401,6 +1416,11 @@
       existingReceptionCreateBtn: document.getElementById("existingReceptionCreateBtn"),
       existingReceptionStatus: document.getElementById("existingReceptionStatus"),
       selectedGuardianForPetAddBox: document.getElementById("selectedGuardianForPetAddBox"),
+      proxyGuardianSearchBox: document.getElementById("proxyGuardianSearchBox"),
+      proxyGuardianSearchInput: document.getElementById("proxyGuardianSearchInput"),
+      proxyGuardianSearchBtn: document.getElementById("proxyGuardianSearchBtn"),
+      proxyGuardianSearchClearBtn: document.getElementById("proxyGuardianSearchClearBtn"),
+      proxyGuardianSearchResults: document.getElementById("proxyGuardianSearchResults"),
       proxyGuardianFields: document.getElementById("proxyGuardianFields"),
       proxyGuardianTitle: document.getElementById("proxyGuardianTitle"),
       proxyGuardianName: document.getElementById("proxyGuardianName"),
@@ -2626,11 +2646,12 @@
       el.proxyGuardianFields.style.display = isExisting ? "none" : "";
       el.proxyGuardianTitle.textContent = isExisting ? "選択中の既存飼い主" : "飼い主情報";
       el.selectedGuardianForPetAddBox.style.display = isExisting ? "" : "none";
+      if (el.proxyGuardianSearchBox) el.proxyGuardianSearchBox.style.display = isExisting ? "" : "none";
 
       if (isExisting) {
         renderSelectedGuardianForPetAdd();
         el.proxyRegistrationStatus.className = "notice info";
-        el.proxyRegistrationStatus.textContent = "既存飼い主に新しいペットを追加します。先に検索結果から飼い主を選んでください。";
+        el.proxyRegistrationStatus.textContent = "既存飼い主に新しいペットを追加します。下の検索欄から飼い主を選んでください。";
       } else {
         el.proxyRegistrationStatus.className = "notice";
         el.proxyRegistrationStatus.textContent = "新規飼い主＋ペットをLINE未連携で代理登録します。";
@@ -2642,7 +2663,7 @@
       if (!item) {
         el.selectedGuardianForPetAddBox.innerHTML = `
           <strong>既存飼い主が未選択です</strong>
-          <span>上の既存患者検索から「この飼い主にペット追加」を押してください。</span>
+          <span>下の検索欄から飼い主名・電話番号で検索して選択してください。</span>
         `;
         return;
       }
@@ -2654,17 +2675,107 @@
       `;
     }
 
-    function selectGuardianForPetAdd(index){
-      const item = state.existingPatients[index];
+    function selectGuardianForPetAddItem(item){
       if (!item || !item.guardian_id) return;
 
       state.selectedGuardianForPetAdd = item;
       const radio = document.querySelector('input[name="proxyRegistrationMode"][value="existing_guardian"]');
       if (radio) radio.checked = true;
       renderProxyRegistrationMode();
-      el.proxyPetName.focus();
+      if (el.proxyPetName) el.proxyPetName.focus();
       el.proxyRegistrationStatus.className = "notice info";
-      el.proxyRegistrationStatus.textContent = `${item.guardian_name} さんに新しいペットを追加できます。`;
+      el.proxyRegistrationStatus.textContent = `${item.guardian_name || "選択した飼い主"} さんに新しいペットを追加できます。`;
+    }
+
+    function selectGuardianForPetAdd(index){
+      selectGuardianForPetAddItem(state.existingPatients[index]);
+    }
+
+    function normalizeGuardianSearchItems(items){
+      const map = new Map();
+      (items || []).forEach((item) => {
+        const key = item.guardian_id || item.guardian_no || item.phone || item.guardian_name || item.pet_name;
+        if (!key || map.has(key)) return;
+        map.set(key, {
+          guardian_id: item.guardian_id,
+          guardian_name: item.guardian_name,
+          phone: item.phone,
+          line_link_status: item.line_link_status,
+          guardian_no: item.guardian_no,
+          pet_name: item.pet_name,
+          pet_no: item.pet_no,
+          card_no: item.card_no
+        });
+      });
+      return Array.from(map.values());
+    }
+
+    function renderProxyGuardianSearchResults(){
+      const items = state.proxyGuardianResults || [];
+      if (!items.length) {
+        el.proxyGuardianSearchResults.innerHTML = '<div class="empty">該当する飼い主が見つかりません。</div>';
+        return;
+      }
+      el.proxyGuardianSearchResults.innerHTML = items.map((item, index) => {
+        const phone = item.phone ? `電話：${escapeHtml(item.phone)}` : "電話：未登録";
+        const status = lineStatusLabel(item.line_link_status);
+        const pet = item.pet_name ? `代表ペット：${escapeHtml(item.pet_name)}` : "代表ペット：未設定";
+        return `
+          <article class="patient-result">
+            <div>
+              <h4>${escapeHtml(item.guardian_name || "飼い主")}</h4>
+              <p>${phone} / ${pet}</p>
+              <div class="tagline" style="margin-top:8px;">
+                <span class="source-tag ${escapeHtml(lineStatusClass(item.line_link_status))}">${escapeHtml(status)}</span>
+                ${item.guardian_no ? `<span class="tag">飼い主番号 ${escapeHtml(item.guardian_no)}</span>` : ""}
+                ${item.card_no ? `<span class="tag">診察券 ${escapeHtml(item.card_no)}</span>` : ""}
+              </div>
+            </div>
+            <div class="entry-actions" style="justify-content:flex-end;">
+              <button class="btn btn-main" type="button" data-proxy-guardian-select-index="${index}">この飼い主を選択</button>
+            </div>
+          </article>
+        `;
+      }).join("");
+
+      el.proxyGuardianSearchResults.querySelectorAll("[data-proxy-guardian-select-index]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const index = Number(btn.dataset.proxyGuardianSelectIndex || 0);
+          selectGuardianForPetAddItem(state.proxyGuardianResults[index]);
+        });
+      });
+    }
+
+    async function searchProxyGuardians(){
+      if (!getAdminToken()) {
+        el.proxyGuardianSearchResults.innerHTML = '<div class="empty">先に管理コードを保存してください。</div>';
+        return;
+      }
+      const q = el.proxyGuardianSearchInput.value.trim();
+      if (!q) {
+        el.proxyGuardianSearchResults.innerHTML = '<div class="empty">飼い主名・電話番号を入力して検索してください。</div>';
+        return;
+      }
+      startButtonLoading(el.proxyGuardianSearchBtn, "検索中...");
+      try {
+        const data = await apiGet("/api/admin/patients/search", { q, limit: 50 }, true);
+        state.proxyGuardianResults = normalizeGuardianSearchItems(data.items || []);
+        renderProxyGuardianSearchResults();
+      } catch (error) {
+        el.proxyGuardianSearchResults.innerHTML = `<div class="empty">検索エラー：${escapeHtml(error.message || "検索に失敗しました。")}</div>`;
+      } finally {
+        stopButtonLoading(el.proxyGuardianSearchBtn, "飼い主を検索");
+      }
+    }
+
+    function clearProxyGuardianSearch(){
+      state.proxyGuardianResults = [];
+      state.selectedGuardianForPetAdd = null;
+      if (el.proxyGuardianSearchInput) el.proxyGuardianSearchInput.value = "";
+      if (el.proxyGuardianSearchResults) el.proxyGuardianSearchResults.innerHTML = '<div class="empty">飼い主名・電話番号で検索できます。</div>';
+      renderSelectedGuardianForPetAdd();
+      el.proxyRegistrationStatus.className = "notice info";
+      el.proxyRegistrationStatus.textContent = "既存飼い主に新しいペットを追加します。下の検索欄から飼い主を選んでください。";
     }
 
     function toggleProxyReceptionOptions(){
@@ -2678,6 +2789,9 @@
 
     function clearProxyRegistrationForm(){
       state.selectedGuardianForPetAdd = null;
+      state.proxyGuardianResults = [];
+      if (el.proxyGuardianSearchInput) el.proxyGuardianSearchInput.value = "";
+      if (el.proxyGuardianSearchResults) el.proxyGuardianSearchResults.innerHTML = '<div class="empty">飼い主名・電話番号で検索できます。</div>';
       const radio = document.querySelector('input[name="proxyRegistrationMode"][value="new_guardian"]');
       if (radio) radio.checked = true;
 
@@ -2726,7 +2840,7 @@
 
       if (isExisting && (!selected || !selected.guardian_id)) {
         el.proxyRegistrationStatus.className = "notice ng";
-        el.proxyRegistrationStatus.textContent = "既存飼い主に追加する場合は、先に検索結果から飼い主を選んでください。";
+        el.proxyRegistrationStatus.textContent = "既存飼い主に追加する場合は、先に下の検索欄から飼い主を選んでください。";
         return;
       }
 
@@ -3165,6 +3279,16 @@
       if (el.proxyCreateReceptionCheck) el.proxyCreateReceptionCheck.addEventListener("change", toggleProxyReceptionOptions);
       if (el.proxyRegistrationCreateBtn) el.proxyRegistrationCreateBtn.addEventListener("click", createProxyRegistration);
       if (el.proxyRegistrationClearBtn) el.proxyRegistrationClearBtn.addEventListener("click", clearProxyRegistrationForm);
+      if (el.proxyGuardianSearchBtn) el.proxyGuardianSearchBtn.addEventListener("click", searchProxyGuardians);
+      if (el.proxyGuardianSearchClearBtn) el.proxyGuardianSearchClearBtn.addEventListener("click", clearProxyGuardianSearch);
+      if (el.proxyGuardianSearchInput) {
+        el.proxyGuardianSearchInput.addEventListener("keydown", (event) => {
+          if (event.key === "Enter") {
+            event.preventDefault();
+            searchProxyGuardians();
+          }
+        });
+      }
       clearProxyRegistrationForm();
 
       if (el.existingPatientSearchBtn) el.existingPatientSearchBtn.addEventListener("click", searchExistingPatients);
