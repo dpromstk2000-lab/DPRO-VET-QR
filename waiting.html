@@ -1,1420 +1,1001 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DPRO PET CARE LINE｜順番受付・優先受付予約</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#2e7d63" />
+  <title>DPRO PET CARE LINE｜来院受付</title>
   <script src="./config.js"></script>
   <style>
-    :root {
-      --bg: #f4f1ea;
-      --card: #ffffff;
-      --ink: #22302c;
-      --muted: #6f7b75;
-      --line: #d9d2c4;
-      --green: #1f8f65;
-      --green2: #e8f7ef;
-      --blue: #3d74a8;
-      --blue2: #edf5ff;
-      --orange: #e79724;
-      --orange2: #fff5df;
-      --red: #c65d4f;
-      --red2: #fff0ed;
-      --purple: #7564b8;
-      --purple2: #f0f3ff;
-      --brown: #8a6a42;
-      --shadow: 0 16px 42px rgba(34, 48, 44, .11);
-      --radius: 22px;
+    :root{
+      --bg:#f4f7f1;
+      --card:#fff;
+      --ink:#20312b;
+      --muted:#6d7b74;
+      --line:#dbe6df;
+      --main:#2f7d64;
+      --main2:#5aa483;
+      --soft:#edf7f2;
+      --soft2:#f7fbf8;
+      --ok:#176a51;
+      --okBg:#edf7f2;
+      --warn:#8a6515;
+      --warnBg:#fff7df;
+      --danger:#a73c3c;
+      --dangerBg:#fff0ef;
+      --blue:#2d659c;
+      --blueBg:#eef6ff;
+      --shadow:0 18px 46px rgba(31,49,43,.10);
+      --radius:24px;
     }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", "YuGothic", "Noto Sans JP", sans-serif;
-      color: var(--ink);
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Yu Gothic","YuGothic","Noto Sans JP",Meiryo,sans-serif;
+      color:var(--ink);
       background:
-        radial-gradient(circle at top left, rgba(31, 143, 101, .15), transparent 36%),
-        linear-gradient(135deg, #fbfaf6 0%, var(--bg) 100%);
-      line-height: 1.7;
-    }
-
-    button,
-    input,
-    select,
-    textarea {
-      font-family: inherit;
-    }
-
-    a {
-      color: inherit;
-    }
-
-    .page {
-      width: min(1120px, calc(100% - 26px));
-      margin: 0 auto;
-      padding: 22px 0 54px;
-    }
-
-    .topbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 14px;
-      margin-bottom: 18px;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      min-width: 0;
-    }
-
-    .logo {
-      width: 48px;
-      height: 48px;
-      display: grid;
-      place-items: center;
-      border-radius: 16px;
-      color: #fff;
-      background: linear-gradient(135deg, #1f8f65, #83c99f);
-      box-shadow: 0 12px 24px rgba(31,143,101,.23);
-      font-size: 24px;
-      flex: 0 0 auto;
-    }
-
-    .brand small {
-      display: block;
-      color: var(--muted);
-      font-weight: 900;
-      font-size: 12px;
-      letter-spacing: .08em;
-    }
-
-    .brand strong {
-      display: block;
-      font-size: clamp(18px, 2.3vw, 28px);
-      line-height: 1.15;
-      letter-spacing: -.02em;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .actions {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-      gap: 8px;
-    }
-
-    .pill-link,
-    .btn {
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,.84);
-      border-radius: 999px;
-      padding: 9px 13px;
-      font-size: 13px;
-      font-weight: 900;
-      text-decoration: none;
-      cursor: pointer;
-      transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
-    }
-
-    .pill-link:hover,
-    .btn:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 8px 20px rgba(34,48,44,.11);
-      background: #fff;
-    }
-
-    .btn-main {
-      border-color: transparent;
-      background: var(--green);
-      color: #fff;
-      box-shadow: 0 12px 26px rgba(31,143,101,.23);
-    }
-
-    .btn-sub {
-      border-color: rgba(31,143,101,.3);
-      background: var(--green2);
-      color: #11704c;
-    }
-
-    .btn-danger {
-      border-color: rgba(198,93,79,.28);
-      background: var(--red2);
-      color: #a73f32;
-    }
-
-    .hero {
-      display: grid;
-      grid-template-columns: 1.05fr .95fr;
-      gap: 18px;
-      align-items: stretch;
-      margin-bottom: 18px;
-    }
-
-    .card {
-      background: rgba(255,255,255,.91);
-      border: 1px solid rgba(217,210,196,.86);
-      border-radius: 28px;
-      box-shadow: var(--shadow);
-      padding: clamp(18px, 2.7vw, 28px);
-    }
-
-    .hero h1 {
-      margin: 0 0 12px;
-      font-size: clamp(27px, 4vw, 48px);
-      line-height: 1.15;
-      letter-spacing: -.035em;
-    }
-
-    .lead {
-      margin: 0;
-      color: #52615b;
-      font-weight: 800;
-      font-size: clamp(14px, 1.7vw, 17px);
-    }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 7px 11px;
-      border-radius: 999px;
-      background: var(--green2);
-      color: #11704c;
-      font-size: 12px;
-      font-weight: 950;
-      margin-bottom: 12px;
-    }
-
-    .status-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-      margin-top: 12px;
-    }
-
-    .status-box {
-      background: #fffdf9;
-      border: 1px solid rgba(217,210,196,.86);
-      border-radius: 18px;
-      padding: 13px;
-      min-height: 82px;
-    }
-
-    .status-box small {
-      display: block;
-      color: var(--muted);
-      font-weight: 900;
-      font-size: 12px;
-    }
-
-    .status-box b {
-      display: block;
-      font-size: 24px;
-      line-height: 1.25;
-      letter-spacing: -.03em;
-    }
-
-    .status-box .sub {
-      color: #62706a;
-      font-weight: 800;
-      font-size: 12px;
-    }
-
-    .level {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      padding: 8px 12px;
-      border-radius: 999px;
-      font-size: 13px;
-      font-weight: 950;
-    }
-
-    .level.quiet { background: var(--green2); color: #11704c; }
-    .level.moderate { background: var(--orange2); color: #8b5b0e; }
-    .level.crowded { background: var(--red2); color: #a43e32; }
-    .level.reception_closed,
-    .level.emergency,
-    .level.closed { background: #f1f1f1; color: #3e4542; }
-
-    .notice {
-      background: #fff8e8;
-      border: 1px solid #eed8a5;
-      color: #6f541c;
-      border-radius: 16px;
-      padding: 12px;
-      font-size: 12px;
-      font-weight: 850;
-      margin-top: 12px;
-    }
-
-    .notice.red {
-      background: var(--red2);
-      border-color: #e7b8b1;
-      color: #96382f;
-    }
-
-    .notice.green {
-      background: var(--green2);
-      border-color: #bfe3cc;
-      color: #0e6a48;
-    }
-
-    .layout {
-      display: grid;
-      grid-template-columns: .9fr 1.1fr;
-      gap: 18px;
-      align-items: start;
-    }
-
-    .section-title {
-      margin: 26px 0 12px;
-      display: flex;
-      align-items: flex-end;
-      justify-content: space-between;
-      gap: 12px;
-    }
-
-    .section-title h2 {
-      margin: 0;
-      font-size: clamp(22px, 3vw, 34px);
-      letter-spacing: -.025em;
-    }
-
-    .section-title p {
-      margin: 0;
-      color: var(--muted);
-      font-weight: 850;
-      font-size: 13px;
-      text-align: right;
-    }
-
-    .mode-grid {
-      display: grid;
-      gap: 10px;
-    }
-
-    .mode-card {
-      border: 1px solid rgba(217,210,196,.9);
-      background: #fffdf9;
-      border-radius: 20px;
-      padding: 14px;
-      cursor: pointer;
-      transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
-    }
-
-    .mode-card:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 10px 24px rgba(34,48,44,.09);
-    }
-
-    .mode-card.active {
-      border-color: rgba(31,143,101,.72);
-      background: linear-gradient(180deg, #fff, #f3fbf6);
-      box-shadow: 0 12px 28px rgba(31,143,101,.13);
-    }
-
-    .mode-head {
-      display: flex;
-      gap: 11px;
-      align-items: flex-start;
-    }
-
-    .mode-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 15px;
-      display: grid;
-      place-items: center;
-      font-size: 24px;
-      background: var(--green2);
-      flex: 0 0 auto;
-    }
-
-    .mode-card[data-mode="priority_reservation"] .mode-icon { background: var(--orange2); }
-    .mode-card[data-mode="medicine_prevention"] .mode-icon { background: var(--purple2); }
-    .mode-card[data-mode="care_consult"] .mode-icon { background: var(--blue2); }
-
-    .mode-card h3 {
-      margin: 0 0 4px;
-      font-size: 18px;
-      line-height: 1.3;
-    }
-
-    .mode-card p {
-      margin: 0;
-      color: #5c6963;
-      font-size: 12px;
-      font-weight: 800;
-      line-height: 1.55;
-    }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-    }
-
-    .form-row {
-      margin-bottom: 12px;
-    }
-
-    .form-row.full {
-      grid-column: 1 / -1;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 6px;
-      font-size: 13px;
-      color: #46524d;
-      font-weight: 950;
-    }
-
-    input,
-    select,
-    textarea {
-      width: 100%;
-      border: 1px solid #d8d0c0;
-      background: #fff;
-      color: var(--ink);
-      border-radius: 15px;
-      padding: 11px 12px;
-      font-size: 15px;
-      font-weight: 750;
-      outline: none;
-      transition: border-color .15s ease, box-shadow .15s ease;
-    }
-
-    input:focus,
-    select:focus,
-    textarea:focus {
-      border-color: rgba(31,143,101,.65);
-      box-shadow: 0 0 0 4px rgba(31,143,101,.10);
-    }
-
-    textarea {
-      min-height: 92px;
-      resize: vertical;
-    }
-
-    .radio-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 8px;
-    }
-
-    .choice {
-      position: relative;
-    }
-
-    .choice input {
-      position: absolute;
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    .choice span {
-      display: block;
-      border: 1px solid #d8d0c0;
-      background: #fff;
-      border-radius: 15px;
-      padding: 11px 10px;
-      font-size: 13px;
-      font-weight: 900;
-      text-align: center;
-      cursor: pointer;
-    }
-
-    .choice input:checked + span {
-      border-color: rgba(31,143,101,.72);
-      background: var(--green2);
-      color: #11704c;
-    }
-
-    .hidden {
-      display: none !important;
-    }
-
-    .submit-area {
-      margin-top: 16px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      align-items: center;
-    }
-
-    .api-status {
-      margin-left: auto;
-      color: var(--muted);
-      font-size: 12px;
-      font-weight: 850;
-    }
-
-    .pet-list {
-      display: grid;
-      gap: 8px;
-      margin-top: 10px;
-    }
-
-    .pet-card {
-      border: 1px solid rgba(217,210,196,.86);
-      background: #fffdf9;
-      border-radius: 16px;
-      padding: 12px;
-      cursor: pointer;
-    }
-
-    .pet-card.active {
-      border-color: rgba(31,143,101,.7);
-      background: #f1fbf5;
-    }
-
-    .pet-card b {
-      display: block;
-      font-size: 15px;
-    }
-
-    .pet-card span {
-      display: block;
-      color: var(--muted);
-      font-size: 12px;
-      font-weight: 800;
-    }
-
-    .result-card {
-      margin-top: 14px;
-      background: linear-gradient(180deg, #ffffff, #f3fbf6);
-      border: 1px solid rgba(31,143,101,.34);
-      border-radius: 22px;
-      padding: 16px;
-      box-shadow: 0 12px 28px rgba(31,143,101,.10);
-    }
-
-    .result-card h3 {
-      margin: 0 0 10px;
-      font-size: 23px;
-    }
-
-    .result-number {
-      display: grid;
-      grid-template-columns: 120px 1fr;
-      gap: 12px;
-      align-items: center;
-      margin: 12px 0;
-    }
-
-    .big-number {
-      border-radius: 22px;
-      background: var(--green);
-      color: #fff;
-      text-align: center;
-      padding: 18px 8px;
-      box-shadow: 0 12px 26px rgba(31,143,101,.20);
-    }
-
-    .big-number small {
-      display: block;
-      opacity: .9;
-      font-weight: 900;
-      font-size: 12px;
-    }
-
-    .big-number b {
-      display: block;
-      font-size: 42px;
-      line-height: 1;
-    }
-
-    .info-table {
-      display: grid;
-      gap: 7px;
-    }
-
-    .info-row {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      border-bottom: 1px dashed #dcd4c5;
-      padding: 7px 0;
-      font-size: 13px;
-    }
-
-    .info-row span:first-child {
-      color: var(--muted);
-      font-weight: 900;
-    }
-
-    .info-row strong {
-      text-align: right;
-    }
-
-    .entry-list {
-      display: grid;
-      gap: 9px;
-      margin-top: 12px;
-    }
-
-    .entry {
-      border: 1px solid rgba(217,210,196,.84);
-      background: #fffdf9;
-      border-radius: 17px;
-      padding: 12px;
-      display: grid;
-      grid-template-columns: 56px 1fr;
-      gap: 10px;
-      align-items: start;
-    }
-
-    .entry-no {
-      width: 50px;
-      height: 50px;
-      border-radius: 16px;
-      display: grid;
-      place-items: center;
-      background: var(--green2);
-      color: #11704c;
-      font-weight: 950;
-      font-size: 18px;
-    }
-
-    .entry.examining .entry-no {
-      background: var(--orange2);
-      color: #8b5b0e;
-    }
-
-    .entry.completed,
-    .entry.cancelled,
-    .entry.no_show {
-      opacity: .55;
-    }
-
-    .entry h4 {
-      margin: 0 0 4px;
-      font-size: 15px;
-      line-height: 1.35;
-    }
-
-    .entry p {
-      margin: 0;
-      color: #61706a;
-      font-size: 12px;
-      font-weight: 800;
-    }
-
-    .tagline {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 5px;
-      margin-top: 7px;
-    }
-
-    .tag {
-      display: inline-flex;
-      border-radius: 999px;
-      background: #f6f2e9;
-      color: #79623d;
-      padding: 3px 7px;
-      font-size: 11px;
-      font-weight: 900;
-    }
-
-    .tab-row {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-bottom: 12px;
-    }
-
-    .tab {
-      border: 1px solid var(--line);
-      background: #fff;
-      border-radius: 999px;
-      padding: 8px 11px;
-      cursor: pointer;
-      font-size: 12px;
-      font-weight: 950;
-    }
-
-    .tab.active {
-      background: var(--green);
-      color: #fff;
-      border-color: var(--green);
-    }
-
-    .empty {
-      border: 1px dashed #d5cbb9;
-      border-radius: 18px;
-      padding: 16px;
-      color: var(--muted);
-      font-weight: 850;
-      text-align: center;
-      background: rgba(255,255,255,.62);
-    }
-
-    .footer-note {
-      margin-top: 18px;
-      border: 1px solid rgba(217,210,196,.88);
-      background: rgba(255,255,255,.8);
-      border-radius: 22px;
-      padding: 14px;
-      color: #56645e;
-      font-weight: 800;
-      font-size: 13px;
-    }
-
-    @media (max-width: 920px) {
-      .hero,
-      .layout {
-        grid-template-columns: 1fr;
-      }
-
-      .section-title {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-
-      .section-title p {
-        text-align: left;
-      }
-    }
-
-    @media (max-width: 620px) {
-      .topbar {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-
-      .actions {
-        justify-content: flex-start;
-      }
-
-      .status-grid,
-      .form-grid,
-      .radio-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .result-number {
-        grid-template-columns: 1fr;
-      }
-
-      .brand strong {
-        white-space: normal;
-      }
-
-      .card {
-        border-radius: 22px;
-      }
+        radial-gradient(circle at 7% 0%, rgba(47,125,100,.14), transparent 34%),
+        radial-gradient(circle at 92% 3%, rgba(83,158,125,.16), transparent 30%),
+        linear-gradient(180deg,#fbfdf9 0%,var(--bg) 100%);
+      line-height:1.75;
+    }
+    a{color:inherit}
+    button,input,select,textarea{font:inherit}
+    button{cursor:pointer}
+    .page{width:min(1080px,calc(100% - 28px));margin:0 auto;padding:18px 0 54px}
+    .hero{
+      position:relative;
+      overflow:hidden;
+      border-radius:32px;
+      padding:clamp(22px,4vw,42px);
+      color:#fff;
+      background:
+        linear-gradient(135deg,rgba(36,77,64,.98),rgba(55,144,109,.92)),
+        radial-gradient(circle at 84% 18%,rgba(255,255,255,.22),transparent 22%);
+      box-shadow:var(--shadow);
+      margin-bottom:16px;
+    }
+    .hero::after{
+      content:"受付";
+      position:absolute;
+      right:18px;
+      bottom:-26px;
+      font-size:clamp(70px,12vw,140px);
+      font-weight:1000;
+      letter-spacing:-.1em;
+      opacity:.07;
+      pointer-events:none;
+    }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      border-radius:999px;
+      padding:7px 11px;
+      border:1px solid rgba(255,255,255,.26);
+      background:rgba(255,255,255,.14);
+      font-size:12px;
+      font-weight:950;
+      letter-spacing:.04em;
+    }
+    h1{margin:14px 0 10px;font-size:clamp(32px,5vw,58px);line-height:1.08;letter-spacing:-.06em}
+    h2{margin:0 0 10px;font-size:clamp(21px,2.7vw,32px);line-height:1.25;letter-spacing:-.035em}
+    h3{margin:0 0 8px;font-size:18px}
+    p{margin:0}
+    .lead{max-width:850px;color:rgba(255,255,255,.9);font-weight:780}
+    .nav{display:flex;flex-wrap:wrap;gap:9px;margin-top:18px}
+    .btn,.nav a{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      min-height:44px;
+      padding:11px 15px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.92);
+      color:var(--ink);
+      text-decoration:none;
+      font-size:14px;
+      font-weight:950;
+      line-height:1.15;
+      transition:.15s transform,.15s box-shadow,.15s background;
+    }
+    .nav a{background:rgba(255,255,255,.16);color:#fff;border-color:rgba(255,255,255,.28)}
+    .btn:hover,.nav a:hover{transform:translateY(-1px);box-shadow:0 10px 24px rgba(31,49,43,.13)}
+    .btnMain{background:var(--main);border-color:transparent;color:#fff;box-shadow:0 14px 28px rgba(47,125,100,.22)}
+    .btnSoft{background:var(--soft);border-color:#c9e7d8;color:var(--ok)}
+    .btnWarn{background:var(--warnBg);border-color:#efd79a;color:var(--warn)}
+    .btnDanger{background:var(--dangerBg);border-color:#edc0bc;color:var(--danger)}
+    .btn:disabled{opacity:.52;cursor:not-allowed;transform:none;box-shadow:none;filter:grayscale(.2)}
+    .layout{display:grid;grid-template-columns:.95fr 1.05fr;gap:16px;align-items:start}
+    .card{
+      border:1px solid rgba(219,230,223,.95);
+      background:rgba(255,255,255,.94);
+      border-radius:var(--radius);
+      padding:clamp(16px,2.3vw,24px);
+      box-shadow:var(--shadow);
+    }
+    .notice{
+      border-radius:18px;
+      padding:12px 13px;
+      font-size:13px;
+      font-weight:850;
+      line-height:1.65;
+      border:1px solid #dbe6df;
+      background:#fff;
+      color:#54615c;
+      margin-top:12px;
+    }
+    .notice.ok{background:var(--okBg);border-color:#c9e7d8;color:var(--ok)}
+    .notice.ng{background:var(--dangerBg);border-color:#edc0bc;color:var(--danger)}
+    .notice.warn{background:var(--warnBg);border-color:#efd79a;color:var(--warn)}
+    .notice.info{background:var(--blueBg);border-color:#c4daf1;color:var(--blue)}
+    label{
+      display:block;
+      margin:0 0 6px;
+      color:#4e5d56;
+      font-size:13px;
+      font-weight:950;
+    }
+    input,select,textarea{
+      width:100%;
+      border:1px solid #d9e3dd;
+      border-radius:16px;
+      padding:12px 13px;
+      background:#fff;
+      color:var(--ink);
+      font-size:15px;
+      font-weight:800;
+      outline:none;
+      transition:.15s border-color,.15s box-shadow;
+    }
+    textarea{min-height:98px;resize:vertical;line-height:1.65}
+    input:focus,select:focus,textarea:focus{border-color:rgba(47,125,100,.62);box-shadow:0 0 0 4px rgba(47,125,100,.11)}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .full{grid-column:1/-1}
+    .buttonRow{display:flex;flex-wrap:wrap;gap:9px;align-items:center;margin-top:14px}
+    .mini{font-size:12px;color:var(--muted);font-weight:800}
+    .clinicStatusBox{
+      margin-top:14px;
+      border:1px solid #cfe4d6;
+      background:linear-gradient(180deg,#ffffff,#f3faf6);
+      border-radius:20px;
+      padding:14px;
+    }
+    .clinicStatusBox.closed{
+      border-color:#f0c7c7;
+      background:linear-gradient(180deg,#fff,#fff4f4);
+    }
+    .clinicStatusBox.half{
+      border-color:#ead39a;
+      background:linear-gradient(180deg,#fff,#fffaf0);
+    }
+    .clinicStatusTitle{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-bottom:8px;
+    }
+    .clinicStatusTitle strong{font-size:16px;line-height:1.35}
+    .clinicStatusTag{
+      display:inline-flex;
+      align-items:center;
+      border-radius:999px;
+      padding:5px 9px;
+      background:var(--okBg);
+      color:var(--ok);
+      font-size:12px;
+      font-weight:900;
+      white-space:nowrap;
+    }
+    .clinicStatusBox.closed .clinicStatusTag{background:var(--dangerBg);color:var(--danger)}
+    .clinicStatusBox.half .clinicStatusTag{background:var(--warnBg);color:var(--warn)}
+    .clinicTimeGrid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:8px;
+      margin-top:10px;
+    }
+    .clinicTime{
+      border:1px solid var(--line);
+      border-radius:14px;
+      background:#fff;
+      padding:10px;
+    }
+    .clinicTime small{
+      display:block;
+      color:var(--muted);
+      font-size:11px;
+      font-weight:900;
+      margin-bottom:2px;
+    }
+    .clinicTime b{display:block;font-size:14px;line-height:1.35}
+    .clinicTime.off{
+      background:#fff6f5;
+      border-color:#f0c7c7;
+      color:var(--danger);
+    }
+    .nextClosedList{
+      margin-top:10px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:6px;
+    }
+    .closedChip{
+      display:inline-flex;
+      align-items:center;
+      border-radius:999px;
+      padding:4px 8px;
+      background:#f6f8f6;
+      border:1px solid var(--line);
+      color:#53645c;
+      font-size:11px;
+      font-weight:850;
+    }
+    .choiceGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+    .choice{
+      border:1px solid var(--line);
+      background:#fff;
+      border-radius:20px;
+      padding:14px;
+      min-height:108px;
+      text-align:left;
+      font-weight:900;
+    }
+    .choice.active{
+      border-color:#a8dabc;
+      background:var(--soft);
+      box-shadow:0 0 0 4px rgba(47,125,100,.09);
+    }
+    .choice:disabled{
+      opacity:.45;
+      cursor:not-allowed;
+      filter:grayscale(.35);
+    }
+    .choice small{
+      display:block;
+      margin-top:4px;
+      color:var(--muted);
+      font-size:12px;
+      font-weight:800;
+      line-height:1.45;
+    }
+    .petCard{
+      border:1px solid var(--line);
+      border-radius:20px;
+      background:#fff;
+      padding:14px;
+      margin-top:12px;
+    }
+    .petMain{display:grid;grid-template-columns:64px 1fr;gap:12px;align-items:start}
+    .petIcon{width:64px;height:64px;border-radius:22px;background:var(--soft);display:grid;place-items:center;font-size:34px}
+    .petName{font-size:22px;font-weight:1000;line-height:1.25;letter-spacing:-.03em}
+    .petSub{font-size:13px;color:var(--muted);font-weight:850;margin-top:3px}
+    .queueBox{
+      display:grid;
+      grid-template-columns:88px 1fr;
+      gap:14px;
+      align-items:center;
+      border:1px solid #cfe4d6;
+      border-radius:24px;
+      background:linear-gradient(180deg,#fff,#f2fbf6);
+      padding:18px;
+      margin-top:14px;
+    }
+    .queueNo{
+      width:88px;height:88px;
+      border-radius:28px;
+      background:var(--main);
+      color:#fff;
+      display:grid;
+      place-items:center;
+      font-size:34px;
+      font-weight:1000;
+      box-shadow:0 14px 28px rgba(47,125,100,.22);
+    }
+    .queueBox h3{font-size:24px;margin:0 0 2px;line-height:1.25}
+    .queueBox p{font-size:13px;color:#53645c;font-weight:850}
+    .calendarMini{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:8px;
+      margin-top:10px;
+    }
+    .dayMini{
+      border:1px solid var(--line);
+      border-radius:14px;
+      background:#fff;
+      padding:9px;
+      min-height:62px;
+    }
+    .dayMini.closed{background:#fff5f4;border-color:#efc7c4}
+    .dayMini.half{background:#fffaf0;border-color:#ead39a}
+    .dayMini b{display:block;font-size:12px}
+    .dayMini span{display:block;font-size:11px;color:#63736b;font-weight:800;line-height:1.35;margin-top:2px}
+    .hidden{display:none!important}
+    .debug{
+      white-space:pre-wrap;
+      word-break:break-word;
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      font-size:12px;
+      background:#12251f;
+      color:#d6f3e6;
+      border-radius:18px;
+      padding:14px;
+      max-height:360px;
+      overflow:auto;
+    }
+    @media(max-width:900px){
+      .layout{grid-template-columns:1fr}
+      .choiceGrid,.clinicTimeGrid,.grid{grid-template-columns:1fr}
+    }
+    @media(max-width:540px){
+      .hero{border-radius:24px}
+      .card{border-radius:22px}
+      .petMain,.queueBox{grid-template-columns:1fr}
+      .queueNo{width:76px;height:76px;border-radius:24px;font-size:30px}
+      .calendarMini{grid-template-columns:1fr}
     }
   </style>
 </head>
 
 <body>
   <main class="page">
-    <header class="topbar">
-      <div class="brand">
-        <div class="logo">🐾</div>
-        <div>
-          <small>飼い主さん用受付画面</small>
-          <strong>DPRO PET CARE LINE</strong>
-        </div>
-      </div>
-
-      <nav class="actions" aria-label="関連画面リンク">
-        <a class="pill-link" href="./member.html?demo=true&v=step-vet-20">ペット診察券</a>
-        <a class="pill-link" href="./rich-menu.html?v=step-vet-20">リッチメニュー</a>
-        <a class="pill-link" href="./index.html?v=step-vet-20">管理トップ</a>
-      </nav>
-    </header>
-
     <section class="hero">
-      <div class="card">
-        <span class="badge">STEP VET-20｜リッチメニュー連動受付</span>
-        <h1>今日行く人も、<br>後日1番で取りたい人も。</h1>
-        <p class="lead">
-          今日の順番受付、後日の午前1番・午後1番の優先受付予約、お薬・予防受付を分けて登録できます。
-          「ただいま何人」だけではなく、診察・薬・ケアを分けた混雑目安も確認できます。
-        </p>
-        <div class="notice">
-          優先受付予約は、診察開始時刻を保証する時間予約ではありません。午前・午後の優先受付枠です。
-        </div>
+      <span class="badge">STEP VET-36D-2｜来院受付</span>
+      <h1>今日の来院受付</h1>
+      <p class="lead">
+        診察券を確認して、今日の受付番号を発行します。
+        休診日・午前休診・午後休診・受付停止は、ボタンを押す前に表示されます。
+      </p>
+      <div class="nav">
+        <a id="memberLink" href="./member.html?v=step-vet-36d-1&clinic_code=dpro_vet_demo&line_user_id=demo_line_link_001">診察券へ戻る</a>
+        <a id="richMenuLink" href="./rich-menu.html">メニューへ</a>
       </div>
 
-      <div class="card">
-        <span id="levelBadge" class="level quiet">空いています</span>
-        <div class="status-grid">
-          <div class="status-box">
-            <small>通常診察</small>
-            <b id="generalExamCount">-</b>
-            <div class="sub">診察・再診の待ち</div>
-          </div>
-          <div class="status-box">
-            <small>現在診察中</small>
-            <b id="currentExamNumber">-</b>
-            <div class="sub">受付番号</div>
-          </div>
-          <div class="status-box">
-            <small>お薬・予防</small>
-            <b id="medicineCount">-</b>
-            <div class="sub">薬・フード・ワクチン等</div>
-          </div>
-          <div class="status-box">
-            <small>ケア・予約枠</small>
-            <b id="careReserveCount">-</b>
-            <div class="sub">処置・優先受付など</div>
-          </div>
+      <div id="heroClinicStatus" class="clinicStatusBox" style="background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.28);color:#fff;">
+        <div class="clinicStatusTitle">
+          <strong>本日の受付状態を確認中です</strong>
+          <span class="clinicStatusTag" style="background:rgba(255,255,255,.18);color:#fff;">確認中</span>
         </div>
-        <div class="notice green" id="summaryMessage">混雑状況を読み込み中です。</div>
+        <div style="font-size:13px;font-weight:750;line-height:1.65;color:rgba(255,255,255,.92);">
+          定休日・臨時休業・受付時間を読み込んでいます。
+        </div>
       </div>
     </section>
-
-    <div class="section-title">
-      <h2>受付内容を選択</h2>
-      <p>LINEから入った飼い主さんが、そのまま登録できる画面です。</p>
-    </div>
 
     <section class="layout">
-      <aside class="card">
-        <div class="mode-grid">
-          <div class="mode-card active" data-mode="today_queue" tabindex="0" role="button">
-            <div class="mode-head">
-              <div class="mode-icon">🏥</div>
-              <div>
-                <h3>今日の順番受付</h3>
-                <p>今日診てもらいたい場合。通常診察・再診・体調不良など。</p>
-              </div>
-            </div>
-          </div>
+      <div class="card">
+        <h2>受付前に確認</h2>
+        <p class="mini">本日の受付可否と、次の休診予定です。</p>
 
-          <div class="mode-card" data-mode="priority_reservation" tabindex="0" role="button">
-            <div class="mode-head">
-              <div class="mode-icon">🌅</div>
-              <div>
-                <h3>優先受付予約</h3>
-                <p>後日の午前1番・午後1番。時間予約ではなく優先受付枠。</p>
-              </div>
-            </div>
+        <div id="clinicReceptionStatus" class="clinicStatusBox">
+          <div class="clinicStatusTitle">
+            <strong>本日の受付状態を確認中です</strong>
+            <span class="clinicStatusTag">確認中</span>
           </div>
-
-          <div class="mode-card" data-mode="medicine_prevention" tabindex="0" role="button">
-            <div class="mode-head">
-              <div class="mode-icon">💊</div>
-              <div>
-                <h3>お薬・予防受付</h3>
-                <p>薬・フード、予防薬、ワクチン、健診などを診察待ちと分ける。</p>
-              </div>
+          <div class="clinicTimeGrid">
+            <div class="clinicTime">
+              <small>午前受付</small>
+              <b>確認中</b>
             </div>
-          </div>
-
-          <div class="mode-card" data-mode="care_consult" tabindex="0" role="button">
-            <div class="mode-head">
-              <div class="mode-icon">🧼</div>
-              <div>
-                <h3>ケア処置相談</h3>
-                <p>爪切り、耳そうじ、肛門腺など。必要に応じて診察へ切り替え。</p>
-              </div>
+            <div class="clinicTime">
+              <small>午後受付</small>
+              <b>確認中</b>
             </div>
           </div>
         </div>
 
-        <div class="notice" style="margin-top:14px;">
-          トリミング・手術は通常の順番受付に混ぜず、病院側で別枠管理する方針です。
+        <h3 style="margin-top:18px;">受付種別</h3>
+        <div class="choiceGrid">
+          <button class="choice active" id="choiceGeneral" type="button" data-entry-kind="today_queue" data-request-category="general_exam" data-day-part="auto">
+            通常診察
+            <small>診察・再診・相談</small>
+          </button>
+          <button class="choice" id="choiceMedicine" type="button" data-entry-kind="medicine_prevention" data-request-category="medicine_food" data-day-part="auto">
+            お薬・予防
+            <small>薬・フード・予防薬</small>
+          </button>
+          <button class="choice" id="choiceCare" type="button" data-entry-kind="care_consult" data-request-category="hygiene_care" data-day-part="auto">
+            ケア処置
+            <small>爪切り・耳掃除など</small>
+          </button>
         </div>
-      </aside>
 
-      <section class="card">
-        <form id="queueForm">
-          <div class="form-grid">
-            <div class="form-row full">
-              <label>ペットを選択</label>
-              <div id="petList" class="pet-list">
-                <div class="empty">ペット情報を読み込み中です。</div>
-              </div>
-            </div>
+        <div id="disabledReason" class="notice ng hidden">本日は受付できません。</div>
 
-            <div class="form-row">
-              <label for="requestCategory">来院目的</label>
-              <select id="requestCategory" name="request_category">
-                <option value="general_exam">通常診察</option>
-                <option value="recheck">再診</option>
-                <option value="vaccination">予防接種</option>
-                <option value="prevention_medicine">予防薬</option>
-                <option value="medicine_food">お薬・フード</option>
-                <option value="hygiene_care">衛生処置</option>
-                <option value="health_check">健康診断</option>
-                <option value="other">その他</option>
-              </select>
-            </div>
-
-            <div class="form-row">
-              <label for="targetDate">希望日</label>
-              <input id="targetDate" name="target_date" type="date" />
-            </div>
-
-            <div class="form-row full">
-              <label>時間帯</label>
-              <div class="radio-grid">
-                <label class="choice">
-                  <input type="radio" name="day_part" value="morning" checked />
-                  <span>午前</span>
-                </label>
-                <label class="choice">
-                  <input type="radio" name="day_part" value="afternoon" />
-                  <span>午後</span>
-                </label>
-              </div>
-            </div>
-
-            <div class="form-row full">
-              <label for="purpose">目的・症状の概要</label>
-              <input id="purpose" name="purpose" type="text" placeholder="例：皮膚のかゆみ、ワクチン、フィラリア薬など" />
-            </div>
-
-            <div class="form-row">
-              <label for="onsetNote">いつから</label>
-              <input id="onsetNote" name="onset_note" type="text" placeholder="例：昨日から、1週間前から" />
-            </div>
-
-            <div class="form-row">
-              <label for="appetite">食欲</label>
-              <select id="appetite" name="appetite">
-                <option value="unknown">わからない</option>
-                <option value="normal">いつも通り</option>
-                <option value="low">少ない</option>
-                <option value="none">食べない</option>
-                <option value="not_applicable">該当なし</option>
-              </select>
-            </div>
-
-            <div class="form-row">
-              <label for="energyLevel">元気</label>
-              <select id="energyLevel" name="energy_level">
-                <option value="unknown">わからない</option>
-                <option value="normal">いつも通り</option>
-                <option value="low">少し元気がない</option>
-                <option value="very_low">かなり元気がない</option>
-                <option value="not_applicable">該当なし</option>
-              </select>
-            </div>
-
-            <div class="form-row">
-              <label for="desiredContact">連絡方法</label>
-              <select id="desiredContact" name="desired_contact">
-                <option value="line">LINE</option>
-                <option value="phone">電話</option>
-                <option value="none">連絡不要</option>
-              </select>
-            </div>
-
-            <div class="form-row full">
-              <label for="freeText">詳しい内容</label>
-              <textarea id="freeText" name="free_text" placeholder="症状、気になること、薬・フードの内容などを入力してください。"></textarea>
-            </div>
-
-            <div class="form-row full">
-              <label class="choice">
-                <input type="checkbox" id="emergencyFlag" name="emergency_flag" />
-                <span>ぐったりしている、呼吸が苦しそうなど、急ぎの可能性があります</span>
-              </label>
-            </div>
+        <div class="grid" style="margin-top:16px;">
+          <div>
+            <label for="dayPart">時間帯</label>
+            <select id="dayPart">
+              <option value="morning">午前</option>
+              <option value="afternoon">午後</option>
+            </select>
           </div>
-
-          <div id="modeNotice" class="notice">
-            今日の順番受付です。受付番号を発行します。
+          <div>
+            <label for="purpose">受付内容</label>
+            <input id="purpose" type="text" placeholder="例：通常診察">
           </div>
-
-          <div class="submit-area">
-            <button class="btn btn-main" type="submit" id="submitButton">受付する</button>
-            <button class="btn btn-sub" type="button" id="refreshButton">混雑状況を更新</button>
-            <span class="api-status" id="apiStatus">API未確認</span>
+          <div class="full">
+            <label for="symptoms">症状・相談内容</label>
+            <textarea id="symptoms" placeholder="例：皮膚をかゆがる、ワクチン相談、いつもの薬がほしい など"></textarea>
           </div>
-        </form>
+        </div>
 
-        <div id="resultArea"></div>
-      </section>
-    </section>
+        <div class="buttonRow">
+          <button class="btn btnMain" id="submitBtn" type="button">この内容で受付する</button>
+          <button class="btn btnSoft" id="reloadBtn" type="button">再読み込み</button>
+        </div>
 
-    <div class="section-title">
-      <h2>本日の受付状況</h2>
-      <p>診察・薬・ケアを分けて見せるための確認表示です。</p>
-    </div>
+        <div id="submitStatus" class="notice">診察券情報を確認中です。</div>
 
-    <section class="card">
-      <div class="tab-row">
-        <button class="tab active" type="button" data-filter="active">受付中</button>
-        <button class="tab" type="button" data-filter="today_queue">通常診察</button>
-        <button class="tab" type="button" data-filter="medicine_prevention">お薬・予防</button>
-        <button class="tab" type="button" data-filter="care_consult">ケア処置</button>
-        <button class="tab" type="button" data-filter="priority_reservation">優先受付</button>
-        <button class="tab" type="button" data-filter="all">すべて</button>
+        <div id="successBox" class="hidden"></div>
       </div>
 
-      <div id="entryList" class="entry-list">
-        <div class="empty">受付状況を読み込み中です。</div>
+      <div class="card">
+        <h2>診察券情報</h2>
+        <p class="mini">LINE連携済みの診察券から受付します。</p>
+
+        <div id="petArea">
+          <div class="notice info">診察券情報を読み込み中です。</div>
+        </div>
+
+        <h3 style="margin-top:18px;">2か月以内の休診予定</h3>
+        <div id="miniCalendar" class="calendarMini">
+          <div class="dayMini"><b>読み込み中</b><span>医院設定を確認しています。</span></div>
+        </div>
+
+        <details style="margin-top:16px;">
+          <summary style="font-weight:950;cursor:pointer;">取得JSONを表示</summary>
+          <pre id="debug" class="debug">未取得</pre>
+        </details>
       </div>
     </section>
-
-    <div class="footer-note">
-      この画面はSTEP VET-20です。登録内容は localStorage ではなく、Cloudflare Worker API 経由で Supabase の
-      vet_waiting_entries / vet_previsit_questionnaires に保存されます。
-    </div>
   </main>
 
   <script>
-    const CONFIG = window.DPRO_CONFIG || {};
-    const API_BASE_URL = (CONFIG.API_BASE_URL || "https://dpro-vet-qr-api.dpromstk2000.workers.dev").replace(/\/$/, "");
-    const CLINIC_CODE = CONFIG.CLINIC_CODE || CONFIG.DEFAULT_CLINIC_CODE || "dpro_vet_demo";
+    const CONFIG = window.DPRO_VET_CONFIG || window.DPRO_CONFIG || window.APP_CONFIG || {};
+    const API_BASE_URL = (
+      CONFIG.API_BASE_URL ||
+      CONFIG?.api?.baseUrl ||
+      CONFIG?.urls?.apiBaseUrl ||
+      "https://dpro-vet-qr-api.dpromstk2000.workers.dev"
+    ).replace(/\/$/, "");
+
+    const urlParams = new URLSearchParams(location.search);
+    const CLINIC_CODE =
+      urlParams.get("clinic_code") ||
+      CONFIG.CLINIC_CODE ||
+      CONFIG.DEFAULT_CLINIC_CODE ||
+      CONFIG?.clinic?.clinicCode ||
+      "dpro_vet_demo";
+
+    const LINE_USER_ID =
+      urlParams.get("line_user_id") ||
+      urlParams.get("lineUserId") ||
+      urlParams.get("uid") ||
+      "demo_line_link_001";
+
+    const ADMIN_TOKEN_KEYS = [
+      "dpro_vet_admin_code",
+      "DPRO_VET_ADMIN_CODE",
+      "DPRO_VET_ADMIN_TOKEN",
+      "dpro_vet_admin_token",
+      "DPRO_ADMIN_TOKEN",
+      "dpro_admin_token"
+    ];
 
     const state = {
-      mode: "today_queue",
-      selectedPet: null,
-      selectedGuardian: null,
+      clinic: null,
+      settings: null,
+      calendar: [],
+      todayStatus: null,
+      guardian: null,
       cards: [],
-      entries: [],
-      summaries: [],
-      summary: null,
-      filter: "active"
+      selectedCard: null,
+      selectedEntryKind: "today_queue",
+      selectedRequestCategory: "general_exam",
+      entryCreated: null,
+      canAcceptAny: true,
+      canAcceptMorning: true,
+      canAcceptAfternoon: true
     };
 
-    const modeInfo = {
-      today_queue: {
-        title: "今日の順番受付",
-        submit: "受付番号を取る",
-        notice: "今日の順番受付です。来院目的と問診を入力すると、受付番号が発行されます。",
-        defaultCategory: "general_exam",
-        dateOffset: 0
-      },
-      priority_reservation: {
-        title: "優先受付予約",
-        submit: "優先受付予約する",
-        notice: "後日の午前1番・午後1番の優先受付枠です。診察開始時刻を保証する時間予約ではありません。",
-        defaultCategory: "vaccination",
-        dateOffset: 2
-      },
-      medicine_prevention: {
-        title: "お薬・予防受付",
-        submit: "お薬・予防受付する",
-        notice: "薬・フード、予防薬、ワクチン、健康診断などを通常診察と分けて受付します。",
-        defaultCategory: "medicine_food",
-        dateOffset: 0
-      },
-      care_consult: {
-        title: "ケア処置相談",
-        submit: "ケア処置相談する",
-        notice: "爪切り、耳そうじ、肛門腺などの相談です。必要に応じて診察へ切り替わる場合があります。",
-        defaultCategory: "hygiene_care",
-        dateOffset: 0
-      }
-    };
+    const $ = (id) => document.getElementById(id);
 
-    const el = {
-      levelBadge: document.getElementById("levelBadge"),
-      generalExamCount: document.getElementById("generalExamCount"),
-      currentExamNumber: document.getElementById("currentExamNumber"),
-      medicineCount: document.getElementById("medicineCount"),
-      careReserveCount: document.getElementById("careReserveCount"),
-      summaryMessage: document.getElementById("summaryMessage"),
-      petList: document.getElementById("petList"),
-      queueForm: document.getElementById("queueForm"),
-      requestCategory: document.getElementById("requestCategory"),
-      targetDate: document.getElementById("targetDate"),
-      purpose: document.getElementById("purpose"),
-      onsetNote: document.getElementById("onsetNote"),
-      appetite: document.getElementById("appetite"),
-      energyLevel: document.getElementById("energyLevel"),
-      desiredContact: document.getElementById("desiredContact"),
-      freeText: document.getElementById("freeText"),
-      emergencyFlag: document.getElementById("emergencyFlag"),
-      modeNotice: document.getElementById("modeNotice"),
-      submitButton: document.getElementById("submitButton"),
-      refreshButton: document.getElementById("refreshButton"),
-      apiStatus: document.getElementById("apiStatus"),
-      resultArea: document.getElementById("resultArea"),
-      entryList: document.getElementById("entryList")
-    };
-
-    function todayString() {
-      const d = new Date();
-      const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, "0");
-      const day = String(d.getDate()).padStart(2, "0");
-      return `${y}-${m}-${day}`;
-    }
-
-    function addDaysString(days) {
-      const d = new Date();
-      d.setDate(d.getDate() + Number(days || 0));
-      const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, "0");
-      const day = String(d.getDate()).padStart(2, "0");
-      return `${y}-${m}-${day}`;
-    }
-
-    function escapeHtml(value) {
+    function escapeHtml(value){
       return String(value ?? "")
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
     }
 
-    async function apiGet(path, params = {}) {
-      const url = new URL(API_BASE_URL + path);
+    function todayString(){
+      const d = new Date();
+      const y = d.getFullYear();
+      const m = String(d.getMonth()+1).padStart(2,"0");
+      const day = String(d.getDate()).padStart(2,"0");
+      return `${y}-${m}-${day}`;
+    }
+
+    function addMonthsString(dateText, months){
+      const [y,m,d] = String(dateText || todayString()).split("-").map(Number);
+      const date = new Date(y, m - 1 + Number(months || 0), d);
+      const yy = date.getFullYear();
+      const mm = String(date.getMonth()+1).padStart(2,"0");
+      const dd = String(date.getDate()).padStart(2,"0");
+      return `${yy}-${mm}-${dd}`;
+    }
+
+    function timeText(value){
+      return String(value || "").slice(0,5) || "-";
+    }
+
+    function getAdminToken(){
+      if (typeof CONFIG.getAdminToken === "function") {
+        const v = CONFIG.getAdminToken();
+        if (v) return String(v).trim();
+      }
+      for (const key of ADMIN_TOKEN_KEYS) {
+        const v = localStorage.getItem(key) || sessionStorage.getItem(key);
+        if (v && String(v).trim()) return String(v).trim();
+      }
+      return "";
+    }
+
+    function headers(json=false, admin=false){
+      const h = { "Accept":"application/json" };
+      if (json) h["Content-Type"] = "application/json";
+
+      const token = getAdminToken();
+      if (admin && token) {
+        h["X-DPRO-Admin-Code"] = token;
+        h["x-dpro-admin-code"] = token;
+        h["x-admin-token"] = token;
+        h["X-Admin-Token"] = token;
+        h["Authorization"] = "Bearer " + token;
+      }
+      return h;
+    }
+
+    async function apiGet(path, params = {}, admin = false){
+      const url = path.startsWith("http") ? new URL(path) : new URL(API_BASE_URL + path);
       Object.entries({ clinic_code: CLINIC_CODE, ...params }).forEach(([key, value]) => {
-        if (value !== undefined && value !== null && value !== "") url.searchParams.set(key, value);
+        if (value !== undefined && value !== null && String(value) !== "") {
+          url.searchParams.set(key, String(value));
+        }
       });
-      const res = await fetch(url.toString(), { method: "GET" });
+
+      const res = await fetch(url.toString(), {
+        method:"GET",
+        mode:"cors",
+        cache:"no-store",
+        headers:headers(false, admin)
+      });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok || data.ok === false) {
-        throw new Error(data.message || data.error || `API Error ${res.status}`);
-      }
+      if (!res.ok || data.ok === false) throw new Error(data.message || data.error || `API Error ${res.status}`);
       return data;
     }
 
-    async function apiPost(path, body = {}) {
+    async function apiPost(path, body = {}, admin = false){
       const res = await fetch(API_BASE_URL + path, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ clinic_code: CLINIC_CODE, ...body })
+        method:"POST",
+        mode:"cors",
+        cache:"no-store",
+        headers:headers(true, admin),
+        body:JSON.stringify({ clinic_code: CLINIC_CODE, ...body })
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok || data.ok === false) {
-        throw new Error(data.message || data.error || `API Error ${res.status}`);
-      }
+      if (!res.ok || data.ok === false) throw new Error(data.message || data.error || `API Error ${res.status}`);
       return data;
     }
 
-    function setApiStatus(text, ok = true) {
-      el.apiStatus.textContent = text;
-      el.apiStatus.style.color = ok ? "#11704c" : "#a43e32";
+    function setNotice(id, type, message){
+      const el = $(id);
+      if (!el) return;
+      el.className = `notice ${type || ""}`.trim();
+      el.textContent = message;
     }
 
-    function getSelectedDayPart() {
-      const radio = document.querySelector('input[name="day_part"]:checked');
-      return radio ? radio.value : "morning";
+    function buildPageUrl(file, params){
+      const safeFile = String(file || "").replace(/^\.\//, "");
+      const target = new URL(`${location.origin}${location.pathname.replace(/[^/]*$/, "")}${safeFile}`);
+      Object.entries({ clinic_code: CLINIC_CODE, ...(params || {}) }).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && String(value) !== "") {
+          target.searchParams.set(key, String(value));
+        }
+      });
+      return target.toString();
     }
 
-    function setDayPart(value) {
-      const radio = document.querySelector(`input[name="day_part"][value="${value}"]`);
-      if (radio) radio.checked = true;
+    function updateLinks(){
+      $("memberLink").href = buildPageUrl("member.html", {
+        v:"step-vet-36d-1",
+        line_user_id: LINE_USER_ID
+      });
+      $("richMenuLink").href = buildPageUrl("rich-menu.html", {
+        v:"step-vet-36d-2",
+        line_user_id: LINE_USER_ID
+      });
     }
 
-    function getBestSummary() {
-      if (!state.summaries || !state.summaries.length) return state.summary;
-      const part = getSelectedDayPart();
-      return state.summaries.find(item => item.day_part === part) || state.summaries[0] || state.summary;
+    async function loadClinicSettings(){
+      const data = await apiGet("/api/public/clinic-settings", {
+        from: todayString(),
+        to: addMonthsString(todayString(), 2)
+      }, false);
+
+      state.clinic = data.clinic || null;
+      state.settings = data.settings || null;
+      state.calendar = Array.isArray(data.calendar) ? data.calendar : [];
+      state.todayStatus = data.today_status || state.calendar.find((row) => row.target_date === todayString()) || null;
+      renderClinicStatus();
+      renderMiniCalendar();
+      return data;
     }
 
-    function renderSummary() {
-      const s = getBestSummary() || {};
-      const level = s.display_level || "quiet";
-      const label = s.display_level_label || "空いています";
+    async function loadMemberCards(){
+      const data = await apiGet("/api/public/member-cards", {
+        line_user_id: LINE_USER_ID
+      }, false);
 
-      el.levelBadge.className = `level ${level}`;
-      el.levelBadge.textContent = label;
-      el.generalExamCount.textContent = Number(s.general_exam_count || 0) + "組";
-      el.currentExamNumber.textContent = s.current_exam_number ? String(s.current_exam_number) + "番" : "-";
-      el.medicineCount.textContent = Number(s.medicine_prevention_count || 0) + "件";
-
-      const careReserve = Number(s.care_count || 0) + Number(s.priority_reservation_count || 0) + Number(s.grooming_surgery_count || 0);
-      el.careReserveCount.textContent = careReserve + "件";
-      el.summaryMessage.textContent = s.display_message || "混雑状況を確認できます。";
-      el.summaryMessage.className = level === "crowded" || level === "reception_closed" || level === "emergency" ? "notice red" : "notice green";
+      state.guardian = data.guardian || data.owner || null;
+      state.cards = Array.isArray(data.cards) ? data.cards : Array.isArray(data.items) ? data.items : [];
+      state.selectedCard = pickSelectedCard(state.cards);
+      renderPetArea();
+      return data;
     }
 
-    function renderPets() {
-      if (!state.cards.length) {
-        el.petList.innerHTML = '<div class="empty">ペット情報が見つかりません。デモでは田中 美咲様のペットを読み込みます。</div>';
-        return;
+    function pickSelectedCard(cards){
+      if (!Array.isArray(cards) || !cards.length) return null;
+      const petId = urlParams.get("pet_id") || "";
+      const cardNo = urlParams.get("card_no") || "";
+      if (petId) {
+        const found = cards.find((card) => String(card.pet_id || card.pet?.id || "") === String(petId));
+        if (found) return found;
       }
+      if (cardNo) {
+        const found = cards.find((card) => String(card.card_no || "") === String(cardNo));
+        if (found) return found;
+      }
+      return cards[0];
+    }
 
-      el.petList.innerHTML = state.cards.map((card, index) => {
-        const id = card.pet_id || card.id || "";
-        const active = state.selectedPet && state.selectedPet.pet_id === id ? " active" : "";
-        const petName = card.pet_name || "ペット";
-        const species = card.species_label || card.species || "";
-        const cardNo = card.card_no || "";
-        return `
-          <div class="pet-card${active}" data-pet-id="${escapeHtml(id)}">
-            <b>${escapeHtml(petName)}</b>
-            <span>${escapeHtml(species)} ${cardNo ? " / 診察券 " + escapeHtml(cardNo) : ""}</span>
+    function petEmoji(card){
+      const value = String(card?.species || card?.species_label || card?.animal_type || "").toLowerCase();
+      if (value.includes("cat") || value.includes("猫")) return "🐱";
+      if (value.includes("rabbit") || value.includes("うさ")) return "🐰";
+      return "🐶";
+    }
+
+    function cardValue(card, ...keys){
+      for (const key of keys) {
+        const v = key.split(".").reduce((acc, part) => acc?.[part], card);
+        if (v !== undefined && v !== null && String(v) !== "") return v;
+      }
+      return "";
+    }
+
+    function renderPetArea(){
+      const card = state.selectedCard;
+      if (!card) {
+        $("petArea").innerHTML = `
+          <div class="notice ng">
+            LINE連携済みの診察券が見つかりません。受付で登録・LINE連携を確認してください。
           </div>
         `;
-      }).join("");
-
-      el.petList.querySelectorAll(".pet-card").forEach(node => {
-        node.addEventListener("click", () => {
-          const petId = node.dataset.petId;
-          state.selectedPet = state.cards.find(card => String(card.pet_id || card.id) === String(petId)) || state.cards[0];
-          renderPets();
-        });
-      });
-    }
-
-    function setMode(mode) {
-      state.mode = mode;
-      document.querySelectorAll(".mode-card").forEach(card => {
-        card.classList.toggle("active", card.dataset.mode === mode);
-      });
-
-      const info = modeInfo[mode] || modeInfo.today_queue;
-      el.submitButton.textContent = info.submit;
-      el.modeNotice.textContent = info.notice;
-      el.requestCategory.value = info.defaultCategory;
-
-      if (mode === "priority_reservation") {
-        el.targetDate.min = addDaysString(1);
-        el.targetDate.value = addDaysString(info.dateOffset);
-      } else {
-        el.targetDate.min = todayString();
-        el.targetDate.value = todayString();
-      }
-
-      if (mode === "medicine_prevention") {
-        el.purpose.placeholder = "例：フィラリア薬、ノミダニ薬、フード受け取り、ワクチン";
-      } else if (mode === "care_consult") {
-        el.purpose.placeholder = "例：爪切り、耳そうじ、肛門腺、簡単なケア相談";
-      } else if (mode === "priority_reservation") {
-        el.purpose.placeholder = "例：ワクチン、健康診断、慢性疾患の再診";
-      } else {
-        el.purpose.placeholder = "例：皮膚のかゆみ、食欲不振、再診など";
-      }
-    }
-
-    function buildEntryTags(item) {
-      const tags = [];
-      if (item.entry_kind_label) tags.push(item.entry_kind_label);
-      if (item.request_category_label) tags.push(item.request_category_label);
-      if (item.status_label) tags.push(item.status_label);
-      if (item.day_part_label) tags.push(item.day_part_label);
-      return tags.map(tag => `<span class="tag">${escapeHtml(tag)}</span>`).join("");
-    }
-
-    function shouldShowEntry(item) {
-      if (state.filter === "all") return true;
-      if (state.filter === "active") return ["reserved", "waiting", "checked_in", "examining"].includes(item.status);
-      return item.entry_kind === state.filter;
-    }
-
-    function renderEntries() {
-      const filtered = (state.entries || []).filter(shouldShowEntry);
-
-      if (!filtered.length) {
-        el.entryList.innerHTML = '<div class="empty">表示する受付データがありません。</div>';
+        $("submitBtn").disabled = true;
         return;
       }
 
-      el.entryList.innerHTML = filtered.map(item => {
-        const no = item.queue_number ? `${item.queue_number}` : "-";
-        const title = `${item.pet_name || "ペット"}｜${item.purpose || item.request_category_label || "受付"}`;
-        const guardian = item.guardian_name || item.line_display_name || "飼い主";
-        const statusClass = item.status || "";
-        const datePart = `${item.target_date || ""} ${item.day_part_label || ""}`.trim();
-        return `
-          <article class="entry ${escapeHtml(statusClass)}">
-            <div class="entry-no">${escapeHtml(no)}</div>
+      const petName = cardValue(card, "pet_name", "pet.pet_name", "name", "pet.name") || "ペット";
+      const guardianName = cardValue(card, "guardian_name", "guardian.guardian_name", "owner_name", "guardian.name") || state.guardian?.guardian_name || "飼い主";
+      const cardNo = cardValue(card, "card_no", "card.card_no") || "-";
+      const species = cardValue(card, "species_label", "species", "animal_type", "pet.species_label", "pet.animal_type") || "";
+      const breed = cardValue(card, "breed", "pet.breed") || "";
+
+      $("petArea").innerHTML = `
+        <div class="petCard">
+          <div class="petMain">
+            <div class="petIcon">${petEmoji(card)}</div>
             <div>
-              <h4>${escapeHtml(title)}</h4>
-              <p>${escapeHtml(guardian)} / ${escapeHtml(datePart)}</p>
-              ${item.symptoms_summary ? `<p>${escapeHtml(item.symptoms_summary)}</p>` : ""}
-              <div class="tagline">${buildEntryTags(item)}</div>
+              <div class="petName">${escapeHtml(petName)}</div>
+              <div class="petSub">${escapeHtml(species)} ${breed ? "/ " + escapeHtml(breed) : ""}</div>
+              <div class="petSub">飼い主：${escapeHtml(guardianName)}</div>
+              <div class="petSub">診察券：${escapeHtml(cardNo)}</div>
             </div>
-          </article>
-        `;
-      }).join("");
-    }
-
-    function renderResult(data) {
-      const entry = data.entry || {};
-      const result = data.result || {};
-      const number = entry.queue_number || result.queue_number || "-";
-      const isPriority = entry.entry_kind === "priority_reservation" || state.mode === "priority_reservation";
-      const statusTitle = isPriority ? "優先受付予約が完了しました" : "受付が完了しました";
-
-      el.resultArea.innerHTML = `
-        <div class="result-card">
-          <h3>${escapeHtml(statusTitle)}</h3>
-          <div class="result-number">
-            <div class="big-number">
-              <small>${isPriority ? "優先受付" : "受付番号"}</small>
-              <b>${escapeHtml(number)}</b>
-            </div>
-            <div class="info-table">
-              <div class="info-row"><span>ペット</span><strong>${escapeHtml(entry.pet_name || state.selectedPet?.pet_name || "-")}</strong></div>
-              <div class="info-row"><span>受付種別</span><strong>${escapeHtml(entry.entry_kind_label || modeInfo[state.mode].title)}</strong></div>
-              <div class="info-row"><span>目的</span><strong>${escapeHtml(entry.purpose || el.purpose.value || "-")}</strong></div>
-              <div class="info-row"><span>日付</span><strong>${escapeHtml(entry.target_date || el.targetDate.value)}</strong></div>
-              <div class="info-row"><span>時間帯</span><strong>${escapeHtml(entry.day_part_label || (getSelectedDayPart() === "morning" ? "午前" : "午後"))}</strong></div>
-            </div>
-          </div>
-          <div class="notice">
-            ${isPriority
-              ? "この予約は診察開始時刻を保証するものではありません。午前・午後の優先受付枠です。"
-              : "急患対応などにより順番が前後する場合があります。順番が近づきましたら、院内受付までお越しください。"
-            }
           </div>
         </div>
       `;
     }
 
-    async function loadPetCards() {
-      const params = new URLSearchParams(location.search);
-      const demo = params.get("demo") || "true";
-      const lineUserId = params.get("line_user_id") || "";
-      const guardianId = params.get("guardian_id") || "";
+    function renderClinicStatus(){
+      const status = state.todayStatus || {};
+      const settings = state.settings || {};
+      const label = status.reception_label || "確認中";
+      const isFullClosed = status.is_full_closed === true || label === "休診";
+      const isMorningClosed = status.is_morning_closed === true || isFullClosed;
+      const isAfternoonClosed = status.is_afternoon_closed === true || isFullClosed;
+      const hasStatus = Boolean(state.todayStatus);
 
-      const data = await apiGet("/api/member/pet-cards", {
-        demo,
-        line_user_id: lineUserId,
-        guardian_id: guardianId
-      });
+      const canMorning = status.can_accept_morning === true || (!isFullClosed && !isMorningClosed && hasStatus);
+      const canAfternoon = status.can_accept_afternoon === true || (!isFullClosed && !isAfternoonClosed && hasStatus);
+      const canAny = hasStatus ? (canMorning || canAfternoon) : true;
 
-      state.selectedGuardian = data.guardian || null;
-      state.cards = Array.isArray(data.cards) ? data.cards : [];
-      state.selectedPet = state.cards[0] || null;
-      renderPets();
+      state.canAcceptMorning = canMorning;
+      state.canAcceptAfternoon = canAfternoon;
+      state.canAcceptAny = canAny;
+
+      const morningText = isMorningClosed
+        ? "受付できません"
+        : `${timeText(settings.morning_open_time || status.morning_open_time || "09:00")}〜${timeText(settings.morning_last_accept_time || status.morning_last_accept_time || "11:30")}`;
+
+      const afternoonText = isAfternoonClosed
+        ? "受付できません"
+        : `${timeText(settings.afternoon_open_time || status.afternoon_open_time || "15:00")}〜${timeText(settings.afternoon_last_accept_time || status.afternoon_last_accept_time || "18:00")}`;
+
+      const message = status.display_message || settings.public_notice || "本日の受付状態を確認してください。";
+      const nextClosed = buildNextClosedChips();
+      const boxClass = isFullClosed ? "clinicStatusBox closed" : (!canMorning || !canAfternoon) ? "clinicStatusBox half" : "clinicStatusBox";
+      const tagText = !hasStatus ? "確認中" : isFullClosed ? "本日休診" : (!canMorning || !canAfternoon) ? label : "受付中";
+
+      const html = `
+        <div class="clinicStatusTitle">
+          <strong>${escapeHtml(message)}</strong>
+          <span class="clinicStatusTag">${escapeHtml(tagText)}</span>
+        </div>
+        <div class="clinicTimeGrid">
+          <div class="clinicTime ${isMorningClosed ? "off" : ""}">
+            <small>午前受付</small>
+            <b>${escapeHtml(morningText)}</b>
+          </div>
+          <div class="clinicTime ${isAfternoonClosed ? "off" : ""}">
+            <small>午後受付</small>
+            <b>${escapeHtml(afternoonText)}</b>
+          </div>
+        </div>
+        ${status.special_title ? `<div class="nextClosedList"><span class="closedChip">本日：${escapeHtml(status.special_title)}</span></div>` : ""}
+        ${nextClosed}
+      `;
+
+      const main = $("clinicReceptionStatus");
+      main.className = boxClass;
+      main.innerHTML = html;
+
+      const hero = $("heroClinicStatus");
+      hero.className = boxClass;
+      hero.style.background = isFullClosed
+        ? "rgba(184,74,74,.22)"
+        : (!canMorning || !canAfternoon)
+          ? "rgba(255,245,220,.18)"
+          : "rgba(255,255,255,.16)";
+      hero.style.borderColor = "rgba(255,255,255,.28)";
+      hero.style.color = "#fff";
+      hero.innerHTML = `
+        <div class="clinicStatusTitle">
+          <strong>${escapeHtml(message)}</strong>
+          <span class="clinicStatusTag" style="background:rgba(255,255,255,.18);color:#fff;">${escapeHtml(tagText)}</span>
+        </div>
+        <div style="font-size:13px;font-weight:750;line-height:1.65;color:rgba(255,255,255,.92);">
+          午前 ${escapeHtml(morningText)} / 午後 ${escapeHtml(afternoonText)}
+        </div>
+      `;
+
+      updateReceptionButtons();
     }
 
-    async function loadQueueData() {
-      const date = el.targetDate.value || todayString();
-      const [summary, entries] = await Promise.all([
-        apiGet("/api/public/queue/summary", { date }),
-        apiGet("/api/public/queue/entries", { date, limit: 160 })
-      ]);
+    function buildNextClosedChips(){
+      const rows = (state.calendar || [])
+        .filter((row) => row.target_date && row.target_date >= todayString())
+        .filter((row) => row.reception_label && row.reception_label !== "通常受付")
+        .slice(0, 4);
 
-      state.summary = summary.summary || null;
-      state.summaries = summary.items || [];
-      state.entries = entries.items || [];
-      renderSummary();
-      renderEntries();
+      if (!rows.length) return "";
+
+      return `
+        <div class="nextClosedList">
+          ${rows.map((row) => `<span class="closedChip">${escapeHtml(row.target_date.slice(5))} ${escapeHtml(row.reception_label)}${row.special_title ? "：" + escapeHtml(row.special_title) : ""}</span>`).join("")}
+        </div>
+      `;
     }
 
-    function validateForm() {
-      if (!state.selectedPet) {
-        throw new Error("ペットを選択してください。");
+    function renderMiniCalendar(){
+      const rows = (state.calendar || [])
+        .filter((row) => row.reception_label && row.reception_label !== "通常受付")
+        .slice(0, 8);
+
+      if (!rows.length) {
+        $("miniCalendar").innerHTML = `<div class="dayMini"><b>休診予定なし</b><span>2か月以内の臨時休診はありません。</span></div>`;
+        return;
       }
 
-      if (!el.purpose.value.trim()) {
-        throw new Error("目的・症状の概要を入力してください。");
-      }
+      $("miniCalendar").innerHTML = rows.map((row) => {
+        const cls = row.reception_label === "休診" ? "dayMini closed" : "dayMini half";
+        return `
+          <div class="${cls}">
+            <b>${escapeHtml(row.target_date.slice(5))} ${escapeHtml(row.reception_label)}</b>
+            <span>${escapeHtml(row.special_title || row.special_note || "")}</span>
+          </div>
+        `;
+      }).join("");
+    }
 
-      if (state.mode === "priority_reservation" && el.targetDate.value <= todayString()) {
-        throw new Error("優先受付予約は、明日以降の日付を選択してください。");
+    function updateReceptionButtons(){
+      const dayPart = $("dayPart").value;
+      const dayPartOk = dayPart === "morning" ? state.canAcceptMorning : state.canAcceptAfternoon;
+      const canSubmit = Boolean(state.selectedCard) && state.canAcceptAny && dayPartOk;
+
+      $("submitBtn").disabled = !canSubmit;
+
+      $("choiceGeneral").disabled = !state.canAcceptAny;
+      $("choiceMedicine").disabled = !state.canAcceptAny;
+      $("choiceCare").disabled = !state.canAcceptAny;
+
+      const disabledReason = $("disabledReason");
+      if (!state.canAcceptAny) {
+        disabledReason.classList.remove("hidden");
+        disabledReason.textContent = state.todayStatus?.display_message || "本日は受付できません。";
+      } else if (!dayPartOk) {
+        disabledReason.classList.remove("hidden");
+        disabledReason.textContent = dayPart === "morning" ? "本日は午前受付ができません。" : "本日は午後受付ができません。";
+      } else {
+        disabledReason.classList.add("hidden");
+        disabledReason.textContent = "";
       }
     }
 
-    async function submitForm(event) {
-      event.preventDefault();
+    function defaultDayPart(){
+      const h = new Date().getHours();
+      if (h >= 13 && state.canAcceptAfternoon) return "afternoon";
+      if (state.canAcceptMorning) return "morning";
+      if (state.canAcceptAfternoon) return "afternoon";
+      return h >= 13 ? "afternoon" : "morning";
+    }
+
+    function selectChoice(button){
+      document.querySelectorAll(".choice").forEach((btn) => btn.classList.remove("active"));
+      button.classList.add("active");
+      state.selectedEntryKind = button.dataset.entryKind || "today_queue";
+      state.selectedRequestCategory = button.dataset.requestCategory || "general_exam";
+
+      if (state.selectedEntryKind === "today_queue") $("purpose").value = "通常診察";
+      if (state.selectedEntryKind === "medicine_prevention") $("purpose").value = "お薬・予防受付";
+      if (state.selectedEntryKind === "care_consult") $("purpose").value = "ケア処置相談";
+    }
+
+    function getCardInfo(){
+      const card = state.selectedCard || {};
+      const guardian = state.guardian || {};
+      const cardToken = cardValue(card, "card_token", "qr_token", "card.card_token", "card.qr_token") || "";
+      const cardId = cardValue(card, "card_id", "id", "card.card_id") || "";
+      const guardianId = cardValue(card, "guardian_id", "guardian.id", "guardian_guardian_id") || guardian.guardian_id || guardian.id || "";
+      const petId = cardValue(card, "pet_id", "pet.id", "pet.pet_id") || "";
+      return { card, guardian, cardToken, cardId, guardianId, petId };
+    }
+
+    async function submitReception(){
+      updateReceptionButtons();
+      if ($("submitBtn").disabled) {
+        setNotice("submitStatus", "ng", "現在はこの時間帯の受付ができません。");
+        return;
+      }
+
+      const info = getCardInfo();
+      if (!info.petId && !info.cardToken && !info.cardId) {
+        setNotice("submitStatus", "ng", "診察券情報が足りません。受付で確認してください。");
+        return;
+      }
+
+      const token = info.cardToken || "";
+      const qrPayload = token ? `vetcard:${CLINIC_CODE}:${token}` : "";
+
+      $("submitBtn").disabled = true;
+      $("submitBtn").textContent = "受付中...";
+      setNotice("submitStatus", "info", "受付番号を発行しています。");
 
       try {
-        validateForm();
+        const data = await apiPost("/api/admin/queue/create", {
+          qr_token: token,
+          token,
+          card_token: token,
+          qr_payload: qrPayload,
+          card_id: info.cardId,
+          guardian_id: info.guardianId,
+          pet_id: info.petId,
+          entry_kind: state.selectedEntryKind,
+          request_category: state.selectedRequestCategory,
+          target_date: todayString(),
+          day_part: $("dayPart").value,
+          purpose: $("purpose").value || "LINE来院受付",
+          symptoms_summary: $("symptoms").value || $("purpose").value || "LINE来院受付",
+          desired_contact: "line",
+          source: "line_member_waiting",
+          actor_name: "飼い主LINE",
+          staff_name: "飼い主LINE"
+        }, false);
 
-        el.submitButton.disabled = true;
-        el.submitButton.textContent = "送信中...";
-
-        const selected = state.selectedPet || {};
-        const body = {
-          demo: true,
-          source: "line",
-          actor_name: state.selectedGuardian?.guardian_name || "飼い主",
-          guardian_id: state.selectedGuardian?.id || state.selectedGuardian?.guardian_id || selected.guardian_id || null,
-          pet_id: selected.pet_id || selected.id || null,
-          qr_token: selected.qr_token || selected.card_token || selected.token || null,
-          entry_kind: state.mode,
-          request_category: el.requestCategory.value,
-          target_date: el.targetDate.value,
-          day_part: getSelectedDayPart(),
-          purpose: el.purpose.value.trim(),
-          symptoms_summary: el.freeText.value.trim() || el.purpose.value.trim(),
-          desired_contact: el.desiredContact.value,
-          questionnaire: {
-            purpose: el.purpose.value.trim(),
-            onset_note: el.onsetNote.value.trim(),
-            appetite: el.appetite.value,
-            energy_level: el.energyLevel.value,
-            free_text: el.freeText.value.trim(),
-            emergency_flag: el.emergencyFlag.checked
-          }
-        };
-
-        const data = await apiPost("/api/member/queue/create", body);
-        renderResult(data);
-        await loadQueueData();
-        setApiStatus("受付保存OK", true);
+        const num = data.entry?.queue_number || data.result?.queue_number || "-";
+        state.entryCreated = data.entry || data.result || data;
+        renderSuccess(num);
+        setNotice("submitStatus", "ok", `受付が完了しました。受付番号：${num}`);
       } catch (error) {
-        alert(error.message || "受付に失敗しました。");
-        setApiStatus("受付エラー", false);
+        setNotice("submitStatus", "ng", error.message || "受付に失敗しました。");
       } finally {
-        const info = modeInfo[state.mode] || modeInfo.today_queue;
-        el.submitButton.disabled = false;
-        el.submitButton.textContent = info.submit;
+        $("submitBtn").disabled = false;
+        $("submitBtn").textContent = "この内容で受付する";
+        updateReceptionButtons();
       }
     }
 
-    async function init() {
-      const params = new URLSearchParams(location.search);
-      const initialMode = params.get("mode") || "today_queue";
-      setMode(modeInfo[initialMode] ? initialMode : "today_queue");
+    function renderSuccess(num){
+      const card = state.selectedCard || {};
+      const petName = cardValue(card, "pet_name", "pet.pet_name", "name", "pet.name") || "ペット";
+      $("successBox").classList.remove("hidden");
+      $("successBox").innerHTML = `
+        <div class="queueBox">
+          <div class="queueNo">${escapeHtml(num)}</div>
+          <div>
+            <h3>受付が完了しました</h3>
+            <p>${escapeHtml(petName)}ちゃんの受付番号です。院内でお待ちください。</p>
+            <div class="buttonRow">
+              <a class="btn btnSoft" href="${escapeHtml(buildPageUrl("member.html", { v:"step-vet-36d-1", line_user_id: LINE_USER_ID }))}">診察券へ戻る</a>
+            </div>
+          </div>
+        </div>
+      `;
+    }
 
-      document.querySelectorAll(".mode-card").forEach(card => {
-        card.addEventListener("click", () => {
-          setMode(card.dataset.mode);
-          loadQueueData().catch(error => setApiStatus(error.message, false));
-        });
-        card.addEventListener("keydown", event => {
-          if (event.key === "Enter" || event.key === " ") {
-            event.preventDefault();
-            setMode(card.dataset.mode);
-            loadQueueData().catch(error => setApiStatus(error.message, false));
-          }
-        });
-      });
+    function renderDebug(data){
+      $("debug").textContent = JSON.stringify({
+        clinic: state.clinic,
+        settings: state.settings,
+        today_status: state.todayStatus,
+        guardian: state.guardian,
+        selected_card: state.selectedCard,
+        cards_count: state.cards.length,
+        latest: data || null
+      }, null, 2);
+    }
 
-      document.querySelectorAll(".tab").forEach(tab => {
-        tab.addEventListener("click", () => {
-          document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
-          tab.classList.add("active");
-          state.filter = tab.dataset.filter || "active";
-          renderEntries();
-        });
-      });
-
-      document.querySelectorAll('input[name="day_part"]').forEach(radio => {
-        radio.addEventListener("change", renderSummary);
-      });
-
-      el.targetDate.addEventListener("change", () => {
-        loadQueueData().catch(error => setApiStatus(error.message, false));
-      });
-
-      el.refreshButton.addEventListener("click", () => {
-        loadQueueData()
-          .then(() => setApiStatus("混雑状況更新OK", true))
-          .catch(error => setApiStatus(error.message, false));
-      });
-
-      el.queueForm.addEventListener("submit", submitForm);
-
+    async function loadAll(){
+      setNotice("submitStatus", "info", "医院設定と診察券情報を読み込み中です。");
       try {
-        await loadPetCards();
-        await loadQueueData();
-        setApiStatus("API接続OK", true);
+        const [clinicData, cardData] = await Promise.all([
+          loadClinicSettings(),
+          loadMemberCards()
+        ]);
+
+        $("dayPart").value = defaultDayPart();
+        if (!$("purpose").value) $("purpose").value = "通常診察";
+        updateReceptionButtons();
+        setNotice("submitStatus", "ok", "受付内容を選んでください。");
+        renderDebug({ clinicData, cardData });
       } catch (error) {
-        console.error(error);
-        setApiStatus(error.message || "API接続エラー", false);
-        el.petList.innerHTML = '<div class="empty">API接続に失敗しました。config.js と Worker URL を確認してください。</div>';
-        el.entryList.innerHTML = '<div class="empty">受付状況を読み込めませんでした。</div>';
+        setNotice("submitStatus", "ng", error.message || "読み込みに失敗しました。");
+        renderDebug({ error: error.message });
       }
+    }
+
+    function bindEvents(){
+      document.querySelectorAll(".choice").forEach((button) => {
+        button.addEventListener("click", () => selectChoice(button));
+      });
+
+      $("dayPart").addEventListener("change", updateReceptionButtons);
+      $("submitBtn").addEventListener("click", submitReception);
+      $("reloadBtn").addEventListener("click", loadAll);
+    }
+
+    function init(){
+      updateLinks();
+      bindEvents();
+      loadAll();
     }
 
     init();
