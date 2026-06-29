@@ -435,6 +435,11 @@
     }
     .source-tag.front_desk,
     .source-tag.window,
+    .field-help{display:block;margin-top:6px;color:var(--muted);font-size:12px;font-weight:800;line-height:1.45}
+    .urgent-toggle{display:flex;align-items:flex-start;gap:8px;margin-top:10px;padding:10px 12px;border:1px solid #f0d4a6;border-radius:14px;background:#fffaf0;color:#6b4b00;font-weight:900;line-height:1.45}
+    .urgent-toggle input{width:auto;margin-top:3px}
+    .urgent-toggle small{display:block;color:#8a6a16;font-weight:800;margin-top:2px}
+    .urgent-label{display:inline-flex;align-items:center;border-radius:999px;padding:4px 8px;background:#fff2ef;color:#c44231;border:1px solid #f2c0b8;font-size:11px;font-weight:1000}
     .source-tag.manual_front{
       background:#ecf8f0;
       border-color:#bfe4cf;
@@ -705,7 +710,7 @@
   
 
     /* =========================================================
-      STEP VET-52.5D：受付PC 画面整理版・窓口受付修正
+      STEP VET-52.5E：受付PC 窓口・電話受付 時刻整理版
       目的：長い縦スクロールをやめ、左メニューで必要な操作だけ表示する
     ========================================================= */
     .ops-workbench{display:grid;grid-template-columns:270px minmax(0,1fr);gap:18px;align-items:start;margin-top:18px}
@@ -761,20 +766,20 @@
 <div class="brand">
 <div class="logo">📷</div>
 <div>
-<small>scan-pc.html / STEP VET-52.5D</small>
+<small>scan-pc.html / STEP VET-52.5E</small>
 <strong>DPRO PET CARE LINE</strong>
 </div>
 </div>
 <nav aria-label="関連画面" class="actions">
-<a class="pill" href="./index.html?clinic_code=dpro_vet_demo&amp;demo=ready&amp;v=step-vet-52-5d">管理トップ</a>
-<a class="pill" href="./waiting.html?clinic_code=dpro_vet_demo&amp;line_user_id=demo_line_link_001&amp;demo=ready&amp;v=step-vet-52-5d">飼い主受付</a>
-<a class="pill" href="./doctor.html?clinic_code=dpro_vet_demo&amp;demo=ready&amp;v=step-vet-52-5d">獣医師画面</a>
-<a class="pill" href="./owner.html?clinic_code=dpro_vet_demo&amp;demo=ready&amp;v=step-vet-52-5d">オーナー画面</a>
-<a class="pill" href="./system-check.html?clinic_code=dpro_vet_demo&amp;demo=ready&amp;v=step-vet-52-5d">システム確認</a>
+<a class="pill" href="./index.html?clinic_code=dpro_vet_demo&amp;demo=ready&amp;v=step-vet-52-5e">管理トップ</a>
+<a class="pill" href="./waiting.html?clinic_code=dpro_vet_demo&amp;line_user_id=demo_line_link_001&amp;demo=ready&amp;v=step-vet-52-5e">飼い主受付</a>
+<a class="pill" href="./doctor.html?clinic_code=dpro_vet_demo&amp;demo=ready&amp;v=step-vet-52-5e">獣医師画面</a>
+<a class="pill" href="./owner.html?clinic_code=dpro_vet_demo&amp;demo=ready&amp;v=step-vet-52-5e">オーナー画面</a>
+<a class="pill" href="./system-check.html?clinic_code=dpro_vet_demo&amp;demo=ready&amp;v=step-vet-52-5e">システム確認</a>
 </nav>
 </header><section class="hero">
 <div class="hero-card">
-<span class="badge">STEP VET-52.5D｜受付PC 画面整理版・窓口受付修正</span>
+<span class="badge">STEP VET-52.5E｜受付PC 窓口・電話受付 時刻整理版</span>
 <h1>今日の受付を中心に、<br/>必要な操作だけ開く。</h1>
 <p class="lead">受付スタッフが迷わないように、最初は「今日の受付」だけを表示します。QR受付・窓口受付・電話受付・既存患者検索・代理登録・フォローは、左メニューから必要な時だけ開きます。既存APIと登録処理はそのまま保持しています。</p>
 </div>
@@ -1014,104 +1019,13 @@
 <div>
 <label for="manualVisitTime">来院予定時刻</label>
 <select id="manualVisitTime">
-<option value="">時刻を選択（15分単位）</option>
-<option value="00:00">00:00</option>
-<option value="00:15">00:15</option>
-<option value="00:30">00:30</option>
-<option value="00:45">00:45</option>
-<option value="01:00">01:00</option>
-<option value="01:15">01:15</option>
-<option value="01:30">01:30</option>
-<option value="01:45">01:45</option>
-<option value="02:00">02:00</option>
-<option value="02:15">02:15</option>
-<option value="02:30">02:30</option>
-<option value="02:45">02:45</option>
-<option value="03:00">03:00</option>
-<option value="03:15">03:15</option>
-<option value="03:30">03:30</option>
-<option value="03:45">03:45</option>
-<option value="04:00">04:00</option>
-<option value="04:15">04:15</option>
-<option value="04:30">04:30</option>
-<option value="04:45">04:45</option>
-<option value="05:00">05:00</option>
-<option value="05:15">05:15</option>
-<option value="05:30">05:30</option>
-<option value="05:45">05:45</option>
-<option value="06:00">06:00</option>
-<option value="06:15">06:15</option>
-<option value="06:30">06:30</option>
-<option value="06:45">06:45</option>
-<option value="07:00">07:00</option>
-<option value="07:15">07:15</option>
-<option value="07:30">07:30</option>
-<option value="07:45">07:45</option>
-<option value="08:00">08:00</option>
-<option value="08:15">08:15</option>
-<option value="08:30">08:30</option>
-<option value="08:45">08:45</option>
-<option value="09:00">09:00</option>
-<option value="09:15">09:15</option>
-<option value="09:30">09:30</option>
-<option value="09:45">09:45</option>
-<option value="10:00">10:00</option>
-<option value="10:15">10:15</option>
-<option value="10:30">10:30</option>
-<option value="10:45">10:45</option>
-<option value="11:00">11:00</option>
-<option value="11:15">11:15</option>
-<option value="11:30">11:30</option>
-<option value="11:45">11:45</option>
-<option value="12:00">12:00</option>
-<option value="12:15">12:15</option>
-<option value="12:30">12:30</option>
-<option value="12:45">12:45</option>
-<option value="13:00">13:00</option>
-<option value="13:15">13:15</option>
-<option value="13:30">13:30</option>
-<option value="13:45">13:45</option>
-<option value="14:00">14:00</option>
-<option value="14:15">14:15</option>
-<option value="14:30">14:30</option>
-<option value="14:45">14:45</option>
-<option value="15:00">15:00</option>
-<option value="15:15">15:15</option>
-<option value="15:30">15:30</option>
-<option value="15:45">15:45</option>
-<option value="16:00">16:00</option>
-<option value="16:15">16:15</option>
-<option value="16:30">16:30</option>
-<option value="16:45">16:45</option>
-<option value="17:00">17:00</option>
-<option value="17:15">17:15</option>
-<option value="17:30">17:30</option>
-<option value="17:45">17:45</option>
-<option value="18:00">18:00</option>
-<option value="18:15">18:15</option>
-<option value="18:30">18:30</option>
-<option value="18:45">18:45</option>
-<option value="19:00">19:00</option>
-<option value="19:15">19:15</option>
-<option value="19:30">19:30</option>
-<option value="19:45">19:45</option>
-<option value="20:00">20:00</option>
-<option value="20:15">20:15</option>
-<option value="20:30">20:30</option>
-<option value="20:45">20:45</option>
-<option value="21:00">21:00</option>
-<option value="21:15">21:15</option>
-<option value="21:30">21:30</option>
-<option value="21:45">21:45</option>
-<option value="22:00">22:00</option>
-<option value="22:15">22:15</option>
-<option value="22:30">22:30</option>
-<option value="22:45">22:45</option>
-<option value="23:00">23:00</option>
-<option value="23:15">23:15</option>
-<option value="23:30">23:30</option>
-<option value="23:45">23:45</option>
+<option value="">営業時間内の時刻を選択</option>
 </select>
+<small class="field-help" id="manualVisitTimeHelp">電話受付は営業時間内の15分単位から選びます。窓口受付は空欄でも登録できます。</small>
+<label class="urgent-toggle" for="manualUrgent">
+<input id="manualUrgent" type="checkbox"/>
+<span>急患・時間外として受付する<small>通常の来院予定時刻とは分けて扱います。状況はメモ欄に残してください。</small></span>
+</label>
 </div>
 <div>
 <label for="manualAgeText">年齢メモ</label>
@@ -1197,104 +1111,13 @@
 <div>
 <label for="existingVisitTime">来院予定時刻</label>
 <select id="existingVisitTime">
-<option value="">時刻を選択（15分単位）</option>
-<option value="00:00">00:00</option>
-<option value="00:15">00:15</option>
-<option value="00:30">00:30</option>
-<option value="00:45">00:45</option>
-<option value="01:00">01:00</option>
-<option value="01:15">01:15</option>
-<option value="01:30">01:30</option>
-<option value="01:45">01:45</option>
-<option value="02:00">02:00</option>
-<option value="02:15">02:15</option>
-<option value="02:30">02:30</option>
-<option value="02:45">02:45</option>
-<option value="03:00">03:00</option>
-<option value="03:15">03:15</option>
-<option value="03:30">03:30</option>
-<option value="03:45">03:45</option>
-<option value="04:00">04:00</option>
-<option value="04:15">04:15</option>
-<option value="04:30">04:30</option>
-<option value="04:45">04:45</option>
-<option value="05:00">05:00</option>
-<option value="05:15">05:15</option>
-<option value="05:30">05:30</option>
-<option value="05:45">05:45</option>
-<option value="06:00">06:00</option>
-<option value="06:15">06:15</option>
-<option value="06:30">06:30</option>
-<option value="06:45">06:45</option>
-<option value="07:00">07:00</option>
-<option value="07:15">07:15</option>
-<option value="07:30">07:30</option>
-<option value="07:45">07:45</option>
-<option value="08:00">08:00</option>
-<option value="08:15">08:15</option>
-<option value="08:30">08:30</option>
-<option value="08:45">08:45</option>
-<option value="09:00">09:00</option>
-<option value="09:15">09:15</option>
-<option value="09:30">09:30</option>
-<option value="09:45">09:45</option>
-<option value="10:00">10:00</option>
-<option value="10:15">10:15</option>
-<option value="10:30">10:30</option>
-<option value="10:45">10:45</option>
-<option value="11:00">11:00</option>
-<option value="11:15">11:15</option>
-<option value="11:30">11:30</option>
-<option value="11:45">11:45</option>
-<option value="12:00">12:00</option>
-<option value="12:15">12:15</option>
-<option value="12:30">12:30</option>
-<option value="12:45">12:45</option>
-<option value="13:00">13:00</option>
-<option value="13:15">13:15</option>
-<option value="13:30">13:30</option>
-<option value="13:45">13:45</option>
-<option value="14:00">14:00</option>
-<option value="14:15">14:15</option>
-<option value="14:30">14:30</option>
-<option value="14:45">14:45</option>
-<option value="15:00">15:00</option>
-<option value="15:15">15:15</option>
-<option value="15:30">15:30</option>
-<option value="15:45">15:45</option>
-<option value="16:00">16:00</option>
-<option value="16:15">16:15</option>
-<option value="16:30">16:30</option>
-<option value="16:45">16:45</option>
-<option value="17:00">17:00</option>
-<option value="17:15">17:15</option>
-<option value="17:30">17:30</option>
-<option value="17:45">17:45</option>
-<option value="18:00">18:00</option>
-<option value="18:15">18:15</option>
-<option value="18:30">18:30</option>
-<option value="18:45">18:45</option>
-<option value="19:00">19:00</option>
-<option value="19:15">19:15</option>
-<option value="19:30">19:30</option>
-<option value="19:45">19:45</option>
-<option value="20:00">20:00</option>
-<option value="20:15">20:15</option>
-<option value="20:30">20:30</option>
-<option value="20:45">20:45</option>
-<option value="21:00">21:00</option>
-<option value="21:15">21:15</option>
-<option value="21:30">21:30</option>
-<option value="21:45">21:45</option>
-<option value="22:00">22:00</option>
-<option value="22:15">22:15</option>
-<option value="22:30">22:30</option>
-<option value="22:45">22:45</option>
-<option value="23:00">23:00</option>
-<option value="23:15">23:15</option>
-<option value="23:30">23:30</option>
-<option value="23:45">23:45</option>
+<option value="">営業時間内の時刻を選択</option>
 </select>
+<small class="field-help" id="existingVisitTimeHelp">電話受付は営業時間内の15分単位から選びます。窓口受付は空欄でも登録できます。</small>
+<label class="urgent-toggle" for="existingUrgent">
+<input id="existingUrgent" type="checkbox"/>
+<span>急患・時間外として受付する<small>通常の来院予定時刻とは分けて扱います。状況はメモ欄に残してください。</small></span>
+</label>
 </div>
 <div class="full">
 <label for="existingMemo">受付メモ</label>
@@ -1442,104 +1265,13 @@
 <div>
 <label for="proxyVisitTime">来院予定時刻</label>
 <select id="proxyVisitTime">
-<option value="">時刻を選択（15分単位）</option>
-<option value="00:00">00:00</option>
-<option value="00:15">00:15</option>
-<option value="00:30">00:30</option>
-<option value="00:45">00:45</option>
-<option value="01:00">01:00</option>
-<option value="01:15">01:15</option>
-<option value="01:30">01:30</option>
-<option value="01:45">01:45</option>
-<option value="02:00">02:00</option>
-<option value="02:15">02:15</option>
-<option value="02:30">02:30</option>
-<option value="02:45">02:45</option>
-<option value="03:00">03:00</option>
-<option value="03:15">03:15</option>
-<option value="03:30">03:30</option>
-<option value="03:45">03:45</option>
-<option value="04:00">04:00</option>
-<option value="04:15">04:15</option>
-<option value="04:30">04:30</option>
-<option value="04:45">04:45</option>
-<option value="05:00">05:00</option>
-<option value="05:15">05:15</option>
-<option value="05:30">05:30</option>
-<option value="05:45">05:45</option>
-<option value="06:00">06:00</option>
-<option value="06:15">06:15</option>
-<option value="06:30">06:30</option>
-<option value="06:45">06:45</option>
-<option value="07:00">07:00</option>
-<option value="07:15">07:15</option>
-<option value="07:30">07:30</option>
-<option value="07:45">07:45</option>
-<option value="08:00">08:00</option>
-<option value="08:15">08:15</option>
-<option value="08:30">08:30</option>
-<option value="08:45">08:45</option>
-<option value="09:00">09:00</option>
-<option value="09:15">09:15</option>
-<option value="09:30">09:30</option>
-<option value="09:45">09:45</option>
-<option value="10:00">10:00</option>
-<option value="10:15">10:15</option>
-<option value="10:30">10:30</option>
-<option value="10:45">10:45</option>
-<option value="11:00">11:00</option>
-<option value="11:15">11:15</option>
-<option value="11:30">11:30</option>
-<option value="11:45">11:45</option>
-<option value="12:00">12:00</option>
-<option value="12:15">12:15</option>
-<option value="12:30">12:30</option>
-<option value="12:45">12:45</option>
-<option value="13:00">13:00</option>
-<option value="13:15">13:15</option>
-<option value="13:30">13:30</option>
-<option value="13:45">13:45</option>
-<option value="14:00">14:00</option>
-<option value="14:15">14:15</option>
-<option value="14:30">14:30</option>
-<option value="14:45">14:45</option>
-<option value="15:00">15:00</option>
-<option value="15:15">15:15</option>
-<option value="15:30">15:30</option>
-<option value="15:45">15:45</option>
-<option value="16:00">16:00</option>
-<option value="16:15">16:15</option>
-<option value="16:30">16:30</option>
-<option value="16:45">16:45</option>
-<option value="17:00">17:00</option>
-<option value="17:15">17:15</option>
-<option value="17:30">17:30</option>
-<option value="17:45">17:45</option>
-<option value="18:00">18:00</option>
-<option value="18:15">18:15</option>
-<option value="18:30">18:30</option>
-<option value="18:45">18:45</option>
-<option value="19:00">19:00</option>
-<option value="19:15">19:15</option>
-<option value="19:30">19:30</option>
-<option value="19:45">19:45</option>
-<option value="20:00">20:00</option>
-<option value="20:15">20:15</option>
-<option value="20:30">20:30</option>
-<option value="20:45">20:45</option>
-<option value="21:00">21:00</option>
-<option value="21:15">21:15</option>
-<option value="21:30">21:30</option>
-<option value="21:45">21:45</option>
-<option value="22:00">22:00</option>
-<option value="22:15">22:15</option>
-<option value="22:30">22:30</option>
-<option value="22:45">22:45</option>
-<option value="23:00">23:00</option>
-<option value="23:15">23:15</option>
-<option value="23:30">23:30</option>
-<option value="23:45">23:45</option>
+<option value="">営業時間内の時刻を選択</option>
 </select>
+<small class="field-help" id="proxyVisitTimeHelp">電話受付は営業時間内の15分単位から選びます。窓口受付は空欄でも登録できます。</small>
+<label class="urgent-toggle" for="proxyUrgent">
+<input id="proxyUrgent" type="checkbox"/>
+<span>急患・時間外として受付する<small>通常の来院予定時刻とは分けて扱います。状況はメモ欄に残してください。</small></span>
+</label>
 </div>
 </div>
 </div>
@@ -1647,6 +1379,8 @@
       manualRequestCategory: document.getElementById("manualRequestCategory"),
       manualDayPart: document.getElementById("manualDayPart"),
       manualVisitTime: document.getElementById("manualVisitTime"),
+      manualVisitTimeHelp: document.getElementById("manualVisitTimeHelp"),
+      manualUrgent: document.getElementById("manualUrgent"),
       manualAgeText: document.getElementById("manualAgeText"),
       manualMemo: document.getElementById("manualMemo"),
       manualReceptionCreateBtn: document.getElementById("manualReceptionCreateBtn"),
@@ -1661,6 +1395,8 @@
       existingRequestCategory: document.getElementById("existingRequestCategory"),
       existingDayPart: document.getElementById("existingDayPart"),
       existingVisitTime: document.getElementById("existingVisitTime"),
+      existingVisitTimeHelp: document.getElementById("existingVisitTimeHelp"),
+      existingUrgent: document.getElementById("existingUrgent"),
       existingMemo: document.getElementById("existingMemo"),
       existingReceptionCreateBtn: document.getElementById("existingReceptionCreateBtn"),
       existingReceptionStatus: document.getElementById("existingReceptionStatus"),
@@ -1681,6 +1417,8 @@
       proxyRequestCategory: document.getElementById("proxyRequestCategory"),
       proxyDayPart: document.getElementById("proxyDayPart"),
       proxyVisitTime: document.getElementById("proxyVisitTime"),
+      proxyVisitTimeHelp: document.getElementById("proxyVisitTimeHelp"),
+      proxyUrgent: document.getElementById("proxyUrgent"),
       proxyRegistrationCreateBtn: document.getElementById("proxyRegistrationCreateBtn"),
       proxyRegistrationClearBtn: document.getElementById("proxyRegistrationClearBtn"),
       proxyRegistrationStatus: document.getElementById("proxyRegistrationStatus")
@@ -1867,6 +1605,7 @@
         `;
       }
       updateReceptionAvailability();
+      refreshVisitTimeOptions();
     }
 
     function buildNextClosedChips(){
@@ -2763,6 +2502,113 @@
 
 
 
+
+
+    function minutesFromTime(value){
+      const match = String(value || "").match(/^(\d{1,2}):(\d{2})/);
+      if (!match) return null;
+      const h = Number(match[1]);
+      const m = Number(match[2]);
+      if (!Number.isFinite(h) || !Number.isFinite(m)) return null;
+      return h * 60 + m;
+    }
+
+    function timeFromMinutes(minutes){
+      const h = Math.floor(minutes / 60);
+      const m = minutes % 60;
+      return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+    }
+
+    function clinicRangeForDayPart(dayPart){
+      const settings = state.clinicSettings || {};
+      const status = state.todayStatus || {};
+      const part = dayPart === "morning" ? "morning" : "afternoon";
+      const isFullClosed = status.is_full_closed === true || status.reception_label === "休診";
+      const isClosed = part === "morning"
+        ? (isFullClosed || status.is_morning_closed === true || state.canAcceptMorning === false)
+        : (isFullClosed || status.is_afternoon_closed === true || state.canAcceptAfternoon === false);
+
+      const open = part === "morning"
+        ? (settings.morning_open_time || status.morning_open_time || "09:00")
+        : (settings.afternoon_open_time || status.afternoon_open_time || "15:00");
+      const last = part === "morning"
+        ? (settings.morning_last_accept_time || status.morning_last_accept_time || "11:30")
+        : (settings.afternoon_last_accept_time || status.afternoon_last_accept_time || "18:00");
+
+      return { open: timeText(open), last: timeText(last), isClosed };
+    }
+
+    function fillVisitTimeOptions(selectEl, dayPart, currentValue, urgent){
+      if (!selectEl) return;
+      const label = dayPart === "morning" ? "午前" : "午後";
+      const { open, last, isClosed } = clinicRangeForDayPart(dayPart);
+      const start = minutesFromTime(open);
+      const end = minutesFromTime(last);
+      const previous = currentValue || selectEl.value || "";
+
+      selectEl.innerHTML = "";
+      const blank = document.createElement("option");
+      blank.value = "";
+      blank.textContent = urgent ? "急患・時間外のため時刻未定" : `${label}の営業時間内から選択`;
+      selectEl.appendChild(blank);
+
+      if (!urgent && !isClosed && start !== null && end !== null && start <= end) {
+        for (let t = start; t <= end; t += 15) {
+          const value = timeFromMinutes(t);
+          const option = document.createElement("option");
+          option.value = value;
+          option.textContent = value;
+          selectEl.appendChild(option);
+        }
+      }
+
+      selectEl.disabled = Boolean(urgent || isClosed);
+      if (!urgent && Array.from(selectEl.options).some((option) => option.value === previous)) {
+        selectEl.value = previous;
+      } else {
+        selectEl.value = "";
+      }
+    }
+
+    function firstAvailableVisitTime(dayPart){
+      const { open, isClosed } = clinicRangeForDayPart(dayPart);
+      return isClosed ? "" : timeText(open || "");
+    }
+
+    function refreshVisitTimeOptions(){
+      fillVisitTimeOptions(el.manualVisitTime, el.manualDayPart?.value || defaultDayPart(), el.manualVisitTime?.value || "", Boolean(el.manualUrgent?.checked));
+      fillVisitTimeOptions(el.existingVisitTime, el.existingDayPart?.value || defaultDayPart(), el.existingVisitTime?.value || "", Boolean(el.existingUrgent?.checked));
+      fillVisitTimeOptions(el.proxyVisitTime, el.proxyDayPart?.value || defaultDayPart(), el.proxyVisitTime?.value || "", Boolean(el.proxyUrgent?.checked));
+      updateVisitTimeHelpText();
+    }
+
+    function updateVisitTimeHelpText(){
+      const pairs = [
+        { select: el.manualVisitTime, source: selectedManualReceptionSource(), urgent: el.manualUrgent, help: el.manualVisitTimeHelp },
+        { select: el.existingVisitTime, source: selectedExistingReceptionSource(), urgent: el.existingUrgent, help: el.existingVisitTimeHelp },
+        { select: el.proxyVisitTime, source: selectedProxyReceptionSource(), urgent: el.proxyUrgent, help: el.proxyVisitTimeHelp }
+      ];
+      pairs.forEach((item) => {
+        if (!item.help) return;
+        if (item.urgent?.checked) {
+          item.help.textContent = "急患・時間外として扱うため、通常の時刻選択は不要です。メモ欄に状況を残してください。";
+        } else if (item.source === "phone") {
+          item.help.textContent = "電話受付は選択中の時間帯に合わせて、営業時間内の15分単位だけ選べます。";
+        } else {
+          item.help.textContent = "窓口受付は来院済み扱いです。時刻は空欄でも登録できます。";
+        }
+      });
+    }
+
+    function urgentPrefix(isUrgent){
+      return isUrgent ? "【急患・時間外】" : "";
+    }
+
+    function buildUrgentMemo(isUrgent, memo){
+      const text = String(memo || "").trim();
+      return isUrgent ? `${urgentPrefix(true)} ${text}`.trim() : text;
+    }
+
     function selectedProxyRegistrationMode(){
       const checked = document.querySelector('input[name="proxyRegistrationMode"]:checked');
       return checked ? checked.value : "new_guardian";
@@ -2826,6 +2672,7 @@
       el.proxyReceptionOptions.style.display = on ? "" : "none";
       if (on) {
         el.proxyDayPart.value = defaultDayPart();
+        refreshVisitTimeOptions();
       }
     }
 
@@ -2847,9 +2694,22 @@
       el.proxyRequestCategory.value = "general_exam";
       el.proxyDayPart.value = defaultDayPart();
       el.proxyVisitTime.value = "";
+      if (el.proxyUrgent) el.proxyUrgent.checked = false;
+      refreshVisitTimeOptions();
 
       toggleProxyReceptionOptions();
       renderProxyRegistrationMode();
+    }
+
+
+    function normalizeProxyReceptionModeChange(){
+      const source = selectedProxyReceptionSource();
+      const urgent = Boolean(el.proxyUrgent?.checked);
+      refreshVisitTimeOptions();
+      if (source === "phone" && !urgent && !el.proxyVisitTime.value) {
+        el.proxyVisitTime.value = firstAvailableVisitTime(el.proxyDayPart.value || defaultDayPart());
+      }
+      updateVisitTimeHelpText();
     }
 
     async function createProxyRegistration(){
@@ -2887,7 +2747,15 @@
       const category = el.proxyRequestCategory.value;
       const createReception = Boolean(el.proxyCreateReceptionCheck.checked);
       const receptionSource = selectedProxyReceptionSource();
+      const urgent = Boolean(el.proxyUrgent?.checked);
       const modeLabel = isExisting ? "既存飼い主へのペット追加" : "スタッフ代理登録";
+
+      if (createReception && receptionSource === "phone" && !urgent && !el.proxyVisitTime.value) {
+        el.proxyRegistrationStatus.className = "notice ng";
+        el.proxyRegistrationStatus.textContent = "電話受付は営業時間内の来院予定時刻を選んでください。時間外・急患の場合は『急患・時間外』にチェックしてください。";
+        el.proxyVisitTime.focus();
+        return;
+      }
 
       const body = {
         guardian_id: isExisting ? selected.guardian_id : undefined,
@@ -2906,8 +2774,10 @@
         entry_kind: category === "medicine_food" || category === "prevention_medicine" ? "medicine_prevention" : "today_queue",
         target_date: todayString(),
         day_part: el.proxyDayPart.value || defaultDayPart(),
-        visit_time: el.proxyVisitTime.value,
-        purpose: `${modeLabel}：${requestCategoryLabel(category)}`,
+        visit_time: urgent ? "" : el.proxyVisitTime.value,
+        is_urgent: urgent,
+        urgency: urgent ? "emergency_after_hours" : "normal",
+        purpose: `${urgentPrefix(urgent)}${modeLabel}：${requestCategoryLabel(category)}`,
         staff_name: "受付PC",
         actor_name: "受付PC"
       };
@@ -3045,6 +2915,8 @@
       state.selectedExistingPatient = item;
       el.existingReceptionPanel.style.display = "";
       el.existingDayPart.value = defaultDayPart();
+      if (el.existingUrgent) el.existingUrgent.checked = false;
+      refreshVisitTimeOptions();
       el.existingReceptionStatus.className = "notice info";
       el.existingReceptionStatus.textContent = "受付方法・来院目的を確認して「このペットで受付する」を押してください。";
 
@@ -3058,17 +2930,18 @@
 
     function normalizeExistingReceptionModeChange(){
       const source = selectedExistingReceptionSource();
-      if (source === "phone" && !el.existingVisitTime.value) {
-        const d = new Date();
-        d.setMinutes(Math.ceil(d.getMinutes() / 15) * 15);
-        const hh = String(Math.min(d.getHours() + 1, 23)).padStart(2, "0");
-        const mm = String(d.getMinutes()).padStart(2, "0");
-        el.existingVisitTime.value = `${hh}:${mm}`;
+      const urgent = Boolean(el.existingUrgent?.checked);
+      refreshVisitTimeOptions();
+      if (source === "phone" && !urgent && !el.existingVisitTime.value) {
+        el.existingVisitTime.value = firstAvailableVisitTime(el.existingDayPart.value || defaultDayPart());
       }
+      updateVisitTimeHelpText();
       el.existingReceptionStatus.className = "notice info";
-      el.existingReceptionStatus.textContent = source === "phone"
-        ? "既存患者の電話受付として追加します。来院したら一覧で「院内受付」を押してください。時刻は15分単位です。"
-        : "既存患者の窓口受付として追加します。登録後は院内受付済みとして一覧に表示します。時刻は15分単位です。";
+      el.existingReceptionStatus.textContent = urgent
+        ? "急患・時間外として受付します。時刻は不要ですが、状況をメモ欄に残してください。"
+        : source === "phone"
+          ? "既存患者の電話受付として追加します。来院予定時刻は営業時間内の15分単位から選びます。"
+          : "既存患者の窓口受付として追加します。来院済み扱いのため時刻は空欄でも登録できます。";
     }
 
     async function createExistingPetReception(){
@@ -3088,7 +2961,15 @@
 
       const source = selectedExistingReceptionSource();
       const category = el.existingRequestCategory.value;
-      const sourceLabelText = source === "phone" ? "電話受付" : "窓口受付";
+      const urgent = Boolean(el.existingUrgent?.checked);
+      const sourceLabelText = urgent ? "急患・時間外受付" : (source === "phone" ? "電話受付" : "窓口受付");
+
+      if (source === "phone" && !urgent && !el.existingVisitTime.value) {
+        el.existingReceptionStatus.className = "notice ng";
+        el.existingReceptionStatus.textContent = "電話受付は営業時間内の来院予定時刻を選んでください。時間外・急患の場合は『急患・時間外』にチェックしてください。";
+        el.existingVisitTime.focus();
+        return;
+      }
 
       const body = {
         reception_source: source,
@@ -3100,10 +2981,12 @@
         entry_kind: category === "medicine_food" || category === "prevention_medicine" ? "medicine_prevention" : "today_queue",
         target_date: todayString(),
         day_part: el.existingDayPart.value || defaultDayPart(),
-        visit_time: el.existingVisitTime.value,
-        purpose: `既存患者${sourceLabelText}：${requestCategoryLabel(category)}`,
-        memo: el.existingMemo.value.trim(),
-        staff_note: el.existingMemo.value.trim(),
+        visit_time: urgent ? "" : el.existingVisitTime.value,
+        is_urgent: urgent,
+        urgency: urgent ? "emergency_after_hours" : "normal",
+        purpose: `${urgentPrefix(urgent)}既存患者${sourceLabelText}：${requestCategoryLabel(category)}`,
+        memo: buildUrgentMemo(urgent, el.existingMemo.value.trim()),
+        staff_note: buildUrgentMemo(urgent, el.existingMemo.value.trim()),
         staff_name: "受付PC",
         actor_name: "受付PC"
       };
@@ -3141,6 +3024,8 @@
       el.manualRequestCategory.value = "general_exam";
       el.manualDayPart.value = defaultDayPart();
       el.manualVisitTime.value = "";
+      if (el.manualUrgent) el.manualUrgent.checked = false;
+      refreshVisitTimeOptions();
       el.manualAgeText.value = "";
       el.manualMemo.value = "";
       el.manualReceptionStatus.className = "notice";
@@ -3149,17 +3034,18 @@
 
     function normalizeManualFormOnModeChange(){
       const source = selectedManualReceptionSource();
-      if (source === "phone" && !el.manualVisitTime.value) {
-        const d = new Date();
-        d.setMinutes(Math.ceil(d.getMinutes() / 15) * 15);
-        const hh = String(Math.min(d.getHours() + 1, 23)).padStart(2, "0");
-        const mm = String(d.getMinutes()).padStart(2, "0");
-        el.manualVisitTime.value = `${hh}:${mm}`;
+      const urgent = Boolean(el.manualUrgent?.checked);
+      refreshVisitTimeOptions();
+      if (source === "phone" && !urgent && !el.manualVisitTime.value) {
+        el.manualVisitTime.value = firstAvailableVisitTime(el.manualDayPart.value || defaultDayPart());
       }
+      updateVisitTimeHelpText();
       el.manualReceptionStatus.className = "notice info";
-      el.manualReceptionStatus.textContent = source === "phone"
-        ? "電話受付として追加します。来院したら一覧で「院内受付」を押してください。時刻は15分単位です。"
-        : "窓口受付として追加します。登録後は院内受付済みとして一覧に表示します。時刻は15分単位です。";
+      el.manualReceptionStatus.textContent = urgent
+        ? "急患・時間外として受付します。時刻は不要ですが、状況をメモ欄に残してください。"
+        : source === "phone"
+          ? "電話受付として追加します。来院予定時刻は営業時間内の15分単位から選びます。"
+          : "窓口受付として追加します。来院済み扱いのため時刻は空欄でも登録できます。";
     }
 
     async function createManualReception(){
@@ -3188,8 +3074,16 @@
       }
 
       const category = el.manualRequestCategory.value;
-      const memo = el.manualMemo.value.trim();
-      const sourceLabelText = source === "phone" ? "電話受付" : "窓口受付";
+      const urgent = Boolean(el.manualUrgent?.checked);
+      const memo = buildUrgentMemo(urgent, el.manualMemo.value.trim());
+      const sourceLabelText = urgent ? "急患・時間外受付" : (source === "phone" ? "電話受付" : "窓口受付");
+
+      if (source === "phone" && !urgent && !el.manualVisitTime.value) {
+        el.manualReceptionStatus.className = "notice ng";
+        el.manualReceptionStatus.textContent = "電話受付は営業時間内の来院予定時刻を選んでください。時間外・急患の場合は『急患・時間外』にチェックしてください。";
+        el.manualVisitTime.focus();
+        return;
+      }
 
       const body = {
         reception_source: source,
@@ -3201,9 +3095,11 @@
         entry_kind: category === "medicine_food" || category === "prevention_medicine" ? "medicine_prevention" : "today_queue",
         target_date: todayString(),
         day_part: el.manualDayPart.value || defaultDayPart(),
-        visit_time: el.manualVisitTime.value,
+        visit_time: urgent ? "" : el.manualVisitTime.value,
         age_text: el.manualAgeText.value.trim(),
-        purpose: `${sourceLabelText}：${requestCategoryLabel(category)}`,
+        is_urgent: urgent,
+        urgency: urgent ? "emergency_after_hours" : "normal",
+        purpose: `${urgentPrefix(urgent)}${sourceLabelText}：${requestCategoryLabel(category)}`,
         memo,
         staff_note: memo,
         staff_name: "受付PC",
@@ -3287,6 +3183,18 @@
         input.addEventListener("change", normalizeManualFormOnModeChange);
       });
       clearManualReceptionForm();
+
+      if (el.manualDayPart) el.manualDayPart.addEventListener("change", normalizeManualFormOnModeChange);
+      if (el.manualUrgent) el.manualUrgent.addEventListener("change", normalizeManualFormOnModeChange);
+      if (el.existingDayPart) el.existingDayPart.addEventListener("change", normalizeExistingReceptionModeChange);
+      if (el.existingUrgent) el.existingUrgent.addEventListener("change", normalizeExistingReceptionModeChange);
+      if (el.proxyDayPart) el.proxyDayPart.addEventListener("change", normalizeProxyReceptionModeChange);
+      if (el.proxyUrgent) el.proxyUrgent.addEventListener("change", normalizeProxyReceptionModeChange);
+      document.querySelectorAll('input[name="proxyReceptionSource"]').forEach((input) => {
+        input.addEventListener("change", normalizeProxyReceptionModeChange);
+      });
+      refreshVisitTimeOptions();
+
 
       el.lookupBtn.addEventListener("click", lookupQr);
       el.clearScanBtn.addEventListener("click", clearScan);
