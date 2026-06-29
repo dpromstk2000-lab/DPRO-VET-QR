@@ -710,7 +710,7 @@
   
 
     /* =========================================================
-      STEP VET-52.5E：受付PC 窓口・電話受付 時刻整理版
+      STEP VET-52.5I：受付PC 既存患者重複メッセージ修正版
       目的：長い縦スクロールをやめ、左メニューで必要な操作だけ表示する
     ========================================================= */
     .ops-workbench{display:grid;grid-template-columns:270px minmax(0,1fr);gap:18px;align-items:start;margin-top:18px}
@@ -766,7 +766,7 @@
 <div class="brand">
 <div class="logo">📷</div>
 <div>
-<small>scan-pc.html / STEP VET-52.5E</small>
+<small>scan-pc.html / STEP VET-52.5I</small>
 <strong>DPRO PET CARE LINE</strong>
 </div>
 </div>
@@ -779,7 +779,7 @@
 </nav>
 </header><section class="hero">
 <div class="hero-card">
-<span class="badge">STEP VET-52.5E｜受付PC 窓口・電話受付 時刻整理版</span>
+<span class="badge">STEP VET-52.5I｜受付PC 既存患者重複メッセージ修正版</span>
 <h1>今日の受付を中心に、<br/>必要な操作だけ開く。</h1>
 <p class="lead">受付スタッフが迷わないように、最初は「今日の受付」だけを表示します。QR受付・窓口受付・電話受付・既存患者検索・代理登録・フォローは、左メニューから必要な時だけ開きます。既存APIと登録処理はそのまま保持しています。</p>
 </div>
@@ -2998,9 +2998,14 @@
       try {
         const data = await apiPost("/api/admin/existing-pet-reception/create", body, true);
         const num = data.entry?.queue_number || data.result?.queue_number || "-";
+        const isDuplicate = Boolean(data.duplicate || data.already_registered || data.entry?.duplicate || data.result?.duplicate || data.result?.already_registered);
         el.existingReceptionStatus.className = "notice ok";
-        el.existingReceptionStatus.textContent = `${item.pet_name} の${sourceLabelText}を追加しました。受付番号：${num}`;
-        el.existingMemo.value = "";
+        if (isDuplicate) {
+          el.existingReceptionStatus.textContent = `${item.pet_name}ちゃんは本日すでに受付済みです。受付番号：${num} / 重複登録はしていません。`;
+        } else {
+          el.existingReceptionStatus.textContent = `${item.pet_name} の${sourceLabelText}を追加しました。受付番号：${num}`;
+          el.existingMemo.value = "";
+        }
         await loadAll();
       } catch (error) {
         el.existingReceptionStatus.className = "notice ng";
