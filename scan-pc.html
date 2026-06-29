@@ -163,7 +163,7 @@
     @media(max-width:980px){.hero,.layout,.follow-grid{grid-template-columns:1fr}.status-grid{grid-template-columns:repeat(2,1fr)}.section-title{align-items:flex-start;flex-direction:column}.section-title p{text-align:left}.entry{grid-template-columns:58px 1fr}.entry-actions{grid-column:1/-1;justify-content:flex-start;max-width:none}}
     @media(max-width:640px){.topbar{align-items:flex-start;flex-direction:column}.actions{justify-content:flex-start}.auth-box,.form-grid,.status-grid{grid-template-columns:1fr}.brand strong{white-space:normal}.hero-card,.card{border-radius:22px}.pet-main{grid-template-columns:1fr}}
   
-    /* STEP VET-40E：全ボタンの白化防止。disabledでも背景色と文字色を維持する */
+    /* STEP VET-43：全ボタンの白化防止。disabledでも背景色と文字色を維持する */
     button.btn:disabled,
     .btn:disabled{
       opacity:.86!important;
@@ -234,7 +234,7 @@
     }
 
   
-    /* STEP VET-40E：選択中・フォーカス中の白化防止 */
+    /* STEP VET-43：選択中・フォーカス中の白化防止 */
     button.btn,
     .btn{
       -webkit-tap-highlight-color:rgba(47,125,100,.14);
@@ -337,7 +337,7 @@
     }
 
   
-    /* STEP VET-40E：取消済み受付は本日の受付一覧から分離 */
+    /* STEP VET-43：取消済み受付は本日の受付一覧から分離 */
     .cancelled-history{
       margin-top:12px;
       border:1px solid var(--line);
@@ -374,6 +374,88 @@
       color:#4c5b54;
     }
 
+  
+    /* STEP VET-43：窓口・電話受付追加 */
+    .manual-reception-card{
+      border:2px solid #d8eadf;
+      background:linear-gradient(180deg,#ffffff,#f7fbf8);
+    }
+    .manual-mode-row{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:10px;
+      margin-top:12px;
+    }
+    .manual-mode{
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:12px;
+      background:#fff;
+      cursor:pointer;
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      transition:.15s;
+    }
+    .manual-mode input{
+      width:auto;
+      margin-top:3px;
+      accent-color:var(--green);
+    }
+    .manual-mode strong{
+      display:block;
+      font-size:14px;
+      color:var(--ink);
+    }
+    .manual-mode span{
+      display:block;
+      color:var(--muted);
+      font-size:12px;
+      font-weight:800;
+      line-height:1.5;
+      margin-top:2px;
+    }
+    .manual-mode:has(input:checked){
+      border-color:#8ed1a7;
+      background:#eefaf2;
+      box-shadow:0 10px 22px rgba(31,143,87,.10);
+    }
+    .source-tag{
+      display:inline-flex;
+      align-items:center;
+      gap:5px;
+      border-radius:999px;
+      padding:3px 8px;
+      font-size:11px;
+      font-weight:900;
+      border:1px solid #dce7df;
+      background:#fff;
+      color:#53625a;
+    }
+    .source-tag.front_desk,
+    .source-tag.window,
+    .source-tag.manual_front{
+      background:#ecf8f0;
+      border-color:#bfe4cf;
+      color:#157044;
+    }
+    .source-tag.phone,
+    .source-tag.telephone{
+      background:#fff7e8;
+      border-color:#f2d49b;
+      color:#8a5a00;
+    }
+    .line-unlinked-tag{
+      background:#f5f6f5;
+      color:#58635d;
+      border-color:#d8ded8;
+    }
+
+    @media (max-width:720px){
+      .manual-mode-row{grid-template-columns:1fr;}
+    }
+
+
   </style>
 </head>
 
@@ -383,14 +465,14 @@
       <div class="brand">
         <div class="logo">📷</div>
         <div>
-          <small>scan-pc.html / STEP VET-40E</small>
+          <small>scan-pc.html / STEP VET-43</small>
           <strong>DPRO PET CARE LINE</strong>
         </div>
       </div>
       <nav class="actions" aria-label="関連画面">
-        <a class="pill" href="./index.html?v=step-vet-40e">管理トップ</a>
+        <a class="pill" href="./index.html?v=step-vet-43">管理トップ</a>
         <a class="pill" href="./waiting.html?v=step-vet-36d-2-r3&clinic_code=dpro_vet_demo">飼い主受付</a>
-        <a class="pill" href="./doctor.html?v=step-vet-40e">獣医師画面</a>
+        <a class="pill" href="./doctor.html?v=step-vet-43">獣医師画面</a>
         <a class="pill" href="./owner.html?v=step-vet-36c&clinic_code=dpro_vet_demo">オーナー画面</a>
         <a class="pill" href="./system-check.html?v=step-vet-34i-r4&clinic_code=dpro_vet_demo">システム確認</a>
       </nav>
@@ -398,7 +480,7 @@
 
     <section class="hero">
       <div class="hero-card">
-        <span class="badge">STEP VET-40E-R2｜受付PC ボタン表示修正</span>
+        <span class="badge">STEP VET-43-R2｜受付PC ボタン表示修正</span>
         <h1>診察券QRを読んで、<br>そのまま来院受付。</h1>
         <p class="lead">
           USB QRリーダーで読み取り、来院受付・受付番号発行まで行います。
@@ -409,7 +491,7 @@
 
       <div class="card">
         <span class="badge-dark">管理コード</span>
-        <p class="plain-lead">QR受付・ステータス更新・LINEフォロー送信済み処理には管理コードが必要です。</p>
+        <p class="plain-lead">QR受付・窓口受付・電話受付・ステータス更新には管理コードが必要です。</p>
         <div id="authStatus" class="notice">管理コード確認中</div>
         <div class="auth-box">
           <input id="adminTokenInput" type="password" placeholder="管理コードを入力" autocomplete="off" />
@@ -529,11 +611,102 @@
 
         <div id="createStatus" class="notice">ペット確認後に受付できます。</div>
       </div>
+
+      <div class="card manual-reception-card">
+        <h2>窓口・電話受付を追加</h2>
+        <p class="plain-lead">
+          LINEを使わない方、スマホ操作が苦手な方、電話で来院予定を入れたい方を、受付PCから今日の受付一覧に追加します。
+        </p>
+
+        <div class="manual-mode-row" role="radiogroup" aria-label="受付方法">
+          <label class="manual-mode">
+            <input type="radio" name="manualReceptionSource" value="front_desk" checked />
+            <span>
+              <strong>窓口受付</strong>
+              <span>来院済みとして受付番号を発行します。</span>
+            </span>
+          </label>
+          <label class="manual-mode">
+            <input type="radio" name="manualReceptionSource" value="phone" />
+            <span>
+              <strong>電話受付</strong>
+              <span>来院予定として受付一覧に追加します。</span>
+            </span>
+          </label>
+        </div>
+
+        <div class="form-grid" style="margin-top:14px;">
+          <div>
+            <label for="manualGuardianName">飼い主名 <span style="color:#c62828;">必須</span></label>
+            <input id="manualGuardianName" type="text" placeholder="例：佐藤 花子" autocomplete="off" />
+          </div>
+          <div>
+            <label for="manualPhone">電話番号</label>
+            <input id="manualPhone" type="tel" placeholder="例：090-1234-5678" autocomplete="off" />
+          </div>
+          <div>
+            <label for="manualPetName">ペット名 <span style="color:#c62828;">必須</span></label>
+            <input id="manualPetName" type="text" placeholder="例：ポチ" autocomplete="off" />
+          </div>
+          <div>
+            <label for="manualAnimalType">動物種</label>
+            <select id="manualAnimalType">
+              <option value="犬">犬</option>
+              <option value="猫">猫</option>
+              <option value="うさぎ">うさぎ</option>
+              <option value="ハムスター">ハムスター</option>
+              <option value="鳥">鳥</option>
+              <option value="その他">その他</option>
+            </select>
+          </div>
+          <div>
+            <label for="manualRequestCategory">来院目的</label>
+            <select id="manualRequestCategory">
+              <option value="general_exam">通常診察</option>
+              <option value="recheck">再診</option>
+              <option value="vaccination">予防接種</option>
+              <option value="prevention_medicine">予防薬</option>
+              <option value="medicine_food">お薬・フード</option>
+              <option value="hygiene_care">衛生処置</option>
+              <option value="health_check">健康診断</option>
+              <option value="other">その他</option>
+            </select>
+          </div>
+          <div>
+            <label for="manualDayPart">時間帯</label>
+            <select id="manualDayPart">
+              <option value="morning">午前</option>
+              <option value="afternoon">午後</option>
+            </select>
+          </div>
+          <div>
+            <label for="manualVisitTime">来院予定時刻</label>
+            <input id="manualVisitTime" type="time" step="900" />
+          </div>
+          <div>
+            <label for="manualAgeText">年齢メモ</label>
+            <input id="manualAgeText" type="text" placeholder="例：6歳、子犬、年齢不明" />
+          </div>
+          <div class="full">
+            <label for="manualMemo">症状・受付メモ</label>
+            <textarea id="manualMemo" placeholder="例：電話で皮膚のかゆみ相談。到着後に問診票確認。"></textarea>
+          </div>
+        </div>
+
+        <div class="button-row">
+          <button class="btn btn-main" id="manualReceptionCreateBtn" type="button">窓口・電話受付を追加</button>
+          <button class="btn btn-sub" id="manualReceptionClearBtn" type="button">入力クリア</button>
+        </div>
+
+        <div id="manualReceptionStatus" class="notice">
+          LINE未連携の飼い主・ペットとして登録し、今日の受付一覧に追加します。
+        </div>
+      </div>
     </section>
 
     <div class="section-title">
       <h2>本日の受付状況</h2>
-      <p>QR受付・LINE受付の両方を同じ一覧で確認できます。</p>
+      <p>LINE受付・QR受付・窓口受付・電話受付を同じ一覧で確認できます。</p>
     </div>
 
     <section class="card">
@@ -566,7 +739,7 @@
     </section>
 
     <div class="footer-note">
-      STEP VET-34H-R2：リーダーなし確認モードを追加しました。vetcard:clinic_code:card_token 形式、card_token、従来のQR URL / qr_token / card_no に対応します。
+      STEP VET-43：LINE受付だけでなく、LINEを使わない方の窓口受付・電話受付を受付PCから追加できます。
     </div>
   </main>
 
@@ -625,7 +798,19 @@
       readerlessInput: document.getElementById("readerlessInput"),
       useReaderlessBtn: document.getElementById("useReaderlessBtn"),
       lookupReaderlessBtn: document.getElementById("lookupReaderlessBtn"),
-      sampleReaderlessBtn: document.getElementById("sampleReaderlessBtn")
+      sampleReaderlessBtn: document.getElementById("sampleReaderlessBtn"),
+      manualGuardianName: document.getElementById("manualGuardianName"),
+      manualPhone: document.getElementById("manualPhone"),
+      manualPetName: document.getElementById("manualPetName"),
+      manualAnimalType: document.getElementById("manualAnimalType"),
+      manualRequestCategory: document.getElementById("manualRequestCategory"),
+      manualDayPart: document.getElementById("manualDayPart"),
+      manualVisitTime: document.getElementById("manualVisitTime"),
+      manualAgeText: document.getElementById("manualAgeText"),
+      manualMemo: document.getElementById("manualMemo"),
+      manualReceptionCreateBtn: document.getElementById("manualReceptionCreateBtn"),
+      manualReceptionClearBtn: document.getElementById("manualReceptionClearBtn"),
+      manualReceptionStatus: document.getElementById("manualReceptionStatus")
     };
 
     function todayString(){
@@ -1205,6 +1390,46 @@
       return map[kind] || kind || "-";
     }
 
+    function requestCategoryLabel(category){
+      const map = {
+        general_exam:"通常診察",
+        recheck:"再診",
+        vaccination:"予防接種",
+        prevention_medicine:"予防薬",
+        medicine_food:"お薬・フード",
+        hygiene_care:"衛生処置",
+        health_check:"健康診断",
+        other:"その他"
+      };
+      return map[category] || category || "-";
+    }
+
+    function inferReceptionSource(item){
+      const text = [
+        item?.source,
+        item?.reception_source,
+        item?.purpose,
+        item?.symptoms_summary,
+        item?.staff_note,
+        item?.memo
+      ].map(v => String(v || "")).join(" ");
+      if (text.includes("電話受付")) return "phone";
+      if (text.includes("窓口受付")) return "front_desk";
+      if (text.includes("qr_reception")) return "qr";
+      if (text.includes("line")) return "line";
+      return item?.source || "";
+    }
+
+    function sourceLabel(source){
+      const text = String(source || "");
+      if (text === "phone" || text.includes("電話")) return "電話受付";
+      if (text === "front_desk" || text.includes("窓口")) return "窓口受付";
+      if (text === "qr") return "QR受付";
+      if (text === "line") return "LINE受付";
+      return text ? text : "受付";
+    }
+
+
     function renderSummary(summary){
       summary = summary || {};
       document.getElementById("generalExamCount").textContent = Number(summary.general_exam_count || 0) + "組";
@@ -1224,6 +1449,9 @@
 
     function renderEntryCard(item){
       const id = item.waiting_entry_id || item.id;
+      const src = inferReceptionSource(item);
+      const lineStatus = String(item.line_link_status || item.line_status || "").toLowerCase();
+      const isUnlinked = lineStatus && !lineStatus.includes("linked");
       return `
         <article class="entry ${escapeHtml(item.status || "")}">
           <div class="entry-no">${escapeHtml(item.queue_number || "-")}</div>
@@ -1234,6 +1462,8 @@
             <div class="tagline">
               <span class="tag">${escapeHtml(item.day_part_label || item.day_part || "")}</span>
               <span class="tag">${escapeHtml(item.request_category_label || "")}</span>
+              ${src ? `<span class="source-tag ${escapeHtml(src)}">${escapeHtml(sourceLabel(src))}</span>` : ""}
+              ${isUnlinked ? `<span class="source-tag line-unlinked-tag">LINE未連携</span>` : ""}
             </div>
           </div>
           <div class="entry-actions">
@@ -1496,6 +1726,115 @@
       if (stopBtn) stopBtn.classList.add("hidden");
     }
 
+
+    function selectedManualReceptionSource(){
+      const checked = document.querySelector('input[name="manualReceptionSource"]:checked');
+      return checked ? checked.value : "front_desk";
+    }
+
+    function clearManualReceptionForm(){
+      el.manualGuardianName.value = "";
+      el.manualPhone.value = "";
+      el.manualPetName.value = "";
+      el.manualAnimalType.value = "犬";
+      el.manualRequestCategory.value = "general_exam";
+      el.manualDayPart.value = defaultDayPart();
+      el.manualVisitTime.value = "";
+      el.manualAgeText.value = "";
+      el.manualMemo.value = "";
+      el.manualReceptionStatus.className = "notice";
+      el.manualReceptionStatus.textContent = "LINE未連携の飼い主・ペットとして登録し、今日の受付一覧に追加します。";
+    }
+
+    function normalizeManualFormOnModeChange(){
+      const source = selectedManualReceptionSource();
+      if (source === "phone" && !el.manualVisitTime.value) {
+        const d = new Date();
+        d.setMinutes(Math.ceil(d.getMinutes() / 15) * 15);
+        const hh = String(Math.min(d.getHours() + 1, 23)).padStart(2, "0");
+        const mm = String(d.getMinutes()).padStart(2, "0");
+        el.manualVisitTime.value = `${hh}:${mm}`;
+      }
+      el.manualReceptionStatus.className = "notice info";
+      el.manualReceptionStatus.textContent = source === "phone"
+        ? "電話受付として追加します。来院したら一覧で「院内受付」を押してください。"
+        : "窓口受付として追加します。登録後は院内受付済みとして一覧に表示します。";
+    }
+
+    async function createManualReception(){
+      const source = selectedManualReceptionSource();
+      const guardianName = el.manualGuardianName.value.trim();
+      const petName = el.manualPetName.value.trim();
+
+      if (!getAdminToken()) {
+        el.manualReceptionStatus.className = "notice ng";
+        el.manualReceptionStatus.textContent = "先に管理コードを保存してください。";
+        return;
+      }
+
+      if (!guardianName) {
+        el.manualReceptionStatus.className = "notice ng";
+        el.manualReceptionStatus.textContent = "飼い主名を入力してください。";
+        el.manualGuardianName.focus();
+        return;
+      }
+
+      if (!petName) {
+        el.manualReceptionStatus.className = "notice ng";
+        el.manualReceptionStatus.textContent = "ペット名を入力してください。";
+        el.manualPetName.focus();
+        return;
+      }
+
+      const category = el.manualRequestCategory.value;
+      const memo = el.manualMemo.value.trim();
+      const sourceLabelText = source === "phone" ? "電話受付" : "窓口受付";
+
+      const body = {
+        reception_source: source,
+        guardian_name: guardianName,
+        phone: el.manualPhone.value.trim(),
+        pet_name: petName,
+        animal_type: el.manualAnimalType.value,
+        request_category: category,
+        entry_kind: category === "medicine_food" || category === "prevention_medicine" ? "medicine_prevention" : "today_queue",
+        target_date: todayString(),
+        day_part: el.manualDayPart.value || defaultDayPart(),
+        visit_time: el.manualVisitTime.value,
+        age_text: el.manualAgeText.value.trim(),
+        purpose: `${sourceLabelText}：${requestCategoryLabel(category)}`,
+        memo,
+        staff_note: memo,
+        staff_name: "受付PC",
+        actor_name: "受付PC"
+      };
+
+      startButtonLoading(el.manualReceptionCreateBtn, "追加中...");
+      el.manualReceptionStatus.className = "notice info";
+      el.manualReceptionStatus.textContent = `${sourceLabelText}を追加しています...`;
+
+      try {
+        const data = await apiPost("/api/admin/manual-reception/create", body, true);
+        const num = data.entry?.queue_number || data.result?.queue_number || "-";
+        const line = data.line_status === "unlinked" ? " / LINE未連携" : "";
+        el.manualReceptionStatus.className = "notice ok";
+        el.manualReceptionStatus.textContent = `${sourceLabelText}を追加しました。受付番号：${num}${line}`;
+        await loadAll();
+
+        // 続けて入力しやすいよう、成功後は必須項目だけ空にする。
+        el.manualGuardianName.value = "";
+        el.manualPhone.value = "";
+        el.manualPetName.value = "";
+        el.manualMemo.value = "";
+      } catch (error) {
+        el.manualReceptionStatus.className = "notice ng";
+        el.manualReceptionStatus.textContent = error.message || `${sourceLabelText}の追加に失敗しました。`;
+      } finally {
+        stopButtonLoading(el.manualReceptionCreateBtn, "窓口・電話受付を追加");
+      }
+    }
+
+
     function init(){
       el.dayPart.value = defaultDayPart();
       if (el.dayPart) {
@@ -1517,6 +1856,13 @@
         renderAuthStatus();
         loadAll();
       });
+
+      if (el.manualReceptionCreateBtn) el.manualReceptionCreateBtn.addEventListener("click", createManualReception);
+      if (el.manualReceptionClearBtn) el.manualReceptionClearBtn.addEventListener("click", clearManualReceptionForm);
+      document.querySelectorAll('input[name="manualReceptionSource"]').forEach((input) => {
+        input.addEventListener("change", normalizeManualFormOnModeChange);
+      });
+      clearManualReceptionForm();
 
       el.lookupBtn.addEventListener("click", lookupQr);
       el.clearScanBtn.addEventListener("click", clearScan);
