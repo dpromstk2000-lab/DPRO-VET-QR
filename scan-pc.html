@@ -163,7 +163,7 @@
     @media(max-width:980px){.hero,.layout,.follow-grid{grid-template-columns:1fr}.status-grid{grid-template-columns:repeat(2,1fr)}.section-title{align-items:flex-start;flex-direction:column}.section-title p{text-align:left}.entry{grid-template-columns:58px 1fr}.entry-actions{grid-column:1/-1;justify-content:flex-start;max-width:none}}
     @media(max-width:640px){.topbar{align-items:flex-start;flex-direction:column}.actions{justify-content:flex-start}.auth-box,.form-grid,.status-grid{grid-template-columns:1fr}.brand strong{white-space:normal}.hero-card,.card{border-radius:22px}.pet-main{grid-template-columns:1fr}}
   
-    /* STEP VET-44：全ボタンの白化防止。disabledでも背景色と文字色を維持する */
+    /* STEP VET-45：全ボタンの白化防止。disabledでも背景色と文字色を維持する */
     button.btn:disabled,
     .btn:disabled{
       opacity:.86!important;
@@ -234,7 +234,7 @@
     }
 
   
-    /* STEP VET-44：選択中・フォーカス中の白化防止 */
+    /* STEP VET-45：選択中・フォーカス中の白化防止 */
     button.btn,
     .btn{
       -webkit-tap-highlight-color:rgba(47,125,100,.14);
@@ -337,7 +337,7 @@
     }
 
   
-    /* STEP VET-44：取消済み受付は本日の受付一覧から分離 */
+    /* STEP VET-45：取消済み受付は本日の受付一覧から分離 */
     .cancelled-history{
       margin-top:12px;
       border:1px solid var(--line);
@@ -375,7 +375,7 @@
     }
 
   
-    /* STEP VET-44：窓口・電話受付追加 */
+    /* STEP VET-45：窓口・電話受付追加 */
     .manual-reception-card{
       border:2px solid #d8eadf;
       background:linear-gradient(180deg,#ffffff,#f7fbf8);
@@ -457,7 +457,7 @@
 
 
   
-    /* STEP VET-44：既存患者検索 */
+    /* STEP VET-45：既存患者検索 */
     .existing-search-card{
       border:2px solid #dbe7ff;
       background:linear-gradient(180deg,#ffffff,#f7f9ff);
@@ -528,6 +528,95 @@
     }
 
 
+  
+    /* STEP VET-45：スタッフ代理登録・ペット追加 */
+    .proxy-registration-card{
+      border:2px solid #eadffc;
+      background:linear-gradient(180deg,#ffffff,#fbf8ff);
+    }
+    .proxy-mode-row{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:10px;
+      margin-top:12px;
+    }
+    .proxy-mode{
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:12px;
+      background:#fff;
+      cursor:pointer;
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      transition:.15s;
+    }
+    .proxy-mode input{
+      width:auto;
+      margin-top:3px;
+      accent-color:#7c3aed;
+    }
+    .proxy-mode strong{
+      display:block;
+      font-size:14px;
+      color:var(--ink);
+    }
+    .proxy-mode span{
+      display:block;
+      color:var(--muted);
+      font-size:12px;
+      font-weight:800;
+      line-height:1.5;
+      margin-top:2px;
+    }
+    .proxy-mode:has(input:checked){
+      border-color:#c4b5fd;
+      background:#f5f0ff;
+      box-shadow:0 10px 22px rgba(124,58,237,.10);
+    }
+    .selected-guardian-box{
+      margin-top:12px;
+      border:1px solid #d8c8ff;
+      background:#f7f2ff;
+      border-radius:16px;
+      padding:12px;
+    }
+    .selected-guardian-box strong{
+      display:block;
+      color:#4c1d95;
+      font-size:15px;
+    }
+    .selected-guardian-box span{
+      display:block;
+      color:#5f5472;
+      font-size:12px;
+      font-weight:800;
+      margin-top:4px;
+      line-height:1.5;
+    }
+    .subsection-title{
+      margin:16px 0 8px;
+      font-size:13px;
+      font-weight:900;
+      color:#4b5563;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .subsection-title:before{
+      content:"";
+      width:8px;
+      height:8px;
+      border-radius:99px;
+      background:#7c3aed;
+      display:inline-block;
+    }
+
+    @media (max-width:720px){
+      .proxy-mode-row{grid-template-columns:1fr;}
+    }
+
+
   </style>
 </head>
 
@@ -537,14 +626,14 @@
       <div class="brand">
         <div class="logo">📷</div>
         <div>
-          <small>scan-pc.html / STEP VET-44</small>
+          <small>scan-pc.html / STEP VET-45</small>
           <strong>DPRO PET CARE LINE</strong>
         </div>
       </div>
       <nav class="actions" aria-label="関連画面">
-        <a class="pill" href="./index.html?v=step-vet-44">管理トップ</a>
+        <a class="pill" href="./index.html?v=step-vet-45">管理トップ</a>
         <a class="pill" href="./waiting.html?v=step-vet-36d-2-r3&clinic_code=dpro_vet_demo">飼い主受付</a>
-        <a class="pill" href="./doctor.html?v=step-vet-44">獣医師画面</a>
+        <a class="pill" href="./doctor.html?v=step-vet-45">獣医師画面</a>
         <a class="pill" href="./owner.html?v=step-vet-36c&clinic_code=dpro_vet_demo">オーナー画面</a>
         <a class="pill" href="./system-check.html?v=step-vet-34i-r4&clinic_code=dpro_vet_demo">システム確認</a>
       </nav>
@@ -552,7 +641,7 @@
 
     <section class="hero">
       <div class="hero-card">
-        <span class="badge">STEP VET-44-R2｜受付PC ボタン表示修正</span>
+        <span class="badge">STEP VET-45-R2｜受付PC ボタン表示修正</span>
         <h1>診察券QRを読んで、<br>そのまま来院受付。</h1>
         <p class="lead">
           USB QRリーダーで読み取り、来院受付・受付番号発行まで行います。
@@ -764,6 +853,151 @@
         </div>
       </div>
 
+      <div class="card proxy-registration-card">
+        <h2>スタッフ代理登録・ペット追加</h2>
+        <p class="plain-lead">
+          LINEが苦手な方の代わりに、受付スタッフが飼い主・ペット・診察券を登録できます。既存の飼い主に新しいペットを追加することもできます。
+        </p>
+
+        <div class="proxy-mode-row" role="radiogroup" aria-label="代理登録モード">
+          <label class="proxy-mode">
+            <input type="radio" name="proxyRegistrationMode" value="new_guardian" checked />
+            <span>
+              <strong>新規飼い主＋ペット登録</strong>
+              <span>LINE未連携の飼い主とペットを代理登録します。</span>
+            </span>
+          </label>
+          <label class="proxy-mode">
+            <input type="radio" name="proxyRegistrationMode" value="existing_guardian" />
+            <span>
+              <strong>既存飼い主にペット追加</strong>
+              <span>検索で選んだ飼い主に、新しいペットを追加します。</span>
+            </span>
+          </label>
+        </div>
+
+        <div id="selectedGuardianForPetAddBox" class="selected-guardian-box" style="display:none;">
+          <strong>既存飼い主が未選択です</strong>
+          <span>上の既存患者検索から「この飼い主にペット追加」を押してください。</span>
+        </div>
+
+        <div class="subsection-title" id="proxyGuardianTitle">飼い主情報</div>
+        <div class="form-grid" id="proxyGuardianFields">
+          <div>
+            <label for="proxyGuardianName">飼い主名 <span style="color:#c62828;">必須</span></label>
+            <input id="proxyGuardianName" type="text" placeholder="例：佐藤 花子" autocomplete="off" />
+          </div>
+          <div>
+            <label for="proxyPhone">電話番号</label>
+            <input id="proxyPhone" type="tel" placeholder="例：090-1234-5678" autocomplete="off" />
+          </div>
+        </div>
+
+        <div class="subsection-title">ペット情報</div>
+        <div class="form-grid">
+          <div>
+            <label for="proxyPetName">ペット名 <span style="color:#c62828;">必須</span></label>
+            <input id="proxyPetName" type="text" placeholder="例：ムギ" autocomplete="off" />
+          </div>
+          <div>
+            <label for="proxyAnimalType">動物種</label>
+            <select id="proxyAnimalType">
+              <option value="犬">犬</option>
+              <option value="猫">猫</option>
+              <option value="うさぎ">うさぎ</option>
+              <option value="ハムスター">ハムスター</option>
+              <option value="鳥">鳥</option>
+              <option value="その他">その他</option>
+            </select>
+          </div>
+          <div>
+            <label for="proxyBreed">品種</label>
+            <input id="proxyBreed" type="text" placeholder="例：柴犬、ミックス" />
+          </div>
+          <div>
+            <label for="proxySex">性別</label>
+            <select id="proxySex">
+              <option value="">未設定</option>
+              <option value="male">男の子</option>
+              <option value="female">女の子</option>
+              <option value="unknown">不明</option>
+            </select>
+          </div>
+          <div>
+            <label for="proxyAgeText">年齢メモ</label>
+            <input id="proxyAgeText" type="text" placeholder="例：6歳、子猫、年齢不明" />
+          </div>
+          <div>
+            <label for="proxyAllergyNote">アレルギー</label>
+            <input id="proxyAllergyNote" type="text" placeholder="例：特になし、薬剤注意" />
+          </div>
+          <div class="full">
+            <label for="proxyMemo">登録メモ</label>
+            <textarea id="proxyMemo" placeholder="例：受付スタッフが代理登録。LINE未連携。"></textarea>
+          </div>
+        </div>
+
+        <label style="display:flex; gap:8px; align-items:flex-start; margin-top:14px; font-weight:900; color:#33423a;">
+          <input id="proxyCreateReceptionCheck" type="checkbox" style="width:auto; margin-top:3px;" />
+          登録後、そのまま今日の受付にも追加する
+        </label>
+
+        <div id="proxyReceptionOptions" style="display:none; margin-top:12px;">
+          <div class="manual-mode-row" role="radiogroup" aria-label="代理登録後の受付方法">
+            <label class="manual-mode">
+              <input type="radio" name="proxyReceptionSource" value="front_desk" checked />
+              <span>
+                <strong>窓口受付</strong>
+                <span>来院済みとして受付番号を発行します。</span>
+              </span>
+            </label>
+            <label class="manual-mode">
+              <input type="radio" name="proxyReceptionSource" value="phone" />
+              <span>
+                <strong>電話受付</strong>
+                <span>来院予定として受付一覧に追加します。</span>
+              </span>
+            </label>
+          </div>
+
+          <div class="form-grid" style="margin-top:14px;">
+            <div>
+              <label for="proxyRequestCategory">来院目的</label>
+              <select id="proxyRequestCategory">
+                <option value="general_exam">通常診察</option>
+                <option value="recheck">再診</option>
+                <option value="vaccination">予防接種</option>
+                <option value="prevention_medicine">予防薬</option>
+                <option value="medicine_food">お薬・フード</option>
+                <option value="hygiene_care">衛生処置</option>
+                <option value="health_check">健康診断</option>
+                <option value="other">その他</option>
+              </select>
+            </div>
+            <div>
+              <label for="proxyDayPart">時間帯</label>
+              <select id="proxyDayPart">
+                <option value="morning">午前</option>
+                <option value="afternoon">午後</option>
+              </select>
+            </div>
+            <div>
+              <label for="proxyVisitTime">来院予定時刻</label>
+              <input id="proxyVisitTime" type="time" step="900" />
+            </div>
+          </div>
+        </div>
+
+        <div class="button-row">
+          <button class="btn btn-main" id="proxyRegistrationCreateBtn" type="button">代理登録する</button>
+          <button class="btn btn-sub" id="proxyRegistrationClearBtn" type="button">入力クリア</button>
+        </div>
+
+        <div id="proxyRegistrationStatus" class="notice">
+          新規飼い主＋ペットをLINE未連携で代理登録します。
+        </div>
+      </div>
+
       <div class="card manual-reception-card">
         <h2>新規・未連携の窓口・電話受付を追加</h2>
         <p class="plain-lead">
@@ -891,7 +1125,7 @@
     </section>
 
     <div class="footer-note">
-      STEP VET-44：既存患者を検索し、登録済みペットを選んで受付できます。新規・未連携の方は下の窓口・電話受付から追加できます。
+      STEP VET-45：既存患者検索に加えて、スタッフ代理登録・既存飼い主へのペット追加・そのまま受付追加までできます。
     </div>
   </main>
 
@@ -927,7 +1161,8 @@
       cameraStream: null,
       detectTimer: null,
       existingPatients: [],
-      selectedExistingPatient: null
+      selectedExistingPatient: null,
+      selectedGuardianForPetAdd: null
     };
 
     const el = {
@@ -976,7 +1211,27 @@
       existingVisitTime: document.getElementById("existingVisitTime"),
       existingMemo: document.getElementById("existingMemo"),
       existingReceptionCreateBtn: document.getElementById("existingReceptionCreateBtn"),
-      existingReceptionStatus: document.getElementById("existingReceptionStatus")
+      existingReceptionStatus: document.getElementById("existingReceptionStatus"),
+      selectedGuardianForPetAddBox: document.getElementById("selectedGuardianForPetAddBox"),
+      proxyGuardianFields: document.getElementById("proxyGuardianFields"),
+      proxyGuardianTitle: document.getElementById("proxyGuardianTitle"),
+      proxyGuardianName: document.getElementById("proxyGuardianName"),
+      proxyPhone: document.getElementById("proxyPhone"),
+      proxyPetName: document.getElementById("proxyPetName"),
+      proxyAnimalType: document.getElementById("proxyAnimalType"),
+      proxyBreed: document.getElementById("proxyBreed"),
+      proxySex: document.getElementById("proxySex"),
+      proxyAgeText: document.getElementById("proxyAgeText"),
+      proxyAllergyNote: document.getElementById("proxyAllergyNote"),
+      proxyMemo: document.getElementById("proxyMemo"),
+      proxyCreateReceptionCheck: document.getElementById("proxyCreateReceptionCheck"),
+      proxyReceptionOptions: document.getElementById("proxyReceptionOptions"),
+      proxyRequestCategory: document.getElementById("proxyRequestCategory"),
+      proxyDayPart: document.getElementById("proxyDayPart"),
+      proxyVisitTime: document.getElementById("proxyVisitTime"),
+      proxyRegistrationCreateBtn: document.getElementById("proxyRegistrationCreateBtn"),
+      proxyRegistrationClearBtn: document.getElementById("proxyRegistrationClearBtn"),
+      proxyRegistrationStatus: document.getElementById("proxyRegistrationStatus")
     };
 
     function todayString(){
@@ -1894,6 +2149,190 @@
 
 
 
+
+    function selectedProxyRegistrationMode(){
+      const checked = document.querySelector('input[name="proxyRegistrationMode"]:checked');
+      return checked ? checked.value : "new_guardian";
+    }
+
+    function selectedProxyReceptionSource(){
+      const checked = document.querySelector('input[name="proxyReceptionSource"]:checked');
+      return checked ? checked.value : "front_desk";
+    }
+
+    function renderProxyRegistrationMode(){
+      const mode = selectedProxyRegistrationMode();
+      const isExisting = mode === "existing_guardian";
+
+      el.proxyGuardianFields.style.display = isExisting ? "none" : "";
+      el.proxyGuardianTitle.textContent = isExisting ? "選択中の既存飼い主" : "飼い主情報";
+      el.selectedGuardianForPetAddBox.style.display = isExisting ? "" : "none";
+
+      if (isExisting) {
+        renderSelectedGuardianForPetAdd();
+        el.proxyRegistrationStatus.className = "notice info";
+        el.proxyRegistrationStatus.textContent = "既存飼い主に新しいペットを追加します。先に検索結果から飼い主を選んでください。";
+      } else {
+        el.proxyRegistrationStatus.className = "notice";
+        el.proxyRegistrationStatus.textContent = "新規飼い主＋ペットをLINE未連携で代理登録します。";
+      }
+    }
+
+    function renderSelectedGuardianForPetAdd(){
+      const item = state.selectedGuardianForPetAdd;
+      if (!item) {
+        el.selectedGuardianForPetAddBox.innerHTML = `
+          <strong>既存飼い主が未選択です</strong>
+          <span>上の既存患者検索から「この飼い主にペット追加」を押してください。</span>
+        `;
+        return;
+      }
+      const phone = item.phone ? `電話：${escapeHtml(item.phone)}` : "電話：未登録";
+      const status = lineStatusLabel(item.line_link_status);
+      el.selectedGuardianForPetAddBox.innerHTML = `
+        <strong>${escapeHtml(item.guardian_name || "飼い主")}</strong>
+        <span>${phone} / ${escapeHtml(status)} / 追加元ペット：${escapeHtml(item.pet_name || "-")}</span>
+      `;
+    }
+
+    function selectGuardianForPetAdd(index){
+      const item = state.existingPatients[index];
+      if (!item || !item.guardian_id) return;
+
+      state.selectedGuardianForPetAdd = item;
+      const radio = document.querySelector('input[name="proxyRegistrationMode"][value="existing_guardian"]');
+      if (radio) radio.checked = true;
+      renderProxyRegistrationMode();
+      el.proxyPetName.focus();
+      el.proxyRegistrationStatus.className = "notice info";
+      el.proxyRegistrationStatus.textContent = `${item.guardian_name} さんに新しいペットを追加できます。`;
+    }
+
+    function toggleProxyReceptionOptions(){
+      const on = Boolean(el.proxyCreateReceptionCheck.checked);
+      el.proxyReceptionOptions.style.display = on ? "" : "none";
+      if (on) {
+        el.proxyDayPart.value = defaultDayPart();
+      }
+    }
+
+    function clearProxyRegistrationForm(){
+      state.selectedGuardianForPetAdd = null;
+      const radio = document.querySelector('input[name="proxyRegistrationMode"][value="new_guardian"]');
+      if (radio) radio.checked = true;
+
+      el.proxyGuardianName.value = "";
+      el.proxyPhone.value = "";
+      el.proxyPetName.value = "";
+      el.proxyAnimalType.value = "犬";
+      el.proxyBreed.value = "";
+      el.proxySex.value = "";
+      el.proxyAgeText.value = "";
+      el.proxyAllergyNote.value = "";
+      el.proxyMemo.value = "";
+      el.proxyCreateReceptionCheck.checked = false;
+      el.proxyRequestCategory.value = "general_exam";
+      el.proxyDayPart.value = defaultDayPart();
+      el.proxyVisitTime.value = "";
+
+      toggleProxyReceptionOptions();
+      renderProxyRegistrationMode();
+    }
+
+    async function createProxyRegistration(){
+      if (!getAdminToken()) {
+        el.proxyRegistrationStatus.className = "notice ng";
+        el.proxyRegistrationStatus.textContent = "先に管理コードを保存してください。";
+        return;
+      }
+
+      const mode = selectedProxyRegistrationMode();
+      const isExisting = mode === "existing_guardian";
+      const selected = state.selectedGuardianForPetAdd;
+      const petName = el.proxyPetName.value.trim();
+
+      if (isExisting && (!selected || !selected.guardian_id)) {
+        el.proxyRegistrationStatus.className = "notice ng";
+        el.proxyRegistrationStatus.textContent = "既存飼い主に追加する場合は、先に検索結果から飼い主を選んでください。";
+        return;
+      }
+
+      if (!isExisting && !el.proxyGuardianName.value.trim()) {
+        el.proxyRegistrationStatus.className = "notice ng";
+        el.proxyRegistrationStatus.textContent = "飼い主名を入力してください。";
+        el.proxyGuardianName.focus();
+        return;
+      }
+
+      if (!petName) {
+        el.proxyRegistrationStatus.className = "notice ng";
+        el.proxyRegistrationStatus.textContent = "ペット名を入力してください。";
+        el.proxyPetName.focus();
+        return;
+      }
+
+      const category = el.proxyRequestCategory.value;
+      const createReception = Boolean(el.proxyCreateReceptionCheck.checked);
+      const receptionSource = selectedProxyReceptionSource();
+      const modeLabel = isExisting ? "既存飼い主へのペット追加" : "スタッフ代理登録";
+
+      const body = {
+        guardian_id: isExisting ? selected.guardian_id : undefined,
+        guardian_name: isExisting ? undefined : el.proxyGuardianName.value.trim(),
+        phone: isExisting ? undefined : el.proxyPhone.value.trim(),
+        pet_name: petName,
+        animal_type: el.proxyAnimalType.value,
+        breed: el.proxyBreed.value.trim(),
+        sex: el.proxySex.value,
+        age_text: el.proxyAgeText.value.trim(),
+        allergy_note: el.proxyAllergyNote.value.trim(),
+        memo: el.proxyMemo.value.trim(),
+        create_reception: createReception,
+        reception_source: receptionSource,
+        request_category: category,
+        entry_kind: category === "medicine_food" || category === "prevention_medicine" ? "medicine_prevention" : "today_queue",
+        target_date: todayString(),
+        day_part: el.proxyDayPart.value || defaultDayPart(),
+        visit_time: el.proxyVisitTime.value,
+        purpose: `${modeLabel}：${requestCategoryLabel(category)}`,
+        staff_name: "受付PC",
+        actor_name: "受付PC"
+      };
+
+      const endpoint = isExisting ? "/api/admin/existing-guardian/pet-add" : "/api/admin/staff-proxy/register";
+
+      startButtonLoading(el.proxyRegistrationCreateBtn, "登録中...");
+      el.proxyRegistrationStatus.className = "notice info";
+      el.proxyRegistrationStatus.textContent = `${modeLabel}を実行しています...`;
+
+      try {
+        const data = await apiPost(endpoint, body, true);
+        const cardNo = data.card?.card_no || data.card_view?.card_no || "-";
+        const receptionText = data.reception?.entry?.queue_number
+          ? ` / 受付番号：${data.reception.entry.queue_number}`
+          : (data.reception?.duplicate ? " / 本日受付済み" : "");
+        el.proxyRegistrationStatus.className = "notice ok";
+        el.proxyRegistrationStatus.textContent = `${petName} を登録しました。診察券：${cardNo}${receptionText}`;
+
+        el.proxyPetName.value = "";
+        el.proxyBreed.value = "";
+        el.proxyAgeText.value = "";
+        el.proxyAllergyNote.value = "";
+        el.proxyMemo.value = "";
+
+        await loadAll();
+        if (el.existingPatientSearchInput.value.trim()) {
+          await searchExistingPatients();
+        }
+      } catch (error) {
+        el.proxyRegistrationStatus.className = "notice ng";
+        el.proxyRegistrationStatus.textContent = error.message || `${modeLabel}に失敗しました。`;
+      } finally {
+        stopButtonLoading(el.proxyRegistrationCreateBtn, "代理登録する");
+      }
+    }
+
+
     function selectedExistingReceptionSource(){
       const checked = document.querySelector('input[name="existingReceptionSource"]:checked');
       return checked ? checked.value : "front_desk";
@@ -1933,8 +2372,9 @@
                 ${item.guardian_no ? `<span class="tag">飼い主番号 ${escapeHtml(item.guardian_no)}</span>` : ""}
               </div>
             </div>
-            <div>
+            <div class="entry-actions" style="justify-content:flex-end;">
               <button class="btn btn-main" type="button" data-existing-patient-index="${index}">このペットで受付</button>
+              <button class="btn btn-sub" type="button" data-existing-guardian-add-pet-index="${index}">この飼い主にペット追加</button>
             </div>
           </article>
         `;
@@ -1944,6 +2384,13 @@
         btn.addEventListener("click", () => {
           const index = Number(btn.dataset.existingPatientIndex || 0);
           selectExistingPatient(index);
+        });
+      });
+
+      el.existingPatientResults.querySelectorAll("[data-existing-guardian-add-pet-index]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const index = Number(btn.dataset.existingGuardianAddPetIndex || 0);
+          selectGuardianForPetAdd(index);
         });
       });
     }
@@ -2197,6 +2644,14 @@
         renderAuthStatus();
         loadAll();
       });
+
+      document.querySelectorAll('input[name="proxyRegistrationMode"]').forEach((input) => {
+        input.addEventListener("change", renderProxyRegistrationMode);
+      });
+      if (el.proxyCreateReceptionCheck) el.proxyCreateReceptionCheck.addEventListener("change", toggleProxyReceptionOptions);
+      if (el.proxyRegistrationCreateBtn) el.proxyRegistrationCreateBtn.addEventListener("click", createProxyRegistration);
+      if (el.proxyRegistrationClearBtn) el.proxyRegistrationClearBtn.addEventListener("click", clearProxyRegistrationForm);
+      clearProxyRegistrationForm();
 
       if (el.existingPatientSearchBtn) el.existingPatientSearchBtn.addEventListener("click", searchExistingPatients);
       if (el.existingPatientClearBtn) el.existingPatientClearBtn.addEventListener("click", clearExistingPatientSearch);
