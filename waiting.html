@@ -341,7 +341,7 @@
       .calendarMini{grid-template-columns:1fr}
     }
   
-    /* STEP VET-40E：登録済みペット選択デモ */
+    /* STEP VET-52.5F：飼い主側受付登録・DEMO遷移修正 */
     .demoPetSelector{
       display:flex;
       flex-wrap:wrap;
@@ -384,7 +384,7 @@
 <body>
   <main class="page">
     <section class="hero">
-      <span class="badge">STEP VET-40E｜来院受付</span>
+      <span class="badge">STEP VET-52.5F｜来院受付</span>
       <h1>今日の来院受付</h1>
       <p class="lead">
         診察券を確認して、今日の受付番号を発行します。
@@ -519,9 +519,17 @@
       "demo_line_link_001";
 
     const IS_DEMO_READY =
-      (urlParams.get("demo") === "ready" || urlParams.get("demo") === "true" || urlParams.get("demo") === "1") &&
       CLINIC_CODE === "dpro_vet_demo" &&
-      LINE_USER_ID === "demo_line_link_001";
+      LINE_USER_ID === "demo_line_link_001" &&
+      (
+        urlParams.get("demo") === "ready" ||
+        urlParams.get("demo") === "true" ||
+        urlParams.get("demo") === "1" ||
+        // STEP VET-52.5F:
+        // 営業DEMO用LINE IDで開いた場合は、member.htmlからdemo=readyが漏れても
+        // waiting.html側で多頭診察券を補助表示する。
+        urlParams.has("line_user_id")
+      );
 
     function buildStep40DemoCardsData(){
       return {
@@ -692,14 +700,14 @@
     }
 
     function updateLinks(){
-      $("memberLink").href = buildPageUrl("member.html", {
-        v:"step-vet-40e",
+      const common = {
+        v:"step-vet-52-5f",
         line_user_id: LINE_USER_ID
-      });
-      $("richMenuLink").href = buildPageUrl("rich-menu.html", {
-        v:"step-vet-40e",
-        line_user_id: LINE_USER_ID
-      });
+      };
+      if (IS_DEMO_READY) common.demo = "ready";
+
+      $("memberLink").href = buildPageUrl("member.html", common);
+      $("richMenuLink").href = buildPageUrl("rich-menu.html", common);
     }
 
     async function loadClinicSettings(){
@@ -718,10 +726,10 @@
     }
 
     async function loadMemberCards(){
-      // STEP VET-40E:
+      // STEP VET-52.5F:
       // 通常はAPIでLINE連携済み診察券を読む。
-      // demo=ready / dpro_vet_demo / demo_line_link_001 の時だけ、
-      // APIが空でも営業デモ用の多頭診察券を補助表示する。
+      // dpro_vet_demo / demo_line_link_001 のDEMO導線では、member.htmlからdemo=readyが漏れても
+      // 営業デモ用の多頭診察券を補助表示する。
       let data = null;
 
       try {
@@ -1052,6 +1060,15 @@
           card_id: info.cardId,
           guardian_id: info.guardianId,
           pet_id: info.petId,
+          pet_name: cardValue(info.card, "pet_name", "pet.pet_name", "name", "pet.name"),
+          guardian_name: cardValue(info.card, "guardian_name", "guardian.guardian_name") || info.guardian?.guardian_name || "",
+          card_no: cardValue(info.card, "card_no", "card.card_no"),
+          species: cardValue(info.card, "species", "pet.species"),
+          species_label: cardValue(info.card, "species_label", "animal_type"),
+          breed: cardValue(info.card, "breed", "pet.breed"),
+          line_user_id: LINE_USER_ID,
+          demo: IS_DEMO_READY,
+          demo_ready: IS_DEMO_READY,
           entry_kind: state.selectedEntryKind,
           request_category: state.selectedRequestCategory,
           target_date: todayString(),
@@ -1059,7 +1076,7 @@
           purpose: $("purpose").value || "LINE来院受付",
           symptoms_summary: $("symptoms").value || $("purpose").value || "LINE来院受付",
           desired_contact: "line",
-          source: "line_member_waiting",
+          source: "line",
           actor_name: "飼い主LINE",
           staff_name: "飼い主LINE"
         }, false);
@@ -1069,7 +1086,8 @@
         renderSuccess(num);
         setNotice("submitStatus", "ok", `受付が完了しました。受付番号：${num}`);
       } catch (error) {
-        setNotice("submitStatus", "ng", error.message || "受付に失敗しました。");
+        const message = error && error.message ? error.message : "受付に失敗しました。";
+        setNotice("submitStatus", "ng", message.includes("Failed to fetch") ? "受付API通信に失敗しました。WorkerのSTEP VET-52.5F反映を確認してください。" : message);
       } finally {
         $("submitBtn").disabled = false;
         $("submitBtn").textContent = "この内容で受付する";
@@ -1088,7 +1106,7 @@
             <h3>受付が完了しました</h3>
             <p>${escapeHtml(petName)}ちゃんの受付番号です。院内でお待ちください。</p>
             <div class="buttonRow">
-              <a class="btn btnSoft" href="${escapeHtml(buildPageUrl("member.html", { v:"step-vet-40e", line_user_id: LINE_USER_ID }))}">診察券へ戻る</a>
+              <a class="btn btnSoft" href="${escapeHtml(buildPageUrl("member.html", { v:"step-vet-52-5f", line_user_id: LINE_USER_ID, demo: IS_DEMO_READY ? "ready" : "" }))}">診察券へ戻る</a>
             </div>
           </div>
         </div>
