@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="robots" content="noindex,nofollow">
-  <title>DPRO PET CARE LINE｜デモ・システム管理センター STEP40B-R2</title>
+  <title>DPRO PET CARE LINE｜デモ・システム管理センター STEP40D</title>
   <style>
     :root{
       --bg:#f5f7f4;
@@ -601,7 +601,7 @@
       .linkbtn{width:100%}
     }
   
-    /* STEP VET-40B-R2：営業デモ用ナビゲーション */
+    /* STEP VET-40D：営業デモ用ナビゲーション */
     .demo-nav{
       margin-top:18px;
       background:
@@ -748,7 +748,7 @@
     }
 
   
-    /* STEP VET-40B-R2：多頭登録アピール */
+    /* STEP VET-40D：多頭登録アピール */
     .multi-pet-highlight{
       margin-top:12px;
       border:1px solid rgba(47,125,79,.22);
@@ -785,6 +785,70 @@
       vertical-align:middle;
     }
 
+  
+    /* STEP VET-40D：反映済みデモ画面ナビ */
+    .route-card.ready{
+      border-color:rgba(47,125,79,.35);
+      background:linear-gradient(180deg,#ffffff,#f7fcf8);
+    }
+    .route-card.need-setup{
+      border-color:rgba(168,106,21,.32);
+      background:linear-gradient(180deg,#fff,#fffaf0);
+    }
+    .route-state{
+      display:inline-flex;
+      align-items:center;
+      gap:5px;
+      min-height:22px;
+      padding:3px 8px;
+      border-radius:999px;
+      font-size:11px;
+      font-weight:950;
+      margin-top:7px;
+      border:1px solid var(--line);
+      color:var(--muted);
+      background:#fff;
+    }
+    .route-state.ok{
+      color:var(--main2);
+      background:var(--soft);
+      border-color:#cde7d5;
+    }
+    .route-state.warn{
+      color:var(--warn);
+      background:var(--warnSoft);
+      border-color:#f1d6aa;
+    }
+    .demo-ready-guide{
+      margin-top:12px;
+      border:1px solid rgba(47,125,79,.22);
+      background:linear-gradient(180deg,#f7fcf8,#fff);
+      border-radius:18px;
+      padding:14px;
+      display:grid;
+      gap:8px;
+    }
+    .demo-ready-guide b{
+      color:var(--main2);
+      font-size:14px;
+    }
+    .demo-ready-guide p{
+      margin:0;
+      color:#42534a;
+      font-size:13px;
+      font-weight:800;
+      line-height:1.7;
+    }
+    .route-mini{
+      display:block;
+      color:var(--muted);
+      font-size:11px;
+      font-weight:800;
+      line-height:1.45;
+      margin-top:5px;
+      word-break:break-all;
+    }
+
   </style>
 </head>
 <body>
@@ -796,7 +860,7 @@
           <h1>デモ・システム<br>管理センター</h1>
           <p class="hero-lead">
             動物病院向けLINE診察券・受付デモの接続状態、医院設定、休診カレンダー、受付データを1か所で確認できます。
-            営業前はこの画面からデモ環境を整え、そのまま営業デモの順番どおりに各画面を開けます。本日の受付は受付番号順に表示します。
+            営業前はこの画面からデモ環境を整え、そのまま営業デモの順番どおりに各画面を開けます。本日の受付は受付番号順に表示し、ナビボタンは営業デモ準備後の反映済み画面を開きます。
           </p>
           <div class="top-actions">
             <a class="linkbtn primary" id="openOwner" href="#">医院設定を開く</a>
@@ -820,7 +884,7 @@
           </div>
           <div class="status-pill">
             <span>STEP</span>
-            <b>STEP VET-40B-R2</b>
+            <b>STEP VET-40D</b>
           </div>
         </div>
       </div>
@@ -835,62 +899,62 @@
             まず営業前デモ準備を押してから、下の順番で進めます。
           </p>
         </div>
-        <span class="badge ok">STEP VET-40B-R2</span>
+        <span class="badge ok">STEP VET-40D</span>
       </div>
 
       <div class="demo-route">
-        <div class="route-card">
+        <div class="route-card" id="routeCardPrepare">
           <div>
             <div class="route-no">1</div>
             <h3>営業前準備</h3>
-            <p>デモデータを整え、本日の受付4件＋多頭登録を見せられる状態にします。</p>
+            <p>4件受付・多頭診察券・LINE連携を整えます。</p><span class="route-state warn" id="routeStatePrepare">準備ボタンへ</span>
           </div>
           <div class="route-actions">
             <button class="btn btn-main" type="button" id="scrollPrepareBtn">準備ボタンへ</button>
           </div>
         </div>
 
-        <div class="route-card">
+        <div class="route-card" id="routeCardMember">
           <div>
             <div class="route-no">2</div>
             <h3>飼い主画面</h3>
-            <p>診察券・ペット情報・受付ボタンを見せます。</p>
+            <p>反映済みの多頭診察券を見せます。</p><span class="route-state warn" id="routeStateMember">準備後に確認</span><small class="route-mini">demo_line_link_001</small>
           </div>
           <div class="route-actions">
-            <a class="btn btn-sub" id="routeMember" href="#" target="_blank" rel="noopener">開く</a>
+            <a class="btn btn-sub" id="routeMember" href="#" target="_blank" rel="noopener">多頭診察券を開く</a>
           </div>
         </div>
 
-        <div class="route-card">
+        <div class="route-card" id="routeCardWaiting">
           <div>
             <div class="route-no">3</div>
             <h3>LINE受付</h3>
-            <p>スマホから順番受付できる流れを見せます。</p>
+            <p>登録済みペットを選んで受付する流れを見せます。</p><span class="route-state warn" id="routeStateWaiting">準備後に確認</span><small class="route-mini">登録済みペット受付</small>
           </div>
           <div class="route-actions">
-            <a class="btn btn-sub" id="routeWaiting" href="#" target="_blank" rel="noopener">開く</a>
+            <a class="btn btn-sub" id="routeWaiting" href="#" target="_blank" rel="noopener">登録済み受付を開く</a>
           </div>
         </div>
 
-        <div class="route-card">
+        <div class="route-card" id="routeCardScanPc">
           <div>
             <div class="route-no">4</div>
             <h3>受付PC</h3>
-            <p>QR受付・二重受付防止・受付状況を見せます。</p>
+            <p>4件の受付・二重受付防止・受付状況を見せます。</p><span class="route-state warn" id="routeStateScanPc">準備後に確認</span><small class="route-mini">受付4件表示</small>
           </div>
           <div class="route-actions">
-            <a class="btn btn-sub" id="routeScanPc" href="#" target="_blank" rel="noopener">開く</a>
+            <a class="btn btn-sub" id="routeScanPc" href="#" target="_blank" rel="noopener">受付4件を見る</a>
           </div>
         </div>
 
-        <div class="route-card">
+        <div class="route-card" id="routeCardOwner">
           <div>
             <div class="route-no">5</div>
             <h3>医院設定</h3>
-            <p>臨時休診・午後休診が各画面に反映されることを見せます。</p>
+            <p>休診設定が各画面に反映されることを見せます。</p><span class="route-state warn" id="routeStateOwner">準備後に確認</span><small class="route-mini">午後休診デモ</small>
           </div>
           <div class="route-actions">
-            <a class="btn btn-sub" id="routeOwner" href="#" target="_blank" rel="noopener">開く</a>
+            <a class="btn btn-sub" id="routeOwner" href="#" target="_blank" rel="noopener">休診設定を開く</a>
           </div>
         </div>
       </div>
@@ -898,6 +962,14 @@
       <div class="qr-copy-box">
         <code id="demoQrText">vetcard:dpro_vet_demo:card_c175a6751639e545e8050e89bccda8705b0962cbc5c7cd8b</code>
         <button class="btn btn-sub" type="button" id="copyQrBtn" style="min-height:36px;padding:8px 10px;border-radius:12px;font-size:12px">QR文字列コピー</button>
+      </div>
+
+      <div class="demo-ready-guide" id="demoReadyGuide">
+        <b>営業デモ準備後に2〜5を押してください</b>
+        <p>
+          準備後は、飼い主画面に複数診察券、LINE受付に登録済みペット、受付PCに本日の4件受付、
+          医院設定に休診反映デモの流れが出ます。
+        </p>
       </div>
 
       <div class="talk-grid">
@@ -983,7 +1055,7 @@
           <div class="step">
             <div>
               <b>LINE診察券を見せる</b>
-              <small>飼い主画面で診察券・ペット情報・受付ボタンを見せます。</small>
+              <small>飼い主画面で反映済みの多頭診察券を見せます。</small>
             </div>
           </div>
           <div class="step">
@@ -1112,7 +1184,7 @@
   <script>
     "use strict";
 
-    const STEP = "STEP VET-40B-R2";
+    const STEP = "STEP VET-40D";
     const API_BASE = "https://dpro-vet-qr-api.dpromstk2000.workers.dev";
     const DEFAULT_CLINIC_CODE = "dpro_vet_demo";
     const DEFAULT_LINE_USER_ID = "demo_line_link_001";
@@ -1124,11 +1196,11 @@
     const lineUserId = params.get("line_user_id") || DEFAULT_LINE_USER_ID;
 
     const urls = {
-      owner: `https://dpromstk2000-lab.github.io/DPRO-VET-QR/owner.html?v=step-vet-36c&clinic_code=${encodeURIComponent(clinicCode)}`,
-      member: `https://dpromstk2000-lab.github.io/DPRO-VET-QR/member.html?v=step-vet-36d-1&clinic_code=${encodeURIComponent(clinicCode)}&line_user_id=${encodeURIComponent(lineUserId)}`,
-      waiting: `https://dpromstk2000-lab.github.io/DPRO-VET-QR/waiting.html?v=step-vet-36d-2-r3&clinic_code=${encodeURIComponent(clinicCode)}&line_user_id=${encodeURIComponent(lineUserId)}`,
-      scanPc: `https://dpromstk2000-lab.github.io/DPRO-VET-QR/scan-pc.html?v=step-vet-36f-2&clinic_code=${encodeURIComponent(clinicCode)}`,
-      systemCheck: `https://dpromstk2000-lab.github.io/DPRO-VET-QR/system-check.html?v=step-vet-40b-r2&clinic_code=${encodeURIComponent(clinicCode)}`
+      owner: `https://dpromstk2000-lab.github.io/DPRO-VET-QR/owner.html?v=step-vet-40d&clinic_code=${encodeURIComponent(clinicCode)}&demo=ready`,
+      member: `https://dpromstk2000-lab.github.io/DPRO-VET-QR/member.html?v=step-vet-40d&clinic_code=${encodeURIComponent(clinicCode)}&line_user_id=${encodeURIComponent(lineUserId)}&demo=ready`,
+      waiting: `https://dpromstk2000-lab.github.io/DPRO-VET-QR/waiting.html?v=step-vet-40d&clinic_code=${encodeURIComponent(clinicCode)}&line_user_id=${encodeURIComponent(lineUserId)}&demo=ready`,
+      scanPc: `https://dpromstk2000-lab.github.io/DPRO-VET-QR/scan-pc.html?v=step-vet-40d&clinic_code=${encodeURIComponent(clinicCode)}&demo=ready`,
+      systemCheck: `https://dpromstk2000-lab.github.io/DPRO-VET-QR/system-check.html?v=step-vet-40d&clinic_code=${encodeURIComponent(clinicCode)}`
     };
 
     const el = {
@@ -1166,7 +1238,18 @@
       routeOwner: document.getElementById("routeOwner"),
       scrollPrepareBtn: document.getElementById("scrollPrepareBtn"),
       copyQrBtn: document.getElementById("copyQrBtn"),
-      demoQrText: document.getElementById("demoQrText")
+      demoQrText: document.getElementById("demoQrText"),
+      routeCardPrepare: document.getElementById("routeCardPrepare"),
+      routeCardMember: document.getElementById("routeCardMember"),
+      routeCardWaiting: document.getElementById("routeCardWaiting"),
+      routeCardScanPc: document.getElementById("routeCardScanPc"),
+      routeCardOwner: document.getElementById("routeCardOwner"),
+      routeStatePrepare: document.getElementById("routeStatePrepare"),
+      routeStateMember: document.getElementById("routeStateMember"),
+      routeStateWaiting: document.getElementById("routeStateWaiting"),
+      routeStateScanPc: document.getElementById("routeStateScanPc"),
+      routeStateOwner: document.getElementById("routeStateOwner"),
+      demoReadyGuide: document.getElementById("demoReadyGuide")
     };
 
     let state = {
@@ -1330,6 +1413,7 @@
 
       el.entryList.innerHTML = '<div class="hint">管理コードを保存すると、本日の受付状態を確認できます。</div>';
       el.calendarList.innerHTML = '<div class="hint">管理コードを保存すると、休診カレンダーを確認できます。</div>';
+      updateDemoNavigationReadiness([]);
       renderDebugInfo();
     }
 
@@ -1435,7 +1519,87 @@
       renderChecks({ healthOk, version, statusLabel, activeEntries, historyCount, calendarPreview, status });
       renderEntries(activeEntries);
       renderCalendar(calendarPreview);
+      updateDemoNavigationReadiness(activeEntries);
       renderDebugInfo();
+    }
+
+    function updateDemoNavigationReadiness(activeEntries){
+      const count = (activeEntries || []).length;
+      const names = new Set((activeEntries || []).map(item => String(item?.pet_name || "")));
+      const hasMulti = names.has("チェックちゃん") && names.has("ココアちゃん");
+      const ready = count >= 4 && hasMulti;
+
+      const routeCards = [
+        el.routeCardMember,
+        el.routeCardWaiting,
+        el.routeCardScanPc,
+        el.routeCardOwner
+      ].filter(Boolean);
+
+      const routeStates = [
+        el.routeStateMember,
+        el.routeStateWaiting,
+        el.routeStateScanPc,
+        el.routeStateOwner
+      ].filter(Boolean);
+
+      if (ready) {
+        if (el.routeCardPrepare) {
+          el.routeCardPrepare.classList.add("ready");
+          el.routeCardPrepare.classList.remove("need-setup");
+        }
+        if (el.routeStatePrepare) {
+          el.routeStatePrepare.textContent = "準備済み";
+          el.routeStatePrepare.className = "route-state ok";
+        }
+
+        routeCards.forEach(card => {
+          card.classList.add("ready");
+          card.classList.remove("need-setup");
+        });
+        routeStates.forEach(state => {
+          state.textContent = "反映済み画面";
+          state.className = "route-state ok";
+        });
+
+        if (el.demoReadyGuide) {
+          el.demoReadyGuide.innerHTML = `
+            <b>反映済みデモ画面を開けます</b>
+            <p>
+              2〜5のボタンは、営業デモ準備後の状態を見せるためのURLに更新済みです。
+              飼い主画面では複数診察券、LINE受付では登録済みペット、受付PCでは4件受付を確認できます。
+            </p>
+          `;
+        }
+      } else {
+        if (el.routeCardPrepare) {
+          el.routeCardPrepare.classList.add("need-setup");
+          el.routeCardPrepare.classList.remove("ready");
+        }
+        if (el.routeStatePrepare) {
+          el.routeStatePrepare.textContent = "先に準備";
+          el.routeStatePrepare.className = "route-state warn";
+        }
+
+        routeCards.forEach(card => {
+          card.classList.add("need-setup");
+          card.classList.remove("ready");
+        });
+        routeStates.forEach(state => {
+          state.textContent = "準備後に確認";
+          state.className = "route-state warn";
+        });
+
+        if (el.demoReadyGuide) {
+          el.demoReadyGuide.innerHTML = `
+            <b>先に営業デモを準備してください</b>
+            <p>
+              2〜5の反映済み画面を見せる前に、下の「営業デモを準備する」を押してください。
+              受付4件と多頭登録が整うと、ナビの表示が「反映済み画面」に変わります。
+            </p>
+          `;
+        }
+      }
     }
 
     function renderChecks(ctx){
@@ -1553,6 +1717,7 @@
           <span class="badge danger">NG</span>
         </div>
       `;
+      updateDemoNavigationReadiness([]);
       renderDebugInfo();
     }
 
