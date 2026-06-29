@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="robots" content="noindex,nofollow">
-  <title>DPRO PET CARE LINE｜デモ・システム管理センター R3</title>
+  <title>DPRO PET CARE LINE｜デモ・システム管理センター R4</title>
   <style>
     :root{
       --bg:#f5f7f4;
@@ -635,7 +635,7 @@
           </div>
           <div class="status-pill">
             <span>STEP</span>
-            <b>STEP VET-38C-R3</b>
+            <b>STEP VET-38C-R4</b>
           </div>
         </div>
       </div>
@@ -817,7 +817,7 @@
   <script>
     "use strict";
 
-    const STEP = "STEP VET-38C-R3";
+    const STEP = "STEP VET-38C-R4";
     const API_BASE = "https://dpro-vet-qr-api.dpromstk2000.workers.dev";
     const DEFAULT_CLINIC_CODE = "dpro_vet_demo";
     const DEFAULT_LINE_USER_ID = "demo_line_link_001";
@@ -833,7 +833,7 @@
       member: `https://dpromstk2000-lab.github.io/DPRO-VET-QR/member.html?v=step-vet-36d-1&clinic_code=${encodeURIComponent(clinicCode)}&line_user_id=${encodeURIComponent(lineUserId)}`,
       waiting: `https://dpromstk2000-lab.github.io/DPRO-VET-QR/waiting.html?v=step-vet-36d-2-r3&clinic_code=${encodeURIComponent(clinicCode)}&line_user_id=${encodeURIComponent(lineUserId)}`,
       scanPc: `https://dpromstk2000-lab.github.io/DPRO-VET-QR/scan-pc.html?v=step-vet-36f-2&clinic_code=${encodeURIComponent(clinicCode)}`,
-      systemCheck: `https://dpromstk2000-lab.github.io/DPRO-VET-QR/system-check.html?v=step-vet-38c-r3&clinic_code=${encodeURIComponent(clinicCode)}`
+      systemCheck: `https://dpromstk2000-lab.github.io/DPRO-VET-QR/system-check.html?v=step-vet-38c-r4&clinic_code=${encodeURIComponent(clinicCode)}`
     };
 
     const el = {
@@ -897,7 +897,13 @@
       el.refreshBtn.addEventListener("click", loadAll);
       el.copyInfoBtn.addEventListener("click", copyDebugInfo);
 
-      el.adminCode.addEventListener("change", saveAdminCodeQuietly);
+      el.adminCode.addEventListener("change", () => {
+        try {
+          saveAdminCodeQuietly();
+        } catch (error) {
+          toast(error.message || "管理コードを確認してください。");
+        }
+      });
 
       renderDebugInfo();
       loadAll();
@@ -915,13 +921,10 @@
     }
 
     function saveAdminCode(){
-      try {
-        saveAdminCodeQuietly();
-        toast("管理コードを保存しました。");
-        loadAll();
-      } catch (error) {
-        alert(error.message || "管理コードを保存できませんでした。");
-      }
+      const saved = saveAdminCodeQuietly();
+      if (!saved) return;
+      toast("管理コードを保存しました。");
+      loadAll();
     }
 
     function saveAdminCodeQuietly(){
@@ -930,7 +933,8 @@
       if (isOldNonVetAdminCode(code)) {
         localStorage.removeItem(ADMIN_CODE_STORAGE_KEY);
         el.adminCode.value = "";
-        throw new Error("古い別システム用の管理コードです。動物病院用の管理コードを入れてください。");
+        toast("古い別システム用の管理コードをクリアしました。動物病院用の管理コードを入れてください。");
+        return false;
       }
 
       if (code) {
@@ -938,6 +942,7 @@
       } else {
         localStorage.removeItem(ADMIN_CODE_STORAGE_KEY);
       }
+      return true;
     }
 
     async function loadAll(){
@@ -1042,12 +1047,8 @@
       );
       if (!ok) return;
 
-      try {
-        saveAdminCodeQuietly();
-      } catch (error) {
-        alert(error.message || "管理コードを保存できませんでした。");
-        return;
-      }
+      const saved = saveAdminCodeQuietly();
+      if (!saved) return;
       setLoading(true, "営業前デモ準備を実行中です。");
       setPrepareResult("営業前デモ準備を実行中です。少しお待ちください。", "実行中", "warn");
 
