@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="robots" content="noindex,nofollow">
-  <title>DPRO PET CARE LINE｜デモ・システム管理センター STEP40D</title>
+  <title>DPRO PET CARE LINE｜デモ・システム管理センター STEP40E</title>
   <style>
     :root{
       --bg:#f5f7f4;
@@ -601,7 +601,7 @@
       .linkbtn{width:100%}
     }
   
-    /* STEP VET-40D：営業デモ用ナビゲーション */
+    /* STEP VET-40E：営業デモ用ナビゲーション */
     .demo-nav{
       margin-top:18px;
       background:
@@ -748,7 +748,7 @@
     }
 
   
-    /* STEP VET-40D：多頭登録アピール */
+    /* STEP VET-40E：多頭登録アピール */
     .multi-pet-highlight{
       margin-top:12px;
       border:1px solid rgba(47,125,79,.22);
@@ -786,7 +786,7 @@
     }
 
   
-    /* STEP VET-40D：反映済みデモ画面ナビ */
+    /* STEP VET-40E：反映済みデモ画面ナビ */
     .route-card.ready{
       border-color:rgba(47,125,79,.35);
       background:linear-gradient(180deg,#ffffff,#f7fcf8);
@@ -884,7 +884,7 @@
           </div>
           <div class="status-pill">
             <span>STEP</span>
-            <b>STEP VET-40D</b>
+            <b>STEP VET-40E</b>
           </div>
         </div>
       </div>
@@ -899,7 +899,7 @@
             まず営業前デモ準備を押してから、下の順番で進めます。
           </p>
         </div>
-        <span class="badge ok">STEP VET-40D</span>
+        <span class="badge ok">STEP VET-40E</span>
       </div>
 
       <div class="demo-route">
@@ -1184,7 +1184,7 @@
   <script>
     "use strict";
 
-    const STEP = "STEP VET-40D";
+    const STEP = "STEP VET-40E";
     const API_BASE = "https://dpro-vet-qr-api.dpromstk2000.workers.dev";
     const DEFAULT_CLINIC_CODE = "dpro_vet_demo";
     const DEFAULT_LINE_USER_ID = "demo_line_link_001";
@@ -1196,11 +1196,11 @@
     const lineUserId = params.get("line_user_id") || DEFAULT_LINE_USER_ID;
 
     const urls = {
-      owner: `https://dpromstk2000-lab.github.io/DPRO-VET-QR/owner.html?v=step-vet-40d&clinic_code=${encodeURIComponent(clinicCode)}&demo=ready`,
-      member: `https://dpromstk2000-lab.github.io/DPRO-VET-QR/member.html?v=step-vet-40d&clinic_code=${encodeURIComponent(clinicCode)}&line_user_id=${encodeURIComponent(lineUserId)}&demo=ready`,
-      waiting: `https://dpromstk2000-lab.github.io/DPRO-VET-QR/waiting.html?v=step-vet-40d&clinic_code=${encodeURIComponent(clinicCode)}&line_user_id=${encodeURIComponent(lineUserId)}&demo=ready`,
-      scanPc: `https://dpromstk2000-lab.github.io/DPRO-VET-QR/scan-pc.html?v=step-vet-40d&clinic_code=${encodeURIComponent(clinicCode)}&demo=ready`,
-      systemCheck: `https://dpromstk2000-lab.github.io/DPRO-VET-QR/system-check.html?v=step-vet-40d&clinic_code=${encodeURIComponent(clinicCode)}`
+      owner: `https://dpromstk2000-lab.github.io/DPRO-VET-QR/owner.html?v=step-vet-40e&clinic_code=${encodeURIComponent(clinicCode)}&demo=ready`,
+      member: `https://dpromstk2000-lab.github.io/DPRO-VET-QR/member.html?v=step-vet-40e&clinic_code=${encodeURIComponent(clinicCode)}&line_user_id=${encodeURIComponent(lineUserId)}&demo=ready`,
+      waiting: `https://dpromstk2000-lab.github.io/DPRO-VET-QR/waiting.html?v=step-vet-40e&clinic_code=${encodeURIComponent(clinicCode)}&line_user_id=${encodeURIComponent(lineUserId)}&demo=ready`,
+      scanPc: `https://dpromstk2000-lab.github.io/DPRO-VET-QR/scan-pc.html?v=step-vet-40e&clinic_code=${encodeURIComponent(clinicCode)}&demo=ready`,
+      systemCheck: `https://dpromstk2000-lab.github.io/DPRO-VET-QR/system-check.html?v=step-vet-40e&clinic_code=${encodeURIComponent(clinicCode)}`
     };
 
     const el = {
