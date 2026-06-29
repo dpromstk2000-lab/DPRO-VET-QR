@@ -162,6 +162,77 @@
     .footer-note{margin-top:18px;border:1px solid rgba(217,210,196,.88);background:rgba(255,255,255,.78);border-radius:22px;padding:14px;color:#56645e;font-size:13px;font-weight:780;line-height:1.7}
     @media(max-width:980px){.hero,.layout,.follow-grid{grid-template-columns:1fr}.status-grid{grid-template-columns:repeat(2,1fr)}.section-title{align-items:flex-start;flex-direction:column}.section-title p{text-align:left}.entry{grid-template-columns:58px 1fr}.entry-actions{grid-column:1/-1;justify-content:flex-start;max-width:none}}
     @media(max-width:640px){.topbar{align-items:flex-start;flex-direction:column}.actions{justify-content:flex-start}.auth-box,.form-grid,.status-grid{grid-template-columns:1fr}.brand strong{white-space:normal}.hero-card,.card{border-radius:22px}.pet-main{grid-template-columns:1fr}}
+  
+    /* STEP VET-36D-3-R3：全ボタンの白化防止。disabledでも背景色と文字色を維持する */
+    button.btn:disabled,
+    .btn:disabled{
+      opacity:.86!important;
+      filter:none!important;
+      cursor:not-allowed!important;
+      box-shadow:none!important;
+    }
+
+    button.btn-main:disabled,
+    .btn-main:disabled{
+      background:var(--main)!important;
+      border-color:var(--main)!important;
+      color:#fff!important;
+      -webkit-text-fill-color:#fff!important;
+      opacity:.86!important;
+    }
+
+    button.btn-sub:disabled,
+    .btn-sub:disabled{
+      background:var(--green-soft)!important;
+      border-color:#b9ddce!important;
+      color:var(--main)!important;
+      -webkit-text-fill-color:var(--main)!important;
+      opacity:.86!important;
+    }
+
+    button.btn-warn:disabled,
+    .btn-warn:disabled{
+      background:var(--amber-soft)!important;
+      border-color:#efd79a!important;
+      color:var(--amber)!important;
+      -webkit-text-fill-color:var(--amber)!important;
+      opacity:.86!important;
+    }
+
+    button.btn-danger:disabled,
+    .btn-danger:disabled{
+      background:var(--red-soft)!important;
+      border-color:#edc0bc!important;
+      color:var(--red)!important;
+      -webkit-text-fill-color:var(--red)!important;
+      opacity:.86!important;
+    }
+
+    button.loading,
+    .btn.loading{
+      background:var(--main)!important;
+      border-color:var(--main)!important;
+      color:#fff!important;
+      -webkit-text-fill-color:#fff!important;
+      opacity:1!important;
+      filter:none!important;
+      box-shadow:0 14px 28px rgba(47,125,100,.24)!important;
+    }
+
+    button.loading::after,
+    .btn.loading::after{
+      content:"";
+      width:14px;
+      height:14px;
+      border:2px solid rgba(255,255,255,.45);
+      border-top-color:#fff;
+      border-radius:50%;
+      animation:dproSpin .75s linear infinite;
+      margin-left:8px;
+      display:inline-block;
+      vertical-align:-2px;
+    }
+
   </style>
 </head>
 
@@ -171,14 +242,14 @@
       <div class="brand">
         <div class="logo">📷</div>
         <div>
-          <small>scan-pc.html / STEP VET-36D-3-R2</small>
+          <small>scan-pc.html / STEP VET-36D-3-R3</small>
           <strong>DPRO PET CARE LINE</strong>
         </div>
       </div>
       <nav class="actions" aria-label="関連画面">
-        <a class="pill" href="./index.html?v=step-vet-36d-3-r2">管理トップ</a>
+        <a class="pill" href="./index.html?v=step-vet-36d-3-r3">管理トップ</a>
         <a class="pill" href="./waiting.html?v=step-vet-36d-2-r3&clinic_code=dpro_vet_demo">飼い主受付</a>
-        <a class="pill" href="./doctor.html?v=step-vet-36d-3-r2">獣医師画面</a>
+        <a class="pill" href="./doctor.html?v=step-vet-36d-3-r3">獣医師画面</a>
         <a class="pill" href="./owner.html?v=step-vet-36c&clinic_code=dpro_vet_demo">オーナー画面</a>
         <a class="pill" href="./system-check.html?v=step-vet-34i-r4&clinic_code=dpro_vet_demo">システム確認</a>
       </nav>
@@ -186,7 +257,7 @@
 
     <section class="hero">
       <div class="hero-card">
-        <span class="badge">STEP VET-36D-3-R2-R2｜受付PC ボタン表示修正</span>
+        <span class="badge">STEP VET-36D-3-R3-R2｜受付PC ボタン表示修正</span>
         <h1>診察券QRを読んで、<br>そのまま来院受付。</h1>
         <p class="lead">
           USB QRリーダーで読み取り、来院受付・受付番号発行まで行います。
@@ -847,7 +918,23 @@
       updateReceptionAvailability();
     }
 
-    async function lookupQr(){
+    function startButtonLoading(button, text){
+      if (!button) return;
+      button.dataset.beforeLoadingText = button.textContent || "";
+      button.classList.add("loading");
+      button.disabled = true;
+      if (text) button.textContent = text;
+    }
+
+    function stopButtonLoading(button, fallbackText){
+      if (!button) return;
+      button.classList.remove("loading");
+      button.disabled = false;
+      button.textContent = button.dataset.beforeLoadingText || fallbackText || button.textContent || "";
+      delete button.dataset.beforeLoadingText;
+    }
+
+    async function lookupQr(activeButton = el.lookupBtn){
       if (!getAdminToken()) {
         alert("先に管理コードを保存してください。");
         return;
@@ -860,6 +947,7 @@
         return;
       }
 
+      startButtonLoading(activeButton, "確認中...");
       el.lookupStatus.className = "notice info";
       el.lookupStatus.textContent = "ペット診察券を確認中...";
 
@@ -878,6 +966,9 @@
         el.petPanel.classList.add("hidden");
         el.lookupStatus.className = "notice ng";
         el.lookupStatus.textContent = error.message || "診察券が見つかりません。";
+      } finally {
+        const fallback = activeButton === el.lookupReaderlessBtn ? "リーダーなしで確認する" : "ペット確認";
+        stopButtonLoading(activeButton, fallback);
       }
     }
 
@@ -921,9 +1012,7 @@
         staff_name: "受付PC"
       };
 
-      el.createReceptionBtn.disabled = true;
-      el.createReceptionBtn.classList.add("loading");
-      el.createReceptionBtn.textContent = "受付中...";
+      startButtonLoading(el.createReceptionBtn, "受付中...");
       el.createStatus.className = "notice info";
       el.createStatus.textContent = "受付番号を発行しています...";
 
@@ -947,8 +1036,7 @@
         el.createStatus.className = "notice ng";
         el.createStatus.textContent = error.message || "受付に失敗しました。";
       } finally {
-        el.createReceptionBtn.classList.remove("loading");
-        el.createReceptionBtn.textContent = "QR来院受付する";
+        stopButtonLoading(el.createReceptionBtn, "QR来院受付する");
         updateReceptionAvailability();
       }
     }
@@ -1161,7 +1249,7 @@
     async function lookupReaderless(){
       const value = applyReaderlessToMainInput();
       if (!value) return;
-      await lookupQr();
+      await lookupQr(el.lookupReaderlessBtn);
     }
 
     function clearScan(){
