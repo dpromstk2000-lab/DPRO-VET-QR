@@ -346,7 +346,7 @@
 <body>
   <main class="page">
     <section class="hero">
-      <span class="badge">STEP VET-36D-2-R2-R2｜来院受付</span>
+      <span class="badge">STEP VET-36D-2-R3｜来院受付</span>
       <h1>今日の来院受付</h1>
       <p class="lead">
         診察券を確認して、今日の受付番号を発行します。
@@ -581,7 +581,7 @@
       const data = await res.json().catch(() => ({}));
       if (!res.ok || data.ok === false) {
         const msg = data.message || data.error || `API Error ${res.status}`;
-        throw new Error(msg === "API endpoint not found." ? "受付APIが見つかりません。最新版のWorker反映、または受付APIのURLを確認してください。" : msg);
+        throw new Error(msg === "API endpoint not found." ? "APIが見つかりません。最新版のWorker反映、またはAPIのURLを確認してください。" : msg);
       }
       return data;
     }
@@ -597,7 +597,7 @@
       const data = await res.json().catch(() => ({}));
       if (!res.ok || data.ok === false) {
         const msg = data.message || data.error || `API Error ${res.status}`;
-        throw new Error(msg === "API endpoint not found." ? "受付APIが見つかりません。最新版のWorker反映、または受付APIのURLを確認してください。" : msg);
+        throw new Error(msg === "API endpoint not found." ? "APIが見つかりません。最新版のWorker反映、またはAPIのURLを確認してください。" : msg);
       }
       return data;
     }
@@ -647,12 +647,38 @@
     }
 
     async function loadMemberCards(){
-      const data = await apiGet("/api/public/member-cards", {
-        line_user_id: LINE_USER_ID
-      }, false);
+      // STEP VET-36D-2-R3:
+      // 正しい診察券取得APIは /api/public/my-cards。
+      // 古いWorker互換として /api/member/pet-cards へフォールバックする。
+      let data = null;
 
-      state.guardian = data.guardian || data.owner || null;
-      state.cards = Array.isArray(data.cards) ? data.cards : Array.isArray(data.items) ? data.items : [];
+      try {
+        data = await apiGet("/api/public/my-cards", {
+          line_user_id: LINE_USER_ID
+        }, false);
+      } catch (error) {
+        console.warn("public my-cards failed, fallback to member pet-cards:", error);
+        data = await apiGet("/api/member/pet-cards", {
+          line_user_id: LINE_USER_ID
+        }, false);
+      }
+
+      state.guardian = data.guardian || data.owner || data.item?.guardian || null;
+
+      let cards = [];
+      if (Array.isArray(data.cards)) {
+        cards = data.cards;
+      } else if (Array.isArray(data.items)) {
+        cards = data.items;
+      } else if (data.card) {
+        cards = [data.card];
+      } else if (data.item && (data.item.pet_id || data.item.card_token || data.item.qr_payload || data.item.card_no)) {
+        cards = [data.item];
+      } else if (data.pet_id || data.card_token || data.qr_payload || data.card_no) {
+        cards = [data];
+      }
+
+      state.cards = cards.filter(Boolean);
       state.selectedCard = pickSelectedCard(state.cards);
       renderPetArea();
       return data;
