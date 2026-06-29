@@ -1,0 +1,703 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>DPRO PET CARE LINE｜CSV一括取込</title>
+  <style>
+    :root{
+      --bg:#f7f5ef;
+      --card:#fffefa;
+      --ink:#26312b;
+      --muted:#6d766f;
+      --line:#e5ded0;
+      --green:#1f8f57;
+      --green2:#0f6b3d;
+      --blue:#2563eb;
+      --danger:#c44747;
+      --warn:#b97818;
+      --shadow:0 18px 45px rgba(45,38,25,.08);
+      --radius:22px;
+      --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      --sans:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family:var(--sans);
+      color:var(--ink);
+      background:
+        radial-gradient(circle at top left,rgba(31,143,87,.13),transparent 34%),
+        linear-gradient(180deg,#fbfaf6 0%,#f3efe5 100%);
+    }
+    .wrap{max-width:1220px;margin:0 auto;padding:22px 18px 44px}
+    .hero{
+      background:linear-gradient(135deg,#fffefa,#eef8f1);
+      border:1px solid rgba(217,210,196,.9);
+      border-radius:28px;
+      box-shadow:var(--shadow);
+      padding:20px;
+      display:grid;
+      grid-template-columns:1fr auto;
+      gap:16px;
+      align-items:center;
+      margin-bottom:16px;
+    }
+    .eyebrow{
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
+      color:var(--green2);
+      font-size:12px;
+      font-weight:950;
+      letter-spacing:.05em;
+      background:#fff;
+      border:1px solid #d7e7db;
+      border-radius:999px;
+      padding:6px 10px;
+    }
+    h1{margin:10px 0 6px;font-size:clamp(24px,4vw,38px);line-height:1.15;letter-spacing:-.04em}
+    .lead{margin:0;color:var(--muted);font-weight:850;line-height:1.7}
+    .version{text-align:right;font-family:var(--mono);font-size:12px;font-weight:950;color:#7c6f58}
+    .grid{display:grid;grid-template-columns:360px 1fr;gap:16px;align-items:start}
+    .card{
+      background:rgba(255,254,250,.96);
+      border:1px solid rgba(217,210,196,.9);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:16px;
+      margin-bottom:16px;
+    }
+    .card h2{margin:0 0 8px;font-size:18px}
+    .small{color:var(--muted);font-size:12px;line-height:1.65;font-weight:850;margin:0 0 12px}
+    label{display:block;font-size:12px;color:#4b5a51;font-weight:950;margin:0 0 6px}
+    input,textarea{
+      width:100%;
+      border:1px solid #ddd4c3;
+      border-radius:14px;
+      background:#fff;
+      padding:11px 12px;
+      font-size:14px;
+      outline:none;
+      color:var(--ink);
+      font-family:var(--sans);
+    }
+    textarea{min-height:88px;resize:vertical}
+    input:focus,textarea:focus{border-color:#8fcaa6;box-shadow:0 0 0 4px rgba(31,143,87,.09)}
+    .field{margin-top:10px}
+    .btn{
+      border:0;
+      border-radius:14px;
+      padding:11px 14px;
+      font-weight:950;
+      cursor:pointer;
+      transition:.15s;
+      font-size:13px;
+      min-height:42px;
+      white-space:nowrap;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:6px;
+    }
+    .btn:disabled{opacity:.58;cursor:not-allowed}
+    .btn-main{background:var(--green);color:#fff}
+    .btn-main:hover{background:var(--green2)}
+    .btn-sub{background:#fff;border:1px solid var(--line);color:var(--ink)}
+    .btn-blue{background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe}
+    .btn-danger{background:#fff1f1;color:#9f3434;border:1px solid #f1c6c6}
+    .button-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+    .notice{
+      border-radius:16px;
+      border:1px solid #d8dfd9;
+      background:#f7faf7;
+      color:#48554e;
+      padding:11px 12px;
+      font-size:12px;
+      font-weight:850;
+      line-height:1.6;
+      margin-top:12px;
+    }
+    .notice.ok{background:#edf9f0;border-color:#bfe4cf;color:#12683f}
+    .notice.ng{background:#fff1f1;border-color:#f1b7b7;color:#9f3434}
+    .notice.warn{background:#fff8e7;border-color:#edd7a2;color:#7b520f}
+    .notice.info{background:#f3f6ff;border-color:#cdd8ff;color:#304174}
+    .summary{
+      display:grid;
+      grid-template-columns:repeat(5,minmax(0,1fr));
+      gap:10px;
+      margin-bottom:16px;
+    }
+    .summary-card{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:14px;
+      min-height:88px;
+    }
+    .summary-card strong{display:block;font-size:28px;letter-spacing:-.04em}
+    .summary-card span{display:block;color:var(--muted);font-size:12px;font-weight:900;margin-top:4px}
+    .preview-table-wrap{
+      overflow:auto;
+      border:1px solid var(--line);
+      border-radius:18px;
+      background:#fff;
+      margin-top:12px;
+      max-height:620px;
+    }
+    table{
+      width:100%;
+      border-collapse:collapse;
+      min-width:920px;
+      font-size:12px;
+    }
+    th,td{
+      border-bottom:1px solid #efe8da;
+      padding:9px 10px;
+      text-align:left;
+      vertical-align:top;
+    }
+    th{
+      position:sticky;
+      top:0;
+      background:#f8f5ee;
+      z-index:1;
+      color:#4b5a51;
+      font-weight:950;
+    }
+    tr.error{background:#fff5f5}
+    tr.duplicate{background:#fffaf0}
+    tr.valid{background:#fbfffc}
+    .tag{
+      display:inline-flex;align-items:center;min-height:22px;border-radius:999px;padding:3px 8px;
+      background:#f6f3ea;border:1px solid var(--line);color:#5c5342;font-size:11px;font-weight:950;
+    }
+    .tag.valid,.tag.imported{background:#ecf8f0;border-color:#bfe4cf;color:#157044}
+    .tag.duplicate,.tag.warning{background:#fff7e8;border-color:#f2d49b;color:#8a5a00}
+    .tag.error,.tag.failed{background:#fff1f1;border-color:#f1b7b7;color:#9f3434}
+    .tag.skipped_duplicate{background:#f5f6f5;border-color:#d8ded8;color:#58635d}
+    .messages{display:grid;gap:4px}
+    .message{font-weight:850;color:#6b5c3a}
+    .message.error{color:#9f3434}
+    .confirm-box{
+      border:2px solid #eadfbd;
+      background:#fffdf5;
+      border-radius:20px;
+      padding:14px;
+      margin-top:16px;
+    }
+    .confirm-text{
+      font-family:var(--mono);
+      background:#fff;
+      border:1px solid #eadfbd;
+      border-radius:12px;
+      padding:8px 10px;
+      display:inline-block;
+      margin:6px 0;
+      font-size:12px;
+      font-weight:950;
+    }
+    .empty{
+      border:1px dashed #d8cfbd;
+      border-radius:16px;
+      padding:14px;
+      text-align:center;
+      color:var(--muted);
+      font-weight:900;
+      background:#fffaf0;
+    }
+    .checkbox-line{
+      display:flex;
+      gap:8px;
+      align-items:flex-start;
+      font-weight:900;
+      color:#33423a;
+      margin-top:10px;
+      font-size:13px;
+    }
+    .checkbox-line input{width:auto;margin-top:2px;accent-color:var(--green)}
+    @media (max-width:900px){
+      .hero,.grid{grid-template-columns:1fr}
+      .version{text-align:left}
+      .summary{grid-template-columns:repeat(2,minmax(0,1fr))}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <div>
+        <span class="eyebrow">DPRO PET CARE LINE｜STEP VET-50</span>
+        <h1>既存患者CSV一括取込</h1>
+        <p class="lead">
+          既存の飼い主・ペット情報をCSVで取り込みます。
+          まず事前チェックで重複・エラーを確認し、確認文言を入力してから本番反映します。
+        </p>
+      </div>
+      <div class="version">
+        csv safe import<br>
+        preview → execute
+      </div>
+    </section>
+
+    <div class="grid">
+      <aside>
+        <section class="card">
+          <h2>取込設定</h2>
+          <p class="small">本番では、取込前にSupabaseバックアップとCSV原本保存を必ず行ってください。</p>
+
+          <div class="field">
+            <label for="clinicCodeInput">clinic_code</label>
+            <input id="clinicCodeInput" />
+          </div>
+
+          <div class="field">
+            <label for="adminTokenInput">管理コード</label>
+            <input id="adminTokenInput" type="password" placeholder="管理コードを入力" autocomplete="off" />
+          </div>
+
+          <div class="button-row">
+            <button class="btn btn-main" id="saveAdminBtn" type="button">保存</button>
+            <button class="btn btn-sub" id="clearAdminBtn" type="button">削除</button>
+          </div>
+
+          <div id="settingStatus" class="notice">管理コードを保存してください。</div>
+        </section>
+
+        <section class="card">
+          <h2>CSVファイル</h2>
+          <p class="small">テンプレートに合わせたCSVを選択してください。Excelで保存する場合はCSV UTF-8推奨です。</p>
+
+          <div class="field">
+            <label for="csvFileInput">CSVファイル</label>
+            <input id="csvFileInput" type="file" accept=".csv,text/csv" />
+          </div>
+
+          <div class="field">
+            <label for="importNoteInput">取込メモ</label>
+            <textarea id="importNoteInput" placeholder="例：2026年6月 既存患者台帳から初回取込"></textarea>
+          </div>
+
+          <label class="checkbox-line">
+            <input id="skipDuplicatesCheck" type="checkbox" checked />
+            重複候補は取込せずスキップする
+          </label>
+
+          <div class="button-row">
+            <button class="btn btn-blue" id="previewBtn" type="button">CSV事前チェック</button>
+            <button class="btn btn-sub" id="clearBtn" type="button">クリア</button>
+          </div>
+
+          <div id="fileStatus" class="notice info">CSVを選択して事前チェックしてください。</div>
+        </section>
+
+        <section class="card">
+          <h2>安全ルール</h2>
+          <div class="notice warn">
+            事前チェックだけではDBに登録しません。<br>
+            取込実行には確認文言が必要です。<br>
+            重複候補は初期設定ではスキップします。
+          </div>
+        </section>
+      </aside>
+
+      <main>
+        <section class="summary" id="summaryArea">
+          <div class="summary-card"><strong>-</strong><span>全行</span></div>
+          <div class="summary-card"><strong>-</strong><span>有効</span></div>
+          <div class="summary-card"><strong>-</strong><span>重複</span></div>
+          <div class="summary-card"><strong>-</strong><span>エラー</span></div>
+          <div class="summary-card"><strong>-</strong><span>取込</span></div>
+        </section>
+
+        <section class="card">
+          <h2>事前チェック結果</h2>
+          <div id="previewStatus" class="notice">まだチェックしていません。</div>
+          <div id="previewArea" class="preview-table-wrap">
+            <div class="empty">CSV事前チェック後に、行ごとの結果が表示されます。</div>
+          </div>
+
+          <div class="confirm-box">
+            <p class="small" style="margin:0;">
+              取込を実行するには、下の確認文言をそのまま入力してください。
+            </p>
+            <div class="confirm-text" id="requiredConfirmText">既存患者CSV取込を実行</div>
+            <div class="field">
+              <label for="confirmTextInput">確認文言</label>
+              <input id="confirmTextInput" placeholder="既存患者CSV取込を実行" />
+            </div>
+            <div class="button-row">
+              <button class="btn btn-danger" id="executeBtn" type="button" disabled>CSV取込を実行</button>
+            </div>
+            <div id="executeStatus" class="notice">事前チェック後、確認文言を入力すると実行できます。</div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    const url = new URL(location.href);
+    const initialClinicCode = url.searchParams.get("clinic_code") || "dpro_vet_demo";
+    const API_BASE = (url.searchParams.get("api") || "https://dpro-vet-qr-api.dpromstk2000.workers.dev").replace(/\/+$/,"");
+    const ADMIN_KEY_PREFIX = "DPRO_VET_ADMIN_CODE_";
+    const REQUIRED_CONFIRM_TEXT = "既存患者CSV取込を実行";
+
+    const el = {
+      clinicCodeInput: document.getElementById("clinicCodeInput"),
+      adminTokenInput: document.getElementById("adminTokenInput"),
+      saveAdminBtn: document.getElementById("saveAdminBtn"),
+      clearAdminBtn: document.getElementById("clearAdminBtn"),
+      csvFileInput: document.getElementById("csvFileInput"),
+      importNoteInput: document.getElementById("importNoteInput"),
+      skipDuplicatesCheck: document.getElementById("skipDuplicatesCheck"),
+      previewBtn: document.getElementById("previewBtn"),
+      clearBtn: document.getElementById("clearBtn"),
+      fileStatus: document.getElementById("fileStatus"),
+      summaryArea: document.getElementById("summaryArea"),
+      previewStatus: document.getElementById("previewStatus"),
+      previewArea: document.getElementById("previewArea"),
+      confirmTextInput: document.getElementById("confirmTextInput"),
+      executeBtn: document.getElementById("executeBtn"),
+      executeStatus: document.getElementById("executeStatus"),
+      settingStatus: document.getElementById("settingStatus")
+    };
+
+    const state = {
+      filename: "",
+      rows: [],
+      preview: null,
+      executed: null
+    };
+
+    function clinicCode(){
+      return el.clinicCodeInput.value.trim() || "dpro_vet_demo";
+    }
+
+    function adminKey(){
+      return `${ADMIN_KEY_PREFIX}${clinicCode()}`;
+    }
+
+    function getAdminToken(){
+      return localStorage.getItem(adminKey()) || "";
+    }
+
+    function adminHeaders(){
+      const token = getAdminToken();
+      return token ? { "X-DPRO-Admin-Code": token } : {};
+    }
+
+    function escapeHtml(value){
+      return String(value ?? "")
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
+    }
+
+    function setNotice(node, text, type=""){
+      node.className = `notice ${type}`.trim();
+      node.textContent = text;
+    }
+
+    function startButton(btn, text){
+      btn.dataset.originalText = btn.textContent;
+      btn.textContent = text;
+      btn.disabled = true;
+    }
+
+    function stopButton(btn){
+      btn.textContent = btn.dataset.originalText || btn.textContent;
+      btn.disabled = false;
+    }
+
+    async function apiPost(path, body = {}, auth = true){
+      const res = await fetch(`${API_BASE}${path}`, {
+        method:"POST",
+        headers:{
+          "Content-Type":"text/plain;charset=utf-8",
+          ...(auth ? adminHeaders() : {})
+        },
+        body: JSON.stringify({ clinic_code: clinicCode(), ...body })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.ok === false) throw new Error(data.message || `APIエラー ${res.status}`);
+      return data;
+    }
+
+    function parseCsv(text){
+      const rows = [];
+      let row = [];
+      let cell = "";
+      let inQuotes = false;
+
+      text = String(text || "").replace(/^\uFEFF/, "");
+
+      for (let i = 0; i < text.length; i += 1) {
+        const ch = text[i];
+        const next = text[i + 1];
+
+        if (ch === '"') {
+          if (inQuotes && next === '"') {
+            cell += '"';
+            i += 1;
+          } else {
+            inQuotes = !inQuotes;
+          }
+          continue;
+        }
+
+        if (ch === "," && !inQuotes) {
+          row.push(cell);
+          cell = "";
+          continue;
+        }
+
+        if ((ch === "\n" || ch === "\r") && !inQuotes) {
+          if (ch === "\r" && next === "\n") i += 1;
+          row.push(cell);
+          if (row.some(v => String(v).trim() !== "")) rows.push(row);
+          row = [];
+          cell = "";
+          continue;
+        }
+
+        cell += ch;
+      }
+
+      row.push(cell);
+      if (row.some(v => String(v).trim() !== "")) rows.push(row);
+
+      if (!rows.length) return [];
+
+      const headers = rows[0].map(h => String(h || "").trim());
+      return rows.slice(1).map((cols) => {
+        const obj = {};
+        headers.forEach((h, i) => {
+          obj[h] = String(cols[i] ?? "").trim();
+        });
+        return obj;
+      });
+    }
+
+    async function readSelectedCsv(){
+      const file = el.csvFileInput.files && el.csvFileInput.files[0];
+      if (!file) throw new Error("CSVファイルを選択してください。");
+      state.filename = file.name;
+      const text = await file.text();
+      const rows = parseCsv(text);
+      if (!rows.length) throw new Error("CSVにデータ行がありません。");
+      state.rows = rows;
+      return rows;
+    }
+
+    function renderSavedAdmin(){
+      const token = getAdminToken();
+      el.adminTokenInput.value = token;
+      if (token) setNotice(el.settingStatus, `管理コード保存済み：${clinicCode()}`, "ok");
+      else setNotice(el.settingStatus, "管理コードを保存してください。", "");
+    }
+
+    function renderSummary(summary = {}, importedSummary = null){
+      const imported = importedSummary?.imported_pets ?? "-";
+      el.summaryArea.innerHTML = `
+        <div class="summary-card"><strong>${escapeHtml(summary.total_rows ?? "-")}</strong><span>全行</span></div>
+        <div class="summary-card"><strong>${escapeHtml(summary.valid_rows ?? "-")}</strong><span>有効</span></div>
+        <div class="summary-card"><strong>${escapeHtml(summary.duplicate_rows ?? "-")}</strong><span>重複</span></div>
+        <div class="summary-card"><strong>${escapeHtml(summary.error_rows ?? "-")}</strong><span>エラー</span></div>
+        <div class="summary-card"><strong>${escapeHtml(imported)}</strong><span>取込</span></div>
+      `;
+    }
+
+    function statusLabel(status){
+      const map = {
+        valid:"有効",
+        duplicate:"重複候補",
+        error:"エラー",
+        imported:"取込済み",
+        skipped_duplicate:"重複スキップ",
+        failed:"失敗"
+      };
+      return map[status] || status || "-";
+    }
+
+    function renderRows(rows = [], executed = false){
+      if (!rows.length) {
+        el.previewArea.innerHTML = '<div class="empty">表示する行がありません。</div>';
+        return;
+      }
+
+      const visible = rows.slice(0, 300);
+      el.previewArea.innerHTML = `
+        <table>
+          <thead>
+            <tr>
+              <th>行</th>
+              <th>状態</th>
+              <th>飼い主</th>
+              <th>電話</th>
+              <th>ペット</th>
+              <th>動物種</th>
+              <th>診察券</th>
+              <th>メッセージ</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${visible.map((row) => {
+              const n = row.normalized || {};
+              const status = row.import_status || row.status;
+              const messages = [
+                ...(row.messages || []),
+                ...(row.import_error ? [{ type:"error", message: row.import_error }] : [])
+              ];
+              return `
+                <tr class="${escapeHtml(row.status || "")}">
+                  <td>${escapeHtml(row.row_number)}</td>
+                  <td><span class="tag ${escapeHtml(status)}">${escapeHtml(statusLabel(status))}</span></td>
+                  <td>${escapeHtml(n.guardian_name || "")}</td>
+                  <td>${escapeHtml(n.phone || "")}</td>
+                  <td>${escapeHtml(n.pet_name || "")}</td>
+                  <td>${escapeHtml(n.species_label || n.species || "")}</td>
+                  <td>${escapeHtml(n.card_no || "自動発行")}</td>
+                  <td>
+                    <div class="messages">
+                      ${messages.length ? messages.map(m => `<div class="message ${escapeHtml(m.type || "")}">${escapeHtml(m.message || "")}</div>`).join("") : '<span class="message">OK</span>'}
+                    </div>
+                  </td>
+                </tr>
+              `;
+            }).join("")}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function updateExecuteButton(){
+      el.executeBtn.disabled = !(state.preview && el.confirmTextInput.value.trim() === REQUIRED_CONFIRM_TEXT);
+    }
+
+    async function previewCsv(){
+      if (!getAdminToken()) {
+        setNotice(el.settingStatus, "先に管理コードを保存してください。", "ng");
+        return;
+      }
+
+      startButton(el.previewBtn, "チェック中...");
+      setNotice(el.fileStatus, "CSVを読み込んでいます...", "info");
+      setNotice(el.previewStatus, "事前チェック中です...", "info");
+
+      try {
+        const rows = await readSelectedCsv();
+        setNotice(el.fileStatus, `${state.filename} を読み込みました。${rows.length}行`, "ok");
+
+        const data = await apiPost("/api/admin/import/csv/preview", {
+          rows,
+          source_filename: state.filename
+        }, true);
+
+        state.preview = data;
+        state.executed = null;
+        renderSummary(data.summary || {});
+        renderRows(data.rows || []);
+        setNotice(el.previewStatus, `事前チェック完了：有効 ${data.summary.valid_rows} / 重複 ${data.summary.duplicate_rows} / エラー ${data.summary.error_rows}`, data.summary.error_rows ? "warn" : "ok");
+        setNotice(el.executeStatus, "内容を確認し、問題なければ確認文言を入力してください。", "info");
+        updateExecuteButton();
+      } catch (error) {
+        state.preview = null;
+        renderSummary({});
+        el.previewArea.innerHTML = `<div class="empty">エラー：${escapeHtml(error.message || "事前チェックに失敗しました。")}</div>`;
+        setNotice(el.previewStatus, error.message || "事前チェックに失敗しました。", "ng");
+      } finally {
+        stopButton(el.previewBtn);
+      }
+    }
+
+    async function executeImport(){
+      if (!state.preview || !state.rows.length) {
+        setNotice(el.executeStatus, "先に事前チェックを実行してください。", "ng");
+        return;
+      }
+
+      if (el.confirmTextInput.value.trim() !== REQUIRED_CONFIRM_TEXT) {
+        setNotice(el.executeStatus, `確認文言は「${REQUIRED_CONFIRM_TEXT}」です。`, "ng");
+        return;
+      }
+
+      const ok = confirm("CSV取込を実行します。\\n既存データは削除しませんが、新しい飼い主・ペット・診察券が登録されます。\\n実行してよろしいですか？");
+      if (!ok) return;
+
+      startButton(el.executeBtn, "取込中...");
+      setNotice(el.executeStatus, "CSV取込を実行しています。画面を閉じないでください。", "info");
+
+      try {
+        const data = await apiPost("/api/admin/import/csv/execute", {
+          rows: state.rows,
+          source_filename: state.filename,
+          confirm_text: el.confirmTextInput.value.trim(),
+          skip_duplicates: Boolean(el.skipDuplicatesCheck.checked),
+          note: el.importNoteInput.value.trim(),
+          staff_name: "CSV一括取込画面"
+        }, true);
+
+        state.executed = data;
+        renderSummary(state.preview.summary || {}, data.summary || {});
+        renderRows(data.rows || [], true);
+        setNotice(el.executeStatus, `取込完了：ペット ${data.summary.imported_pets}件 / スキップ ${data.summary.skipped_rows}件 / エラー ${data.summary.error_rows}件`, data.summary.error_rows ? "warn" : "ok");
+      } catch (error) {
+        setNotice(el.executeStatus, error.message || "CSV取込に失敗しました。", "ng");
+      } finally {
+        stopButton(el.executeBtn);
+        updateExecuteButton();
+      }
+    }
+
+    function clearAll(){
+      state.filename = "";
+      state.rows = [];
+      state.preview = null;
+      state.executed = null;
+      el.csvFileInput.value = "";
+      el.importNoteInput.value = "";
+      el.confirmTextInput.value = "";
+      renderSummary({});
+      el.previewArea.innerHTML = '<div class="empty">CSV事前チェック後に、行ごとの結果が表示されます。</div>';
+      setNotice(el.fileStatus, "CSVを選択して事前チェックしてください。", "info");
+      setNotice(el.previewStatus, "まだチェックしていません。", "");
+      setNotice(el.executeStatus, "事前チェック後、確認文言を入力すると実行できます。", "");
+      updateExecuteButton();
+    }
+
+    function bind(){
+      el.clinicCodeInput.addEventListener("change", renderSavedAdmin);
+
+      el.saveAdminBtn.addEventListener("click", () => {
+        localStorage.setItem(adminKey(), el.adminTokenInput.value.trim());
+        renderSavedAdmin();
+      });
+
+      el.clearAdminBtn.addEventListener("click", () => {
+        localStorage.removeItem(adminKey());
+        el.adminTokenInput.value = "";
+        renderSavedAdmin();
+      });
+
+      el.previewBtn.addEventListener("click", previewCsv);
+      el.executeBtn.addEventListener("click", executeImport);
+      el.clearBtn.addEventListener("click", clearAll);
+      el.confirmTextInput.addEventListener("input", updateExecuteButton);
+    }
+
+    function init(){
+      el.clinicCodeInput.value = initialClinicCode;
+      bind();
+      renderSavedAdmin();
+      updateExecuteButton();
+    }
+
+    init();
+  </script>
+</body>
+</html>
