@@ -1,0 +1,565 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>DPRO PET CARE LINE｜本番前安全チェック</title>
+  <style>
+    :root{
+      --bg:#f7f5ef;
+      --card:#fffefa;
+      --ink:#26312b;
+      --muted:#6d766f;
+      --line:#e5ded0;
+      --green:#1f8f57;
+      --green2:#0f6b3d;
+      --blue:#2563eb;
+      --purple:#7c3aed;
+      --danger:#c44747;
+      --warn:#b97818;
+      --shadow:0 18px 45px rgba(45,38,25,.08);
+      --radius:22px;
+      --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      --sans:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family:var(--sans);
+      color:var(--ink);
+      background:
+        radial-gradient(circle at top left,rgba(31,143,87,.13),transparent 34%),
+        linear-gradient(180deg,#fbfaf6 0%,#f3efe5 100%);
+    }
+    .wrap{max-width:1180px;margin:0 auto;padding:22px 18px 44px}
+    .hero{
+      background:linear-gradient(135deg,#fffefa,#eef8f1);
+      border:1px solid rgba(217,210,196,.9);
+      border-radius:28px;
+      box-shadow:var(--shadow);
+      padding:20px;
+      display:grid;
+      grid-template-columns:1fr auto;
+      gap:16px;
+      align-items:center;
+      margin-bottom:16px;
+    }
+    .eyebrow{
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
+      color:var(--green2);
+      font-size:12px;
+      font-weight:950;
+      letter-spacing:.05em;
+      background:#fff;
+      border:1px solid #d7e7db;
+      border-radius:999px;
+      padding:6px 10px;
+    }
+    h1{margin:10px 0 6px;font-size:clamp(24px,4vw,38px);line-height:1.15;letter-spacing:-.04em}
+    .lead{margin:0;color:var(--muted);font-weight:850;line-height:1.7}
+    .version{text-align:right;font-family:var(--mono);font-size:12px;font-weight:950;color:#7c6f58}
+    .grid{display:grid;grid-template-columns:360px 1fr;gap:16px;align-items:start}
+    .card{
+      background:rgba(255,254,250,.96);
+      border:1px solid rgba(217,210,196,.9);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:16px;
+      margin-bottom:16px;
+    }
+    .card h2{margin:0 0 8px;font-size:18px}
+    .small{color:var(--muted);font-size:12px;line-height:1.65;font-weight:850;margin:0 0 12px}
+    label{display:block;font-size:12px;color:#4b5a51;font-weight:950;margin:0 0 6px}
+    input{
+      width:100%;
+      border:1px solid #ddd4c3;
+      border-radius:14px;
+      background:#fff;
+      padding:11px 12px;
+      font-size:14px;
+      outline:none;
+      color:var(--ink);
+      font-family:var(--sans);
+    }
+    input:focus{border-color:#8fcaa6;box-shadow:0 0 0 4px rgba(31,143,87,.09)}
+    .field{margin-top:10px}
+    .btn{
+      border:0;
+      border-radius:14px;
+      padding:11px 14px;
+      font-weight:950;
+      cursor:pointer;
+      transition:.15s;
+      font-size:13px;
+      min-height:42px;
+      white-space:nowrap;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:6px;
+    }
+    .btn-main{background:var(--green);color:#fff}
+    .btn-main:hover{background:var(--green2)}
+    .btn-sub{background:#fff;border:1px solid var(--line);color:var(--ink)}
+    .btn-blue{background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe}
+    .btn-danger{background:#fff1f1;color:#9f3434;border:1px solid #f1c6c6}
+    .button-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+    .notice{
+      border-radius:16px;
+      border:1px solid #d8dfd9;
+      background:#f7faf7;
+      color:#48554e;
+      padding:11px 12px;
+      font-size:12px;
+      font-weight:850;
+      line-height:1.6;
+      margin-top:12px;
+    }
+    .notice.ok{background:#edf9f0;border-color:#bfe4cf;color:#12683f}
+    .notice.ng{background:#fff1f1;border-color:#f1b7b7;color:#9f3434}
+    .notice.warn{background:#fff8e7;border-color:#edd7a2;color:#7b520f}
+    .notice.info{background:#f3f6ff;border-color:#cdd8ff;color:#304174}
+    .summary{
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:10px;
+      margin-bottom:16px;
+    }
+    .summary-card{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:14px;
+      min-height:88px;
+    }
+    .summary-card strong{display:block;font-size:28px;letter-spacing:-.04em}
+    .summary-card span{display:block;color:var(--muted);font-size:12px;font-weight:900;margin-top:4px}
+    .check-list{display:grid;gap:10px;margin-top:12px}
+    .check{
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:12px;
+      background:#fff;
+      display:grid;
+      grid-template-columns:auto 1fr;
+      gap:10px;
+      align-items:start;
+    }
+    .status-dot{
+      width:14px;height:14px;border-radius:99px;margin-top:3px;background:#9ca3af;
+    }
+    .status-dot.pass{background:#10b981;box-shadow:0 0 0 5px rgba(16,185,129,.11)}
+    .status-dot.warn{background:#f59e0b;box-shadow:0 0 0 5px rgba(245,158,11,.12)}
+    .status-dot.fail{background:#ef4444;box-shadow:0 0 0 5px rgba(239,68,68,.12)}
+    .status-dot.info{background:#3b82f6;box-shadow:0 0 0 5px rgba(59,130,246,.11)}
+    .check h3{margin:0;font-size:14px}
+    .check p{margin:5px 0 0;color:var(--muted);font-size:12px;font-weight:850;line-height:1.55}
+    .tagline{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+    .tag{
+      display:inline-flex;align-items:center;min-height:22px;border-radius:999px;padding:3px 8px;
+      background:#f6f3ea;border:1px solid var(--line);color:#5c5342;font-size:11px;font-weight:950;
+    }
+    .tag.pass{background:#ecf8f0;border-color:#bfe4cf;color:#157044}
+    .tag.warn{background:#fff7e8;border-color:#f2d49b;color:#8a5a00}
+    .tag.fail{background:#fff1f1;border-color:#f1b7b7;color:#9f3434}
+    .manual-item{
+      display:grid;
+      grid-template-columns:auto 1fr;
+      gap:10px;
+      border:1px solid var(--line);
+      border-radius:16px;
+      background:#fff;
+      padding:12px;
+      margin-top:10px;
+    }
+    .manual-item input{width:auto;margin-top:3px;accent-color:var(--green)}
+    .manual-item strong{display:block;font-size:14px;color:var(--ink)}
+    .manual-item span{display:block;color:var(--muted);font-size:12px;font-weight:850;line-height:1.55;margin-top:4px}
+    .url-list{display:grid;gap:8px;margin-top:10px}
+    .url-row{
+      display:grid;
+      grid-template-columns:130px 1fr auto;
+      gap:8px;
+      align-items:center;
+      border:1px solid var(--line);
+      border-radius:14px;
+      background:#fff;
+      padding:8px;
+    }
+    .url-row b{font-size:12px;color:#48554e}
+    .url-box{
+      font-family:var(--mono);
+      font-size:12px;
+      word-break:break-all;
+      color:#334155;
+      background:#f8fafc;
+      border:1px solid #d9e2ec;
+      border-radius:10px;
+      padding:7px 9px;
+    }
+    .empty{
+      border:1px dashed #d8cfbd;
+      border-radius:16px;
+      padding:14px;
+      text-align:center;
+      color:var(--muted);
+      font-weight:900;
+      background:#fffaf0;
+    }
+    @media (max-width:900px){
+      .hero,.grid{grid-template-columns:1fr}
+      .version{text-align:left}
+      .summary{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .url-row{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <div>
+        <span class="eyebrow">DPRO PET CARE LINE｜STEP VET-49</span>
+        <h1>本番前安全チェック</h1>
+        <p class="lead">
+          demo専用機能の隔離、権限、管理コード、LINE連携、URL整理を確認します。
+          この画面はチェック専用で、DBの更新・削除・DEMOリセットは実行しません。
+        </p>
+      </div>
+      <div class="version">
+        production final safety check<br>
+        read only
+      </div>
+    </section>
+
+    <div class="grid">
+      <aside>
+        <section class="card">
+          <h2>チェック設定</h2>
+          <p class="small">本番医院では、clinic_code を dpro_vet_demo 以外にします。DEMO確認の場合は dpro_vet_demo のままでOKです。</p>
+
+          <div class="field">
+            <label for="clinicCodeInput">clinic_code</label>
+            <input id="clinicCodeInput" />
+          </div>
+
+          <div class="field">
+            <label for="adminTokenInput">管理コード</label>
+            <input id="adminTokenInput" type="password" placeholder="管理コードを入力" autocomplete="off" />
+          </div>
+
+          <div class="button-row">
+            <button class="btn btn-main" id="saveAdminBtn" type="button">保存</button>
+            <button class="btn btn-sub" id="clearAdminBtn" type="button">削除</button>
+            <button class="btn btn-blue" id="runCheckBtn" type="button">本番前チェック実行</button>
+          </div>
+
+          <div id="settingStatus" class="notice">管理コードを保存してチェックを実行してください。</div>
+        </section>
+
+        <section class="card">
+          <h2>この画面で確認すること</h2>
+          <p class="small">APIで確認できるものと、人が目視確認するものを分けて表示します。</p>
+          <div class="notice info">
+            本番では LINEリッチメニューURLに <b>demo=ready</b> や <b>demo_line_link_001</b> を入れません。<br>
+            system-check.html は営業・開発用で、医院オーナーの日常メニューには出しません。
+          </div>
+        </section>
+      </aside>
+
+      <main>
+        <section class="summary" id="summaryArea">
+          <div class="summary-card"><strong>-</strong><span>PASS</span></div>
+          <div class="summary-card"><strong>-</strong><span>WARN</span></div>
+          <div class="summary-card"><strong>-</strong><span>FAIL</span></div>
+          <div class="summary-card"><strong>-</strong><span>READY</span></div>
+        </section>
+
+        <section class="card">
+          <h2>APIチェック結果</h2>
+          <div id="apiCheckStatus" class="notice">まだ実行していません。</div>
+          <div id="apiChecks" class="check-list">
+            <div class="empty">「本番前チェック実行」を押してください。</div>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>本番URL整理</h2>
+          <p class="small">本番医院では、ここに表示されるURLの clinic_code を実医院用にします。</p>
+          <div id="urlList" class="url-list">
+            <div class="empty">チェック実行後にURLを表示します。</div>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>人が確認する項目</h2>
+          <p class="small">LINE公式・GitHub・Cloudflare・Supabaseなど、APIだけでは確認できない項目です。チェック状態はこのブラウザに保存されます。</p>
+          <div id="manualChecklist">
+            <div class="empty">チェック実行後に表示します。</div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    const url = new URL(location.href);
+    const initialClinicCode = url.searchParams.get("clinic_code") || "dpro_vet_demo";
+    const API_BASE = (url.searchParams.get("api") || "https://dpro-vet-qr-api.dpromstk2000.workers.dev").replace(/\/+$/,"");
+    const ADMIN_KEY_PREFIX = "DPRO_VET_ADMIN_CODE_";
+    const MANUAL_PREFIX = "DPRO_VET_STEP49_MANUAL_";
+
+    const el = {
+      clinicCodeInput: document.getElementById("clinicCodeInput"),
+      adminTokenInput: document.getElementById("adminTokenInput"),
+      saveAdminBtn: document.getElementById("saveAdminBtn"),
+      clearAdminBtn: document.getElementById("clearAdminBtn"),
+      runCheckBtn: document.getElementById("runCheckBtn"),
+      settingStatus: document.getElementById("settingStatus"),
+      summaryArea: document.getElementById("summaryArea"),
+      apiCheckStatus: document.getElementById("apiCheckStatus"),
+      apiChecks: document.getElementById("apiChecks"),
+      urlList: document.getElementById("urlList"),
+      manualChecklist: document.getElementById("manualChecklist")
+    };
+
+    let lastData = null;
+
+    function clinicCode(){
+      return el.clinicCodeInput.value.trim() || "dpro_vet_demo";
+    }
+
+    function adminKey(){
+      return `${ADMIN_KEY_PREFIX}${clinicCode()}`;
+    }
+
+    function getAdminToken(){
+      return localStorage.getItem(adminKey()) || "";
+    }
+
+    function adminHeaders(){
+      const token = getAdminToken();
+      return token ? { "X-DPRO-Admin-Code": token } : {};
+    }
+
+    function escapeHtml(value){
+      return String(value ?? "")
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
+    }
+
+    function setNotice(node, text, type=""){
+      node.className = `notice ${type}`.trim();
+      node.textContent = text;
+    }
+
+    function startButton(btn, text){
+      btn.dataset.originalText = btn.textContent;
+      btn.textContent = text;
+      btn.disabled = true;
+    }
+
+    function stopButton(btn){
+      btn.textContent = btn.dataset.originalText || btn.textContent;
+      btn.disabled = false;
+    }
+
+    async function apiGet(path, params = {}, auth = true){
+      const qs = new URLSearchParams({ clinic_code: clinicCode(), ...params });
+      const res = await fetch(`${API_BASE}${path}?${qs.toString()}`, {
+        method:"GET",
+        headers: auth ? adminHeaders() : {}
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.ok === false) throw new Error(data.message || `APIエラー ${res.status}`);
+      return data;
+    }
+
+    function renderSavedAdmin(){
+      const token = getAdminToken();
+      el.adminTokenInput.value = token;
+      if (token) {
+        setNotice(el.settingStatus, `管理コード保存済み：${clinicCode()} のチェックを実行できます。`, "ok");
+      } else {
+        setNotice(el.settingStatus, "管理コードを保存してチェックを実行してください。", "");
+      }
+    }
+
+    function renderSummary(summary = {}){
+      const readyText = summary.ready_level === "ready"
+        ? "READY"
+        : summary.ready_level === "needs_review"
+          ? "REVIEW"
+          : summary.ready_level === "not_ready"
+            ? "NG"
+            : "-";
+
+      el.summaryArea.innerHTML = `
+        <div class="summary-card"><strong>${escapeHtml(summary.pass ?? "-")}</strong><span>PASS</span></div>
+        <div class="summary-card"><strong>${escapeHtml(summary.warn ?? "-")}</strong><span>WARN</span></div>
+        <div class="summary-card"><strong>${escapeHtml(summary.fail ?? "-")}</strong><span>FAIL</span></div>
+        <div class="summary-card"><strong>${escapeHtml(readyText)}</strong><span>READY</span></div>
+      `;
+    }
+
+    function statusClass(status){
+      if (status === "pass") return "pass";
+      if (status === "warn") return "warn";
+      if (status === "fail") return "fail";
+      return "info";
+    }
+
+    function renderApiChecks(checks = []){
+      if (!checks.length) {
+        el.apiChecks.innerHTML = '<div class="empty">チェック項目がありません。</div>';
+        return;
+      }
+
+      el.apiChecks.innerHTML = checks.map((item) => `
+        <article class="check">
+          <div class="status-dot ${escapeHtml(statusClass(item.status))}"></div>
+          <div>
+            <h3>${escapeHtml(item.label || item.id || "チェック")}</h3>
+            <p>${escapeHtml(item.message || "")}</p>
+            <div class="tagline">
+              <span class="tag ${escapeHtml(statusClass(item.status))}">${escapeHtml(String(item.status || "info").toUpperCase())}</span>
+              ${item.id ? `<span class="tag">${escapeHtml(item.id)}</span>` : ""}
+            </div>
+          </div>
+        </article>
+      `).join("");
+    }
+
+    function renderUrls(urls = {}){
+      const entries = Object.entries(urls || {});
+      if (!entries.length) {
+        el.urlList.innerHTML = '<div class="empty">URLがありません。</div>';
+        return;
+      }
+
+      const labels = {
+        production_check:"本番チェック",
+        owner:"医院設定",
+        scan_pc:"受付PC",
+        patients:"患者管理",
+        member_liff:"LINE診察券",
+        waiting_liff:"LINE受付",
+        system_check_demo_only:"DEMO管理"
+      };
+
+      el.urlList.innerHTML = entries.map(([key, value]) => `
+        <div class="url-row">
+          <b>${escapeHtml(labels[key] || key)}</b>
+          <div class="url-box" id="url_${escapeHtml(key)}">${escapeHtml(value)}</div>
+          <button class="btn btn-sub" type="button" data-copy-url="${escapeHtml(key)}">コピー</button>
+        </div>
+      `).join("");
+
+      el.urlList.querySelectorAll("[data-copy-url]").forEach((btn) => {
+        btn.addEventListener("click", () => copyText(`url_${btn.dataset.copyUrl}`));
+      });
+    }
+
+    function manualStorageKey(id){
+      return `${MANUAL_PREFIX}${clinicCode()}_${id}`;
+    }
+
+    function renderManualChecklist(items = []){
+      if (!items.length) {
+        el.manualChecklist.innerHTML = '<div class="empty">確認項目がありません。</div>';
+        return;
+      }
+
+      el.manualChecklist.innerHTML = items.map((item) => {
+        const checked = localStorage.getItem(manualStorageKey(item.id)) === "true" ? "checked" : "";
+        return `
+          <label class="manual-item">
+            <input type="checkbox" data-manual-id="${escapeHtml(item.id)}" ${checked} />
+            <span>
+              <strong>${escapeHtml(item.label)}</strong>
+              <span>${escapeHtml(item.detail || "")}</span>
+            </span>
+          </label>
+        `;
+      }).join("");
+
+      el.manualChecklist.querySelectorAll("[data-manual-id]").forEach((input) => {
+        input.addEventListener("change", () => {
+          localStorage.setItem(manualStorageKey(input.dataset.manualId), input.checked ? "true" : "false");
+        });
+      });
+    }
+
+    async function copyText(id){
+      const node = document.getElementById(id);
+      if (!node) return;
+      try {
+        await navigator.clipboard.writeText(node.textContent.trim());
+        setNotice(el.apiCheckStatus, "URLをコピーしました。", "ok");
+      } catch (error) {
+        setNotice(el.apiCheckStatus, "コピーできませんでした。URLを手動で選択してください。", "warn");
+      }
+    }
+
+    async function runCheck(){
+      if (!getAdminToken()) {
+        setNotice(el.settingStatus, "先に管理コードを保存してください。", "ng");
+        return;
+      }
+
+      startButton(el.runCheckBtn, "確認中...");
+      setNotice(el.apiCheckStatus, "本番前安全チェックを実行中です...", "info");
+
+      try {
+        const data = await apiGet("/api/admin/production/final-check", {}, true);
+        lastData = data;
+        renderSummary(data.summary || {});
+        renderApiChecks(data.checks || []);
+        renderUrls(data.urls || {});
+        renderManualChecklist(data.manual_checklist || []);
+
+        const summary = data.summary || {};
+        const cls = summary.fail > 0 ? "ng" : (summary.warn > 0 ? "warn" : "ok");
+        setNotice(el.apiCheckStatus, summary.message || "チェック完了", cls);
+      } catch (error) {
+        renderSummary({});
+        el.apiChecks.innerHTML = `<div class="empty">エラー：${escapeHtml(error.message || "チェックに失敗しました。")}</div>`;
+        setNotice(el.apiCheckStatus, error.message || "チェックに失敗しました。", "ng");
+      } finally {
+        stopButton(el.runCheckBtn);
+      }
+    }
+
+    function bind(){
+      el.clinicCodeInput.addEventListener("change", renderSavedAdmin);
+
+      el.saveAdminBtn.addEventListener("click", () => {
+        localStorage.setItem(adminKey(), el.adminTokenInput.value.trim());
+        renderSavedAdmin();
+      });
+
+      el.clearAdminBtn.addEventListener("click", () => {
+        localStorage.removeItem(adminKey());
+        el.adminTokenInput.value = "";
+        renderSavedAdmin();
+      });
+
+      el.runCheckBtn.addEventListener("click", runCheck);
+    }
+
+    function init(){
+      el.clinicCodeInput.value = initialClinicCode;
+      bind();
+      renderSavedAdmin();
+    }
+
+    init();
+  </script>
+</body>
+</html>
