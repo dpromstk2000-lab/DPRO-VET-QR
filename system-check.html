@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="robots" content="noindex,nofollow">
-  <title>DPRO PET CARE LINE｜デモ・システム管理センター STEP39</title>
+  <title>DPRO PET CARE LINE｜デモ・システム管理センター STEP40</title>
   <style>
     :root{
       --bg:#f5f7f4;
@@ -601,7 +601,7 @@
       .linkbtn{width:100%}
     }
   
-    /* STEP VET-39：営業デモ用ナビゲーション */
+    /* STEP VET-40：営業デモ用ナビゲーション */
     .demo-nav{
       margin-top:18px;
       background:
@@ -747,6 +747,44 @@
       .talk-grid{grid-template-columns:1fr}
     }
 
+  
+    /* STEP VET-40：多頭登録アピール */
+    .multi-pet-highlight{
+      margin-top:12px;
+      border:1px solid rgba(47,125,79,.22);
+      background:linear-gradient(180deg,#f7fcf8,#ffffff);
+      border-radius:18px;
+      padding:14px;
+    }
+    .multi-pet-highlight b{
+      display:block;
+      font-size:14px;
+      color:var(--main2);
+      margin-bottom:6px;
+    }
+    .multi-pet-highlight p{
+      margin:0;
+      color:#42534a;
+      font-size:13px;
+      font-weight:800;
+      line-height:1.7;
+    }
+    .multi-badge{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      min-height:22px;
+      padding:3px 8px;
+      border-radius:999px;
+      background:var(--soft);
+      color:var(--main2);
+      border:1px solid #cde7d5;
+      font-size:11px;
+      font-weight:950;
+      margin-left:6px;
+      vertical-align:middle;
+    }
+
   </style>
 </head>
 <body>
@@ -782,7 +820,7 @@
           </div>
           <div class="status-pill">
             <span>STEP</span>
-            <b>STEP VET-39</b>
+            <b>STEP VET-40</b>
           </div>
         </div>
       </div>
@@ -797,7 +835,7 @@
             まず営業前デモ準備を押してから、下の順番で進めます。
           </p>
         </div>
-        <span class="badge ok">STEP VET-39</span>
+        <span class="badge ok">STEP VET-40</span>
       </div>
 
       <div class="demo-route">
@@ -805,7 +843,7 @@
           <div>
             <div class="route-no">1</div>
             <h3>営業前準備</h3>
-            <p>デモデータを整え、チェックちゃん1件だけにします。</p>
+            <p>デモデータを整え、本日の受付4件＋多頭登録を見せられる状態にします。</p>
           </div>
           <div class="route-actions">
             <button class="btn btn-main" type="button" id="scrollPrepareBtn">準備ボタンへ</button>
@@ -882,7 +920,7 @@
       </div>
 
       <div class="mini-note">
-        営業時の基本は「順番待ちだけ」ではなく、
+        営業時の基本は「順番待ちだけ」ではなく、多頭登録も見せながら、
         <b>診察券・LINE受付・院内受付・休診案内までLINEでつながる</b>
         と説明すると伝わりやすいです。
       </div>
@@ -1002,6 +1040,15 @@
         </div>
       </div>
 
+      <div class="multi-pet-highlight">
+        <b>多頭登録デモ</b>
+        <p>
+          営業前デモ準備後は、同じ飼い主さんに
+          <strong>チェックちゃん</strong> と <strong>ココアちゃん</strong>
+          の2頭が入ります。受付PC画面で「1人の飼い主さんに複数ペットを登録できる」ことを説明できます。
+        </p>
+      </div>
+
       <div class="check-list" id="checkList">
         <div class="check-item">
           <div class="check-icon">…</div>
@@ -1019,7 +1066,7 @@
         <div class="card-head">
           <div>
             <h2>本日の有効受付</h2>
-            <p>営業デモ準備後は、チェックちゃんが1件だけ見える状態を目指します。</p>
+            <p>営業デモ準備後は、4件の受付と多頭登録が見える状態を目指します。</p>
           </div>
           <span class="badge ok" id="entryBadge">-</span>
         </div>
@@ -1065,7 +1112,7 @@
   <script>
     "use strict";
 
-    const STEP = "STEP VET-39";
+    const STEP = "STEP VET-40";
     const API_BASE = "https://dpro-vet-qr-api.dpromstk2000.workers.dev";
     const DEFAULT_CLINIC_CODE = "dpro_vet_demo";
     const DEFAULT_LINE_USER_ID = "demo_line_link_001";
@@ -1081,7 +1128,7 @@
       member: `https://dpromstk2000-lab.github.io/DPRO-VET-QR/member.html?v=step-vet-36d-1&clinic_code=${encodeURIComponent(clinicCode)}&line_user_id=${encodeURIComponent(lineUserId)}`,
       waiting: `https://dpromstk2000-lab.github.io/DPRO-VET-QR/waiting.html?v=step-vet-36d-2-r3&clinic_code=${encodeURIComponent(clinicCode)}&line_user_id=${encodeURIComponent(lineUserId)}`,
       scanPc: `https://dpromstk2000-lab.github.io/DPRO-VET-QR/scan-pc.html?v=step-vet-36f-2&clinic_code=${encodeURIComponent(clinicCode)}`,
-      systemCheck: `https://dpromstk2000-lab.github.io/DPRO-VET-QR/system-check.html?v=step-vet-39&clinic_code=${encodeURIComponent(clinicCode)}`
+      systemCheck: `https://dpromstk2000-lab.github.io/DPRO-VET-QR/system-check.html?v=step-vet-40&clinic_code=${encodeURIComponent(clinicCode)}`
     };
 
     const el = {
@@ -1370,7 +1417,7 @@
       el.metricCalendar.textContent = calendarPreview.length;
 
       setBadge(el.overallBadge, healthOk ? "正常" : "要確認", healthOk ? "ok" : "danger");
-      setBadge(el.entryBadge, `${activeEntries.length}件`, activeEntries.length === 1 ? "ok" : "warn");
+      setBadge(el.entryBadge, `${activeEntries.length}件`, activeEntries.length === 4 ? "ok" : "warn");
       setBadge(el.calendarBadge, `${calendarPreview.length}件`, "info");
 
       renderChecks({ healthOk, version, statusLabel, activeEntries, historyCount, calendarPreview, status });
@@ -1410,11 +1457,11 @@
       });
 
       checks.push({
-        status: ctx.activeEntries.length === 1 ? "ok" : "warn",
+        status: ctx.activeEntries.length === 4 ? "ok" : "warn",
         title: "本日の受付データ",
-        body: ctx.activeEntries.length === 1
-          ? "営業デモに見せやすい状態です。有効受付が1件です。"
-          : `有効受付が ${ctx.activeEntries.length} 件あります。営業前デモ準備を実行すると整理されます。`,
+        body: ctx.activeEntries.length === 4
+          ? "営業デモに見せやすい状態です。有効受付が4件あります。"
+          : `有効受付が ${ctx.activeEntries.length} 件あります。営業前デモ準備を実行すると4件デモ受付に整理されます。`,
         badge: `${ctx.activeEntries.length}件`
       });
 
@@ -1441,7 +1488,7 @@
 
     function renderEntries(entries){
       if (!entries.length) {
-        el.entryList.innerHTML = '<div class="hint">本日の有効受付はありません。営業前デモ準備を実行すると、チェックちゃんが1件だけ表示されます。</div>';
+        el.entryList.innerHTML = '<div class="hint">本日の有効受付はありません。営業前デモ準備を実行すると、4件のサンプル受付が表示されます。</div>';
         return;
       }
 
@@ -1449,7 +1496,7 @@
         <div class="entry">
           <div class="entry-no">${escapeHtml(item.queue_number || "-")}</div>
           <div>
-            <b>${escapeHtml(item.pet_name || "ペット")}｜${escapeHtml(item.guardian_name || "飼い主")}</b>
+            <b>${escapeHtml(item.pet_name || "ペット")}｜${escapeHtml(item.guardian_name || "飼い主")}${isMultiPetDemoEntry(item) ? '<span class="multi-badge">多頭デモ</span>' : ''}</b>
             <small>
               ${escapeHtml(dayPartLabel(item.day_part))} / ${escapeHtml(statusLabel(item.status))}<br>
               ${escapeHtml(item.purpose || item.request_category || "受付")}
@@ -1499,18 +1546,18 @@
     function formatPrepareSuccess(result){
       const activeCount = result.summary?.active_entry_count ?? "-";
       const historyCount = result.summary?.finished_history_count ?? "-";
-      const expectedPet = result.summary?.expected_demo_pet || "チェックちゃん";
-      const expectedNo = result.summary?.expected_queue_number || 1;
+      const expectedPet = "4件受付＋多頭登録";
+      const expectedNo = "1〜4";
 
       return [
         "営業前デモ準備が完了しました。",
         "",
         `有効受付：${activeCount}件`,
         `取消・履歴：${historyCount}件`,
-        `デモ用ペット：${expectedPet}`,
-        `受付番号：${expectedNo}`,
+        `デモ用表示：4件受付＋多頭登録`,
+        `受付番号：1〜4`,
         "",
-        "次に受付PC画面を開いて、チェックちゃんが1件だけ表示されるか確認してください。"
+        "次に受付PC画面を開いて、4件の受付とチェックちゃん＋ココアちゃんの多頭登録が見えるか確認してください。"
       ].join("\n");
     }
 
@@ -1618,6 +1665,12 @@
       if (status === "warn") return "!";
       if (status === "danger") return "!";
       return "…";
+    }
+
+    function isMultiPetDemoEntry(item){
+      const name = String(item?.pet_name || "");
+      if (item?.multi_pet_demo === true) return true;
+      return name.includes("チェックちゃん") || name.includes("ココアちゃん");
     }
 
     function dayPartLabel(value){
