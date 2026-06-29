@@ -321,6 +321,78 @@
       .form-grid{grid-template-columns:1fr}
       .row{grid-template-columns:1fr}
     }
+  
+    /* STEP VET-48：LINE連携状態管理 */
+    .line-management-card{
+      border:2px solid #cdebd8;
+      background:linear-gradient(180deg,#ffffff,#f2fbf5);
+      border-radius:20px;
+      padding:14px;
+      margin-top:12px;
+    }
+    .line-management-card h4{
+      margin:0 0 6px;
+      font-size:16px;
+      color:var(--green2);
+    }
+    .line-status-large{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      border:1px solid #d8eadf;
+      background:#fff;
+      border-radius:18px;
+      padding:12px;
+      margin:10px 0;
+    }
+    .line-status-large strong{
+      display:block;
+      font-size:15px;
+      color:var(--ink);
+    }
+    .line-status-large span{
+      display:block;
+      color:var(--muted);
+      font-size:12px;
+      font-weight:850;
+      line-height:1.5;
+      margin-top:4px;
+      word-break:break-all;
+    }
+    .line-dot{
+      width:16px;
+      height:16px;
+      border-radius:99px;
+      background:#9ca3af;
+      flex:0 0 auto;
+    }
+    .line-dot.linked{background:#06c755;box-shadow:0 0 0 5px rgba(6,199,85,.13)}
+    .line-dot.unlinked{background:#9ca3af}
+    .line-help{
+      background:#fffdf5;
+      border:1px solid #eadfbd;
+      color:#65552d;
+      border-radius:14px;
+      padding:10px 11px;
+      font-size:12px;
+      font-weight:850;
+      line-height:1.6;
+      margin-top:10px;
+    }
+    .copy-box{
+      font-family:var(--mono);
+      font-size:12px;
+      word-break:break-all;
+      background:#f8fafc;
+      border:1px solid #d9e2ec;
+      border-radius:12px;
+      padding:8px 10px;
+      margin-top:6px;
+      color:#334155;
+    }
+
+
   </style>
 </head>
 <body>
@@ -331,12 +403,12 @@
           <span class="eyebrow">DPRO PET CARE LINE｜飼い主・ペット管理</span>
           <h1>DPROどうぶつ病院 管理画面</h1>
           <p class="lead">
-            飼い主検索、飼い主情報編集、ペット情報編集、診察券の有効/停止、既存飼い主へのペット追加を行います。
+            飼い主・ペット管理に加えて、LINE連携済み/未連携の確認、LINE連携解除、確認済みLINE IDの手動登録を行います。
           </p>
         </div>
         <div class="version">
-          STEP VET-47<br />
-          guardian / pet management
+          STEP VET-48<br />
+          line link status management
           <div class="navlinks" style="margin-top:10px;">
             <a class="btn btn-sub" id="openScanPcLink" href="#" target="_blank" rel="noopener">受付PC</a>
             <a class="btn btn-sub" id="openOwnerLink" href="#" target="_blank" rel="noopener">医院設定</a>
@@ -583,6 +655,143 @@
       }
     }
 
+
+    function normalizedLineStatus(guardian){
+      if (!guardian) return "unlinked";
+      const status = String(guardian.line_link_status || "").toLowerCase();
+      if (status === "linked" || guardian.line_user_id) return "linked";
+      return "unlinked";
+    }
+
+    function renderLineManagementCard(g){
+      const status = normalizedLineStatus(g);
+      const linked = status === "linked";
+      const lineUserId = g.line_user_id || "";
+      const displayName = g.line_display_name || "";
+      const memberUrl = lineUserId
+        ? `https://dpromstk2000-lab.github.io/DPRO-VET-QR/member.html?clinic_code=${encodeURIComponent(clinicCode)}&line_user_id=${encodeURIComponent(lineUserId)}`
+        : "";
+      const waitingUrl = lineUserId
+        ? `https://dpromstk2000-lab.github.io/DPRO-VET-QR/waiting.html?clinic_code=${encodeURIComponent(clinicCode)}&line_user_id=${encodeURIComponent(lineUserId)}`
+        : "";
+
+      return `
+        <div class="line-management-card">
+          <h4>LINE連携状態</h4>
+          <div class="line-status-large">
+            <div>
+              <strong>${linked ? "LINE連携済み" : "LINE未連携"}</strong>
+              <span>${linked ? `LINE表示名：${escapeHtml(displayName || "未取得")}` : "この飼い主はLINE診察券とまだ紐づいていません。"}</span>
+              <span>${linked ? `LINE User ID：${escapeHtml(lineUserId)}` : "窓口・電話・スタッフ対応で運用できます。"}</span>
+            </div>
+            <div class="line-dot ${linked ? "linked" : "unlinked"}"></div>
+          </div>
+
+          <div class="form-grid">
+            <div>
+              <label for="lineUserIdInput">手動連携用 LINE User ID</label>
+              <input id="lineUserIdInput" value="${escapeHtml(lineUserId)}" placeholder="LIFFで確認済みのLINE User ID" />
+            </div>
+            <div>
+              <label for="lineDisplayNameInput">LINE表示名メモ</label>
+              <input id="lineDisplayNameInput" value="${escapeHtml(displayName)}" placeholder="例：山田さんLINE" />
+            </div>
+            <div class="full">
+              <label for="lineLinkNoteInput">連携・解除メモ</label>
+              <input id="lineLinkNoteInput" placeholder="例：受付で本人確認済み、機種変更のため解除" />
+            </div>
+          </div>
+
+          <div class="button-row">
+            <button class="btn btn-main" id="lineLinkUpdateBtn" type="button">LINE連携情報を保存</button>
+            <button class="btn btn-danger" id="lineLinkUnlinkBtn" type="button">LINE連携を解除</button>
+            ${memberUrl ? `<button class="btn btn-sub" id="copyMemberUrlBtn" type="button">診察券URLコピー</button>` : ""}
+            ${waitingUrl ? `<button class="btn btn-sub" id="copyWaitingUrlBtn" type="button">受付URLコピー</button>` : ""}
+          </div>
+
+          ${memberUrl ? `<div class="copy-box" id="memberUrlBox">${escapeHtml(memberUrl)}</div>` : ""}
+          ${waitingUrl ? `<div class="copy-box" id="waitingUrlBox">${escapeHtml(waitingUrl)}</div>` : ""}
+
+          <div class="line-help">
+            本番では、基本的に飼い主さんがLIFFで本人確認してLINE連携します。
+            ここでの手動登録は、受付スタッフが本人確認済みの場合の補助機能です。
+            LINEを使わない方は未連携のまま、窓口・電話受付で運用できます。
+          </div>
+
+          <div id="lineLinkStatus" class="notice">LINE連携状態を確認できます。</div>
+        </div>
+      `;
+    }
+
+    async function updateLineLink(){
+      const g = state.detail?.guardian;
+      const status = document.getElementById("lineLinkStatus");
+      if (!g || !status) return;
+
+      const lineUserId = document.getElementById("lineUserIdInput").value.trim();
+      if (!lineUserId) {
+        setNotice(status, "LINE User IDを入力してください。", "ng");
+        return;
+      }
+
+      const ok = confirm("この飼い主にLINE User IDを紐づけますか？\\n本番では本人確認済みの場合だけ実行してください。");
+      if (!ok) return;
+
+      setNotice(status, "LINE連携情報を保存中...", "info");
+      try {
+        const data = await apiPost("/api/admin/guardian/line-link/update", {
+          guardian_id: g.id || g.guardian_id,
+          line_user_id: lineUserId,
+          line_display_name: document.getElementById("lineDisplayNameInput").value.trim(),
+          note: document.getElementById("lineLinkNoteInput").value.trim(),
+          staff_name: "飼い主・ペット管理画面"
+        }, true);
+        state.detail.guardian = data.guardian;
+        setNotice(status, "LINE連携情報を保存しました。", "ok");
+        await loadGuardianDetail(state.selectedGuardianId);
+        await searchGuardians(el.searchInput.value.trim());
+      } catch (error) {
+        setNotice(status, error.message || "LINE連携情報の保存に失敗しました。", "ng");
+      }
+    }
+
+    async function unlinkLine(){
+      const g = state.detail?.guardian;
+      const status = document.getElementById("lineLinkStatus");
+      if (!g || !status) return;
+
+      const ok = confirm("この飼い主のLINE連携を解除しますか？\\n解除後も飼い主・ペット情報は残り、窓口・電話受付で運用できます。");
+      if (!ok) return;
+
+      setNotice(status, "LINE連携を解除中...", "info");
+      try {
+        const data = await apiPost("/api/admin/guardian/line-link/unlink", {
+          guardian_id: g.id || g.guardian_id,
+          reason: document.getElementById("lineLinkNoteInput")?.value.trim() || "管理画面から解除",
+          staff_name: "飼い主・ペット管理画面"
+        }, true);
+        state.detail.guardian = data.guardian;
+        setNotice(status, "LINE連携を解除しました。", "ok");
+        await loadGuardianDetail(state.selectedGuardianId);
+        await searchGuardians(el.searchInput.value.trim());
+      } catch (error) {
+        setNotice(status, error.message || "LINE連携解除に失敗しました。", "ng");
+      }
+    }
+
+    async function copyTextFromBox(boxId, statusId = "lineLinkStatus"){
+      const box = document.getElementById(boxId);
+      const status = document.getElementById(statusId);
+      if (!box) return;
+      try {
+        await navigator.clipboard.writeText(box.textContent.trim());
+        if (status) setNotice(status, "URLをコピーしました。", "ok");
+      } catch (error) {
+        if (status) setNotice(status, "コピーできませんでした。URLを手動で選択してください。", "ng");
+      }
+    }
+
+
     function renderDetail(){
       const data = state.detail;
       if (!data || !data.guardian) {
@@ -641,6 +850,8 @@
           </div>
           <div id="guardianSaveStatus" class="notice">編集後に保存してください。</div>
 
+          ${renderLineManagementCard(g)}
+
           <div id="addPetPanel" class="accordion">
             ${renderAddPetForm()}
           </div>
@@ -661,6 +872,18 @@
 
       const addPetBtn = document.getElementById("addPetCreateBtn");
       if (addPetBtn) addPetBtn.addEventListener("click", addPetToSelectedGuardian);
+
+      const lineLinkUpdateBtn = document.getElementById("lineLinkUpdateBtn");
+      if (lineLinkUpdateBtn) lineLinkUpdateBtn.addEventListener("click", updateLineLink);
+
+      const lineLinkUnlinkBtn = document.getElementById("lineLinkUnlinkBtn");
+      if (lineLinkUnlinkBtn) lineLinkUnlinkBtn.addEventListener("click", unlinkLine);
+
+      const copyMemberUrlBtn = document.getElementById("copyMemberUrlBtn");
+      if (copyMemberUrlBtn) copyMemberUrlBtn.addEventListener("click", () => copyTextFromBox("memberUrlBox"));
+
+      const copyWaitingUrlBtn = document.getElementById("copyWaitingUrlBtn");
+      if (copyWaitingUrlBtn) copyWaitingUrlBtn.addEventListener("click", () => copyTextFromBox("waitingUrlBox"));
 
       el.detailArea.querySelectorAll("[data-open-pet]").forEach((btn) => {
         btn.addEventListener("click", () => {
