@@ -163,7 +163,7 @@
     @media(max-width:980px){.hero,.layout,.follow-grid{grid-template-columns:1fr}.status-grid{grid-template-columns:repeat(2,1fr)}.section-title{align-items:flex-start;flex-direction:column}.section-title p{text-align:left}.entry{grid-template-columns:58px 1fr}.entry-actions{grid-column:1/-1;justify-content:flex-start;max-width:none}}
     @media(max-width:640px){.topbar{align-items:flex-start;flex-direction:column}.actions{justify-content:flex-start}.auth-box,.form-grid,.status-grid{grid-template-columns:1fr}.brand strong{white-space:normal}.hero-card,.card{border-radius:22px}.pet-main{grid-template-columns:1fr}}
   
-    /* STEP VET-36D-3-R3：全ボタンの白化防止。disabledでも背景色と文字色を維持する */
+    /* STEP VET-36D-3-R4：全ボタンの白化防止。disabledでも背景色と文字色を維持する */
     button.btn:disabled,
     .btn:disabled{
       opacity:.86!important;
@@ -233,6 +233,109 @@
       vertical-align:-2px;
     }
 
+  
+    /* STEP VET-36D-3-R4：選択中・フォーカス中の白化防止 */
+    button.btn,
+    .btn{
+      -webkit-tap-highlight-color:rgba(47,125,100,.14);
+    }
+
+    button.btn:focus,
+    button.btn:focus-visible,
+    button.btn:active,
+    .btn:focus,
+    .btn:focus-visible,
+    .btn:active{
+      outline:3px solid rgba(47,125,100,.22)!important;
+      outline-offset:2px!important;
+      filter:none!important;
+      opacity:1!important;
+      text-decoration:none!important;
+    }
+
+    button.btn-main,
+    .btn-main,
+    button.btn-main:hover,
+    button.btn-main:focus,
+    button.btn-main:focus-visible,
+    button.btn-main:active,
+    .btn-main:hover,
+    .btn-main:focus,
+    .btn-main:focus-visible,
+    .btn-main:active{
+      background:var(--main)!important;
+      border-color:var(--main)!important;
+      color:#fff!important;
+      -webkit-text-fill-color:#fff!important;
+    }
+
+    button.btn-sub,
+    .btn-sub,
+    button.btn-sub:hover,
+    button.btn-sub:focus,
+    button.btn-sub:focus-visible,
+    button.btn-sub:active,
+    .btn-sub:hover,
+    .btn-sub:focus,
+    .btn-sub:focus-visible,
+    .btn-sub:active{
+      background:var(--green-soft)!important;
+      border-color:#b9ddce!important;
+      color:var(--main)!important;
+      -webkit-text-fill-color:var(--main)!important;
+    }
+
+    button.btn-warn,
+    .btn-warn,
+    button.btn-warn:hover,
+    button.btn-warn:focus,
+    button.btn-warn:focus-visible,
+    button.btn-warn:active,
+    .btn-warn:hover,
+    .btn-warn:focus,
+    .btn-warn:focus-visible,
+    .btn-warn:active{
+      background:var(--amber-soft)!important;
+      border-color:#efd79a!important;
+      color:var(--amber)!important;
+      -webkit-text-fill-color:var(--amber)!important;
+    }
+
+    button.btn-danger,
+    .btn-danger,
+    button.btn-danger:hover,
+    button.btn-danger:focus,
+    button.btn-danger:focus-visible,
+    button.btn-danger:active,
+    .btn-danger:hover,
+    .btn-danger:focus,
+    .btn-danger:focus-visible,
+    .btn-danger:active{
+      background:var(--red-soft)!important;
+      border-color:#edc0bc!important;
+      color:var(--red)!important;
+      -webkit-text-fill-color:var(--red)!important;
+    }
+
+    button.loading,
+    .btn.loading,
+    button.loading:hover,
+    button.loading:focus,
+    button.loading:focus-visible,
+    button.loading:active,
+    .btn.loading:hover,
+    .btn.loading:focus,
+    .btn.loading:focus-visible,
+    .btn.loading:active{
+      background:var(--main)!important;
+      border-color:var(--main)!important;
+      color:#fff!important;
+      -webkit-text-fill-color:#fff!important;
+      opacity:1!important;
+      filter:none!important;
+      box-shadow:0 14px 28px rgba(47,125,100,.24)!important;
+    }
+
   </style>
 </head>
 
@@ -242,14 +345,14 @@
       <div class="brand">
         <div class="logo">📷</div>
         <div>
-          <small>scan-pc.html / STEP VET-36D-3-R3</small>
+          <small>scan-pc.html / STEP VET-36D-3-R4</small>
           <strong>DPRO PET CARE LINE</strong>
         </div>
       </div>
       <nav class="actions" aria-label="関連画面">
-        <a class="pill" href="./index.html?v=step-vet-36d-3-r3">管理トップ</a>
+        <a class="pill" href="./index.html?v=step-vet-36d-3-r4">管理トップ</a>
         <a class="pill" href="./waiting.html?v=step-vet-36d-2-r3&clinic_code=dpro_vet_demo">飼い主受付</a>
-        <a class="pill" href="./doctor.html?v=step-vet-36d-3-r3">獣医師画面</a>
+        <a class="pill" href="./doctor.html?v=step-vet-36d-3-r4">獣医師画面</a>
         <a class="pill" href="./owner.html?v=step-vet-36c&clinic_code=dpro_vet_demo">オーナー画面</a>
         <a class="pill" href="./system-check.html?v=step-vet-34i-r4&clinic_code=dpro_vet_demo">システム確認</a>
       </nav>
@@ -257,7 +360,7 @@
 
     <section class="hero">
       <div class="hero-card">
-        <span class="badge">STEP VET-36D-3-R3-R2｜受付PC ボタン表示修正</span>
+        <span class="badge">STEP VET-36D-3-R4-R2｜受付PC ボタン表示修正</span>
         <h1>診察券QRを読んで、<br>そのまま来院受付。</h1>
         <p class="lead">
           USB QRリーダーで読み取り、来院受付・受付番号発行まで行います。
