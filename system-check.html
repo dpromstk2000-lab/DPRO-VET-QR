@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>DPRO PET CARE LINE｜デモ・システム管理センター STEP VET-52.5Q</title>
+  <title>DPRO PET CARE LINE｜デモ・システム管理センター STEP VET-52.5R</title>
   <style>
     :root{
       --bg:#edf5ef;
@@ -224,7 +224,7 @@
           <div class="status-pill"><span>対象医院</span><b id="clinicNameHero">確認中</b></div>
           <div class="status-pill"><span>API</span><b id="apiStatusHero">確認中</b></div>
           <div class="status-pill"><span>本日の受付</span><b id="todayStatusHero">確認中</b></div>
-          <div class="status-pill"><span>STEP</span><b>STEP VET-52.5Q</b></div>
+          <div class="status-pill"><span>STEP</span><b>STEP VET-52.5R</b></div>
         </div>
       </div>
     </section>
@@ -235,7 +235,7 @@
           <h2>営業デモ・ナビゲーション</h2>
           <p>営業時はこの順番で開くと、オーナーに「LINE診察券 → 受付 → 院内管理 → 診察 → 会計待ち → 休診反映」まで自然に伝わります。</p>
         </div>
-        <span class="badge ok">STEP VET-52.5Q</span>
+        <span class="badge ok">STEP VET-52.5R</span>
       </div>
 
       <div class="demo-route">
@@ -301,8 +301,8 @@
           </div>
           <div>
             <label for="confirmText">確認文言</label>
-            <input id="confirmText" type="text" value="DEMO動物病院だけ実行" placeholder="DEMO動物病院だけ実行">
-            <div class="small-note">誤操作防止のため、確認文言を入力した時だけ実行できます。</div>
+            <input id="confirmText" type="text" value="" placeholder="DEMO動物病院だけ実行">
+            <div class="small-note">誤操作防止のため、自動入力せず、毎回この文言を入力した時だけ実行できます。</div>
           </div>
           <div class="btn-row">
             <button class="btn btn-main" id="saveCodeBtn" type="button">管理コードを保存</button>
@@ -397,7 +397,7 @@
       </div>
     </section>
 
-    <div class="footer">STEP VET-52.5Q：system-check.html 表示STEP更新・受付PC/iPad/doctor連携確認済み導線に整理しました。</div>
+    <div class="footer">STEP VET-52.5R：system-check.html 管理コード誤保存防止・営業デモ準備API実行順を修正しました。</div>
   </div>
 
 <script>
@@ -405,23 +405,42 @@
   'use strict';
 
   const API_BASE = 'https://dpro-vet-qr-api.dpromstk2000.workers.dev';
-  const PAGE_STEP = 'STEP VET-52.5Q';
+  const PAGE_STEP = 'STEP VET-52.5R';
   const EXPECTED_WORKER_VERSION = 'step-vet-52-5o-doctor-exam-to-accounting-complete';
   const DEFAULT_CLINIC_CODE = 'dpro_vet_demo';
   const DEMO_LINE_USER_ID = 'demo_line_link_001';
   const REQUIRED_CONFIRM_TEXT = 'DEMO動物病院だけ実行';
+  const VALID_ADMIN_PREFIX = 'DPRO-VET-';
+  const INVALID_ADMIN_PREFIXES = ['DPRO_LIFF_ADMIN_', 'DPRO_LIFF_', 'LIFF_ADMIN_'];
 
   const params = new URLSearchParams(location.search);
   const clinicCode = params.get('clinic_code') || DEFAULT_CLINIC_CODE;
   const demo = params.get('demo') || 'ready';
-  const versionSuffix = params.get('v') || 'step-vet-52-5q';
+  const versionSuffix = params.get('v') || 'step-vet-52-5r';
 
   const ADMIN_KEY = `dpro_vet_admin_code_${clinicCode}`;
   const oldAdminKeys = ['dpro_admin_code','admin_code','DPRO_ADMIN_CODE','dpro_vet_admin_code'];
 
   const $ = (id) => document.getElementById(id);
+  function isAllowedAdminCode(code){
+    const c = String(code || '').trim();
+    if(!c) return false;
+    if(INVALID_ADMIN_PREFIXES.some(prefix => c.startsWith(prefix))) return false;
+    return c.startsWith(VALID_ADMIN_PREFIX);
+  }
+
+  function getCleanStoredAdminCode(){
+    const stored = String(localStorage.getItem(ADMIN_KEY) || '').trim();
+    if(!stored) return '';
+    if(!isAllowedAdminCode(stored)){
+      localStorage.removeItem(ADMIN_KEY);
+      return '';
+    }
+    return stored;
+  }
+
   const state = {
-    adminCode: localStorage.getItem(ADMIN_KEY) || '',
+    adminCode: getCleanStoredAdminCode(),
     health: null,
     status: null,
     lastError: null
@@ -507,9 +526,9 @@
   }
 
   function setLinks(){
-    const owner = localUrl('owner.html', { v:'step-vet-52-5q-owner' });
-    const member = localUrl('member.html', { line_user_id: DEMO_LINE_USER_ID, v:'step-vet-52-5q-member' });
-    const waiting = localUrl('waiting.html', { line_user_id: DEMO_LINE_USER_ID, v:'step-vet-52-5q-waiting' });
+    const owner = localUrl('owner.html', { v:'step-vet-52-5r-owner' });
+    const member = localUrl('member.html', { line_user_id: DEMO_LINE_USER_ID, v:'step-vet-52-5r-member' });
+    const waiting = localUrl('waiting.html', { line_user_id: DEMO_LINE_USER_ID, v:'step-vet-52-5r-waiting' });
     const scanPc = localUrl('scan-pc.html', { v:'step-vet-52-5p-from-system' });
     const scanIpad = localUrl('scan-ipad.html', { v:'step-vet-52-5p-from-system' });
     const doctor = localUrl('doctor.html', { v:'step-vet-52-5p-from-system' });
@@ -528,8 +547,19 @@
     if(!code){
       localStorage.removeItem(ADMIN_KEY);
       state.adminCode = '';
+      input.type = 'text';
       input.value = '';
       updateAdminNotice('管理コードが未保存です。入力して保存してください。', 'warn');
+      return;
+    }
+    if(!isAllowedAdminCode(code)){
+      localStorage.removeItem(ADMIN_KEY);
+      state.adminCode = '';
+      input.type = 'text';
+      input.value = '';
+      updateAdminNotice('動物病院用の管理コードを入力してください。古いLIFF用コードは保存しません。', 'danger');
+      $('prepareResult').className = 'notice danger';
+      $('prepareResult').textContent = 'DPRO PET CARE LINE 動物病院用の管理コードを入力してください。';
       return;
     }
     localStorage.setItem(ADMIN_KEY, code);
@@ -548,15 +578,20 @@
 
   function initAdminCode(){
     const input = $('adminCode');
-    if(state.adminCode){
+    oldAdminKeys.forEach(k => localStorage.removeItem(k));
+    const clean = getCleanStoredAdminCode();
+    state.adminCode = clean;
+    if(clean){
       input.type = 'password';
-      input.value = state.adminCode;
+      input.value = clean;
       updateAdminNotice('管理コード保存済みです。営業デモ準備と状態確認ができます。', 'ok');
     }else{
       input.type = 'text';
       input.value = '';
-      updateAdminNotice('管理コードを入力して保存すると、デモ準備の状態確認ができます。', 'warn');
+      updateAdminNotice('管理コードを入力して保存すると、デモ準備の状態確認ができます。古いLIFF用コードは自動で消去します。', 'warn');
     }
+    const confirmInput = $('confirmText');
+    if(confirmInput) confirmInput.value = '';
   }
 
   function extractEntries(data){
@@ -819,40 +854,66 @@
       $('prepareResult').textContent = '管理コードを保存してください。';
       return;
     }
+    if(!isAllowedAdminCode(code)){
+      localStorage.removeItem(ADMIN_KEY);
+      state.adminCode = '';
+      initAdminCode();
+      $('prepareResult').className = 'notice danger';
+      $('prepareResult').textContent = '古いLIFF用コードは使えません。動物病院用の管理コードを保存し直してください。';
+      return;
+    }
     const confirm = ($('confirmText').value || '').trim();
     if(confirm !== REQUIRED_CONFIRM_TEXT){
       $('prepareResult').className = 'notice danger';
-      $('prepareResult').textContent = `確認文言「${REQUIRED_CONFIRM_TEXT}」を入力してください。`;
+      $('prepareResult').textContent = `確認文言「${REQUIRED_CONFIRM_TEXT}」を手入力してください。`;
       return;
     }
 
     const btn = $('prepareBtn');
     btn.disabled = true;
     $('prepareResult').className = 'notice warn';
-    $('prepareResult').textContent = '営業デモ準備を実行中です。';
+    $('prepareResult').textContent = '営業デモ準備を実行中です。受付1〜4が戻るまで確認します。';
 
-    const urls = [
-      apiUrl('/api/admin/demo/prepare', {}, true),
-      apiUrl('/api/admin/demo/prepare-status', { execute:'1' }, true)
+    const payload = {
+      clinic_code: clinicCode,
+      admin_code: code,
+      confirm_text: confirm,
+      step: PAGE_STEP
+    };
+    const attempts = [
+      { label:'prepare-status execute POST', url: apiUrl('/api/admin/demo/prepare-status', { execute:'1' }, true), options:{ method:'POST', body: JSON.stringify(payload) } },
+      { label:'prepare-status execute GET', url: apiUrl('/api/admin/demo/prepare-status', { execute:'1' }, true), options:{ method:'GET' } },
+      { label:'prepare execute POST', url: apiUrl('/api/admin/demo/prepare', { execute:'1' }, true), options:{ method:'POST', body: JSON.stringify(payload) } },
+      { label:'prepare POST', url: apiUrl('/api/admin/demo/prepare', {}, true), options:{ method:'POST', body: JSON.stringify(payload) } }
     ];
 
+    let lastErr = null;
+    let lastMessage = '';
     try{
-      const data = await tryFetch(urls, {
-        method:'POST',
-        body: JSON.stringify({
-          clinic_code: clinicCode,
-          admin_code: code,
-          confirm_text: confirm,
-          step: PAGE_STEP
-        })
-      });
-      $('prepareResult').className = 'notice ok';
-      $('prepareResult').textContent = data?.message || '営業デモ準備を実行しました。状態を再チェックします。';
+      for(const attempt of attempts){
+        try{
+          const data = await fetchJson(attempt.url, attempt.options);
+          lastMessage = data?.message || attempt.label;
+          await refreshAll();
+          const entries = extractEntries(state.status || {});
+          const active = activeEntries(entries);
+          if(active.length === 4){
+            $('prepareResult').className = 'notice ok';
+            $('prepareResult').textContent = `営業デモ準備が完了しました。本日の有効受付は4件です。`;
+            return;
+          }
+        }catch(e){
+          lastErr = e;
+        }
+      }
       await refreshAll();
+      const active = activeEntries(extractEntries(state.status || {}));
+      $('prepareResult').className = 'notice warn';
+      $('prepareResult').textContent = `準備APIは応答しましたが、本日の有効受付は${active.length}件です。Worker側の準備APIを確認してください。${lastMessage ? ' 最終応答: ' + lastMessage : ''}`;
     }catch(e){
       $('prepareResult').className = 'notice danger';
-      $('prepareResult').textContent = `営業デモ準備エラー：${e.message}`;
-      state.lastError = e;
+      $('prepareResult').textContent = `営業デモ準備エラー：${(lastErr || e).message}`;
+      state.lastError = lastErr || e;
       updateDebug();
     }finally{
       btn.disabled = false;
