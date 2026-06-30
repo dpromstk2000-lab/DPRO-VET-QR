@@ -1,0 +1,472 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DPRO PET CARE LINE｜営業デモ用QR一覧</title>
+  <style>
+    :root {
+      --green:#12875f;
+      --green2:#0f6f50;
+      --pale:#eaf8f1;
+      --ink:#17231d;
+      --muted:#637268;
+      --line:#d8e6dd;
+      --paper:#fffdf8;
+      --shadow:0 18px 45px rgba(24, 54, 38, .12);
+      --radius:22px;
+    }
+
+    * { box-sizing:border-box; }
+
+    body {
+      margin:0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color:var(--ink);
+      background:
+        radial-gradient(circle at 10% 10%, rgba(18,135,95,.12), transparent 35%),
+        radial-gradient(circle at 90% 12%, rgba(240,184,92,.16), transparent 35%),
+        linear-gradient(135deg, #f7fbf7 0%, #fffaf1 100%);
+      min-height:100vh;
+    }
+
+    .wrap {
+      max-width:1180px;
+      margin:0 auto;
+      padding:28px 18px 44px;
+    }
+
+    header {
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap:18px;
+      align-items:stretch;
+      margin-bottom:22px;
+    }
+
+    .hero {
+      background:linear-gradient(135deg, #104631, #169068);
+      color:white;
+      border-radius:28px;
+      padding:30px;
+      box-shadow:var(--shadow);
+      position:relative;
+      overflow:hidden;
+    }
+
+    .hero:after {
+      content:"QR";
+      position:absolute;
+      right:20px;
+      bottom:-40px;
+      font-weight:900;
+      font-size:150px;
+      letter-spacing:-8px;
+      color:rgba(255,255,255,.08);
+    }
+
+    .badge {
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      background:rgba(255,255,255,.14);
+      border:1px solid rgba(255,255,255,.26);
+      border-radius:999px;
+      padding:8px 12px;
+      font-size:13px;
+      font-weight:800;
+      margin-bottom:16px;
+    }
+
+    h1 {
+      margin:0 0 12px;
+      font-size:clamp(30px, 4.5vw, 52px);
+      line-height:1.08;
+      letter-spacing:-.04em;
+    }
+
+    .lead {
+      margin:0;
+      max-width:720px;
+      color:rgba(255,255,255,.9);
+      line-height:1.8;
+      font-weight:650;
+    }
+
+    .howto {
+      background:rgba(255,255,255,.84);
+      border:1px solid var(--line);
+      border-radius:28px;
+      padding:24px;
+      box-shadow:var(--shadow);
+    }
+
+    .howto h2 {
+      margin:0 0 12px;
+      font-size:22px;
+    }
+
+    .howto ol {
+      margin:0;
+      padding-left:1.4em;
+      line-height:1.9;
+      color:#31443a;
+      font-weight:650;
+    }
+
+    .notice {
+      margin-top:14px;
+      background:#fff8df;
+      border:1px solid #f1d68e;
+      border-radius:16px;
+      padding:12px 14px;
+      line-height:1.7;
+      color:#5f4712;
+      font-size:14px;
+      font-weight:700;
+    }
+
+    .grid {
+      display:grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap:16px;
+    }
+
+    .card {
+      background:rgba(255,255,255,.92);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      padding:16px;
+      box-shadow:var(--shadow);
+      display:flex;
+      flex-direction:column;
+      min-height:100%;
+    }
+
+    .cardHead {
+      display:flex;
+      gap:10px;
+      align-items:center;
+      min-height:62px;
+    }
+
+    .num {
+      width:38px;
+      height:38px;
+      border-radius:999px;
+      display:grid;
+      place-items:center;
+      background:var(--pale);
+      color:var(--green);
+      font-weight:900;
+      flex:0 0 auto;
+    }
+
+    .card h2 {
+      margin:0;
+      font-size:20px;
+      line-height:1.15;
+      letter-spacing:-.03em;
+    }
+
+    .sub {
+      margin:4px 0 0;
+      color:var(--muted);
+      font-weight:800;
+      font-size:12px;
+      line-height:1.45;
+    }
+
+    .qrBox {
+      margin:14px auto 10px;
+      background:white;
+      border:1px solid #edf3ef;
+      border-radius:18px;
+      padding:10px;
+      width:100%;
+      max-width:190px;
+      aspect-ratio:1/1;
+      display:grid;
+      place-items:center;
+    }
+
+    .qrBox img {
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      display:block;
+    }
+
+    .fileName {
+      display:inline-flex;
+      align-self:flex-start;
+      border-radius:999px;
+      background:#f3f7f4;
+      color:#20362b;
+      padding:6px 10px;
+      font-size:12px;
+      font-weight:900;
+      margin-bottom:9px;
+      word-break:break-all;
+    }
+
+    .memo {
+      color:#42554b;
+      line-height:1.65;
+      font-size:13px;
+      margin:0 0 12px;
+      flex:1;
+    }
+
+    .openBtn {
+      display:block;
+      text-align:center;
+      text-decoration:none;
+      background:var(--green);
+      color:white;
+      border-radius:999px;
+      padding:11px 12px;
+      font-weight:900;
+      box-shadow:0 10px 18px rgba(18,135,95,.2);
+      margin-top:auto;
+    }
+
+    .openBtn:hover {
+      background:var(--green2);
+    }
+
+    details {
+      margin-top:10px;
+      border-top:1px solid #edf3ef;
+      padding-top:8px;
+    }
+
+    summary {
+      cursor:pointer;
+      color:var(--green);
+      font-weight:900;
+      font-size:12px;
+    }
+
+    .urlText {
+      margin-top:8px;
+      padding:10px;
+      background:#f8fbf9;
+      border:1px solid #e2ece6;
+      border-radius:12px;
+      font-size:11px;
+      line-height:1.5;
+      word-break:break-all;
+      color:#2d4437;
+    }
+
+    footer {
+      margin-top:18px;
+      background:rgba(255,255,255,.8);
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:13px 16px;
+      color:#43574b;
+      font-size:13px;
+      font-weight:800;
+      line-height:1.6;
+    }
+
+    @media (max-width:1100px) {
+      .grid { grid-template-columns: repeat(3, 1fr); }
+      header { grid-template-columns:1fr; }
+    }
+
+    @media (max-width:760px) {
+      .wrap { padding:16px 12px 28px; }
+      .hero, .howto { border-radius:22px; padding:22px; }
+      .grid { grid-template-columns:1fr; }
+      .card { border-radius:20px; }
+      .qrBox { max-width:260px; }
+    }
+
+    @media print {
+      body { background:white; }
+      .wrap { max-width:none; padding:12px; }
+      header { grid-template-columns:1fr; }
+      .howto { display:none; }
+      .grid { grid-template-columns: repeat(5, 1fr); gap:8px; }
+      .card { box-shadow:none; break-inside:avoid; padding:10px; }
+      .openBtn, details, footer { display:none; }
+      .hero { box-shadow:none; padding:16px; }
+      .hero h1 { font-size:30px; }
+      .lead { font-size:12px; }
+      .qrBox { max-width:150px; }
+      .memo { font-size:10px; }
+      .card h2 { font-size:15px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <section class="hero">
+        <div class="badge">STEP VET-52.5X｜営業デモ用QR一覧</div>
+        <h1>DPRO PET CARE LINE<br>各画面をすぐ開く</h1>
+        <p class="lead">
+          PCでこのページを開き、スマホ・iPad・タブレットのカメラでQRを読み取って各画面を開きます。
+          営業前チェック、受付PC、受付iPad、獣医師画面、オーナー画面をすばやく確認できます。
+        </p>
+      </section>
+
+      <section class="howto">
+        <h2>使い方</h2>
+        <ol>
+          <li>営業前にこのページをPCで開く</li>
+          <li>スマホ・iPadのカメラで必要なQRを読み取る</li>
+          <li>各画面で管理コードを保存する</li>
+          <li>system-check で営業デモ準備を実行する</li>
+          <li>受付PC / 受付iPad / doctor の同期を確認する</li>
+        </ol>
+        <div class="notice">
+          管理コードはQRに含めていません。各画面で必要な時だけ入力・保存してください。
+        </div>
+      </section>
+    </header>
+
+    <main class="grid">
+      
+      <article class="card">
+        <div class="cardHead">
+          <div class="num">1</div>
+          <div>
+            <h2>システム確認</h2>
+            <p class="sub">営業前チェック・デモ準備</p>
+          </div>
+        </div>
+
+        <div class="qrBox">
+          <img src="data:image/png;base64,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" alt="システム確認を開くQRコード">
+        </div>
+
+        <div class="fileName">system-check.html</div>
+        <p class="memo">営業前に最初に開く画面。API接続、Worker version、営業デモ準備、受付1〜4を確認します。</p>
+
+        <a class="openBtn" href="https://dpromstk2000-lab.github.io/DPRO-VET-QR/system-check.html?clinic_code=dpro_vet_demo&amp;demo=ready&amp;v=step-vet-52-5u-demo-check" target="_blank" rel="noopener">
+          この画面を開く
+        </a>
+
+        <details>
+          <summary>URLを表示</summary>
+          <div class="urlText">https://dpromstk2000-lab.github.io/DPRO-VET-QR/system-check.html?clinic_code=dpro_vet_demo&amp;demo=ready&amp;v=step-vet-52-5u-demo-check</div>
+        </details>
+      </article>
+    
+      <article class="card">
+        <div class="cardHead">
+          <div class="num">2</div>
+          <div>
+            <h2>受付PC</h2>
+            <p class="sub">USB QRリーダー・受付一覧</p>
+          </div>
+        </div>
+
+        <div class="qrBox">
+          <img src="data:image/png;base64,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" alt="受付PCを開くQRコード">
+        </div>
+
+        <div class="fileName">scan-pc.html</div>
+        <p class="memo">受付スタッフ用PC画面。通常受付、院内受付済み、診察中、会計待ち、完了まで確認します。</p>
+
+        <a class="openBtn" href="https://dpromstk2000-lab.github.io/DPRO-VET-QR/scan-pc.html?clinic_code=dpro_vet_demo&amp;demo=ready&amp;v=step-vet-52-5v-demo-check" target="_blank" rel="noopener">
+          この画面を開く
+        </a>
+
+        <details>
+          <summary>URLを表示</summary>
+          <div class="urlText">https://dpromstk2000-lab.github.io/DPRO-VET-QR/scan-pc.html?clinic_code=dpro_vet_demo&amp;demo=ready&amp;v=step-vet-52-5v-demo-check</div>
+        </details>
+      </article>
+    
+      <article class="card">
+        <div class="cardHead">
+          <div class="num">3</div>
+          <div>
+            <h2>受付iPad</h2>
+            <p class="sub">カメラQR読取・タッチ操作</p>
+          </div>
+        </div>
+
+        <div class="qrBox">
+          <img src="data:image/png;base64,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" alt="受付iPadを開くQRコード">
+        </div>
+
+        <div class="fileName">scan-ipad.html</div>
+        <p class="memo">iPad・タブレット用画面。カメラで診察券QRを読み取り、来院受付できます。</p>
+
+        <a class="openBtn" href="https://dpromstk2000-lab.github.io/DPRO-VET-QR/scan-ipad.html?clinic_code=dpro_vet_demo&amp;demo=ready&amp;v=step-vet-52-5x-camera-qr" target="_blank" rel="noopener">
+          この画面を開く
+        </a>
+
+        <details>
+          <summary>URLを表示</summary>
+          <div class="urlText">https://dpromstk2000-lab.github.io/DPRO-VET-QR/scan-ipad.html?clinic_code=dpro_vet_demo&amp;demo=ready&amp;v=step-vet-52-5x-camera-qr</div>
+        </details>
+      </article>
+    
+      <article class="card">
+        <div class="cardHead">
+          <div class="num">4</div>
+          <div>
+            <h2>獣医師画面</h2>
+            <p class="sub">診察中患者・診察済み→会計待ち</p>
+          </div>
+        </div>
+
+        <div class="qrBox">
+          <img src="data:image/png;base64,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" alt="獣医師画面を開くQRコード">
+        </div>
+
+        <div class="fileName">doctor.html</div>
+        <p class="memo">獣医師用画面。診察中患者を確認し、診察済みにすると会計待ちへ移動します。</p>
+
+        <a class="openBtn" href="https://dpromstk2000-lab.github.io/DPRO-VET-QR/doctor.html?clinic_code=dpro_vet_demo&amp;demo=ready&amp;v=step-vet-52-5p-demo-check" target="_blank" rel="noopener">
+          この画面を開く
+        </a>
+
+        <details>
+          <summary>URLを表示</summary>
+          <div class="urlText">https://dpromstk2000-lab.github.io/DPRO-VET-QR/doctor.html?clinic_code=dpro_vet_demo&amp;demo=ready&amp;v=step-vet-52-5p-demo-check</div>
+        </details>
+      </article>
+    
+      <article class="card">
+        <div class="cardHead">
+          <div class="num">5</div>
+          <div>
+            <h2>オーナー画面</h2>
+            <p class="sub">管理・患者確認・LINE連携</p>
+          </div>
+        </div>
+
+        <div class="qrBox">
+          <img src="data:image/png;base64,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" alt="オーナー画面を開くQRコード">
+        </div>
+
+        <div class="fileName">owner.html</div>
+        <p class="memo">院長・管理者向け画面。患者管理、フォロー、LINE未連携などを確認します。</p>
+
+        <a class="openBtn" href="https://dpromstk2000-lab.github.io/DPRO-VET-QR/owner.html?clinic_code=dpro_vet_demo&amp;demo=ready&amp;v=step-vet-52-5x-qr-list" target="_blank" rel="noopener">
+          この画面を開く
+        </a>
+
+        <details>
+          <summary>URLを表示</summary>
+          <div class="urlText">https://dpromstk2000-lab.github.io/DPRO-VET-QR/owner.html?clinic_code=dpro_vet_demo&amp;demo=ready&amp;v=step-vet-52-5x-qr-list</div>
+        </details>
+      </article>
+    
+    </main>
+
+    <footer>
+      DPRO PET CARE LINE 動物病院版 / clinic_code: dpro_vet_demo / QR一覧ページ。
+      本番導入時は医院ごとの clinic_code と本番URLに差し替えて使用します。
+    </footer>
+  </div>
+</body>
+</html>
