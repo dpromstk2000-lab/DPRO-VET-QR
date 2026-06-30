@@ -133,6 +133,17 @@
     .readerless-box p{margin:0;color:#5e6a65;font-size:13px;font-weight:800;line-height:1.75}
     .readerless-grid{display:grid;grid-template-columns:1fr auto;gap:10px;margin-top:10px;align-items:end}
     .mono-input{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;letter-spacing:.01em}
+
+    .camera-reader-box{margin-top:14px;padding:14px;border:1px solid rgba(61,116,168,.25);background:linear-gradient(180deg,#f8fbff,#edf5ff);border-radius:20px}
+    .camera-reader-box h3{margin:0 0 6px;font-size:17px;display:flex;align-items:center;gap:7px}
+    .camera-reader-box p{margin:0;color:#5f6f7e;font-size:13px;font-weight:800;line-height:1.75}
+    .camera-stage{margin-top:12px;border:1px solid rgba(61,116,168,.24);border-radius:20px;overflow:hidden;background:#0f1715;position:relative;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
+    .camera-stage video{display:block;width:100%;max-height:420px;object-fit:cover;background:#0f1715}
+    .camera-guide{position:absolute;left:50%;top:50%;width:min(68%,320px);aspect-ratio:1/1;transform:translate(-50%,-50%);border:4px solid rgba(255,255,255,.88);border-radius:24px;box-shadow:0 0 0 999px rgba(0,0,0,.28);pointer-events:none}
+    .camera-guide::before{content:"QRを枠内へ";position:absolute;left:50%;bottom:-42px;transform:translateX(-50%);white-space:nowrap;color:#fff;background:rgba(0,0,0,.55);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:950;letter-spacing:.02em}
+    .camera-status{margin-top:10px;color:#516272;font-size:13px;font-weight:900;line-height:1.6}
+    .camera-status.ok{color:#11704c}.camera-status.ng{color:#9f3939}.camera-status.info{color:#3d6386}
+    .camera-tips{margin-top:10px;display:grid;gap:6px;color:#5f6f7e;font-size:12px;font-weight:850;line-height:1.6}
     .hidden{display:none!important}
     .form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
     .full{grid-column:1/-1}
@@ -717,7 +728,7 @@
   
 
     /* =========================================================
-      STEP VET-52.5V：受付iPad 画面整理・PC版整合版
+      STEP VET-52.5X：受付iPad 画面整理・PC版整合版
       目的：長い縦スクロールをやめ、左メニューで必要な操作だけ表示する
     ========================================================= */
     .ops-workbench{display:grid;grid-template-columns:270px minmax(0,1fr);gap:18px;align-items:start;margin-top:18px}
@@ -755,7 +766,7 @@
     .status-collapse summary::-webkit-details-marker{display:none}
     .status-collapse[open] summary{margin-bottom:10px;background:#e8f7ef}
     .is-collapsed-group .status-section-body{padding-top:0}
-    /* STEP VET-52.5V：営業デモでは履歴件数を目立たせない */
+    /* STEP VET-52.5X：営業デモでは履歴件数を目立たせない */
     .status-section.is-history-quiet{
       border-style:dashed;
       background:#fffdfa;
@@ -814,7 +825,7 @@
       .panel-heading{display:block}
     }
 
-    /* STEP VET-52.5V：iPad操作向けの余白・タッチ領域調整 */
+    /* STEP VET-52.5X：iPad操作向けの余白・タッチ領域調整 */
     @media (min-width:768px) and (max-width:1180px){
       .page{width:min(1080px,calc(100% - 24px));padding-top:18px}
       .hero{grid-template-columns:1fr 1fr;gap:16px}
@@ -834,7 +845,7 @@
 <div class="brand">
 <div class="logo">📷</div>
 <div>
-<small>scan-ipad.html / STEP VET-52.5V</small>
+<small>scan-ipad.html / STEP VET-52.5X</small>
 <strong>DPRO PET CARE LINE</strong>
 </div>
 </div>
@@ -847,7 +858,7 @@
 </nav>
 </header><section class="hero">
 <div class="hero-card">
-<span class="badge">STEP VET-52.5V｜受付iPad 履歴控えめ表示版</span>
+<span class="badge">STEP VET-52.5X｜受付iPad 履歴控えめ表示版</span>
 <h1>今日の受付を中心に、<br/>必要な操作だけ開く。</h1>
 <p class="lead">iPad・タブレットで迷わないように、最初は「今日の受付」だけを表示します。QR受付・窓口受付・電話受付・既存患者検索・代理登録・フォローは、左メニューから必要な時だけ開きます。PC版で確認した安全な受付番号・ステータス更新・文面編集の流れに合わせ、完了・取消などの履歴は必要な時だけ開く控えめ表示にしています。</p>
 </div>
@@ -917,6 +928,23 @@
 <div class="ops-card-grid two"><div class="card">
 <h2>QR読み取り受付</h2>
 <p class="plain-lead">診察券QRを読み取るか、QRのURL/tokenを貼り付けてEnterを押してください。</p>
+<div class="camera-reader-box">
+<h3>📷 iPadカメラでQR読み取り</h3>
+<p>受付iPadの背面カメラで、飼い主さんのスマホ診察券QRを読み取れます。読み取りに成功すると自動でペット確認へ進みます。</p>
+<div class="button-row" style="margin-top:12px;">
+<button class="btn btn-main" id="cameraBtn" type="button">カメラでQRを読む</button>
+<button class="btn btn-sub hidden" id="stopCameraBtn" type="button">カメラ停止</button>
+</div>
+<div class="camera-stage hidden" id="cameraBox" aria-live="polite">
+<video id="qrVideo" playsinline muted></video>
+<div class="camera-guide"></div>
+</div>
+<div class="camera-status info" id="cameraStatus">カメラを使う場合は、ブラウザのカメラ許可を「許可」にしてください。</div>
+<div class="camera-tips">
+<div>・iPadでは Safari / Chrome のカメラ権限を許可してください。</div>
+<div>・暗い場所や反射が強い場合は、QRリーダー入力・貼り付け・既存患者検索に切り替えてください。</div>
+</div>
+</div>
 <label for="qrInput" style="margin-top:14px;">QR URL / token / card_no</label>
 <input autocomplete="off" autofocus="" class="scan-input" id="qrInput" placeholder="QRリーダーで読み取り、または貼り付け" type="text"/>
 <div class="button-row">
@@ -1390,7 +1418,7 @@
 </section>
 </div>
 </section><div class="footer-note">
-      STEP VET-52.5V：本日の受付を主役にし、完了・取消/不在の履歴は必要な時だけ開く控えめ表示にしました。
+      STEP VET-52.5X：本日の受付を主役にし、完了・取消/不在の履歴は必要な時だけ開く控えめ表示にしました。
     </div></main>
 <script>
     const CONFIG = window.DPRO_VET_CONFIG || window.DPRO_CONFIG || window.APP_CONFIG || {};
@@ -1423,6 +1451,8 @@
       canAcceptAfternoon: true,
       cameraStream: null,
       detectTimer: null,
+      cameraDetecting: false,
+      jsQrLoadingPromise: null,
       existingPatients: [],
       selectedExistingPatient: null,
       selectedGuardianForPetAdd: null,
@@ -2595,58 +2625,162 @@
       el.qrInput.focus();
     }
 
+    function setCameraStatus(message, type = "info"){
+      const node = document.getElementById("cameraStatus");
+      if (!node) return;
+      node.className = `camera-status ${type}`;
+      node.textContent = message;
+    }
+
+    async function loadJsQrFallback(){
+      if (window.jsQR) return true;
+      if (state.jsQrLoadingPromise) return state.jsQrLoadingPromise;
+
+      state.jsQrLoadingPromise = new Promise((resolve) => {
+        const script = document.createElement("script");
+        script.src = "https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js";
+        script.async = true;
+        script.onload = () => resolve(Boolean(window.jsQR));
+        script.onerror = () => resolve(false);
+        document.head.appendChild(script);
+      });
+
+      return state.jsQrLoadingPromise;
+    }
+
+    function getBestCameraConstraints(){
+      return {
+        audio: false,
+        video: {
+          facingMode: { ideal: "environment" },
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        }
+      };
+    }
+
+    async function detectQrFromVideo(video, detector, canvas, ctx){
+      if (detector) {
+        const codes = await detector.detect(video);
+        return codes && codes[0]?.rawValue ? String(codes[0].rawValue).trim() : "";
+      }
+
+      if (!window.jsQR || !video.videoWidth || !video.videoHeight) return "";
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const result = window.jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: "dontInvert" });
+      return result?.data ? String(result.data).trim() : "";
+    }
+
     async function startCamera(){
       const cameraBox = document.getElementById("cameraBox");
       const video = document.getElementById("qrVideo");
       const cameraBtn = document.getElementById("cameraBtn");
       const stopBtn = document.getElementById("stopCameraBtn");
-      if (!cameraBox || !video) return;
-
-      if (!("BarcodeDetector" in window)) {
-        alert("このブラウザではカメラQR読み取りに対応していません。QRリーダーまたは手入力を使ってください。");
+      if (!cameraBox || !video) {
+        alert("カメラ読取エリアが見つかりません。画面を再読み込みしてください。");
         return;
       }
 
-      try {
-        state.cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio:false });
-        video.srcObject = state.cameraStream;
-        await video.play();
-        cameraBox.classList.remove("hidden");
-        cameraBtn.classList.add("hidden");
-        stopBtn.classList.remove("hidden");
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        setCameraStatus("このブラウザではカメラを起動できません。QRリーダー入力・貼り付け・既存患者検索を使ってください。", "ng");
+        alert("このブラウザではカメラを起動できません。QRリーダー入力・貼り付け・既存患者検索を使ってください。");
+        return;
+      }
 
-        const detector = new BarcodeDetector({ formats:["qr_code"] });
-        state.detectTimer = setInterval(async () => {
+      stopCamera(false);
+      setCameraStatus("カメラを起動しています。権限確認が出たら『許可』を押してください。", "info");
+      if (cameraBtn) cameraBtn.disabled = true;
+
+      try {
+        state.cameraStream = await navigator.mediaDevices.getUserMedia(getBestCameraConstraints());
+        video.srcObject = state.cameraStream;
+        video.setAttribute("playsinline", "");
+        video.muted = true;
+        await video.play();
+
+        cameraBox.classList.remove("hidden");
+        if (cameraBtn) cameraBtn.classList.add("hidden");
+        if (stopBtn) stopBtn.classList.remove("hidden");
+
+        let detector = null;
+        let usingFallback = false;
+
+        if ("BarcodeDetector" in window) {
           try {
-            const codes = await detector.detect(video);
-            if (codes && codes[0]?.rawValue) {
-              el.qrInput.value = codes[0].rawValue;
-              stopCamera();
+            const formats = typeof BarcodeDetector.getSupportedFormats === "function" ? await BarcodeDetector.getSupportedFormats() : ["qr_code"];
+            if (!formats.length || formats.includes("qr_code")) detector = new BarcodeDetector({ formats:["qr_code"] });
+          } catch (_) { detector = null; }
+        }
+
+        if (!detector) usingFallback = await loadJsQrFallback();
+
+        if (!detector && !usingFallback) {
+          setCameraStatus("カメラは起動しましたが、このブラウザではQR解析ライブラリを読み込めませんでした。QRリーダー入力・貼り付けを使ってください。", "ng");
+          return;
+        }
+
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d", { willReadFrequently: true });
+        state.cameraDetecting = false;
+        setCameraStatus(detector ? "カメラ読取中です。QRを白い枠の中に入れてください。" : "カメラ読取中です。QRを白い枠の中に入れてください。（互換モード）", "info");
+
+        state.detectTimer = setInterval(async () => {
+          if (state.cameraDetecting) return;
+          state.cameraDetecting = true;
+          try {
+            const rawValue = await detectQrFromVideo(video, detector, canvas, ctx);
+            if (rawValue) {
+              el.qrInput.value = rawValue;
+              setCameraStatus("QRを読み取りました。ペット情報を確認しています。", "ok");
+              stopCamera(false);
               await lookupQr();
             }
-          } catch (_) {}
-        }, 700);
+          } catch (_) {
+            // 読取中の一時的な失敗は無視して、次フレームで再試行する。
+          } finally {
+            state.cameraDetecting = false;
+          }
+        }, 450);
       } catch (error) {
-        alert("カメラを開始できませんでした。権限を確認してください。");
+        const message = error?.name === "NotAllowedError"
+          ? "カメラ権限が拒否されています。Safari/Chromeの設定からカメラを許可してください。"
+          : "カメラを開始できませんでした。権限・HTTPS接続・別アプリのカメラ使用状況を確認してください。";
+        setCameraStatus(message, "ng");
+        alert(message);
+        stopCamera(false);
+      } finally {
+        if (cameraBtn) cameraBtn.disabled = false;
       }
     }
 
-    function stopCamera(){
+    function stopCamera(showMessage = true){
       const cameraBox = document.getElementById("cameraBox");
+      const video = document.getElementById("qrVideo");
       const cameraBtn = document.getElementById("cameraBtn");
       const stopBtn = document.getElementById("stopCameraBtn");
+
       if (state.detectTimer) clearInterval(state.detectTimer);
       state.detectTimer = null;
-      if (state.cameraStream) {
-        state.cameraStream.getTracks().forEach(track => track.stop());
-      }
+      state.cameraDetecting = false;
+
+      if (state.cameraStream) state.cameraStream.getTracks().forEach(track => track.stop());
       state.cameraStream = null;
+
+      if (video) {
+        try { video.pause(); } catch (_) {}
+        video.srcObject = null;
+      }
       if (cameraBox) cameraBox.classList.add("hidden");
-      if (cameraBtn) cameraBtn.classList.remove("hidden");
+      if (cameraBtn) {
+        cameraBtn.classList.remove("hidden");
+        cameraBtn.disabled = false;
+      }
       if (stopBtn) stopBtn.classList.add("hidden");
+      if (showMessage) setCameraStatus("カメラを停止しました。", "info");
     }
-
-
 
 
 
