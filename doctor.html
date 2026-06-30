@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>DPRO PET CARE LINE | doctor.html STEP VET-52.5N</title>
+  <title>DPRO PET CARE LINE | doctor.html STEP VET-52.5O</title>
   <style>
     :root{
       --bg:#f4f0e8;--mint:#e9f8f1;--mint2:#dff4eb;--green:#0f7f5a;--green2:#1b8f67;--deep:#0f332a;
@@ -24,9 +24,9 @@
 
     <div class="grid">
       <section class="hero">
-        <div class="badge">STEP VET-52.5N｜doctor.html 診察済み白画面対策版</div>
+        <div class="badge">STEP VET-52.5O｜doctor.html 診察済み会計待ち移動版</div>
         <h1>先生は送らない。<br>先生は指示を残す。</h1>
-        <p>診察メモ、会計への注意、再診・予防フォロー指示を安全に保存します。診察済みボタンを押しても白画面にならないよう、エラー表示と再読込処理を整理しました。</p>
+        <p>診察メモ、会計への注意、再診・予防フォロー指示を安全に保存します。診察済みにした後は完了ではなく受付側の会計待ちへ進みます。白画面対策と保存完了表示も維持しています。</p>
       </section>
       <section class="auth">
         <div class="tag">管理コード</div>
@@ -73,12 +73,12 @@
         </div>
       </section>
     </main>
-    <div class="footer">STEP VET-52.5N：doctor.html 診察済みボタンの白画面対策、メモ保存完了表示、受付PC・iPadとの状態整合を確認します。</div>
+    <div class="footer">STEP VET-52.5O：doctor.html 診察済みボタンは完了ではなく会計待ちへ移動。白画面対策、メモ保存完了表示、受付PC・iPadとの状態整合を確認します。</div>
   </div>
 <script>
 (function(){
   'use strict';
-  const STEP='STEP VET-52.5N';
+  const STEP='STEP VET-52.5O';
   const API_BASE='https://dpro-vet-qr-api.dpromstk2000.workers.dev';
   const qs=new URLSearchParams(location.search);
   const clinicCode=qs.get('clinic_code')||'dpro_vet_demo';
@@ -91,10 +91,10 @@
   };
   let items=[];let selected=null;
   function url(page,extra=''){return `${page}?clinic_code=${encodeURIComponent(clinicCode)}${demo?`&demo=${encodeURIComponent(demo)}`:''}${extra}`;}
-  document.getElementById('linkPc').href=url('scan-pc.html','&v=from-doctor-52-5n');
-  document.getElementById('linkIpad').href=url('scan-ipad.html','&v=from-doctor-52-5n');
-  document.getElementById('linkOwner').href=url('owner.html','&v=from-doctor-52-5n');
-  document.getElementById('linkTop').href=url('system-check.html','&v=from-doctor-52-5n');
+  document.getElementById('linkPc').href=url('scan-pc.html','&v=from-doctor-52-5o');
+  document.getElementById('linkIpad').href=url('scan-ipad.html','&v=from-doctor-52-5o');
+  document.getElementById('linkOwner').href=url('owner.html','&v=from-doctor-52-5o');
+  document.getElementById('linkTop').href=url('system-check.html','&v=from-doctor-52-5o');
   function admin(){return localStorage.getItem(ADMIN_KEY)||'';}
   function setAdminState(){const a=admin();els.adminCode.value=a;els.adminNotice.textContent=a?'管理コード保存済みです。':'管理コードを入力してください。';}
   function showGlobal(msg){els.globalError.textContent=msg;els.globalError.classList.remove('hidden');}
@@ -105,7 +105,7 @@
   function idOf(row){return val(row,['id','checkin_id','queue_id'],null);}
   function qn(row){return val(row,['queue_number','reception_number','daily_number','number','checkin_number'],'-');}
   function statusOf(row){return clean(val(row,['status','queue_status'],'scheduled'));}
-  function statusLabel(s){return ({scheduled:'未院待ち',checked_in:'院内受付済み',examining:'診察中',completed:'診察済み',cancelled:'取消',no_show:'不在',payment_waiting:'会計待ち'}[s]||s||'-');}
+  function statusLabel(s){return ({scheduled:'未院待ち',checked_in:'院内受付済み',examining:'診察中',completed:'診察済み',cancelled:'取消',no_show:'不在',accounting:'会計待ち',payment_waiting:'会計待ち'}[s]||s||'-');}
   function pet(row){return val(row,['pet_name','animal_name'],'-');}
   function guardian(row){return val(row,['guardian_name','owner_name','customer_name'],'-');}
   function purpose(row){return val(row,['purpose','visit_purpose','menu_name','title'],'通常診察');}
@@ -115,12 +115,12 @@
   async function apiGet(path){const a=admin();const u=new URL(API_BASE+path);u.searchParams.set('clinic_code',clinicCode);if(a)u.searchParams.set('admin_code',a);const res=await fetch(u.toString(),{headers:{'x-dpro-admin-code':a}});const text=await res.text();let data;try{data=JSON.parse(text)}catch{data={ok:false,message:text||'JSON解析に失敗しました'}}if(!res.ok||data.ok===false)throw new Error(data.message||data.error||`APIエラー ${res.status}`);return data;}
   async function apiPost(path,body){const a=admin();const res=await fetch(API_BASE+path,{method:'POST',headers:{'content-type':'application/json','x-dpro-admin-code':a},body:JSON.stringify({...body,clinic_code:clinicCode,admin_code:a,staff_name:'獣医師'})});const text=await res.text();let data;try{data=JSON.parse(text)}catch{data={ok:false,message:text||'JSON解析に失敗しました'}}if(!res.ok||data.ok===false)throw new Error(data.message||data.error||`APIエラー ${res.status}`);return data;}
   async function load(){try{clearGlobal();els.countText.textContent='読込中';const data=await apiGet('/api/doctor/today');items=(data.items||data.rows||[]).filter(Boolean);renderList();if(selected){const found=items.find(x=>idOf(x)===idOf(selected));if(found){selectItem(found,false)}else{selected=null;renderDetail(null)}}}catch(e){showGlobal('読み込みエラー：'+e.message);els.countText.textContent='エラー';}}
-  function renderList(){const active=items.filter(x=>!['cancelled','canceled','no_show','noshow'].includes(statusOf(x)));const sorted=active.sort((a,b)=>Number(qn(a)||999999)-Number(qn(b)||999999));els.countText.textContent=`${sorted.length}件`;els.list.innerHTML='';if(!sorted.length){els.list.innerHTML='<div class="empty">本日の診察待ちはありません。</div>';return;}for(const row of sorted){const s=statusOf(row);const div=document.createElement('div');div.className='item'+(selected&&idOf(selected)===idOf(row)?' active':'');div.innerHTML=`<div class="num ${s==='examining'?'examining':s==='completed'?'done':''}">${escapeHtml(qn(row))}</div><div><div class="item-title">${escapeHtml(pet(row))}｜${escapeHtml(purpose(row))}</div><div class="small">${escapeHtml(guardian(row))} / ${escapeHtml(statusLabel(s))}</div><div class="small">${escapeHtml(memo(row)||'受付メモなし')}</div><div class="chips"><span class="chip green">${escapeHtml(statusLabel(s))}</span><span class="chip">${escapeHtml(val(row,['source','checkin_source','entry_source'],'通常'))}</span></div></div>`;div.onclick=()=>selectItem(row,true);els.list.appendChild(div);}}
-  function renderDetail(row){if(!row){els.detail.classList.add('hidden');els.detailEmpty.classList.remove('hidden');return;}els.detail.classList.remove('hidden');els.detailEmpty.classList.add('hidden');const rows=[['受付番号',qn(row)],['状態',statusLabel(statusOf(row))],['飼い主',guardian(row)],['ペット',pet(row)],['ペット情報',animal(row)],['目的',purpose(row)]];els.detailGrid.innerHTML=rows.map(([a,b])=>`<div>${escapeHtml(a)}</div><div>${escapeHtml(b)}</div>`).join('');const pre=[`来院前問診`,memo(row)||'受付メモなし'].join('\n');els.precheckBox.textContent=pre;els.doctorMemo.value=doctorMemo(row)||'';showStatus('',false);els.saveStatus.classList.remove('show');els.startExamBtn.disabled=statusOf(row)==='examining';els.completeBtn.disabled=statusOf(row)==='completed';}
+  function renderList(){const active=items.filter(x=>!['cancelled','canceled','no_show','noshow','completed','accounting','payment_waiting','checkout_waiting','billing','kaikei'].includes(statusOf(x)));const sorted=active.sort((a,b)=>Number(qn(a)||999999)-Number(qn(b)||999999));els.countText.textContent=`${sorted.length}件`;els.list.innerHTML='';if(!sorted.length){els.list.innerHTML='<div class="empty">本日の診察待ちはありません。</div>';return;}for(const row of sorted){const s=statusOf(row);const div=document.createElement('div');div.className='item'+(selected&&idOf(selected)===idOf(row)?' active':'');div.innerHTML=`<div class="num ${s==='examining'?'examining':s==='completed'?'done':''}">${escapeHtml(qn(row))}</div><div><div class="item-title">${escapeHtml(pet(row))}｜${escapeHtml(purpose(row))}</div><div class="small">${escapeHtml(guardian(row))} / ${escapeHtml(statusLabel(s))}</div><div class="small">${escapeHtml(memo(row)||'受付メモなし')}</div><div class="chips"><span class="chip green">${escapeHtml(statusLabel(s))}</span><span class="chip">${escapeHtml(val(row,['source','checkin_source','entry_source'],'通常'))}</span></div></div>`;div.onclick=()=>selectItem(row,true);els.list.appendChild(div);}}
+  function renderDetail(row){if(!row){els.detail.classList.add('hidden');els.detailEmpty.classList.remove('hidden');return;}els.detail.classList.remove('hidden');els.detailEmpty.classList.add('hidden');const rows=[['受付番号',qn(row)],['状態',statusLabel(statusOf(row))],['飼い主',guardian(row)],['ペット',pet(row)],['ペット情報',animal(row)],['目的',purpose(row)]];els.detailGrid.innerHTML=rows.map(([a,b])=>`<div>${escapeHtml(a)}</div><div>${escapeHtml(b)}</div>`).join('');const pre=[`来院前問診`,memo(row)||'受付メモなし'].join('\n');els.precheckBox.textContent=pre;els.doctorMemo.value=doctorMemo(row)||'';showStatus('',false);els.saveStatus.classList.remove('show');els.startExamBtn.disabled=statusOf(row)==='examining';els.completeBtn.disabled=['completed','accounting','payment_waiting','checkout_waiting','billing','kaikei'].includes(statusOf(row));}
   function selectItem(row,rerender=true){selected=row;renderDetail(row);if(rerender)renderList();}
   async function saveMemo(){if(!selected)return;try{showStatus('保存中です...');const data=await apiPost('/api/doctor/memo-save',{checkin_id:idOf(selected),doctor_memo:els.doctorMemo.value});showStatus(data.message||'メモを保存しました。');await load();}catch(e){showStatus('保存エラー：'+e.message,true);}}
   async function startExam(){if(!selected)return;try{showStatus('診察中に更新中です...');const data=await apiPost('/api/doctor/exam-start',{checkin_id:idOf(selected),doctor_memo:els.doctorMemo.value});showStatus(data.message||'診察中にしました。');await load();}catch(e){showStatus('更新エラー：'+e.message,true);}}
-  async function completeExam(){if(!selected)return;const ok=confirm(`${pet(selected)}を診察済みにします。よろしいですか？`);if(!ok)return;try{showStatus('診察済みに更新中です...');const data=await apiPost('/api/doctor/exam-complete',{checkin_id:idOf(selected),doctor_memo:els.doctorMemo.value,create_visit:true});showStatus(data.message||'診察済みにしました。受付PC側でも状態を確認してください。');await load();}catch(e){showStatus('診察済み更新エラー：'+e.message,true);showGlobal('診察済みボタンでエラーが出ました。画面は白くせず、このメッセージを表示しています：'+e.message);}}
+  async function completeExam(){if(!selected)return;const ok=confirm(`${pet(selected)}を診察済みにして、受付側の「会計待ち」へ移動します。よろしいですか？`);if(!ok)return;try{showStatus('診察済みとして会計待ちへ移動中です...');const data=await apiPost('/api/doctor/exam-complete',{checkin_id:idOf(selected),doctor_memo:els.doctorMemo.value,create_visit:true,next_status:'accounting'});showStatus(data.message||'診察済みにしました。受付PC・受付タブレット側では会計待ちに表示されます。');selected=null;await load();renderDetail(null);}catch(e){showStatus('診察済み更新エラー：'+e.message,true);showGlobal('診察済みボタンでエラーが出ました。画面は白くせず、このメッセージを表示しています：'+e.message);}}
   async function copyAfter(){if(!selected)return;const text=`こんにちは。DPROどうぶつ病院です。${pet(selected)}ちゃんの診察後のご案内です。${els.doctorMemo.value?`\n\n${els.doctorMemo.value}`:''}\n\nご不明な点があれば、このメッセージにご返信ください。`;try{await navigator.clipboard.writeText(text);showStatus('診察後文面をコピーしました。');}catch{showStatus('コピーできませんでした。手動で選択してコピーしてください。',true);}}
   document.querySelectorAll('[data-template]').forEach(btn=>btn.addEventListener('click',()=>{const add=btn.getAttribute('data-template');els.doctorMemo.value=(els.doctorMemo.value?els.doctorMemo.value+'\n':'')+add;showStatus('フォロー指示をメモに追加しました。');}));
   els.saveAdmin.onclick=()=>{localStorage.setItem(ADMIN_KEY,els.adminCode.value.trim());setAdminState();load();};
