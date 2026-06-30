@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>DPRO PET CARE LINE｜デモ・システム管理センター STEP VET-52.5S</title>
+  <title>DPRO PET CARE LINE｜デモ・システム管理センター STEP VET-52.5T</title>
   <style>
     :root{
       --bg:#edf5ef;
@@ -153,7 +153,7 @@
     .notice.ok{background:var(--soft);border-color:#cde7d5;color:var(--main2)}
     .notice.warn{background:var(--warnSoft);border-color:#f1d6aa;color:var(--warn)}
     .notice.danger{background:var(--dangerSoft);border-color:#f1c2c2;color:var(--danger)}
-    .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px}
+    .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-top:14px}
     .metric{border:1px solid var(--line2);background:#fff;border-radius:18px;padding:14px;min-height:92px}
     .metric span{font-size:12px;color:var(--muted)}
     .metric b{display:block;margin-top:7px;font-size:26px;line-height:1;color:var(--ink)}
@@ -224,7 +224,7 @@
           <div class="status-pill"><span>対象医院</span><b id="clinicNameHero">確認中</b></div>
           <div class="status-pill"><span>API</span><b id="apiStatusHero">確認中</b></div>
           <div class="status-pill"><span>本日の受付</span><b id="todayStatusHero">確認中</b></div>
-          <div class="status-pill"><span>STEP</span><b>STEP VET-52.5S</b></div>
+          <div class="status-pill"><span>STEP</span><b>STEP VET-52.5T</b></div>
         </div>
       </div>
     </section>
@@ -235,7 +235,7 @@
           <h2>営業デモ・ナビゲーション</h2>
           <p>営業時はこの順番で開くと、オーナーに「LINE診察券 → 受付 → 院内管理 → 診察 → 会計待ち → 休診反映」まで自然に伝わります。</p>
         </div>
-        <span class="badge ok">STEP VET-52.5S</span>
+        <span class="badge ok">STEP VET-52.5T</span>
       </div>
 
       <div class="demo-route">
@@ -346,6 +346,7 @@
         <div class="metric"><span>有効受付</span><b id="activeMetric">-</b><small>本日分</small></div>
         <div class="metric"><span>取消・履歴</span><b id="historyMetric">-</b><small>折りたたみ対象</small></div>
         <div class="metric"><span>休診予定</span><b id="closureMetric">-</b><small>30日以内</small></div>
+        <div class="metric"><span>次営業日</span><b id="nextDayMetric">-</b><small id="nextDayMetricSub">予定確認</small></div>
       </div>
 
       <div class="check-list" id="systemChecks">
@@ -384,6 +385,20 @@
     <section class="section">
       <div class="card-head">
         <div>
+          <h2>次の営業日の予定</h2>
+          <p>休診日や受付停止日で本日の受付が0件でも、次の営業日に受付デモデータが入っているか確認できます。</p>
+        </div>
+        <span class="badge" id="nextEntriesCountBadge">-</span>
+      </div>
+      <div class="entries" id="nextEntriesList">
+        <div class="notice">読み込み中です。</div>
+      </div>
+      <div class="mini-note" id="nextBusinessNote">本日の受付が空でも、次営業日に1〜4の受付が見えれば営業デモ準備はできています。</div>
+    </section>
+
+    <section class="section">
+      <div class="card-head">
+        <div>
           <h2>接続情報</h2>
           <p>デバッグ用の情報です。営業時は必要な時だけ確認します。</p>
         </div>
@@ -398,7 +413,7 @@
       </div>
     </section>
 
-    <div class="footer">STEP VET-52.5S：system-check.html 管理コード削除ボタン・入力し直しやすさを追加しました。</div>
+    <div class="footer">STEP VET-52.5T：system-check.html 休診日でも次営業日の予定がすぐ分かる表示を追加しました。</div>
   </div>
 
 <script>
@@ -406,7 +421,7 @@
   'use strict';
 
   const API_BASE = 'https://dpro-vet-qr-api.dpromstk2000.workers.dev';
-  const PAGE_STEP = 'STEP VET-52.5S';
+  const PAGE_STEP = 'STEP VET-52.5T';
   const EXPECTED_WORKER_VERSION = 'step-vet-52-5o-doctor-exam-to-accounting-complete';
   const DEFAULT_CLINIC_CODE = 'dpro_vet_demo';
   const DEMO_LINE_USER_ID = 'demo_line_link_001';
@@ -417,7 +432,7 @@
   const params = new URLSearchParams(location.search);
   const clinicCode = params.get('clinic_code') || DEFAULT_CLINIC_CODE;
   const demo = params.get('demo') || 'ready';
-  const versionSuffix = params.get('v') || 'step-vet-52-5s';
+  const versionSuffix = params.get('v') || 'step-vet-52-5t';
 
   const ADMIN_KEY = `dpro_vet_admin_code_${clinicCode}`;
   const oldAdminKeys = ['dpro_admin_code','admin_code','DPRO_ADMIN_CODE','dpro_vet_admin_code'];
@@ -527,9 +542,9 @@
   }
 
   function setLinks(){
-    const owner = localUrl('owner.html', { v:'step-vet-52-5s-owner' });
-    const member = localUrl('member.html', { line_user_id: DEMO_LINE_USER_ID, v:'step-vet-52-5s-member' });
-    const waiting = localUrl('waiting.html', { line_user_id: DEMO_LINE_USER_ID, v:'step-vet-52-5s-waiting' });
+    const owner = localUrl('owner.html', { v:'step-vet-52-5t-owner' });
+    const member = localUrl('member.html', { line_user_id: DEMO_LINE_USER_ID, v:'step-vet-52-5t-member' });
+    const waiting = localUrl('waiting.html', { line_user_id: DEMO_LINE_USER_ID, v:'step-vet-52-5t-waiting' });
     const scanPc = localUrl('scan-pc.html', { v:'step-vet-52-5p-from-system' });
     const scanIpad = localUrl('scan-ipad.html', { v:'step-vet-52-5p-from-system' });
     const doctor = localUrl('doctor.html', { v:'step-vet-52-5p-from-system' });
@@ -630,7 +645,15 @@
       data?.data?.entries,
       data?.data?.queue_entries,
       data?.result?.entries,
-      data?.summary?.entries
+      data?.summary?.entries,
+      data?.future_entries,
+      data?.next_entries,
+      data?.next_business_day_entries,
+      data?.next_business_day?.entries,
+      data?.next_open_day?.entries,
+      data?.data?.future_entries,
+      data?.data?.next_entries,
+      data?.data?.next_business_day_entries
     ];
     for(const c of candidates){
       if(Array.isArray(c)) return c;
@@ -682,17 +705,64 @@
     return e.visit_purpose || e.purpose || e.reason || e.service_name || e.menu_name || e.type || '';
   }
 
+  function getEntryYmd(e){
+    const raw = e.date || e.visit_date || e.queue_date || e.reception_date || e.day || e.target_date || e.scheduled_date || e.created_date || e.visit_at || e.scheduled_at || e.created_at || '';
+    const s = String(raw || '');
+    const m = s.match(/\d{4}-\d{2}-\d{2}/);
+    return m ? m[0] : '';
+  }
+
   function isTodayEntry(e){
     const today = todayYmd();
-    const d = e.date || e.visit_date || e.queue_date || e.created_date || e.day || e.reception_date || '';
+    const d = getEntryYmd(e);
     if(!d) return true;
-    return String(d).slice(0,10) === today || String(d).includes(today);
+    return d === today;
+  }
+
+  function isActiveLike(e){
+    return !['completed','history'].includes(normalizeStatus(e.status || e.queue_status || e.reception_status));
+  }
+
+  function directNextEntries(data){
+    const candidates = [
+      data?.next_business_day_entries,
+      data?.next_entries,
+      data?.next_day_entries,
+      data?.future_entries,
+      data?.next_business_day?.entries,
+      data?.next_open_day?.entries,
+      data?.next?.entries,
+      data?.data?.next_business_day_entries,
+      data?.data?.next_entries,
+      data?.data?.future_entries
+    ];
+    for(const c of candidates){
+      if(Array.isArray(c) && c.length) return c.filter(isActiveLike);
+    }
+    return [];
+  }
+
+  function nextBusinessGroup(entries, statusData){
+    const direct = directNextEntries(statusData || {});
+    if(direct.length){
+      const dates = direct.map(getEntryYmd).filter(Boolean).sort();
+      return { date: dates[0] || '次営業日', entries: direct.sort((a,b) => Number(getQueueNo(a,0)) - Number(getQueueNo(b,0))), source:'api' };
+    }
+    const today = todayYmd();
+    const future = (entries || [])
+      .filter(isActiveLike)
+      .map(e => ({ e, d:getEntryYmd(e) }))
+      .filter(x => x.d && x.d > today)
+      .sort((a,b) => a.d.localeCompare(b.d) || Number(getQueueNo(a.e,0)) - Number(getQueueNo(b.e,0)));
+    if(!future.length) return { date:'-', entries:[], source:'none' };
+    const first = future[0].d;
+    return { date:first, entries:future.filter(x => x.d === first).map(x => x.e), source:'entries' };
   }
 
   function activeEntries(entries){
     return entries
       .filter(isTodayEntry)
-      .filter(e => !['completed','history'].includes(normalizeStatus(e.status || e.queue_status || e.reception_status)))
+      .filter(isActiveLike)
       .sort((a,b) => Number(getQueueNo(a,0)) - Number(getQueueNo(b,0)));
   }
 
@@ -729,6 +799,39 @@
     }).join('');
   }
 
+  function renderNextEntries(entries, statusData){
+    const box = $('nextEntriesList');
+    const group = nextBusinessGroup(entries, statusData);
+    const items = group.entries || [];
+    $('nextEntriesCountBadge').textContent = items.length ? `${group.date} / ${items.length}件` : '0件';
+    $('nextDayMetric').textContent = items.length ? `${items.length}件` : '-';
+    $('nextDayMetricSub').textContent = items.length ? group.date : '予定なし';
+    if(!items.length){
+      box.innerHTML = '<div class="notice warn">次営業日の予定はまだ取得できません。営業デモ準備APIまたは受付データを確認してください。</div>';
+      $('nextBusinessNote').textContent = '本日が休診日・受付停止日の場合、ここに次営業日の1〜4受付が表示されると安心です。';
+      return;
+    }
+    box.innerHTML = items.map((e, idx) => {
+      const no = getQueueNo(e, idx);
+      const pet = escapeHtml(getPetName(e));
+      const owner = escapeHtml(getOwnerName(e));
+      const purpose = escapeHtml(getPurpose(e));
+      const status = escapeHtml(normalizeStatus(e.status || e.queue_status || e.reception_status));
+      const badge = Number(no) >= 10000 ? 'danger' : 'ok';
+      return `
+        <div class="entry-card">
+          <div class="entry-no">${escapeHtml(no)}</div>
+          <div>
+            <h3>${pet}${owner ? `｜${owner}` : ''}</h3>
+            <p>${escapeHtml(group.date)} / ${purpose || '通常診察'}<br>${status}</p>
+          </div>
+          <span class="badge ${badge}">${badge === 'danger' ? '番号確認' : '次営業日'}</span>
+        </div>`;
+    }).join('');
+    const names = items.map(getPetName).join(' / ');
+    $('nextBusinessNote').textContent = `次営業日の予定：${group.date}、${items.length}件。${names}`;
+  }
+
   function renderClosures(closures){
     const list = $('closuresList');
     const items = closures.slice(0, 12);
@@ -747,9 +850,14 @@
 
   function renderChecks(entries, closures, health, statusData){
     const active = activeEntries(entries);
+    const nextGroup = nextBusinessGroup(entries, statusData);
+    const nextItems = nextGroup.entries || [];
+    const demoReady = active.length === 4 || nextItems.length === 4;
     const history = historyEntries(entries);
-    const hasNormalNumbers = active.every((e, idx) => Number(getQueueNo(e, idx)) < 10000);
+    const visibleForNumberCheck = active.length ? active : nextItems;
+    const hasNormalNumbers = visibleForNumberCheck.every((e, idx) => Number(getQueueNo(e, idx)) < 10000);
     const names = active.map(getPetName).join(' / ');
+    const nextNames = nextItems.map(getPetName).join(' / ');
     const checks = [
       {
         title:'Worker API接続',
@@ -763,9 +871,15 @@
       },
       {
         title:'本日の受付データ',
-        body: `${active.length}件の有効受付。${names || '受付なし'}`,
+        body: active.length === 4 ? `${active.length}件の有効受付。${names}` : `${active.length}件の有効受付。休診日・受付停止日の場合は次営業日の予定を確認します。`,
         ok: active.length === 4,
         warn: active.length !== 4
+      },
+      {
+        title:'次営業日の予定',
+        body: nextItems.length ? `${nextGroup.date} に ${nextItems.length}件。${nextNames}` : '次営業日の受付予定は取得できません。',
+        ok: active.length === 4 || nextItems.length === 4,
+        warn: active.length !== 4 && nextItems.length !== 4
       },
       {
         title:'受付番号安全確認',
@@ -798,11 +912,11 @@
     $('activeMetric').textContent = active.length;
     $('historyMetric').textContent = history.length;
     $('closureMetric').textContent = closures.length;
-    $('overallBadge').textContent = health && active.length === 4 ? '正常' : '確認';
-    $('overallBadge').className = `badge ${health && active.length === 4 ? 'ok' : 'warn'}`;
+    $('overallBadge').textContent = health && demoReady ? '正常' : '確認';
+    $('overallBadge').className = `badge ${health && demoReady ? 'ok' : 'warn'}`;
     $('clinicNameHero').textContent = clinicCode === DEFAULT_CLINIC_CODE ? 'DPROどうぶつ病院' : clinicCode;
     $('apiStatusHero').textContent = health ? '接続OK' : '確認';
-    $('todayStatusHero').textContent = active.length === 4 ? '通常受付' : `${active.length}件`;
+    $('todayStatusHero').textContent = active.length === 4 ? '通常受付' : (nextItems.length === 4 ? '次営業日受付' : `${active.length}件`);
   }
 
   async function loadHealth(){
@@ -838,6 +952,7 @@
       const entries = extractEntries(statusData);
       const closures = extractClosures(statusData);
       renderEntries(entries);
+      renderNextEntries(entries, statusData);
       renderClosures(closures);
       renderChecks(entries, closures, health, statusData);
       updateRoutes(entries);
@@ -849,6 +964,7 @@
       $('overallBadge').textContent = 'エラー';
       $('overallBadge').className = 'badge danger';
       $('entriesList').innerHTML = `<div class="notice danger">読み込みエラー：${escapeHtml(e.message)}</div>`;
+      $('nextEntriesList').innerHTML = '<div class="notice warn">次営業日の予定を読み込みできませんでした。</div>';
       $('closuresList').innerHTML = '<div class="notice warn">読み込みできませんでした。</div>';
       updateDebug();
     }
@@ -856,7 +972,8 @@
 
   function updateRoutes(entries){
     const active = activeEntries(entries || []);
-    const ok = active.length === 4;
+    const nextGroup = nextBusinessGroup(entries || [], state.status || {});
+    const ok = active.length === 4 || (nextGroup.entries || []).length === 4;
     const mapping = [
       ['routeStatePrepare', ok ? '準備済み' : '準備ボタンへ'],
       ['routeStateMember', ok ? '反映済み画面' : '準備後に確認'],
@@ -923,9 +1040,13 @@
           await refreshAll();
           const entries = extractEntries(state.status || {});
           const active = activeEntries(entries);
-          if(active.length === 4){
+          const nextGroup = nextBusinessGroup(entries, state.status || {});
+          const nextItems = nextGroup.entries || [];
+          if(active.length === 4 || nextItems.length === 4){
             $('prepareResult').className = 'notice ok';
-            $('prepareResult').textContent = `営業デモ準備が完了しました。本日の有効受付は4件です。`;
+            $('prepareResult').textContent = active.length === 4
+              ? `営業デモ準備が完了しました。本日の有効受付は4件です。`
+              : `営業デモ準備が完了しました。本日は休診/受付停止のため、次営業日 ${nextGroup.date} に${nextItems.length}件の予定があります。`;
             return;
           }
         }catch(e){
@@ -933,9 +1054,12 @@
         }
       }
       await refreshAll();
-      const active = activeEntries(extractEntries(state.status || {}));
+      const entriesAfter = extractEntries(state.status || {});
+      const active = activeEntries(entriesAfter);
+      const nextGroup = nextBusinessGroup(entriesAfter, state.status || {});
+      const nextItems = nextGroup.entries || [];
       $('prepareResult').className = 'notice warn';
-      $('prepareResult').textContent = `準備APIは応答しましたが、本日の有効受付は${active.length}件です。Worker側の準備APIを確認してください。${lastMessage ? ' 最終応答: ' + lastMessage : ''}`;
+      $('prepareResult').textContent = `準備APIは応答しましたが、本日の有効受付は${active.length}件、次営業日は${nextItems.length}件です。Worker側の準備APIを確認してください。${lastMessage ? ' 最終応答: ' + lastMessage : ''}`;
     }catch(e){
       $('prepareResult').className = 'notice danger';
       $('prepareResult').textContent = `営業デモ準備エラー：${(lastErr || e).message}`;
@@ -964,6 +1088,11 @@
       admin_code: codeMask,
       expected_worker_version: EXPECTED_WORKER_VERSION,
       worker_version: state.health?.version || null,
+      next_business_day: (() => {
+        const entries = extractEntries(state.status || {});
+        const g = nextBusinessGroup(entries, state.status || {});
+        return { date:g.date, count:(g.entries || []).length, names:(g.entries || []).map(getPetName) };
+      })(),
       last_error: state.lastError ? {
         message: state.lastError.message,
         status: state.lastError.status || null,
