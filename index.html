@@ -1,80 +1,685 @@
 <!doctype html>
 <html lang="ja">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-<title>DPRO PET CARE LINE｜STEP VET-25</title>
-<script src="./config.js"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>DPRO PET CARE LINE｜動物病院版 営業デモトップ</title>
+  <style>
+    :root{
+      --bg:#f4f1ea;
+      --paper:#fffdf8;
+      --card:#ffffff;
+      --ink:#1f2d27;
+      --muted:#66756d;
+      --line:#dce7df;
+      --main:#14875f;
+      --main2:#0f6d4d;
+      --soft:#eaf8f1;
+      --amber:#9a6a17;
+      --amberSoft:#fff4d7;
+      --blue:#2269a6;
+      --blueSoft:#ecf6ff;
+      --red:#b84a4a;
+      --redSoft:#fff0ef;
+      --shadow:0 18px 46px rgba(31,45,39,.12);
+      --radius:24px;
+    }
 
-<style>
-:root{--bg:#f4f1ea;--card:#fff;--ink:#22302c;--muted:#6f7b75;--line:#d9d2c4;--main:#1f8f65;--main-dark:#223b34;--green-soft:#e8f7ef;--blue-soft:#edf5ff;--blue:#2d68a6;--amber:#8a621f;--amber-soft:#fff6de;--red:#b84a4a;--red-soft:#fff0ef;--shadow:0 18px 46px rgba(34,48,44,.12);--radius:24px}
-*{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Yu Gothic","YuGothic","Noto Sans JP",Meiryo,sans-serif;color:var(--ink);background:radial-gradient(circle at top left,rgba(31,143,101,.17),transparent 35%),radial-gradient(circle at 88% 10%,rgba(231,151,36,.12),transparent 28%),linear-gradient(180deg,#fbfaf6 0%,var(--bg) 100%);line-height:1.7}
-a{color:inherit}button,input{font:inherit}.page{width:min(1260px,calc(100% - 28px));margin:0 auto;padding:22px 0 54px}.topbar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:18px}.brand{display:flex;align-items:center;gap:12px;min-width:0}.logo{width:52px;height:52px;border-radius:18px;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,#1f8f65,#83c99f);box-shadow:0 14px 26px rgba(31,143,101,.23);font-size:26px;flex:0 0 auto}.brand small{display:block;color:var(--muted);font-weight:950;font-size:12px;letter-spacing:.08em}.brand strong{display:block;font-size:clamp(19px,2.4vw,30px);line-height:1.12;letter-spacing:-.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px}
-.pill,.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1px solid var(--line);border-radius:999px;padding:9px 13px;background:rgba(255,255,255,.86);color:var(--ink);text-decoration:none;font-size:13px;font-weight:950;line-height:1.15;transition:.15s transform,.15s box-shadow,.15s background}.pill:hover,.btn:hover{transform:translateY(-1px);box-shadow:0 10px 22px rgba(34,48,44,.11);background:#fff}.btn-main{border-color:transparent;background:var(--main);color:#fff;box-shadow:0 14px 28px rgba(31,143,101,.24)}.btn-sub{border-color:#bfe3cc;background:var(--green-soft);color:#11704c}.btn-warn{border-color:#efd89e;background:var(--amber-soft);color:var(--amber)}.btn-danger{border-color:#ecc0bc;background:var(--red-soft);color:#9f3939}
-.hero{display:grid;grid-template-columns:1.05fr .95fr;gap:18px;align-items:stretch;margin-bottom:18px}.hero-card{position:relative;overflow:hidden;border-radius:32px;background:linear-gradient(135deg,rgba(34,59,52,.98),rgba(31,143,101,.92)),radial-gradient(circle at 86% 10%,rgba(255,255,255,.22),transparent 24%);color:#fff;padding:clamp(22px,3.6vw,42px);box-shadow:var(--shadow)}.hero-card::after{content:"PET";position:absolute;right:-8px;bottom:-42px;font-size:clamp(90px,15vw,190px);font-weight:1000;letter-spacing:.06em;opacity:.06;pointer-events:none}.card{border:1px solid rgba(217,210,196,.88);border-radius:var(--radius);background:rgba(255,255,255,.92);box-shadow:var(--shadow);padding:clamp(18px,2.5vw,28px)}.badge{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:8px 12px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.24);color:#fff;font-size:12px;font-weight:950;letter-spacing:.04em;margin-bottom:14px}.badge-dark{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:7px 11px;background:var(--green-soft);color:#11704c;font-size:12px;font-weight:950;margin-bottom:12px}
-h1{position:relative;z-index:1;margin:0 0 14px;font-size:clamp(32px,4.8vw,62px);line-height:1.06;letter-spacing:-.06em}h2{margin:0 0 12px;font-size:clamp(22px,2.8vw,34px);line-height:1.2;letter-spacing:-.03em}h3{margin:0 0 8px;font-size:20px;line-height:1.3}.lead{position:relative;z-index:1;margin:0;color:rgba(255,255,255,.88);font-size:clamp(14px,1.7vw,17px);font-weight:770;line-height:1.9}.plain-lead{margin:0;color:#5a6862;font-size:14px;font-weight:780;line-height:1.8}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.role{display:flex;gap:12px;align-items:flex-start;border:1px solid rgba(217,210,196,.86);border-radius:20px;background:#fffdf9;padding:16px;text-decoration:none;min-height:150px}.role:hover{transform:translateY(-2px);box-shadow:0 14px 28px rgba(34,48,44,.11)}.role-icon{width:48px;height:48px;border-radius:17px;display:grid;place-items:center;background:var(--green-soft);font-size:27px;flex:0 0 auto}.role strong{display:block;font-size:18px;line-height:1.25;margin-bottom:4px}.role p{margin:0;color:#61706a;font-size:12px;font-weight:820;line-height:1.6}.tagline{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}.tag{display:inline-flex;border-radius:999px;background:#f6f2e9;color:#79623d;padding:3px 8px;font-size:11px;font-weight:950}.tag.green{background:var(--green-soft);color:#11704c}.tag.blue{background:var(--blue-soft);color:#2d68a6}.tag.red{background:var(--red-soft);color:#9f3939}
-.status-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px}.metric{border:1px solid rgba(217,210,196,.86);border-radius:18px;background:#fffdf9;padding:13px;min-height:84px}.metric small{display:block;color:var(--muted);font-weight:950;font-size:12px}.metric b{display:block;font-size:26px;line-height:1.2;letter-spacing:-.04em;margin-top:2px}.metric span{display:block;color:#62706a;font-size:12px;font-weight:850;margin-top:2px}
-.section-title{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin:26px 0 12px}.section-title h2{margin:0}.section-title p{margin:0;color:var(--muted);text-align:right;font-size:13px;font-weight:850}.notice{border-radius:16px;padding:12px;margin-top:12px;font-size:13px;font-weight:850;line-height:1.65;background:var(--amber-soft);border:1px solid #efd89e;color:var(--amber)}.notice.ok{background:var(--green-soft);border-color:#bfe3cc;color:#11704c}.notice.ng{background:var(--red-soft);border-color:#ecc0bc;color:#9f3939}.notice.info{background:var(--blue-soft);border-color:#bdd5ef;color:#2d68a6}
-input{width:100%;border:1px solid #d8d0c0;border-radius:15px;padding:11px 12px;background:#fff;color:var(--ink);font-size:14px;font-weight:800;outline:none}.auth-box{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;margin-top:14px}.check-list{display:grid;gap:10px}.check{border:1px solid rgba(217,210,196,.86);border-radius:18px;background:#fffdf9;padding:13px;display:grid;grid-template-columns:54px 1fr auto;gap:12px;align-items:center}.check-mark{width:48px;height:48px;border-radius:17px;display:grid;place-items:center;background:#f6f2e9;font-weight:1000}.check.ok .check-mark{background:var(--green-soft);color:#11704c}.check.ng .check-mark{background:var(--red-soft);color:#9f3939}.check.run .check-mark{background:var(--blue-soft);color:#2d68a6}.check h4{margin:0;font-size:15px}.check p{margin:2px 0 0;color:#61706a;font-size:12px;font-weight:800}.footer-note{margin-top:18px;border:1px solid rgba(217,210,196,.88);background:rgba(255,255,255,.78);border-radius:22px;padding:14px;color:#56645e;font-size:13px;font-weight:780;line-height:1.7}
-@media(max-width:980px){.hero,.grid,.grid2{grid-template-columns:1fr}.status-grid{grid-template-columns:repeat(2,1fr)}.section-title{align-items:flex-start;flex-direction:column}.section-title p{text-align:left}.check{grid-template-columns:54px 1fr}.check .btn{grid-column:1/-1;justify-self:start}}
-@media(max-width:640px){.topbar{align-items:flex-start;flex-direction:column}.actions{justify-content:flex-start}.auth-box,.status-grid{grid-template-columns:1fr}.brand strong{white-space:normal}.hero-card,.card{border-radius:22px}}
-</style>
+    *{box-sizing:border-box}
 
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Yu Gothic","YuGothic","Noto Sans JP",Meiryo,sans-serif;
+      color:var(--ink);
+      background:
+        radial-gradient(circle at 8% 6%,rgba(20,135,95,.16),transparent 34%),
+        radial-gradient(circle at 92% 8%,rgba(230,174,78,.17),transparent 35%),
+        linear-gradient(180deg,#fbfaf6 0%,var(--bg) 100%);
+      line-height:1.75;
+    }
+
+    a{color:inherit}
+
+    .page{
+      width:min(1180px,calc(100% - 28px));
+      margin:0 auto;
+      padding:24px 0 54px;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      margin-bottom:18px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width:0;
+    }
+
+    .logo{
+      width:52px;
+      height:52px;
+      border-radius:18px;
+      display:grid;
+      place-items:center;
+      color:#fff;
+      background:linear-gradient(135deg,#14875f,#84c79f);
+      box-shadow:0 14px 26px rgba(20,135,95,.23);
+      font-size:25px;
+      flex:0 0 auto;
+    }
+
+    .brand small{
+      display:block;
+      color:var(--muted);
+      font-weight:950;
+      font-size:12px;
+      letter-spacing:.08em;
+    }
+
+    .brand strong{
+      display:block;
+      font-size:clamp(19px,2.5vw,30px);
+      line-height:1.12;
+      letter-spacing:-.03em;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .actions{
+      display:flex;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+      gap:8px;
+    }
+
+    .pill,
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:7px;
+      border:1px solid var(--line);
+      border-radius:999px;
+      padding:9px 13px;
+      background:rgba(255,255,255,.86);
+      color:var(--ink);
+      text-decoration:none;
+      font-weight:900;
+      font-size:13px;
+      box-shadow:0 8px 20px rgba(31,45,39,.06);
+    }
+
+    .hero{
+      display:grid;
+      grid-template-columns:1.1fr .9fr;
+      gap:18px;
+      align-items:stretch;
+      margin-bottom:20px;
+    }
+
+    .heroMain{
+      position:relative;
+      overflow:hidden;
+      border-radius:32px;
+      padding:34px;
+      color:white;
+      background:
+        linear-gradient(135deg,rgba(14,65,45,.96),rgba(21,145,101,.94)),
+        radial-gradient(circle at 70% 20%,rgba(255,255,255,.25),transparent 20%);
+      box-shadow:var(--shadow);
+      min-height:360px;
+    }
+
+    .heroMain:after{
+      content:"PET";
+      position:absolute;
+      right:18px;
+      bottom:-50px;
+      color:rgba(255,255,255,.08);
+      font-size:160px;
+      font-weight:1000;
+      letter-spacing:-12px;
+      line-height:1;
+    }
+
+    .step{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      border:1px solid rgba(255,255,255,.28);
+      background:rgba(255,255,255,.14);
+      color:white;
+      border-radius:999px;
+      padding:8px 13px;
+      font-size:12px;
+      font-weight:950;
+      margin-bottom:18px;
+    }
+
+    h1{
+      margin:0 0 14px;
+      font-size:clamp(34px,5.2vw,62px);
+      line-height:1.05;
+      letter-spacing:-.06em;
+    }
+
+    .lead{
+      position:relative;
+      z-index:1;
+      margin:0;
+      max-width:760px;
+      color:rgba(255,255,255,.92);
+      font-weight:750;
+      line-height:1.9;
+    }
+
+    .heroSide{
+      display:grid;
+      gap:14px;
+    }
+
+    .statusBox{
+      background:rgba(255,255,255,.9);
+      border:1px solid var(--line);
+      border-radius:28px;
+      padding:22px;
+      box-shadow:var(--shadow);
+    }
+
+    .statusBox h2{
+      margin:0 0 12px;
+      font-size:22px;
+      letter-spacing:-.03em;
+    }
+
+    .checkList{
+      margin:0;
+      padding:0;
+      list-style:none;
+      display:grid;
+      gap:9px;
+    }
+
+    .checkList li{
+      display:flex;
+      gap:9px;
+      align-items:flex-start;
+      background:#f8fbf9;
+      border:1px solid #e5eee8;
+      border-radius:14px;
+      padding:10px 12px;
+      font-weight:800;
+      color:#31443a;
+      font-size:14px;
+    }
+
+    .checkList li:before{
+      content:"✓";
+      width:22px;
+      height:22px;
+      border-radius:999px;
+      display:grid;
+      place-items:center;
+      background:var(--soft);
+      color:var(--main);
+      font-weight:1000;
+      flex:0 0 auto;
+      margin-top:1px;
+    }
+
+    .primaryGrid{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:16px;
+      margin-bottom:20px;
+    }
+
+    .card{
+      background:rgba(255,255,255,.92);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:18px;
+      display:flex;
+      flex-direction:column;
+      min-height:100%;
+    }
+
+    .cardHead{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      margin-bottom:10px;
+    }
+
+    .icon{
+      width:42px;
+      height:42px;
+      border-radius:16px;
+      display:grid;
+      place-items:center;
+      background:var(--soft);
+      color:var(--main);
+      font-size:21px;
+      flex:0 0 auto;
+    }
+
+    .card h3{
+      margin:0;
+      font-size:22px;
+      line-height:1.2;
+      letter-spacing:-.04em;
+    }
+
+    .card small{
+      display:block;
+      color:var(--muted);
+      font-weight:900;
+      margin-top:2px;
+    }
+
+    .card p{
+      margin:0 0 14px;
+      color:#3c5147;
+      font-size:14px;
+      font-weight:650;
+      line-height:1.75;
+      flex:1;
+    }
+
+    .open{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      width:100%;
+      min-height:46px;
+      border-radius:16px;
+      background:var(--main);
+      color:white;
+      text-decoration:none;
+      font-weight:1000;
+      box-shadow:0 12px 22px rgba(20,135,95,.2);
+    }
+
+    .open:hover{background:var(--main2)}
+
+    .open.subtle{
+      background:#f7fbf8;
+      color:var(--main2);
+      border:1px solid #cfe5d8;
+      box-shadow:none;
+    }
+
+    .section{
+      margin-top:18px;
+      background:rgba(255,255,255,.86);
+      border:1px solid var(--line);
+      border-radius:28px;
+      box-shadow:var(--shadow);
+      padding:22px;
+    }
+
+    .sectionHead{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:flex-end;
+      margin-bottom:14px;
+    }
+
+    .section h2{
+      margin:0;
+      font-size:28px;
+      line-height:1.2;
+      letter-spacing:-.05em;
+    }
+
+    .section .note{
+      margin:4px 0 0;
+      color:var(--muted);
+      font-weight:750;
+    }
+
+    .flow{
+      display:grid;
+      grid-template-columns:repeat(6,1fr);
+      gap:10px;
+    }
+
+    .flowItem{
+      background:#fbfdfb;
+      border:1px solid #e4eee7;
+      border-radius:18px;
+      padding:13px;
+      min-height:120px;
+    }
+
+    .flowItem b{
+      display:block;
+      color:var(--main2);
+      font-size:13px;
+      margin-bottom:5px;
+    }
+
+    .flowItem strong{
+      display:block;
+      font-size:17px;
+      line-height:1.25;
+      margin-bottom:6px;
+      letter-spacing:-.03em;
+    }
+
+    .flowItem span{
+      display:block;
+      color:#55685f;
+      font-size:12px;
+      line-height:1.55;
+      font-weight:700;
+    }
+
+    .utilityGrid{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:12px;
+    }
+
+    .mini{
+      border:1px solid #e4eee7;
+      background:#fbfdfb;
+      border-radius:18px;
+      padding:14px;
+    }
+
+    .mini h3{
+      margin:0 0 6px;
+      font-size:17px;
+      letter-spacing:-.03em;
+    }
+
+    .mini p{
+      margin:0 0 10px;
+      color:#586a62;
+      font-size:13px;
+      font-weight:700;
+    }
+
+    .mini a{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:36px;
+      border-radius:999px;
+      border:1px solid #cfe5d8;
+      color:var(--main2);
+      text-decoration:none;
+      font-weight:950;
+      padding:6px 11px;
+      background:#fff;
+      font-size:13px;
+    }
+
+    .warning{
+      margin-top:18px;
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
+    }
+
+    .warnBox{
+      border-radius:20px;
+      padding:16px;
+      border:1px solid #efd999;
+      background:var(--amberSoft);
+      color:#59410e;
+      font-weight:750;
+    }
+
+    .warnBox.red{
+      border-color:#f0c5c5;
+      background:var(--redSoft);
+      color:#6a2a2a;
+    }
+
+    .warnBox b{
+      display:block;
+      margin-bottom:5px;
+      font-size:16px;
+    }
+
+    footer{
+      margin-top:18px;
+      color:#67766e;
+      text-align:center;
+      font-size:12px;
+      font-weight:800;
+    }
+
+    @media(max-width:980px){
+      .hero{grid-template-columns:1fr}
+      .primaryGrid{grid-template-columns:1fr}
+      .flow{grid-template-columns:repeat(2,1fr)}
+      .utilityGrid{grid-template-columns:repeat(2,1fr)}
+      .warning{grid-template-columns:1fr}
+      .topbar{align-items:flex-start;flex-direction:column}
+      .actions{justify-content:flex-start}
+    }
+
+    @media(max-width:620px){
+      .page{width:min(100% - 20px,1180px);padding-top:14px}
+      .heroMain{border-radius:24px;padding:24px;min-height:auto}
+      .statusBox,.section{border-radius:22px;padding:18px}
+      .flow{grid-template-columns:1fr}
+      .utilityGrid{grid-template-columns:1fr}
+      .brand strong{white-space:normal}
+    }
+  </style>
 </head>
 <body>
-<main class="page">
-<header class="topbar">
-  <div class="brand"><div class="logo">🐾</div><div><small>STEP VET-25｜最終導線トップ</small><strong>DPRO PET CARE LINE</strong></div></div>
-  <nav class="actions">
-    <a class="pill" href="./system-check.html?v=step-vet-25">システム確認</a>
-    <a class="pill" href="./rich-menu.html?v=step-vet-25">LINE入口</a>
-    <a class="pill" href="./admin.html?v=step-vet-25">管理設定</a>
-  </nav>
-</header>
-
-<section class="hero">
-  <div class="hero-card">
-    <span class="badge">動物病院LINE受付・診察券・フォロー管理</span>
-    <h1>受付の前後まで、<br>LINEでつながる。</h1>
-    <p class="lead">歯科QR診察券の良い所を引き継ぎ、動物病院に必要なQR来院受付、順番受付、問診、診察ステータス、LINEフォロー、予防案内を一体化します。</p>
-  </div>
-  <div class="card">
-    <span class="badge-dark">営業DEMOの見せ方</span>
-    <p class="plain-lead">このトップから、飼い主スマホ、受付PC、受付タブレット、ドクター、オーナーの順番で見せると一番伝わります。</p>
-    <div class="status-grid">
-      <div class="metric"><small>お客スマホ</small><b>LINE</b><span>診察券・受付</span></div>
-      <div class="metric"><small>受付</small><b>QR</b><span>PC/タブレット</span></div>
-      <div class="metric"><small>先生</small><b>診察</b><span>問診・指示</span></div>
-      <div class="metric"><small>オーナー</small><b>未対応</b><span>フォロー管理</span></div>
+  <div class="page">
+    <div class="topbar">
+      <div class="brand">
+        <div class="logo">🐾</div>
+        <div>
+          <small>STEP VET-53｜DPRO PET CARE LINE</small>
+          <strong>動物病院版 営業デモトップ</strong>
+        </div>
+      </div>
+      <div class="actions">
+        <a class="pill" href="./demo-qr.html?clinic_code=dpro_vet_demo&demo=ready&v=step-vet-53" target="_blank" rel="noopener">QR一覧</a>
+        <a class="pill" href="./system-check.html?clinic_code=dpro_vet_demo&demo=ready&v=step-vet-52-5u-demo-check" target="_blank" rel="noopener">システム確認</a>
+        <a class="pill" href="./scan-pc.html?clinic_code=dpro_vet_demo&demo=ready&v=step-vet-52-5v-demo-check" target="_blank" rel="noopener">受付PC</a>
+        <a class="pill" href="./scan-ipad.html?clinic_code=dpro_vet_demo&demo=ready&v=step-vet-52-5x-camera-qr" target="_blank" rel="noopener">受付iPad</a>
+      </div>
     </div>
+
+    <section class="hero">
+      <div class="heroMain">
+        <div class="step">最新デモ導線｜STEP VET-53</div>
+        <h1>診察券・受付・診察・会計待ちまで、LINEでつながる。</h1>
+        <p class="lead">
+          DPRO PET CARE LINE は、動物病院向けのLINE診察券・QR受付・受付PC・受付iPad・獣医師画面をつなぐ営業デモ兼本番導入前提のシステムです。
+          順番待ちだけではなく、受付の前後までLINEでつながることを見せられるように、このトップから各画面へすぐ移動できます。
+        </p>
+      </div>
+
+      <div class="heroSide">
+        <div class="statusBox">
+          <h2>現在の確認済み状態</h2>
+          <ul class="checkList">
+            <li>Worker：step-vet-52-5u-sales-demo-prepare-verify-complete</li>
+            <li>system-check.html：STEP VET-52.5U</li>
+            <li>scan-pc.html：STEP VET-52.5V</li>
+            <li>scan-ipad.html：STEP VET-52.5X カメラQR読取対応</li>
+            <li>doctor.html：STEP VET-52.5P 診察済み→会計待ち</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <main class="primaryGrid">
+      <article class="card">
+        <div class="cardHead">
+          <div class="icon">✅</div>
+          <div>
+            <h3>営業前チェック</h3>
+            <small>system-check.html</small>
+          </div>
+        </div>
+        <p>
+          API接続、Worker version、管理コード、営業デモ準備、本日の受付1〜4を確認します。
+          営業デモの最初はここから開きます。
+        </p>
+        <a class="open" href="./system-check.html?clinic_code=dpro_vet_demo&demo=ready&v=step-vet-52-5u-demo-check" target="_blank" rel="noopener">システム確認を開く</a>
+      </article>
+
+      <article class="card">
+        <div class="cardHead">
+          <div class="icon">🖥️</div>
+          <div>
+            <h3>受付PC</h3>
+            <small>scan-pc.html</small>
+          </div>
+        </div>
+        <p>
+          USB QRリーダー、窓口受付、電話受付、ステータス更新、会計待ち、完了までを確認します。
+          履歴は控えめ表示です。
+        </p>
+        <a class="open" href="./scan-pc.html?clinic_code=dpro_vet_demo&demo=ready&v=step-vet-52-5v-demo-check" target="_blank" rel="noopener">受付PCを開く</a>
+      </article>
+
+      <article class="card">
+        <div class="cardHead">
+          <div class="icon">📷</div>
+          <div>
+            <h3>受付iPad</h3>
+            <small>scan-ipad.html</small>
+          </div>
+        </div>
+        <p>
+          iPad・タブレットでカメラQR読取を使う受付画面です。
+          QR読取、来院受付、窓口受付、既存患者検索まで確認します。
+        </p>
+        <a class="open" href="./scan-ipad.html?clinic_code=dpro_vet_demo&demo=ready&v=step-vet-52-5x-camera-qr" target="_blank" rel="noopener">受付iPadを開く</a>
+      </article>
+    </main>
+
+    <section class="section">
+      <div class="sectionHead">
+        <div>
+          <h2>3分デモの流れ</h2>
+          <p class="note">営業では、画面の多さではなく「受付の前後までつながる」ことを見せます。</p>
+        </div>
+      </div>
+
+      <div class="flow">
+        <div class="flowItem">
+          <b>1</b>
+          <strong>営業前チェック</strong>
+          <span>system-checkでデモ準備。受付1〜4を作成します。</span>
+        </div>
+        <div class="flowItem">
+          <b>2</b>
+          <strong>飼い主診察券</strong>
+          <span>memberでペット診察券QRを見せます。多頭管理も説明します。</span>
+        </div>
+        <div class="flowItem">
+          <b>3</b>
+          <strong>受付iPad</strong>
+          <span>カメラでQRを読み、来院受付に入れます。</span>
+        </div>
+        <div class="flowItem">
+          <b>4</b>
+          <strong>受付PC同期</strong>
+          <span>受付PCにも同じ受付が反映されることを見せます。</span>
+        </div>
+        <div class="flowItem">
+          <b>5</b>
+          <strong>獣医師画面</strong>
+          <span>診察中患者を確認し、診察済みで会計待ちへ送ります。</span>
+        </div>
+        <div class="flowItem">
+          <b>6</b>
+          <strong>会計・完了</strong>
+          <span>受付側で会計待ちから完了。履歴は控えめに確認します。</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="sectionHead">
+        <div>
+          <h2>その他の画面</h2>
+          <p class="note">営業時に必要な時だけ開きます。</p>
+        </div>
+      </div>
+
+      <div class="utilityGrid">
+        <div class="mini">
+          <h3>QR一覧</h3>
+          <p>PC画面にQR一覧を出し、iPadやスマホで各画面を開きます。</p>
+          <a href="./demo-qr.html?clinic_code=dpro_vet_demo&demo=ready&v=step-vet-53" target="_blank" rel="noopener">開く</a>
+        </div>
+        <div class="mini">
+          <h3>獣医師画面</h3>
+          <p>診察中患者を確認し、診察済みで会計待ちへ移動します。</p>
+          <a href="./doctor.html?clinic_code=dpro_vet_demo&demo=ready&v=step-vet-52-5p-demo-check" target="_blank" rel="noopener">開く</a>
+        </div>
+        <div class="mini">
+          <h3>オーナー画面</h3>
+          <p>患者管理、LINE未連携、フォロー確認など管理者向け画面です。</p>
+          <a href="./owner.html?clinic_code=dpro_vet_demo&demo=ready&v=step-vet-53" target="_blank" rel="noopener">開く</a>
+        </div>
+        <div class="mini">
+          <h3>飼い主診察券</h3>
+          <p>LINE診察券、多頭ペット、QR表示を確認します。</p>
+          <a href="./member.html?clinic_code=dpro_vet_demo&demo=ready&v=step-vet-53" target="_blank" rel="noopener">開く</a>
+        </div>
+        <div class="mini">
+          <h3>順番受付</h3>
+          <p>飼い主側の順番受付・お薬/予防受付の入口です。</p>
+          <a href="./waiting.html?clinic_code=dpro_vet_demo&demo=ready&v=step-vet-53" target="_blank" rel="noopener">開く</a>
+        </div>
+        <div class="mini">
+          <h3>リッチメニュー確認</h3>
+          <p>LINE公式から見せる入口の確認用です。</p>
+          <a href="./rich-menu.html?clinic_code=dpro_vet_demo&demo=ready&v=step-vet-53" target="_blank" rel="noopener">開く</a>
+        </div>
+        <div class="mini">
+          <h3>患者管理</h3>
+          <p>飼い主・ペット情報の確認、更新、LINE連携確認用です。</p>
+          <a href="./patients.html?clinic_code=dpro_vet_demo&demo=ready&v=step-vet-53" target="_blank" rel="noopener">開く</a>
+        </div>
+        <div class="mini">
+          <h3>本番安全確認</h3>
+          <p>本番導入前の安全設定・環境確認に使います。</p>
+          <a href="./production-check.html?clinic_code=dpro_vet_demo&demo=ready&v=step-vet-53" target="_blank" rel="noopener">開く</a>
+        </div>
+      </div>
+
+      <div class="warning">
+        <div class="warnBox">
+          <b>営業での主役</b>
+          受付PC・受付iPad・doctor・飼い主診察券を中心に見せます。管理系画面は聞かれた時だけ開くと、説明が散らかりません。
+        </div>
+        <div class="warnBox red">
+          <b>本番安全ルール</b>
+          管理コードはURLに含めません。localStorageだけの見せかけ更新ではなく、Worker API → Supabase保存 → 各画面再取得を基本にします。
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      DPRO PET CARE LINE 動物病院版 / GitHub Pages: https://dpromstk2000-lab.github.io/DPRO-VET-QR/ / Worker: https://dpro-vet-qr-api.dpromstk2000.workers.dev
+    </footer>
   </div>
-</section>
-
-<div class="section-title"><h2>使う人別の画面</h2><p>GitHub Pages上のHTMLを、端末ごとに使い分けます。</p></div>
-
-<section class="grid">
-  <a class="role" href="./rich-menu.html?v=step-vet-25"><div class="role-icon">📱</div><div><strong>お客スマホ｜LINE入口</strong><p>リッチメニュー風の入口。診察券、今日の順番受付、優先受付、お薬・予防、混雑目安へ進みます。</p><div class="tagline"><span class="tag green">rich-menu.html</span></div></div></a>
-  <a class="role" href="./member.html?demo=true&v=step-vet-25"><div class="role-icon">🐶</div><div><strong>お客スマホ｜ペット診察券</strong><p>ペットごとの診察券QR、多頭管理、予防予定、病院情報を表示します。</p><div class="tagline"><span class="tag green">member.html</span></div></div></a>
-  <a class="role" href="./waiting.html?demo=true&mode=today_queue&v=step-vet-25"><div class="role-icon">🎫</div><div><strong>お客スマホ｜順番受付</strong><p>今日の順番受付、優先受付予約、お薬・予防受付、来院前問診を送信します。</p><div class="tagline"><span class="tag green">waiting.html</span></div></div></a>
-
-  <a class="role" href="./scan-pc.html?v=step-vet-25"><div class="role-icon">🖥️</div><div><strong>受付PC｜QRリーダー受付</strong><p>USB QRリーダーで診察券を読み取り、来院受付・受付番号発行・LINEフォロー送信を行います。</p><div class="tagline"><span class="tag blue">scan-pc.html</span></div></div></a>
-  <a class="role" href="./scan-ipad.html?v=step-vet-25"><div class="role-icon">📷</div><div><strong>受付タブレット｜QR受付</strong><p>iPad/タブレットで受付一覧、QR受付、院内受付済み、診察中、診療済みを操作します。</p><div class="tagline"><span class="tag blue">scan-ipad.html</span></div></div></a>
-  <a class="role" href="./doctor.html?v=step-vet-25"><div class="role-icon">🩺</div><div><strong>ドクタータブレット</strong><p>問診確認、診察メモ、診察中・診療済み、3日後様子確認などのフォロー指示を行います。</p><div class="tagline"><span class="tag blue">doctor.html</span></div></div></a>
-
-  <a class="role" href="./owner.html?v=step-vet-25"><div class="role-icon">📊</div><div><strong>オーナー管理PC/タブレット</strong><p>今日の未対応、受付状況、LINEフォロー待ち、予防案内、LINE未連携を一画面で確認します。</p><div class="tagline"><span class="tag green">owner.html</span></div></div></a>
-  <a class="role" href="./admin.html?v=step-vet-25"><div class="role-icon">⚙️</div><div><strong>管理設定</strong><p>病院情報、飼い主、ペット、診察券、LINE連携トークンなどを管理します。</p><div class="tagline"><span class="tag">admin.html</span></div></div></a>
-  <a class="role" href="./admin-queue.html?v=step-vet-25"><div class="role-icon">🚦</div><div><strong>受付ルール設定</strong><p>順番受付、優先受付、お薬・予防受付、混雑目安の設定を行います。</p><div class="tagline"><span class="tag">admin-queue.html</span></div></div></a>
-</section>
-
-<div class="section-title"><h2>あなたの運用・営業確認</h2><p>営業前はこの順番で確認します。</p></div>
-
-<section class="grid2">
-  <a class="role" href="./system-check.html?v=step-vet-25"><div class="role-icon">✅</div><div><strong>system-check.html</strong><p>Worker、Supabase、診察券、QR受付、順番受付、owner/doctor、フォロー系APIを確認します。</p><div class="tagline"><span class="tag green">営業前確認</span></div></div></a>
-  <a class="role" href="./demo-guide.html?v=step-vet-25"><div class="role-icon">🎬</div><div><strong>demo-guide.html</strong><p>営業デモの見せ方、説明順、オーナーに刺さるポイントをまとめる予定の画面です。</p><div class="tagline"><span class="tag">次で最終整備</span></div></div></a>
-</section>
-
-<div class="footer-note">STEP VET-25：最新導線を整理しました。次の営業では「お客スマホ → 受付QR → ドクター → オーナー未対応管理」の順に見せると一番強いです。</div>
-</main>
 </body>
 </html>
