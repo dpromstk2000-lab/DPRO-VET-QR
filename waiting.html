@@ -412,7 +412,7 @@
       .calendarMini{grid-template-columns:1fr}
     }
   
-    /* STEP VET-55R：飼い主側受付登録・DEMO遷移修正 */
+    /* STEP VET-55R-2：飼い主側受付登録・DEMO遷移修正 */
     .demoPetSelector{
       display:flex;
       flex-wrap:wrap;
@@ -455,7 +455,7 @@
 <body>
   <main class="page">
     <section class="hero">
-      <span class="badge">STEP VET-55R｜来院受付・順番案内</span>
+      <span class="badge">STEP VET-55R-2-2｜来院受付・順番案内</span>
       <h1>今日の来院受付</h1>
       <p class="lead">
         診察券を確認して、今日の受付番号を発行します。
@@ -547,8 +547,8 @@
         <label class="notifyOption" for="notifyOneBefore">
           <input id="notifyOneBefore" type="checkbox">
           <span>
-            <strong>1組前通知を希望する</strong>
-            <span>医院が通知運用を使っている場合のみ有効です。メッセージ通数を抑えるため、標準は通知なしです。</span>
+            <strong>必要な場合だけ、1組前通知を希望する</strong>
+            <span>医院の運用状況により、通知に対応していない場合があります。標準は受付番号と待ち状況を見ながらお待ちいただく形です。</span>
           </span>
         </label>
 
@@ -613,7 +613,7 @@
         urlParams.get("demo") === "ready" ||
         urlParams.get("demo") === "true" ||
         urlParams.get("demo") === "1" ||
-        // STEP VET-55R:
+        // STEP VET-55R-2:
         // 営業DEMO用LINE IDで開いた場合は、member.htmlからdemo=readyが漏れても
         // waiting.html側で多頭診察券を補助表示する。
         urlParams.has("line_user_id")
@@ -789,7 +789,7 @@
 
     function updateLinks(){
       const common = {
-        v:"step-vet-55r",
+        v:"step-vet-55r-2",
         line_user_id: LINE_USER_ID
       };
       if (IS_DEMO_READY) common.demo = "ready";
@@ -814,7 +814,7 @@
     }
 
     async function loadMemberCards(){
-      // STEP VET-55R:
+      // STEP VET-55R-2:
       // 通常はAPIでLINE連携済み診察券を読む。
       // dpro_vet_demo / demo_line_link_001 のDEMO導線では、member.htmlからdemo=readyが漏れても
       // 営業デモ用の多頭診察券を補助表示する。
@@ -1213,7 +1213,7 @@
         }
       } catch (error) {
         const message = error && error.message ? error.message : "受付に失敗しました。";
-        setNotice("submitStatus", "ng", message.includes("Failed to fetch") ? "受付API通信に失敗しました。WorkerのSTEP VET-55R反映を確認してください。" : message);
+        setNotice("submitStatus", "ng", message.includes("Failed to fetch") ? "受付API通信に失敗しました。WorkerのSTEP VET-55R-2反映を確認してください。" : message);
       } finally {
         $("submitBtn").disabled = false;
         $("submitBtn").textContent = "この内容で受付する";
@@ -1235,7 +1235,7 @@
         : "受付番号を発行しました。";
       const notifyText = notifyRequested
         ? "1組前通知を希望しました。医院側が通知運用を使っている場合、順番が近づいた時にLINEで案内します。"
-        : "標準は通知なしです。受付番号と待ち状況を見ながら、1組前になったら院内・受付付近へお戻りください。";
+        : "標準は受付番号と待ち状況を見ながらお待ちいただく形です。1組前になったら院内・受付付近へお戻りください。";
 
       $("successBox").classList.remove("hidden");
       $("successBox").innerHTML = `
@@ -1260,8 +1260,8 @@
               </div>
             </div>
             <div class="buttonRow">
-              <a class="btn btnSoft" href="${escapeHtml(buildPageUrl("member.html", { v:"step-vet-55r", line_user_id: LINE_USER_ID, demo: IS_DEMO_READY ? "ready" : "" }))}">診察券へ戻る</a>
-              <a class="btn btnWarn" href="${escapeHtml(buildPageUrl("rich-menu.html", { v:"step-vet-55r", line_user_id: LINE_USER_ID, demo: IS_DEMO_READY ? "ready" : "" }))}">メニューへ戻る</a>
+              <a class="btn btnSoft" href="${escapeHtml(buildPageUrl("member.html", { v:"step-vet-55r-2", line_user_id: LINE_USER_ID, demo: IS_DEMO_READY ? "ready" : "" }))}">診察券へ戻る</a>
+              <a class="btn btnWarn" href="${escapeHtml(buildPageUrl("rich-menu.html", { v:"step-vet-55r-2", line_user_id: LINE_USER_ID, demo: IS_DEMO_READY ? "ready" : "" }))}">メニューへ戻る</a>
             </div>
           </div>
         </div>
@@ -1291,7 +1291,7 @@
         $("dayPart").value = defaultDayPart();
         if (!$("purpose").value) $("purpose").value = "通常診察";
         updateReceptionButtons();
-        setNotice("submitStatus", "ok", "受付内容を選んでください。");
+        setNotice("submitStatus", "ok", "内容を確認して「この内容で受付する」を押してください。");
         renderDebug({ clinicData, cardData });
       } catch (error) {
         setNotice("submitStatus", "ng", error.message || "読み込みに失敗しました。");
