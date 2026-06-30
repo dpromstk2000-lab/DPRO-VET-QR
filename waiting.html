@@ -316,6 +316,77 @@
     .dayMini.half{background:#fffaf0;border-color:#ead39a}
     .dayMini b{display:block;font-size:12px}
     .dayMini span{display:block;font-size:11px;color:#63736b;font-weight:800;line-height:1.35;margin-top:2px}
+
+    .waitGuide{
+      border:1px solid #c9e7d8;
+      background:linear-gradient(180deg,#fff,#f2fbf6);
+      border-radius:20px;
+      padding:14px;
+      margin:14px 0 12px;
+    }
+    .waitGuide b{
+      display:block;
+      color:var(--ok);
+      font-size:16px;
+      margin-bottom:5px;
+    }
+    .waitGuide p{
+      color:#43564d;
+      font-size:13px;
+      font-weight:800;
+      line-height:1.65;
+    }
+    .notifyOption{
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      border:1px solid #e8d49b;
+      background:var(--warnBg);
+      color:#604713;
+      border-radius:18px;
+      padding:12px;
+      margin:10px 0 12px;
+    }
+    .notifyOption input{
+      width:22px;
+      height:22px;
+      margin:2px 0 0;
+      flex:0 0 auto;
+      accent-color:var(--main);
+    }
+    .notifyOption strong{
+      display:block;
+      font-size:14px;
+      line-height:1.35;
+      margin-bottom:2px;
+    }
+    .notifyOption span{
+      display:block;
+      font-size:12px;
+      line-height:1.55;
+      font-weight:800;
+    }
+    .successGuide{
+      margin-top:12px;
+      display:grid;
+      gap:9px;
+    }
+    .successGuideItem{
+      border:1px solid #d9e8df;
+      background:#fff;
+      border-radius:16px;
+      padding:10px 12px;
+      color:#405349;
+      font-size:13px;
+      font-weight:850;
+      line-height:1.6;
+    }
+    .successGuideItem b{
+      display:block;
+      color:var(--ok);
+      margin-bottom:2px;
+      font-size:14px;
+    }
     .hidden{display:none!important}
     .debug{
       white-space:pre-wrap;
@@ -341,7 +412,7 @@
       .calendarMini{grid-template-columns:1fr}
     }
   
-    /* STEP VET-52.5H：飼い主側受付登録・DEMO遷移修正 */
+    /* STEP VET-55R：飼い主側受付登録・DEMO遷移修正 */
     .demoPetSelector{
       display:flex;
       flex-wrap:wrap;
@@ -384,11 +455,11 @@
 <body>
   <main class="page">
     <section class="hero">
-      <span class="badge">STEP VET-52.5H｜来院受付</span>
+      <span class="badge">STEP VET-55R｜来院受付・順番案内</span>
       <h1>今日の来院受付</h1>
       <p class="lead">
         診察券を確認して、今日の受付番号を発行します。
-        休診日・午前休診・午後休診・受付停止は、ボタンを押す前に表示されます。
+        基本は受付番号と待ち状況を確認し、1組前になったら院内・受付付近でお待ちください。通知は希望者・必要な医院のみ使います。
       </p>
       <div class="nav">
         <a id="memberLink" href="./member.html?v=step-vet-36d-1&clinic_code=dpro_vet_demo&line_user_id=demo_line_link_001">診察券へ戻る</a>
@@ -464,6 +535,23 @@
           </div>
         </div>
 
+        <div class="waitGuide">
+          <b>受付後の待ち方</b>
+          <p>
+            受付番号と現在の状況を確認しながらお待ちください。
+            目安として、1組前になったら院内・受付付近へお戻りください。
+            診察内容や急患対応により、順番が前後する場合があります。
+          </p>
+        </div>
+
+        <label class="notifyOption" for="notifyOneBefore">
+          <input id="notifyOneBefore" type="checkbox">
+          <span>
+            <strong>1組前通知を希望する</strong>
+            <span>医院が通知運用を使っている場合のみ有効です。メッセージ通数を抑えるため、標準は通知なしです。</span>
+          </span>
+        </label>
+
         <div class="buttonRow">
           <button class="btn btnMain" id="submitBtn" type="button">この内容で受付する</button>
           <button class="btn btnSoft" id="reloadBtn" type="button">再読み込み</button>
@@ -525,7 +613,7 @@
         urlParams.get("demo") === "ready" ||
         urlParams.get("demo") === "true" ||
         urlParams.get("demo") === "1" ||
-        // STEP VET-52.5H:
+        // STEP VET-55R:
         // 営業DEMO用LINE IDで開いた場合は、member.htmlからdemo=readyが漏れても
         // waiting.html側で多頭診察券を補助表示する。
         urlParams.has("line_user_id")
@@ -701,7 +789,7 @@
 
     function updateLinks(){
       const common = {
-        v:"step-vet-52-5h",
+        v:"step-vet-55r",
         line_user_id: LINE_USER_ID
       };
       if (IS_DEMO_READY) common.demo = "ready";
@@ -726,7 +814,7 @@
     }
 
     async function loadMemberCards(){
-      // STEP VET-52.5H:
+      // STEP VET-55R:
       // 通常はAPIでLINE連携済み診察券を読む。
       // dpro_vet_demo / demo_line_link_001 のDEMO導線では、member.htmlからdemo=readyが漏れても
       // 営業デモ用の多頭診察券を補助表示する。
@@ -1031,6 +1119,28 @@
       return { card, guardian, cardToken, cardId, guardianId, petId };
     }
 
+
+    function oneBeforeNotificationRequested(){
+      return Boolean($("notifyOneBefore") && $("notifyOneBefore").checked);
+    }
+
+    function buildSymptomsSummaryForSubmit(){
+      const base = $("symptoms").value || $("purpose").value || "LINE来院受付";
+      return oneBeforeNotificationRequested()
+        ? `${base}｜1組前通知希望`
+        : base;
+    }
+
+    function buildQuestionnaireForSubmit(){
+      return {
+        purpose: $("purpose").value || "LINE来院受付",
+        free_text: $("symptoms").value || "",
+        notification_policy: "default_no_auto_notification",
+        one_before_notification_requested: oneBeforeNotificationRequested(),
+        waiting_instruction: "1組前になったら院内・受付付近で待機"
+      };
+    }
+
     async function submitReception(){
       updateReceptionButtons();
       if ($("submitBtn").disabled) {
@@ -1074,7 +1184,8 @@
           target_date: todayString(),
           day_part: $("dayPart").value,
           purpose: $("purpose").value || "LINE来院受付",
-          symptoms_summary: $("symptoms").value || $("purpose").value || "LINE来院受付",
+          symptoms_summary: buildSymptomsSummaryForSubmit(),
+          questionnaire: buildQuestionnaireForSubmit(),
           desired_contact: "line",
           source: "line",
           actor_name: "飼い主LINE",
@@ -1102,7 +1213,7 @@
         }
       } catch (error) {
         const message = error && error.message ? error.message : "受付に失敗しました。";
-        setNotice("submitStatus", "ng", message.includes("Failed to fetch") ? "受付API通信に失敗しました。WorkerのSTEP VET-52.5H反映を確認してください。" : message);
+        setNotice("submitStatus", "ng", message.includes("Failed to fetch") ? "受付API通信に失敗しました。WorkerのSTEP VET-55R反映を確認してください。" : message);
       } finally {
         $("submitBtn").disabled = false;
         $("submitBtn").textContent = "この内容で受付する";
@@ -1114,13 +1225,17 @@
       const card = state.selectedCard || {};
       const petName = cardValue(card, "pet_name", "pet.pet_name", "name", "pet.name") || "ペット";
       const isDuplicate = Boolean(options.duplicate);
+      const notifyRequested = oneBeforeNotificationRequested();
       const title = isDuplicate ? "本日はすでに受付済みです" : "受付が完了しました";
       const description = isDuplicate
-        ? `${petName}ちゃんは、すでに本日の受付が入っています。受付番号をご確認のうえ、院内でお待ちください。`
-        : `${petName}ちゃんの受付番号です。院内でお待ちください。`;
+        ? `${petName}ちゃんは、すでに本日の受付が入っています。受付番号をご確認ください。`
+        : `${petName}ちゃんの受付番号です。`;
       const statusText = isDuplicate
         ? "重複登録はしていません。既存の受付番号を表示しています。"
         : "受付番号を発行しました。";
+      const notifyText = notifyRequested
+        ? "1組前通知を希望しました。医院側が通知運用を使っている場合、順番が近づいた時にLINEで案内します。"
+        : "標準は通知なしです。受付番号と待ち状況を見ながら、1組前になったら院内・受付付近へお戻りください。";
 
       $("successBox").classList.remove("hidden");
       $("successBox").innerHTML = `
@@ -1130,8 +1245,23 @@
             <h3>${escapeHtml(title)}</h3>
             <p>${escapeHtml(description)}</p>
             <p style="margin-top:8px;font-weight:900;color:#2f7a5e;">${escapeHtml(statusText)}</p>
+            <div class="successGuide">
+              <div class="successGuideItem">
+                <b>待ち方の目安</b>
+                受付番号と現在の順番を確認しながらお待ちください。1組前になったら院内・受付付近へお戻りください。
+              </div>
+              <div class="successGuideItem">
+                <b>順番について</b>
+                診察内容、急患、検査、獣医師指名などにより、順番が前後する場合があります。
+              </div>
+              <div class="successGuideItem">
+                <b>通知について</b>
+                ${escapeHtml(notifyText)}
+              </div>
+            </div>
             <div class="buttonRow">
-              <a class="btn btnSoft" href="${escapeHtml(buildPageUrl("member.html", { v:"step-vet-52-5h", line_user_id: LINE_USER_ID, demo: IS_DEMO_READY ? "ready" : "" }))}">診察券へ戻る</a>
+              <a class="btn btnSoft" href="${escapeHtml(buildPageUrl("member.html", { v:"step-vet-55r", line_user_id: LINE_USER_ID, demo: IS_DEMO_READY ? "ready" : "" }))}">診察券へ戻る</a>
+              <a class="btn btnWarn" href="${escapeHtml(buildPageUrl("rich-menu.html", { v:"step-vet-55r", line_user_id: LINE_USER_ID, demo: IS_DEMO_READY ? "ready" : "" }))}">メニューへ戻る</a>
             </div>
           </div>
         </div>
