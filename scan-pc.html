@@ -717,7 +717,7 @@
   
 
     /* =========================================================
-      STEP VET-52.5P：受付PC LINEフォロー文面プレビュー・編集版
+      STEP VET-52.5V：受付PC 履歴控えめ表示版
       目的：長い縦スクロールをやめ、左メニューで必要な操作だけ表示する
     ========================================================= */
     .ops-workbench{display:grid;grid-template-columns:270px minmax(0,1fr);gap:18px;align-items:start;margin-top:18px}
@@ -755,6 +755,53 @@
     .status-collapse summary::-webkit-details-marker{display:none}
     .status-collapse[open] summary{margin-bottom:10px;background:#e8f7ef}
     .is-collapsed-group .status-section-body{padding-top:0}
+    /* STEP VET-52.5V：営業デモでは履歴件数を目立たせない */
+    .status-section.is-history-quiet{
+      border-style:dashed;
+      background:#fffdfa;
+      box-shadow:none;
+    }
+    .status-section.is-history-quiet .status-section-header{
+      background:#fbfaf5;
+      padding:10px 14px;
+      border-bottom:1px solid rgba(217,210,196,.55);
+    }
+    .status-section.is-history-quiet .status-section-header h3{
+      color:#56635d;
+      font-size:14px;
+    }
+    .status-section.is-history-quiet .status-section-header p{
+      color:#7b857f;
+      font-size:11px;
+    }
+    .status-count.history-count{
+      min-width:52px;
+      background:#f3fbf6;
+      border-color:#d7eadf;
+      color:#11704c;
+      font-size:12px;
+    }
+    .history-quiet-collapse{
+      border-top:0;
+      margin-top:0;
+      padding:0 12px 12px;
+    }
+    .history-quiet-collapse summary{
+      background:#f3fbf6;
+      color:#11704c;
+      box-shadow:none;
+    }
+    .history-open-note{
+      margin:0 0 8px;
+      border:1px solid #edf0e9;
+      background:#fbfcfa;
+      border-radius:12px;
+      padding:8px 10px;
+      color:#6f7b75;
+      font-size:11px;
+      font-weight:850;
+      line-height:1.55;
+    }
     @media (max-width:980px){
       .ops-workbench{grid-template-columns:1fr}
       .ops-side{position:static}
@@ -773,7 +820,7 @@
 <div class="brand">
 <div class="logo">📷</div>
 <div>
-<small>scan-pc.html / STEP VET-52.5P</small>
+<small>scan-pc.html / STEP VET-52.5V</small>
 <strong>DPRO PET CARE LINE</strong>
 </div>
 </div>
@@ -786,9 +833,9 @@
 </nav>
 </header><section class="hero">
 <div class="hero-card">
-<span class="badge">STEP VET-52.5P｜受付PC 管理コード削除確実化版</span>
+<span class="badge">STEP VET-52.5V｜受付PC 履歴控えめ表示版</span>
 <h1>今日の受付を中心に、<br/>必要な操作だけ開く。</h1>
-<p class="lead">受付スタッフが迷わないように、最初は「今日の受付」だけを表示します。QR受付・窓口受付・電話受付・既存患者検索・代理登録・フォローは、左メニューから必要な時だけ開きます。既存APIと登録処理はそのまま保持しています。</p>
+<p class="lead">受付スタッフが迷わないように、最初は「今日の受付」だけを表示します。QR受付・窓口受付・電話受付・既存患者検索・代理登録・フォローは、左メニューから必要な時だけ開きます。本日の受付を主役にし、完了・取消などの履歴は必要な時だけ開く控えめ表示にしています。既存APIと登録処理はそのまま保持しています。</p>
 </div>
 <div class="card">
 <span class="badge-dark">管理コード</span>
@@ -1329,7 +1376,7 @@
 </section>
 </div>
 </section><div class="footer-note">
-      STEP VET-46：受付の流れを、来院待ち・院内受付済み・診察中・会計待ち・完了・取消/不在で管理できます。
+      STEP VET-52.5V：本日の受付を主役にし、完了・取消/不在の履歴は必要な時だけ開く控えめ表示にしました。
     </div></main>
 <script>
     const CONFIG = window.DPRO_VET_CONFIG || window.DPRO_CONFIG || window.APP_CONFIG || {};
@@ -2271,23 +2318,34 @@
         return group.statuses.includes(s);
       }));
 
+      const quietHistory = ["completed", "cancelled"].includes(group.key);
+      const displayTitle = quietHistory
+        ? (group.key === "completed" ? "完了履歴" : "取消・不在履歴")
+        : group.title;
+      const displayHint = quietHistory
+        ? "営業デモ中は必要な時だけ開いて確認します。通常の受付一覧には影響しません。"
+        : group.hint;
+
       const body = groupItems.length
         ? groupItems.map(renderEntryCard).join("")
-        : `<div class="empty">${escapeHtml(group.title)}の受付はありません。</div>`;
+        : `<div class="empty">${escapeHtml(displayTitle)}はありません。</div>`;
 
-      const shouldCollapse = ["completed", "cancelled"].includes(group.key) && groupItems.length > 0;
+      const shouldCollapse = quietHistory && groupItems.length > 0;
       const bodyHtml = shouldCollapse
-        ? `<details class="status-collapse"><summary>${escapeHtml(group.title)} ${groupItems.length}件を開く</summary><div class="status-section-body">${body}</div></details>`
+        ? `<details class="status-collapse history-quiet-collapse"><summary>${escapeHtml(displayTitle)}を見る</summary><div class="history-open-note">必要な時だけ開く履歴です。営業デモでは本日の受付1〜4を中心に説明できます。</div><div class="status-section-body">${body}</div></details>`
         : `<div class="status-section-body">${body}</div>`;
+      const countHtml = quietHistory
+        ? `<div class="status-count history-count">履歴</div>`
+        : `<div class="status-count">${groupItems.length}</div>`;
 
       return `
-        <section class="status-section ${shouldCollapse ? "is-collapsed-group" : ""}">
+        <section class="status-section ${shouldCollapse ? "is-collapsed-group" : ""} ${quietHistory ? "is-history-quiet" : ""}">
           <div class="status-section-header">
             <div>
-              <h3><span class="status-dot ${escapeHtml(group.dot)}"></span>${escapeHtml(group.title)}</h3>
-              <p>${escapeHtml(group.hint)}</p>
+              <h3><span class="status-dot ${escapeHtml(group.dot)}"></span>${escapeHtml(displayTitle)}</h3>
+              <p>${escapeHtml(displayHint)}</p>
             </div>
-            <div class="status-count">${groupItems.length}</div>
+            ${countHtml}
           </div>
           ${bodyHtml}
         </section>
