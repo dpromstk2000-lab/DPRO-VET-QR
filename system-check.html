@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>DPRO PET CARE LINE｜デモ・システム管理センター STEP VET-52.5T</title>
+  <title>DPRO PET CARE LINE｜デモ・システム管理センター STEP VET-52.5U</title>
   <style>
     :root{
       --bg:#edf5ef;
@@ -224,7 +224,7 @@
           <div class="status-pill"><span>対象医院</span><b id="clinicNameHero">確認中</b></div>
           <div class="status-pill"><span>API</span><b id="apiStatusHero">確認中</b></div>
           <div class="status-pill"><span>本日の受付</span><b id="todayStatusHero">確認中</b></div>
-          <div class="status-pill"><span>STEP</span><b>STEP VET-52.5T</b></div>
+          <div class="status-pill"><span>STEP</span><b>STEP VET-52.5U</b></div>
         </div>
       </div>
     </section>
@@ -235,7 +235,7 @@
           <h2>営業デモ・ナビゲーション</h2>
           <p>営業時はこの順番で開くと、オーナーに「LINE診察券 → 受付 → 院内管理 → 診察 → 会計待ち → 休診反映」まで自然に伝わります。</p>
         </div>
-        <span class="badge ok">STEP VET-52.5T</span>
+        <span class="badge ok">STEP VET-52.5U</span>
       </div>
 
       <div class="demo-route">
@@ -413,7 +413,7 @@
       </div>
     </section>
 
-    <div class="footer">STEP VET-52.5T：system-check.html 休診日でも次営業日の予定がすぐ分かる表示を追加しました。</div>
+    <div class="footer">STEP VET-52.5U：system-check.html 営業デモ準備APIの実データ作成確認に対応しました。</div>
   </div>
 
 <script>
@@ -421,8 +421,8 @@
   'use strict';
 
   const API_BASE = 'https://dpro-vet-qr-api.dpromstk2000.workers.dev';
-  const PAGE_STEP = 'STEP VET-52.5T';
-  const EXPECTED_WORKER_VERSION = 'step-vet-52-5o-doctor-exam-to-accounting-complete';
+  const PAGE_STEP = 'STEP VET-52.5U';
+  const EXPECTED_WORKER_VERSION = 'step-vet-52-5u-sales-demo-prepare-verify-complete';
   const DEFAULT_CLINIC_CODE = 'dpro_vet_demo';
   const DEMO_LINE_USER_ID = 'demo_line_link_001';
   const REQUIRED_CONFIRM_TEXT = 'DEMO動物病院だけ実行';
@@ -432,7 +432,7 @@
   const params = new URLSearchParams(location.search);
   const clinicCode = params.get('clinic_code') || DEFAULT_CLINIC_CODE;
   const demo = params.get('demo') || 'ready';
-  const versionSuffix = params.get('v') || 'step-vet-52-5t';
+  const versionSuffix = params.get('v') || 'step-vet-52-5u';
 
   const ADMIN_KEY = `dpro_vet_admin_code_${clinicCode}`;
   const oldAdminKeys = ['dpro_admin_code','admin_code','DPRO_ADMIN_CODE','dpro_vet_admin_code'];
@@ -542,9 +542,9 @@
   }
 
   function setLinks(){
-    const owner = localUrl('owner.html', { v:'step-vet-52-5t-owner' });
-    const member = localUrl('member.html', { line_user_id: DEMO_LINE_USER_ID, v:'step-vet-52-5t-member' });
-    const waiting = localUrl('waiting.html', { line_user_id: DEMO_LINE_USER_ID, v:'step-vet-52-5t-waiting' });
+    const owner = localUrl('owner.html', { v:'step-vet-52-5u-owner' });
+    const member = localUrl('member.html', { line_user_id: DEMO_LINE_USER_ID, v:'step-vet-52-5u-member' });
+    const waiting = localUrl('waiting.html', { line_user_id: DEMO_LINE_USER_ID, v:'step-vet-52-5u-waiting' });
     const scanPc = localUrl('scan-pc.html', { v:'step-vet-52-5p-from-system' });
     const scanIpad = localUrl('scan-ipad.html', { v:'step-vet-52-5p-from-system' });
     const doctor = localUrl('doctor.html', { v:'step-vet-52-5p-from-system' });
