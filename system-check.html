@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>DPRO PET CARE LINE｜デモ・システム管理センター STEP VET-52.5U</title>
+  <title>DPRO PET CARE LINE｜デモ・システム管理センター STEP VET-56C</title>
   <style>
     :root{
       --bg:#edf5ef;
@@ -209,7 +209,7 @@
           <h1>デモ・システム<br>管理センター</h1>
           <p class="hero-lead">
             動物病院向けLINE診察券・受付デモの接続状態、医院設定、休診カレンダー、受付データを1か所で確認できます。
-            STEP VET-52.5 系で確認した、受付PC・受付タブレット・獣医師画面の流れに合わせて表示を更新しました。
+            STEP VET-56C：営業デモ用の管理コードを 1234 に統一しました。受付PC・受付タブレット・獣医師画面の流れはそのまま確認できます。
           </p>
           <div class="top-actions">
             <a class="linkbtn primary" id="openOwner" href="#">医院設定を開く</a>
@@ -224,7 +224,7 @@
           <div class="status-pill"><span>対象医院</span><b id="clinicNameHero">確認中</b></div>
           <div class="status-pill"><span>API</span><b id="apiStatusHero">確認中</b></div>
           <div class="status-pill"><span>本日の受付</span><b id="todayStatusHero">確認中</b></div>
-          <div class="status-pill"><span>STEP</span><b>STEP VET-52.5U</b></div>
+          <div class="status-pill"><span>STEP</span><b>STEP VET-56C</b></div>
         </div>
       </div>
     </section>
@@ -235,7 +235,7 @@
           <h2>営業デモ・ナビゲーション</h2>
           <p>営業時はこの順番で開くと、オーナーに「LINE診察券 → 受付 → 院内管理 → 診察 → 会計待ち → 休診反映」まで自然に伝わります。</p>
         </div>
-        <span class="badge ok">STEP VET-52.5U</span>
+        <span class="badge ok">STEP VET-56C｜管理コード1234統一</span>
       </div>
 
       <div class="demo-route">
@@ -296,7 +296,7 @@
         <div class="prep-grid" style="margin-top:14px">
           <div>
             <label for="adminCode">管理コード</label>
-            <input id="adminCode" type="password" autocomplete="off" placeholder="管理コードを入力">
+            <input id="adminCode" type="password" autocomplete="off" placeholder="1234">
             <div class="small-note">このコードはブラウザ内だけに保存されます。HTMLには埋め込んでいません。</div>
           </div>
           <div>
@@ -413,7 +413,7 @@
       </div>
     </section>
 
-    <div class="footer">STEP VET-52.5U：system-check.html 営業デモ準備APIの実データ作成確認に対応しました。</div>
+    <div class="footer">STEP VET-56C：system-check.html 営業デモ用管理コード1234統一版。営業デモ準備APIと実データ作成確認に対応しています。</div>
   </div>
 
 <script>
@@ -421,28 +421,33 @@
   'use strict';
 
   const API_BASE = 'https://dpro-vet-qr-api.dpromstk2000.workers.dev';
-  const PAGE_STEP = 'STEP VET-52.5U';
+  const PAGE_STEP = 'STEP VET-56C';
   const EXPECTED_WORKER_VERSION = 'step-vet-52-5u-sales-demo-prepare-verify-complete';
   const DEFAULT_CLINIC_CODE = 'dpro_vet_demo';
   const DEMO_LINE_USER_ID = 'demo_line_link_001';
   const REQUIRED_CONFIRM_TEXT = 'DEMO動物病院だけ実行';
   const VALID_ADMIN_PREFIX = 'DPRO-VET-';
+  const DEMO_ADMIN_CODE = '1234';
   const INVALID_ADMIN_PREFIXES = ['DPRO_LIFF_ADMIN_', 'DPRO_LIFF_', 'LIFF_ADMIN_'];
 
   const params = new URLSearchParams(location.search);
   const clinicCode = params.get('clinic_code') || DEFAULT_CLINIC_CODE;
   const demo = params.get('demo') || 'ready';
-  const versionSuffix = params.get('v') || 'step-vet-52-5u';
+  const versionSuffix = params.get('v') || 'step-vet-56c-admin1234';
 
   const ADMIN_KEY = `dpro_vet_admin_code_${clinicCode}`;
   const oldAdminKeys = ['dpro_admin_code','admin_code','DPRO_ADMIN_CODE','dpro_vet_admin_code'];
+
+  function shouldUseDemoAdminCode(){
+    return clinicCode === DEFAULT_CLINIC_CODE && demo === 'ready';
+  }
 
   const $ = (id) => document.getElementById(id);
   function isAllowedAdminCode(code){
     const c = String(code || '').trim();
     if(!c) return false;
     if(INVALID_ADMIN_PREFIXES.some(prefix => c.startsWith(prefix))) return false;
-    return c.startsWith(VALID_ADMIN_PREFIX);
+    return c === DEMO_ADMIN_CODE || c.startsWith(VALID_ADMIN_PREFIX);
   }
 
   function getCleanStoredAdminCode(){
@@ -456,7 +461,7 @@
   }
 
   const state = {
-    adminCode: getCleanStoredAdminCode(),
+    adminCode: getCleanStoredAdminCode() || (shouldUseDemoAdminCode() ? DEMO_ADMIN_CODE : ''),
     health: null,
     status: null,
     lastError: null
@@ -495,7 +500,7 @@
   }
 
   function getAdminCode(){
-    return (state.adminCode || localStorage.getItem(ADMIN_KEY) || '').trim();
+    return (state.adminCode || localStorage.getItem(ADMIN_KEY) || (shouldUseDemoAdminCode() ? DEMO_ADMIN_CODE : '') || '').trim();
   }
 
   function getFetchHeaders(){
@@ -593,7 +598,7 @@
     state.adminCode = '';
     input.type = 'text';
     input.value = '';
-    input.placeholder = '管理コードを入力';
+    input.placeholder = '1234';
     updateAdminNotice('管理コードが未保存です。入力して保存してください。', 'warn');
     const prep = $('prepareResult');
     if(prep){
@@ -620,8 +625,11 @@
   function initAdminCode(){
     const input = $('adminCode');
     oldAdminKeys.forEach(k => localStorage.removeItem(k));
-    const clean = getCleanStoredAdminCode();
+    const clean = getCleanStoredAdminCode() || (shouldUseDemoAdminCode() ? DEMO_ADMIN_CODE : '');
     state.adminCode = clean;
+    if(shouldUseDemoAdminCode() && clean === DEMO_ADMIN_CODE){
+      localStorage.setItem(ADMIN_KEY, DEMO_ADMIN_CODE);
+    }
     if(clean){
       input.type = 'password';
       input.value = clean;
