@@ -280,7 +280,7 @@
 <body>
   <main class="page">
     <section class="hero">
-      <span class="badge">STEP VET-36C｜医院設定</span>
+      <span class="badge">STEP VET-56C｜管理コード1234統一</span>
       <h1>医院設定</h1>
       <p class="lead">
         受付ボタンを押す前に、定休日・臨時休業・受付時間が分かるようにするための管理画面です。
@@ -312,7 +312,7 @@
         </div>
 
         <label for="adminCode" style="margin-top:12px;">管理コード</label>
-        <input id="adminCode" type="password" placeholder="管理コードを入力" autocomplete="off">
+        <input id="adminCode" type="password" placeholder="1234" autocomplete="off">
         <div class="buttonRow">
           <button class="btn btnMain" id="saveAdminCodeBtn" type="button">保存</button>
           <button class="btn btnDanger" id="clearAdminCodeBtn" type="button">削除</button>
@@ -558,6 +558,9 @@
       CONFIG?.clinic?.clinicCode ||
       "dpro_vet_demo";
 
+    const DEMO_ADMIN_CODE = '1234';
+    const IS_DEMO_1234 = CLINIC_CODE === 'dpro_vet_demo' && (urlParams.get('demo') === 'ready' || urlParams.get('v') === 'step-vet-56c-admin1234');
+
     const ADMIN_TOKEN_KEYS = [
       "dpro_vet_admin_code",
       "DPRO_VET_ADMIN_CODE",
@@ -632,7 +635,7 @@
         const v = localStorage.getItem(key) || sessionStorage.getItem(key);
         if (v && String(v).trim()) return String(v).trim();
       }
-      return "";
+      return IS_DEMO_1234 ? DEMO_ADMIN_CODE : "";
     }
 
     function saveAdminToken(token){
@@ -1069,7 +1072,7 @@
 
       $("saveAdminCodeBtn").addEventListener("click", () => {
         saveAdminToken($("adminCode").value);
-        $("adminCode").value = "";
+        $("adminCode").value = IS_DEMO_1234 ? DEMO_ADMIN_CODE : "";
         renderAdminStatus();
         loadSettings();
       });
