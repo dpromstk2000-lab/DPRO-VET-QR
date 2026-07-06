@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>DPRO PET CARE LINE | doctor.html STEP VET-54</title>
+  <title>DPRO PET CARE LINE | doctor.html STEP VET-56C</title>
   <style>
     :root{
       --bg:#f4f0e8;--mint:#e9f8f1;--mint2:#dff4eb;--green:#0f7f5a;--green2:#1b8f67;--deep:#0f332a;
@@ -24,7 +24,7 @@
 
     <div class="grid">
       <section class="hero">
-        <div class="badge">STEP VET-54｜doctor.html 現場運用強化・診察前情報整理版</div>
+        <div class="badge">STEP VET-56C｜doctor.html 管理コード1234統一版</div>
         <h1>診察前に、<br>見るべき情報を先に出す。</h1>
         <p>主訴・受付メモ・注意ラベル・会計申し送りを診察前にまとめて表示します。診察済みにすると完了ではなく会計待ちへ移動し、受付PC・受付iPad側で会計対応できます。</p>
       </section>
@@ -32,7 +32,7 @@
         <div class="tag">管理コード</div>
         <p>診察中・診察済み・フォロー指示の保存には管理コードが必要です。</p>
         <div class="notice" id="adminNotice">管理コードを入力してください。</div>
-        <div class="row"><input class="input" id="adminCode" type="password" placeholder="管理コードを入力"><button class="btn" id="saveAdmin">保存</button><button class="btn danger" id="clearAdmin">削除</button></div>
+        <div class="row"><input class="input" id="adminCode" type="password" placeholder="1234"><button class="btn" id="saveAdmin">保存</button><button class="btn danger" id="clearAdmin">削除</button></div>
       </section>
     </div>
 
@@ -80,12 +80,14 @@
 <script>
 (function(){
   'use strict';
-  const STEP='STEP VET-54';
+  const STEP='STEP VET-56C';
   const API_BASE='https://dpro-vet-qr-api.dpromstk2000.workers.dev';
   const qs=new URLSearchParams(location.search);
   const clinicCode=qs.get('clinic_code')||'dpro_vet_demo';
   const demo=qs.get('demo')||'';
   const ADMIN_KEY='dpro_vet_admin_code';
+  const DEMO_ADMIN_CODE='1234';
+  const IS_DEMO_1234=clinicCode==='dpro_vet_demo' && (demo==='ready' || qs.get('v')==='step-vet-56c-admin1234');
   const els={
     adminCode:document.getElementById('adminCode'),adminNotice:document.getElementById('adminNotice'),saveAdmin:document.getElementById('saveAdmin'),clearAdmin:document.getElementById('clearAdmin'),
     globalError:document.getElementById('globalError'),reloadBtn:document.getElementById('reloadBtn'),countText:document.getElementById('countText'),list:document.getElementById('list'),
@@ -98,7 +100,7 @@
   document.getElementById('linkOwner').href=url('owner.html','&v=from-doctor-54');
   document.getElementById('linkTop').href=url('system-check.html','&v=from-doctor-54');
   document.getElementById('linkQr').href=url('demo-qr.html','&v=from-doctor-54');
-  function admin(){return localStorage.getItem(ADMIN_KEY)||'';}
+  function admin(){return localStorage.getItem(ADMIN_KEY) || (IS_DEMO_1234 ? DEMO_ADMIN_CODE : '');}
   function setAdminState(){const a=admin();els.adminCode.value=a;els.adminNotice.textContent=a?'管理コード保存済みです。':'管理コードを入力してください。';}
   function showGlobal(msg){els.globalError.textContent=msg;els.globalError.classList.remove('hidden');}
   function clearGlobal(){els.globalError.textContent='';els.globalError.classList.add('hidden');}
@@ -241,7 +243,7 @@
   }
   document.querySelectorAll('[data-template]').forEach(btn=>btn.addEventListener('click',()=>{const add=btn.getAttribute('data-template');els.doctorMemo.value=(els.doctorMemo.value?els.doctorMemo.value+'\n':'')+add;showStatus('フォロー指示をメモに追加しました。');}));
   els.saveAdmin.onclick=()=>{localStorage.setItem(ADMIN_KEY,els.adminCode.value.trim());setAdminState();load();};
-  els.clearAdmin.onclick=()=>{localStorage.removeItem(ADMIN_KEY);sessionStorage.removeItem(ADMIN_KEY);els.adminCode.value='';els.adminCode.placeholder='管理コードを入力';setAdminState();clearGlobal();renderDetail(null);items=[];renderList();};
+  els.clearAdmin.onclick=()=>{localStorage.removeItem(ADMIN_KEY);sessionStorage.removeItem(ADMIN_KEY);els.adminCode.value='';els.adminCode.placeholder='1234';setAdminState();clearGlobal();renderDetail(null);items=[];renderList();};
   els.reloadBtn.onclick=load;els.saveMemoBtn.onclick=saveMemo;els.startExamBtn.onclick=startExam;els.completeBtn.onclick=completeExam;els.copyAfterBtn.onclick=copyAfter;
   function escapeHtml(v){return String(v??'').replace(/[&<>"']/g,s=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));}
   window.addEventListener('error',e=>showGlobal('画面エラー：'+(e.message||e.error||'不明なエラー')));
