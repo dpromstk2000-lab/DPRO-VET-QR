@@ -845,7 +845,7 @@
 <div class="brand">
 <div class="logo">📷</div>
 <div>
-<small>scan-ipad.html / STEP VET-52.5X</small>
+<small>scan-ipad.html / STEP VET-56C</small>
 <strong>DPRO PET CARE LINE</strong>
 </div>
 </div>
@@ -858,7 +858,7 @@
 </nav>
 </header><section class="hero">
 <div class="hero-card">
-<span class="badge">STEP VET-52.5X｜受付iPad 履歴控えめ表示版</span>
+<span class="badge">STEP VET-56C｜受付iPad 管理コード1234統一版</span>
 <h1>今日の受付を中心に、<br/>必要な操作だけ開く。</h1>
 <p class="lead">iPad・タブレットで迷わないように、最初は「今日の受付」だけを表示します。QR受付・窓口受付・電話受付・既存患者検索・代理登録・フォローは、左メニューから必要な時だけ開きます。PC版で確認した安全な受付番号・ステータス更新・文面編集の流れに合わせ、完了・取消などの履歴は必要な時だけ開く控えめ表示にしています。</p>
 </div>
@@ -867,7 +867,7 @@
 <p class="plain-lead">QR受付・窓口受付・電話受付・ステータス更新には管理コードが必要です。</p>
 <div class="notice" id="authStatus">管理コード確認中</div>
 <div class="auth-box">
-<input autocomplete="off" id="adminTokenInput" placeholder="管理コードを入力" type="password"/>
+<input autocomplete="off" id="adminTokenInput" placeholder="1234" type="password"/>
 <button class="btn btn-main" id="saveAdminTokenBtn" type="button">保存</button>
 <button class="btn btn-danger" id="clearAdminTokenBtn" type="button">削除</button>
 </div>
@@ -1437,6 +1437,9 @@
       CONFIG?.clinic?.clinicCode ||
       CONFIG?.demo?.clinicCode ||
       "dpro_vet_demo";
+    const DEMO_ADMIN_CODE = '1234';
+    const IS_DEMO_1234 = CLINIC_CODE === 'dpro_vet_demo' && ((new URLSearchParams(location.search)).get('demo') === 'ready' || (new URLSearchParams(location.search)).get('v') === 'step-vet-56c-admin1234');
+
     const ADMIN_TOKEN_KEYS = ["dpro_vet_admin_code", "DPRO_VET_ADMIN_CODE", "DPRO_VET_ADMIN_TOKEN", "dpro_vet_admin_token", "DPRO_ADMIN_TOKEN", "dpro_admin_token"];
 
     const state = {
@@ -1581,7 +1584,7 @@
         const v = localStorage.getItem(key) || sessionStorage.getItem(key);
         if (v && String(v).trim()) return String(v).trim();
       }
-      return "";
+      return IS_DEMO_1234 ? DEMO_ADMIN_CODE : "";
     }
 
     function saveAdminToken(token){
@@ -3532,7 +3535,7 @@
         clearAdminToken();
         if (el.adminTokenInput) {
           el.adminTokenInput.value = "";
-          el.adminTokenInput.placeholder = "管理コードを入力";
+          el.adminTokenInput.placeholder = "1234";
           el.adminTokenInput.focus();
         }
         renderAuthStatus();
