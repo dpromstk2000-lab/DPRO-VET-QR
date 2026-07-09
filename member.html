@@ -7,7 +7,7 @@
   <title>DPRO PET CARE LINE｜ペット診察券</title>
 
   <!--
-    STEP VET-52.5F
+    STEP VET-PHONE-3
     DPRO PET CARE LINE 動物病院版
     member.html 修正版 完全版
 
@@ -886,7 +886,7 @@
     </main>
 
     <div class="footer">
-      STEP VET-52.5F member.html waiting demo handoff complete<br>
+      STEP VET-PHONE-3 member.html waiting demo handoff complete<br>
       DPRO PET CARE LINE / 動物病院版
     </div>
   </div>
@@ -1314,6 +1314,13 @@
           ...(data?.clinic || data?.item?.clinic || {})
         };
         state.guardian = data?.guardian || data?.item?.guardian || null;
+        if (state.guardian) {
+          const normalizedGuardianPhone = normalizePhoneForVet(state.guardian.phone || state.guardian.guardian_phone);
+          if (normalizedGuardianPhone) {
+            state.guardian.phone = normalizedGuardianPhone;
+            state.guardian.guardian_phone = normalizedGuardianPhone;
+          }
+        }
 
         let cards = [];
 
@@ -1338,7 +1345,7 @@
           state.guardian = {
             guardian_id: first.guardian_id,
             guardian_name: first.guardian_name,
-            phone: first.phone,
+            phone: normalizePhoneForVet(first.phone || first.guardian_phone) || first.phone,
             line_status: first.line_status || "linked",
             line_link_status: first.line_link_status || first.line_status || "linked"
           };
@@ -1353,7 +1360,9 @@
 
         card.guardian_id = card.guardian_id || data?.guardian_id || data?.guardian?.guardian_id || data?.guardian?.id || "";
         card.guardian_name = card.guardian_name || data?.guardian_name || data?.guardian?.guardian_name || "";
-        card.phone = card.phone || data?.phone || data?.guardian?.phone || "";
+        const rawPhone = card.phone || card.guardian_phone || data?.phone || data?.guardian?.phone || data?.guardian?.guardian_phone || "";
+        card.phone = normalizePhoneForVet(rawPhone) || clean(rawPhone);
+        card.guardian_phone = card.phone;
 
         card.pet_id = card.pet_id || data?.pet_id || data?.pet?.pet_id || data?.pet?.id || "";
         card.pet_name = card.pet_name || data?.pet_name || data?.pet?.pet_name || "ペット";
@@ -1397,7 +1406,7 @@
         $("guardianName").textContent = guardian.guardian_name ? `${guardian.guardian_name} さん` : "飼い主さん";
         const sub = [];
         if (guardian.guardian_no) sub.push(`飼い主番号：${guardian.guardian_no}`);
-        if (guardian.phone || guardian.guardian_phone) sub.push(`電話：${guardian.phone || guardian.guardian_phone}`);
+        if (guardian.phone || guardian.guardian_phone) sub.push(`電話：${displayPhoneForVet(guardian.phone || guardian.guardian_phone)}`);
         if (state.lineDisplayName) sub.push(`LINE：${state.lineDisplayName}`);
         $("guardianSub").textContent = sub.join(" / ") || "LINE診察券として登録済み";
         $("clinicLine").textContent = clinic.clinic_name || clinic.name || CONFIG?.clinic?.clinicName || "DPROどうぶつ病院";
@@ -1873,6 +1882,28 @@
       function clean(value){
         return String(value ?? "").trim();
       }
+
+      function normalizePhoneForVet(value){
+        let text = String(value ?? "").trim();
+        if (!text) return "";
+        text = text
+          .replace(/[０-９]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 0xFEE0))
+          .replace(/[＋]/g, "+")
+          .replace(/[ー−―‐－]/g, "-")
+          .replace(/[（）]/g, "");
+        text = text.replace(/[^0-9+]/g, "");
+        if (text.startsWith("+81")) text = "0" + text.slice(3);
+        else if (text.startsWith("81") && text.length >= 11) text = "0" + text.slice(2);
+        return text.replace(/\D/g, "");
+      }
+
+      function displayPhoneForVet(value){
+        const n = normalizePhoneForVet(value);
+        if (n.length === 11) return `${n.slice(0,3)}-${n.slice(3,7)}-${n.slice(7)}`;
+        if (n.length === 10) return `${n.slice(0,2)}-${n.slice(2,6)}-${n.slice(6)}`;
+        return clean(value || n);
+      }
+
 
       function speciesCode(value){
         const text = String(value || "").toLowerCase();
