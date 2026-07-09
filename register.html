@@ -7,7 +7,7 @@
   <title>DPRO PET CARE LINE｜LINE診察券 初回登録</title>
 
   <!--
-    STEP VET-34D
+    STEP VET-PHONE-3
     DPRO PET CARE LINE 動物病院版
     register.html 完全版
 
@@ -506,7 +506,7 @@
     <section class="hero">
       <div class="heroTop">
         <div class="badge">🐶 DPRO PET CARE LINE</div>
-        <div class="badge" id="versionBadge">STEP VET-34D</div>
+        <div class="badge" id="versionBadge">STEP VET-PHONE-3</div>
       </div>
       <h1>LINE診察券<br>初回登録</h1>
       <p>
@@ -728,7 +728,7 @@
     </div>
 
     <div class="footer">
-      STEP VET-34D register.html complete<br>
+      STEP VET-PHONE-3 register.html complete<br>
       DPRO PET CARE LINE / 動物病院版
     </div>
   </div>
@@ -868,6 +868,13 @@
             });
           }
         });
+
+        const phoneNode = document.getElementById("phone");
+        if (phoneNode) {
+          phoneNode.addEventListener("blur", () => {
+            phoneNode.value = normalizePhoneForVet(phoneNode.value);
+          });
+        }
       }
 
       async function loadClinic(){
@@ -977,7 +984,7 @@
           line_display_name: state.lineDisplayName,
           line_picture_url: state.linePictureUrl,
           guardian_name: clean(document.getElementById("guardianName").value),
-          phone: clean(document.getElementById("phone").value),
+          phone: normalizePhoneForVet(document.getElementById("phone").value),
           pet_name: clean(document.getElementById("petName").value),
           animal_type: clean(document.getElementById("animalType").value),
           age_text: clean(document.getElementById("ageText").value),
@@ -993,6 +1000,7 @@
         if (!state.lineReady || !payload.line_user_id) return { ok:false, message:"LINEアカウントを確認できていません。LINEアプリ内で開いてください。" };
         if (!payload.guardian_name) return { ok:false, message:"飼い主名を入力してください。" };
         if (!payload.phone) return { ok:false, message:"電話番号を入力してください。" };
+        if (payload.phone.length < 10) return { ok:false, message:"電話番号を確認してください。" };
         if (!payload.pet_name) return { ok:false, message:"ペット名を入力してください。" };
         if (!payload.animal_type) return { ok:false, message:"ペットの種類を選択してください。" };
         if (!payload.sex) return { ok:false, message:"性別を選択してください。" };
@@ -1001,7 +1009,7 @@
       }
 
       async function checkDuplicateAndRender(manual){
-        const phone = clean(document.getElementById("phone").value);
+        const phone = normalizePhoneForVet(document.getElementById("phone").value);
         const petName = clean(document.getElementById("petName").value);
 
         if (!phone && !petName) {
@@ -1150,6 +1158,28 @@
       function clean(value){
         return String(value ?? "").trim();
       }
+
+      function normalizePhoneForVet(value){
+        let text = String(value ?? "").trim();
+        if (!text) return "";
+        text = text
+          .replace(/[０-９]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 0xFEE0))
+          .replace(/[＋]/g, "+")
+          .replace(/[ー−―‐－]/g, "-")
+          .replace(/[（）]/g, "");
+        text = text.replace(/[^0-9+]/g, "");
+        if (text.startsWith("+81")) text = "0" + text.slice(3);
+        else if (text.startsWith("81") && text.length >= 11) text = "0" + text.slice(2);
+        return text.replace(/\D/g, "");
+      }
+
+      function displayPhoneForVet(value){
+        const n = normalizePhoneForVet(value);
+        if (n.length === 11) return `${n.slice(0,3)}-${n.slice(3,7)}-${n.slice(7)}`;
+        if (n.length === 10) return `${n.slice(0,2)}-${n.slice(2,6)}-${n.slice(6)}`;
+        return clean(value || n);
+      }
+
       function setHref(node, href){
         if (node) node.href = href;
       }
