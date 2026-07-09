@@ -444,7 +444,7 @@
           <div class="row">
             <div>
               <label for="searchInput">検索キーワード</label>
-              <input id="searchInput" type="text" placeholder="例：本番確認、チェック、090、VET-000005" autocomplete="off" />
+              <input id="searchInput" type="text" placeholder="例：本番確認、チェック、090-1111-2222、09011112222、VET-000005" autocomplete="off" />
             </div>
             <button class="btn btn-main" id="searchBtn" type="button">検索</button>
           </div>
@@ -517,6 +517,47 @@
         .replace(/>/g,"&gt;")
         .replace(/"/g,"&quot;")
         .replace(/'/g,"&#039;");
+    }
+
+    // STEP VET-PHONE-2:
+    // 飼い主・患者検索の電話番号入力ゆれ対策。
+    function toHalfWidthPhoneTextForVet(value){
+      return String(value ?? "")
+        .replace(/[０-９]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 0xFEE0))
+        .replace(/＋/g, "+")
+        .replace(/[－ー―‐‑‒–—]/g, "-")
+        .replace(/（/g, "(")
+        .replace(/）/g, ")")
+        .replace(/　/g, " ")
+        .trim();
+    }
+
+    function normalizePhoneForVet(value){
+      let text = toHalfWidthPhoneTextForVet(value);
+      if (!text) return "";
+      text = text.replace(/^\+81[\s\-]*/i, "0");
+      return text.replace(/[^0-9]/g, "");
+    }
+
+    function looksLikePhoneKeywordForVet(value){
+      const text = toHalfWidthPhoneTextForVet(value);
+      if (!text) return false;
+      if (/[A-Za-zＡ-Ｚａ-ｚ]/.test(text)) return false;
+      const digits = normalizePhoneForVet(text);
+      return digits.length >= 7 && /^[+0-9\s\-().]+$/.test(text);
+    }
+
+    function normalizeSearchKeywordForVet(value){
+      const raw = String(value ?? "").trim();
+      return looksLikePhoneKeywordForVet(raw) ? normalizePhoneForVet(raw) : raw;
+    }
+
+    function normalizePhoneFieldOnBlurForVet(input){
+      if (!input) return;
+      input.addEventListener("blur", () => {
+        const normalized = normalizePhoneForVet(input.value);
+        if (normalized) input.value = normalized;
+      });
     }
 
     function setNotice(node, text, type=""){
@@ -617,7 +658,7 @@
       });
     }
 
-    async function searchGuardians(q = el.searchInput.value.trim()){
+    async function searchGuardians(q = normalizeSearchKeywordForVet(el.searchInput.value.trim())){
       if (!getAdminToken()) {
         setNotice(el.searchStatus, "先に管理コードを保存してください。", "ng");
         return;
@@ -749,7 +790,7 @@
         state.detail.guardian = data.guardian;
         setNotice(status, "LINE連携情報を保存しました。", "ok");
         await loadGuardianDetail(state.selectedGuardianId);
-        await searchGuardians(el.searchInput.value.trim());
+        await searchGuardians(normalizeSearchKeywordForVet(el.searchInput.value.trim()));
       } catch (error) {
         setNotice(status, error.message || "LINE連携情報の保存に失敗しました。", "ng");
       }
@@ -773,7 +814,7 @@
         state.detail.guardian = data.guardian;
         setNotice(status, "LINE連携を解除しました。", "ok");
         await loadGuardianDetail(state.selectedGuardianId);
-        await searchGuardians(el.searchInput.value.trim());
+        await searchGuardians(normalizeSearchKeywordForVet(el.searchInput.value.trim()));
       } catch (error) {
         setNotice(status, error.message || "LINE連携解除に失敗しました。", "ng");
       }
@@ -866,6 +907,7 @@
       `;
 
       document.getElementById("saveGuardianBtn").addEventListener("click", saveGuardian);
+      normalizePhoneFieldOnBlurForVet(document.getElementById("guardianPhone"));
       document.getElementById("openAddPetBtn").addEventListener("click", () => {
         document.getElementById("addPetPanel").classList.toggle("open");
       });
@@ -1044,7 +1086,7 @@
           guardian_id: g.id || g.guardian_id,
           guardian_name: document.getElementById("guardianName").value,
           guardian_kana: document.getElementById("guardianKana").value,
-          phone: document.getElementById("guardianPhone").value,
+          phone: normalizePhoneForVet(document.getElementById("guardianPhone").value),
           email: document.getElementById("guardianEmail").value,
           preferred_contact: document.getElementById("preferredContact").value,
           status: document.getElementById("guardianStatus").value,
@@ -1053,7 +1095,7 @@
         }, true);
         state.detail.guardian = data.guardian;
         setNotice(status, "飼い主情報を保存しました。", "ok");
-        await searchGuardians(el.searchInput.value.trim());
+        await searchGuardians(normalizeSearchKeywordForVet(el.searchInput.value.trim()));
       } catch (error) {
         setNotice(status, error.message || "保存に失敗しました。", "ng");
       }
@@ -1129,7 +1171,7 @@
         }, true);
         setNotice(status, `ペットを追加しました。診察券：${data.card?.card_no || data.card_view?.card_no || "-"}`, "ok");
         await loadGuardianDetail(state.selectedGuardianId);
-        await searchGuardians(el.searchInput.value.trim());
+        await searchGuardians(normalizeSearchKeywordForVet(el.searchInput.value.trim()));
       } catch (error) {
         setNotice(status, error.message || "ペット追加に失敗しました。", "ng");
       }
