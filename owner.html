@@ -280,7 +280,7 @@
 <body>
   <main class="page">
     <section class="hero">
-      <span class="badge">STEP VET-56C｜管理コード1234統一</span>
+      <span class="badge">STEP VET-PHONE-2｜管理コード1234統一・電話番号入力ゆれ対策</span>
       <h1>医院設定</h1>
       <p class="lead">
         受付ボタンを押す前に、定休日・臨時休業・受付時間が分かるようにするための管理画面です。
@@ -626,6 +626,28 @@
       return String(value).slice(0,5);
     }
 
+    // STEP VET-PHONE-2:
+    // 医院電話番号の入力ゆれ対策。表示用なので通常のハイフンは残し、全角だけ半角へ寄せる。
+    function toHalfWidthPhoneTextForVet(value){
+      return String(value ?? "")
+        .replace(/[０-９]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 0xFEE0))
+        .replace(/＋/g, "+")
+        .replace(/[－ー―‐‑‒–—]/g, "-")
+        .replace(/（/g, "(")
+        .replace(/）/g, ")")
+        .replace(/　/g, " ")
+        .trim();
+    }
+
+    function normalizeClinicPhoneTextForVet(value){
+      const text = toHalfWidthPhoneTextForVet(value);
+      if (!text) return "";
+      if (/^\+81[\s\-]*/i.test(text)) {
+        return text.replace(/^\+81[\s\-]*/i, "0").replace(/[^0-9]/g, "");
+      }
+      return text;
+    }
+
     function getAdminToken(){
       if (typeof CONFIG.getAdminToken === "function") {
         const v = CONFIG.getAdminToken();
@@ -933,7 +955,7 @@
         const data = await apiPost("/api/admin/clinic-settings/update", {
           clinic_name: $("clinicName").value,
           display_name: $("displayName").value,
-          phone: $("phone").value,
+          phone: normalizeClinicPhoneTextForVet($("phone").value),
           official_line_name: $("officialLineName").value,
           address: $("address").value,
           public_notice: $("publicNotice").value,
