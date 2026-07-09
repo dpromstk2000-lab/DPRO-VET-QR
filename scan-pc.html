@@ -820,7 +820,7 @@
 <div class="brand">
 <div class="logo">📷</div>
 <div>
-<small>scan-pc.html / STEP VET-56C</small>
+<small>scan-pc.html / STEP VET-PHONE-2</small>
 <strong>DPRO PET CARE LINE</strong>
 </div>
 </div>
@@ -833,7 +833,7 @@
 </nav>
 </header><section class="hero">
 <div class="hero-card">
-<span class="badge">STEP VET-56C｜受付PC 管理コード1234統一版</span>
+<span class="badge">STEP VET-PHONE-2｜受付PC 電話番号正規化対応</span>
 <h1>今日の受付を中心に、<br/>必要な操作だけ開く。</h1>
 <p class="lead">受付スタッフが迷わないように、最初は「今日の受付」だけを表示します。QR受付・窓口受付・電話受付・既存患者検索・代理登録・フォローは、左メニューから必要な時だけ開きます。本日の受付を主役にし、完了・取消などの履歴は必要な時だけ開く控えめ表示にしています。既存APIと登録処理はそのまま保持しています。</p>
 </div>
@@ -1115,7 +1115,7 @@
 <div class="search-row">
 <div>
 <label for="existingPatientSearchInput">検索キーワード</label>
-<input autocomplete="off" id="existingPatientSearchInput" placeholder="例：本番確認、チェック、090、VET-000005" type="text"/>
+<input autocomplete="off" id="existingPatientSearchInput" placeholder="例：本番確認、チェック、090-1111-2222、09011112222、VET-000005" type="text"/>
 </div>
 <button class="btn btn-main" id="existingPatientSearchBtn" type="button">既存患者を検索</button>
 <button class="btn btn-sub" id="existingPatientClearBtn" type="button">クリア</button>
@@ -1223,7 +1223,7 @@
 <div id="proxyGuardianSearchBox" style="display:none;">
 <div class="subsection-title">既存飼い主を検索</div>
 <div class="inline-search">
-<input autocomplete="off" id="proxyGuardianSearchInput" placeholder="例：本番確認、佐藤、090 など" type="search"/>
+<input autocomplete="off" id="proxyGuardianSearchInput" placeholder="例：本番確認、佐藤、090-1111-2222、09011112222 など" type="search"/>
 <button class="btn btn-main" id="proxyGuardianSearchBtn" type="button">飼い主を検索</button>
 <button class="btn btn-sub" id="proxyGuardianSearchClearBtn" type="button">クリア</button>
 </div>
@@ -1529,6 +1529,49 @@
 
     function escapeHtml(value){
       return String(value ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
+    }
+
+    // STEP VET-PHONE-2:
+    // 電話番号検索・電話受付登録の入力ゆれ対策。
+    // 090-1111-2222 / 09011112222 / 090 1111 2222 / ０９０－１１１１－２２２２ / +81 90 1111 2222 を同じ番号として扱いやすくする。
+    function toHalfWidthPhoneTextForVet(value){
+      return String(value ?? "")
+        .replace(/[０-９]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 0xFEE0))
+        .replace(/＋/g, "+")
+        .replace(/[－ー―‐‑‒–—]/g, "-")
+        .replace(/（/g, "(")
+        .replace(/）/g, ")")
+        .replace(/　/g, " ")
+        .trim();
+    }
+
+    function normalizePhoneForVet(value){
+      let text = toHalfWidthPhoneTextForVet(value);
+      if (!text) return "";
+      text = text.replace(/^\+81[\s\-]*/i, "0");
+      text = text.replace(/[^0-9]/g, "");
+      return text;
+    }
+
+    function looksLikePhoneKeywordForVet(value){
+      const text = toHalfWidthPhoneTextForVet(value);
+      if (!text) return false;
+      if (/[A-Za-zＡ-Ｚａ-ｚ]/.test(text)) return false;
+      const digits = normalizePhoneForVet(text);
+      return digits.length >= 7 && /^[+0-9\s\-().]+$/.test(text);
+    }
+
+    function normalizeSearchKeywordForVet(value){
+      const raw = String(value ?? "").trim();
+      return looksLikePhoneKeywordForVet(raw) ? normalizePhoneForVet(raw) : raw;
+    }
+
+    function normalizePhoneFieldOnBlurForVet(input){
+      if (!input) return;
+      input.addEventListener("blur", () => {
+        const normalized = normalizePhoneForVet(input.value);
+        if (normalized) input.value = normalized;
+      });
     }
 
     function getAdminToken(){
@@ -2867,8 +2910,9 @@
         el.proxyGuardianSearchResults.innerHTML = '<div class="empty">先に管理コードを保存してください。</div>';
         return;
       }
-      const q = el.proxyGuardianSearchInput.value.trim();
-      if (!q) {
+      const rawQ = el.proxyGuardianSearchInput.value.trim();
+      const q = normalizeSearchKeywordForVet(rawQ);
+      if (!rawQ) {
         el.proxyGuardianSearchResults.innerHTML = '<div class="empty">飼い主名・電話番号を入力して検索してください。</div>';
         return;
       }
@@ -2990,7 +3034,7 @@
       const body = {
         guardian_id: isExisting ? selected.guardian_id : undefined,
         guardian_name: isExisting ? undefined : el.proxyGuardianName.value.trim(),
-        phone: isExisting ? undefined : el.proxyPhone.value.trim(),
+        phone: isExisting ? undefined : normalizePhoneForVet(el.proxyPhone.value.trim()),
         pet_name: petName,
         animal_type: el.proxyAnimalType.value,
         breed: el.proxyBreed.value.trim(),
@@ -3114,7 +3158,8 @@
         return;
       }
 
-      const q = el.existingPatientSearchInput.value.trim();
+      const rawQ = el.existingPatientSearchInput.value.trim();
+      const q = normalizeSearchKeywordForVet(rawQ);
       startButtonLoading(el.existingPatientSearchBtn, "検索中...");
 
       try {
@@ -3323,7 +3368,7 @@
       const body = {
         reception_source: source,
         guardian_name: guardianName,
-        phone: el.manualPhone.value.trim(),
+        phone: normalizePhoneForVet(el.manualPhone.value.trim()),
         pet_name: petName,
         animal_type: el.manualAnimalType.value,
         request_category: category,
@@ -3410,6 +3455,8 @@
           }
         });
       }
+      normalizePhoneFieldOnBlurForVet(el.manualPhone);
+      normalizePhoneFieldOnBlurForVet(el.proxyPhone);
       clearProxyRegistrationForm();
 
       if (el.existingPatientSearchBtn) el.existingPatientSearchBtn.addEventListener("click", searchExistingPatients);
