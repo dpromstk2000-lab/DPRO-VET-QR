@@ -149,7 +149,11 @@
     .full{grid-column:1/-1}
     .pet-panel{border:1px solid rgba(31,143,101,.26);background:linear-gradient(180deg,#fff,#f1fbf6);border-radius:22px;padding:14px;margin-top:14px}
     .pet-main{display:grid;grid-template-columns:64px 1fr;gap:12px;align-items:start}
-    .pet-icon{width:64px;height:64px;border-radius:22px;display:grid;place-items:center;background:var(--green-soft);font-size:34px}
+    .pet-icon{width:64px;height:64px;border-radius:22px;display:grid;place-items:center;background:var(--green-soft);font-size:34px;overflow:hidden;flex:0 0 64px}
+    .pet-photo{width:100%;height:100%;object-fit:cover;display:block;border-radius:inherit}
+    .entry-lead{position:relative;width:58px;min-height:58px}
+    .entry-photo{width:52px;height:52px;border-radius:17px;object-fit:cover;display:block;border:2px solid #fff;box-shadow:0 8px 18px rgba(31,49,43,.14);background:var(--green-soft)}
+    .entry-photo-badge{position:absolute;right:0;bottom:0;min-width:24px;height:24px;padding:0 6px;border-radius:999px;background:#11704c;color:#fff;border:2px solid #fff;display:grid;place-items:center;font-size:12px;font-weight:1000;line-height:1}
     .pet-title{font-size:22px;font-weight:1000;line-height:1.25;letter-spacing:-.03em}
     .pet-sub{color:#62706a;font-size:13px;font-weight:850;margin-top:3px}
     .tagline{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
@@ -845,7 +849,7 @@
 <div class="brand">
 <div class="logo">📷</div>
 <div>
-<small>scan-ipad.html / STEP VET-PHONE-2</small>
+<small>scan-ipad.html / STEP VET-PHOTO-1D</small>
 <strong>DPRO PET CARE LINE</strong>
 </div>
 </div>
@@ -858,7 +862,7 @@
 </nav>
 </header><section class="hero">
 <div class="hero-card">
-<span class="badge">STEP VET-PHONE-2｜受付iPad 電話番号正規化対応</span>
+<span class="badge">STEP VET-PHOTO-1D｜受付iPad ペット写真アイコン表示対応</span>
 <h1>今日の受付を中心に、<br/>必要な操作だけ開く。</h1>
 <p class="lead">iPad・タブレットで迷わないように、最初は「今日の受付」だけを表示します。QR受付・窓口受付・電話受付・既存患者検索・代理登録・フォローは、左メニューから必要な時だけ開きます。PC版で確認した安全な受付番号・ステータス更新・文面編集の流れに合わせ、完了・取消などの履歴は必要な時だけ開く控えめ表示にしています。</p>
 </div>
@@ -1418,7 +1422,7 @@
 </section>
 </div>
 </section><div class="footer-note">
-      STEP VET-52.5X：本日の受付を主役にし、完了・取消/不在の履歴は必要な時だけ開く控えめ表示にしました。
+      STEP VET-PHOTO-1D：受付確認・本日の受付一覧にペット写真アイコンを表示します。写真未登録の場合は通常アイコンを表示します。
     </div></main>
 <script>
     const CONFIG = window.DPRO_VET_CONFIG || window.DPRO_CONFIG || window.APP_CONFIG || {};
@@ -1925,6 +1929,13 @@
         allergy_note: card.allergy_note || item.allergy_note || pet.allergy_note || "",
         caution_memo: card.caution_memo || item.caution_memo || pet.caution_memo || "",
         allergies: card.allergies || item.allergies || card.allergy_note || item.allergy_note || pet.allergy_note || "",
+        photo_url: card.photo_url || card.pet_photo_url || item.photo_url || item.pet_photo_url || pet.photo_url || pet.pet_photo_url || "",
+        pet_photo_url: card.pet_photo_url || card.photo_url || item.pet_photo_url || item.photo_url || pet.pet_photo_url || pet.photo_url || "",
+        photo_storage_path: card.photo_storage_path || card.pet_photo_storage_path || item.photo_storage_path || item.pet_photo_storage_path || pet.photo_storage_path || pet.pet_photo_storage_path || "",
+        pet_photo_storage_path: card.pet_photo_storage_path || card.photo_storage_path || item.pet_photo_storage_path || item.photo_storage_path || pet.pet_photo_storage_path || pet.photo_storage_path || "",
+        photo_updated_at: card.photo_updated_at || card.pet_photo_updated_at || item.photo_updated_at || item.pet_photo_updated_at || pet.photo_updated_at || pet.pet_photo_updated_at || "",
+        pet_photo_updated_at: card.pet_photo_updated_at || card.photo_updated_at || item.pet_photo_updated_at || item.photo_updated_at || pet.pet_photo_updated_at || pet.photo_updated_at || "",
+        has_pet_photo: Boolean(card.photo_url || card.pet_photo_url || item.photo_url || item.pet_photo_url || pet.photo_url || pet.pet_photo_url),
         card_id: card.card_id || item.card_id || "",
         card_no: card.card_no || item.card_no || "",
         card_token: card.card_token || item.card_token || parsed.card_token || parsed.token || "",
@@ -1952,7 +1963,14 @@
           sex: pet.sex || normalizedCard.sex,
           age_text: pet.age_text || normalizedCard.age_text,
           medical_note: pet.medical_note || normalizedCard.medical_note,
-          allergy_note: pet.allergy_note || normalizedCard.allergy_note
+          allergy_note: pet.allergy_note || normalizedCard.allergy_note,
+          photo_url: pet.photo_url || normalizedCard.photo_url,
+          pet_photo_url: pet.pet_photo_url || normalizedCard.pet_photo_url || normalizedCard.photo_url,
+          photo_storage_path: pet.photo_storage_path || normalizedCard.photo_storage_path,
+          pet_photo_storage_path: pet.pet_photo_storage_path || normalizedCard.pet_photo_storage_path || normalizedCard.photo_storage_path,
+          photo_updated_at: pet.photo_updated_at || normalizedCard.photo_updated_at,
+          pet_photo_updated_at: pet.pet_photo_updated_at || normalizedCard.pet_photo_updated_at || normalizedCard.photo_updated_at,
+          has_pet_photo: Boolean(pet.photo_url || pet.pet_photo_url || normalizedCard.photo_url || normalizedCard.pet_photo_url)
         }
       };
     }
@@ -1984,10 +2002,36 @@
     }
 
     function petEmoji(card){
-      const s = String(card?.species || card?.species_label || "").toLowerCase();
+      const s = String(card?.species || card?.species_label || card?.animal_type || "").toLowerCase();
       if (s.includes("cat") || s.includes("猫")) return "🐱";
       if (s.includes("rabbit") || s.includes("うさ")) return "🐰";
       return "🐶";
+    }
+
+    function getPetPhotoUrl(...items){
+      for (const item of items) {
+        if (!item) continue;
+        const url = item.photo_url || item.pet_photo_url || item.image_url || item.pet_image_url || "";
+        if (String(url).trim()) return String(url).trim();
+      }
+      return "";
+    }
+
+    function renderPetIcon(card, pet){
+      const photoUrl = getPetPhotoUrl(card, pet);
+      if (photoUrl) {
+        return `<div class="pet-icon"><img class="pet-photo" src="${escapeHtml(photoUrl)}" alt="${escapeHtml((card?.pet_name || pet?.pet_name || "ペット") + "の写真")}" loading="lazy" onerror="this.closest('.pet-icon').textContent='${petEmoji(card || pet)}';"></div>`;
+      }
+      return `<div class="pet-icon">${petEmoji(card || pet)}</div>`;
+    }
+
+    function renderEntryLead(item){
+      const photoUrl = getPetPhotoUrl(item);
+      const queueNo = escapeHtml(item.queue_number || "-");
+      if (photoUrl) {
+        return `<div class="entry-lead"><img class="entry-photo" src="${escapeHtml(photoUrl)}" alt="${escapeHtml((item.pet_name || "ペット") + "の写真")}" loading="lazy" onerror="this.outerHTML='<div class=&quot;entry-no&quot;>${queueNo}</div>';"><span class="entry-photo-badge">${queueNo}</span></div>`;
+      }
+      return `<div class="entry-no">${queueNo}</div>`;
     }
 
     function renderPet(data){
@@ -2000,7 +2044,7 @@
       el.petPanel.innerHTML = `
         <div class="pet-panel">
           <div class="pet-main">
-            <div class="pet-icon">${petEmoji(card)}</div>
+            ${renderPetIcon(card, pet)}
             <div>
               <div class="pet-title">${escapeHtml(card.pet_name || pet.pet_name || "ペット")}</div>
               <div class="pet-sub">${escapeHtml(card.species_label || pet.species_label || card.species || "")} / ${escapeHtml(card.breed || pet.breed || "")}</div>
@@ -2356,7 +2400,7 @@
       const normalizedStatus = normalizeStatusForView(item.status);
       return `
         <article class="entry ${escapeHtml(normalizedStatus)}">
-          <div class="entry-no">${escapeHtml(item.queue_number || "-")}</div>
+          ${renderEntryLead(item)}
           <div>
             <h4>${escapeHtml(item.pet_name || "ペット")}｜${escapeHtml(item.purpose || item.request_category_label || "受付")}</h4>
             <p>${escapeHtml(item.guardian_name || item.line_display_name || "飼い主")} / ${escapeHtml(entryKindLabel(item.entry_kind))} / ${escapeHtml(statusLabel(normalizedStatus))}</p>
