@@ -7,9 +7,9 @@
   <title>DPRO PET CARE LINE｜ペット診察券</title>
 
   <!--
-    STEP VET-PHONE-3
+    STEP VET-PHOTO-1C
     DPRO PET CARE LINE 動物病院版
-    member.html 修正版 完全版
+    member.html ペット写真アイコン登録対応 完全版
 
     目的：
     ・本番導線に合わせたペット診察券画面
@@ -17,6 +17,8 @@
     ・未登録なら register.html へ案内
     ・既存患者は受付で line-setup.html から連携QRを発行してもらう案内
     ・複数ペット診察券対応
+    ・ペットごとの写真アイコン任意登録・変更・削除対応
+    ・写真未登録の場合は通常アイコン表示
     ・ペット診察券QRには個人情報を直接入れず、qr_payload / card_token を表示
     ・Cloudflare Worker API → Supabase → 画面再読込の本番導線
 
@@ -33,6 +35,7 @@
     ・ADMIN_TOKEN はこのHTMLに絶対に書かない
     ・未登録なのにデモ診察券を表示しない
     ・demo=true の時だけ営業DEMO表示を許可
+    ・写真は確認補助。正式確認は診察券番号・飼い主名・ペット名・受付情報と合わせて行う
   -->
 
   <script src="./config.js"></script>
@@ -381,6 +384,21 @@
       box-shadow:0 8px 20px rgba(47,111,94,.08);
     }
     .petTab .emoji{font-size:22px}
+    .petTab .tabAvatar{
+      width:42px;height:42px;
+      border-radius:16px;
+      display:grid;
+      place-items:center;
+      background:var(--soft);
+      overflow:hidden;
+      box-shadow:inset 0 0 0 1px #d3e7d9;
+      flex:0 0 auto;
+    }
+    .petTab .tabAvatar img{
+      width:100%;height:100%;
+      object-fit:cover;
+      display:block;
+    }
     .petTab strong{color:var(--ink);font-size:14px}
     .petTab span{font-size:12px;line-height:1.4}
 
@@ -403,16 +421,51 @@
       text-align:center;
     }
     .petAvatar{
-      width:74px;height:74px;
-      border-radius:26px;
+      width:82px;height:82px;
+      border-radius:28px;
       display:grid;
       place-items:center;
       margin:0 auto 10px;
       background:var(--soft);
       color:var(--main);
-      font-size:36px;
+      font-size:38px;
       box-shadow:inset 0 0 0 1px #d3e7d9;
+      overflow:hidden;
+      position:relative;
     }
+    .petAvatar.hasPhoto{
+      background:#fff;
+      box-shadow:0 10px 28px rgba(47,111,94,.16), inset 0 0 0 1px #d3e7d9;
+    }
+    .petAvatar img{
+      width:100%;height:100%;
+      object-fit:cover;
+      display:block;
+    }
+    .petAvatar span{line-height:1}
+    .petPhotoActions{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:8px;
+      margin:0 0 12px;
+    }
+    .petPhotoActions .btn{width:100%}
+    .petPhotoHelp{
+      color:var(--muted);
+      font-size:11px;
+      line-height:1.55;
+      font-weight:700;
+      margin:-2px 0 0;
+    }
+    .photoStatus{
+      min-height:18px;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.5;
+      font-weight:850;
+    }
+    .photoStatus.ok{color:var(--ok)}
+    .photoStatus.err{color:var(--danger)}
     .petName{
       font-size:26px;
       font-weight:950;
@@ -792,9 +845,21 @@
 
       <div class="cardLayout">
         <section class="qrCard">
-          <div class="petAvatar" id="petEmoji">🐾</div>
+          <div class="petAvatar" id="petAvatar">
+            <img id="petPhotoImg" class="hidden" alt="ペット写真">
+            <span id="petEmoji">🐾</span>
+          </div>
           <h2 class="petName" id="petName">ペット</h2>
           <div class="cardNo" id="cardNo">診察券番号 -</div>
+
+          <div class="petPhotoActions">
+            <input id="petPhotoInput" class="hidden" type="file" accept="image/jpeg,image/png,image/webp">
+            <button class="btn btnSoft btnMini" type="button" id="selectPetPhotoBtn">写真を登録・変更</button>
+            <button class="btn btnDanger btnMini hidden" type="button" id="deletePetPhotoBtn">写真を削除</button>
+            <div class="petPhotoHelp" id="petPhotoHelp">写真登録は任意です。未登録の場合は通常アイコンで表示されます。</div>
+            <div class="photoStatus" id="petPhotoStatus"></div>
+          </div>
+
           <div class="qrBox" id="qrcode"></div>
           <div class="qrText" id="qrText">QR情報を確認中</div>
           <button class="btn btnSoft copyBtn" type="button" id="copyQrTextBtn">QR文字列をコピー</button>
@@ -886,7 +951,7 @@
     </main>
 
     <div class="footer">
-      STEP VET-PHONE-3 member.html waiting demo handoff complete<br>
+      STEP VET-PHOTO-1C member.html pet photo icon ready<br>
       DPRO PET CARE LINE / 動物病院版
     </div>
   </div>
@@ -1079,6 +1144,9 @@
         $("retryBtn").addEventListener("click", load);
         $("copyCardUrlBtn").addEventListener("click", copySelectedCardUrl);
         $("copyQrTextBtn").addEventListener("click", copySelectedQrText);
+        $("selectPetPhotoBtn").addEventListener("click", () => $("petPhotoInput").click());
+        $("petPhotoInput").addEventListener("change", handlePetPhotoInputChange);
+        $("deletePetPhotoBtn").addEventListener("click", deleteSelectedPetPhoto);
       }
 
       function setupStaticLinks() {
@@ -1374,6 +1442,13 @@
         card.age_text = card.age_text || data?.age_text || data?.pet?.age_text || "";
         card.medical_note = card.medical_note || data?.medical_note || data?.pet?.medical_note || "";
         card.allergy_note = card.allergy_note || data?.allergy_note || data?.pet?.allergy_note || "";
+        card.photo_url = card.photo_url || card.pet_photo_url || data?.photo_url || data?.pet_photo_url || data?.pet?.photo_url || data?.pet?.pet_photo_url || "";
+        card.pet_photo_url = card.pet_photo_url || card.photo_url || "";
+        card.photo_storage_path = card.photo_storage_path || card.pet_photo_storage_path || data?.photo_storage_path || data?.pet_photo_storage_path || data?.pet?.photo_storage_path || data?.pet?.pet_photo_storage_path || "";
+        card.pet_photo_storage_path = card.pet_photo_storage_path || card.photo_storage_path || "";
+        card.photo_updated_at = card.photo_updated_at || card.pet_photo_updated_at || data?.photo_updated_at || data?.pet_photo_updated_at || data?.pet?.photo_updated_at || data?.pet?.pet_photo_updated_at || "";
+        card.pet_photo_updated_at = card.pet_photo_updated_at || card.photo_updated_at || "";
+        card.has_pet_photo = Boolean(card.photo_url || card.pet_photo_url || card.has_pet_photo);
 
         card.card_id = card.card_id || data?.card_id || data?.card?.card_id || "";
         card.card_no = card.card_no || data?.card_no || data?.card?.card_no || "";
@@ -1432,7 +1507,7 @@
           btn.type = "button";
           btn.className = `petTab ${index === state.selectedIndex ? "active" : ""}`;
           btn.innerHTML = `
-            <span class="emoji">${getSpeciesEmoji(card.species || card.animal_type)}</span>
+            ${renderPetTabAvatar(card)}
             <strong>${escapeHtml(card.pet_name || "ペット")}</strong>
             <span>${escapeHtml(card.species_label || card.animal_type || "")}${card.breed ? " / " + escapeHtml(card.breed) : ""}<br>${escapeHtml(card.card_no || "診察券")}</span>
           `;
@@ -1450,6 +1525,7 @@
         if (!card) return;
 
         $("petEmoji").textContent = getSpeciesEmoji(card.species || card.animal_type);
+        renderPetPhoto(card);
         $("petName").textContent = card.pet_name || "ペット";
         $("petKind").innerHTML = `${escapeHtml(card.species_label || card.animal_type || "-")}<br>${escapeHtml(card.breed || "")}`;
         $("cardNo").textContent = card.card_no ? `診察券番号 ${card.card_no}` : "診察券番号 -";
@@ -1477,6 +1553,231 @@
         renderActionLinks(card);
         renderPreventions(card);
         renderQr(card);
+      }
+
+      function renderPetTabAvatar(card){
+        const photoUrl = getPetPhotoUrl(card);
+        if (photoUrl) {
+          return `<span class="tabAvatar"><img src="${escapeHtml(photoUrl)}" alt="${escapeHtml(card.pet_name || "ペット")}の写真" loading="lazy"></span>`;
+        }
+        return `<span class="tabAvatar emoji">${escapeHtml(getSpeciesEmoji(card.species || card.animal_type))}</span>`;
+      }
+
+      function getPetPhotoUrl(card){
+        return clean(card?.photo_url || card?.pet_photo_url || card?.pet?.photo_url || card?.pet?.pet_photo_url || "");
+      }
+
+      function renderPetPhoto(card){
+        const photoUrl = getPetPhotoUrl(card);
+        const avatar = $("petAvatar");
+        const img = $("petPhotoImg");
+        const emoji = $("petEmoji");
+        const deleteBtn = $("deletePetPhotoBtn");
+        const help = $("petPhotoHelp");
+
+        setPetPhotoStatus("");
+
+        if (photoUrl) {
+          img.src = photoUrl;
+          img.classList.remove("hidden");
+          emoji.classList.add("hidden");
+          avatar.classList.add("hasPhoto");
+          deleteBtn.classList.remove("hidden");
+          help.textContent = "写真登録済みです。変更・削除は飼い主さん側でできます。";
+        } else {
+          img.removeAttribute("src");
+          img.classList.add("hidden");
+          emoji.classList.remove("hidden");
+          avatar.classList.remove("hasPhoto");
+          deleteBtn.classList.add("hidden");
+          help.textContent = "写真登録は任意です。未登録の場合は通常アイコンで表示されます。";
+        }
+      }
+
+      async function handlePetPhotoInputChange(event){
+        const input = event.target;
+        const file = input.files && input.files[0];
+        input.value = "";
+        if (!file) return;
+
+        const card = getSelectedCard();
+        if (!card) return;
+
+        try {
+          setPetPhotoBusy(true, "写真を準備中です...");
+          const payload = await buildPetPhotoUploadPayload(file);
+
+          setPetPhotoStatus("写真をアップロード中です...", "");
+          const data = await apiPost(`${apiBase}/api/public/pets/photo/update`, {
+            clinic_code: clinicCode,
+            pet_id: card.pet_id || card.id || "",
+            guardian_id: card.guardian_id || state.guardian?.guardian_id || state.guardian?.id || "",
+            line_user_id: state.lineUserId || "",
+            card_token: card.card_token || card.qr_token || "",
+            demo: isStep40DemoReady() ? "true" : "",
+            photo_data_url: payload.dataUrl,
+            file_name: payload.fileName,
+            mime_type: payload.mimeType
+          });
+
+          applyPetPhotoResultToCurrentCard(data, false);
+          renderTabs();
+          renderSelectedCard();
+          setPetPhotoStatus(data?.message || "写真を更新しました。", "ok");
+        } catch (error) {
+          console.error(error);
+          setPetPhotoStatus(error?.message || "写真の更新に失敗しました。", "err");
+        } finally {
+          setPetPhotoBusy(false);
+        }
+      }
+
+      async function deleteSelectedPetPhoto(){
+        const card = getSelectedCard();
+        if (!card) return;
+        if (!getPetPhotoUrl(card)) return;
+        if (!confirm(`${card.pet_name || "このペット"}の写真を削除しますか？`)) return;
+
+        try {
+          setPetPhotoBusy(true, "写真を削除中です...");
+          const data = await apiPost(`${apiBase}/api/public/pets/photo/delete`, {
+            clinic_code: clinicCode,
+            pet_id: card.pet_id || card.id || "",
+            guardian_id: card.guardian_id || state.guardian?.guardian_id || state.guardian?.id || "",
+            line_user_id: state.lineUserId || "",
+            card_token: card.card_token || card.qr_token || "",
+            demo: isStep40DemoReady() ? "true" : ""
+          });
+
+          applyPetPhotoResultToCurrentCard(data, true);
+          renderTabs();
+          renderSelectedCard();
+          setPetPhotoStatus(data?.message || "写真を削除しました。", "ok");
+        } catch (error) {
+          console.error(error);
+          setPetPhotoStatus(error?.message || "写真の削除に失敗しました。", "err");
+        } finally {
+          setPetPhotoBusy(false);
+        }
+      }
+
+      function applyPetPhotoResultToCurrentCard(data, deleted){
+        const card = getSelectedCard();
+        if (!card) return;
+        const pet = data?.pet || {};
+        const nextPhotoUrl = deleted ? "" : clean(data?.photo_url || pet.photo_url || pet.pet_photo_url || "");
+        const nextStoragePath = deleted ? "" : clean(data?.photo_storage_path || pet.photo_storage_path || pet.pet_photo_storage_path || "");
+        const nextUpdatedAt = clean(data?.photo_updated_at || pet.photo_updated_at || pet.pet_photo_updated_at || "");
+
+        card.photo_url = nextPhotoUrl;
+        card.pet_photo_url = nextPhotoUrl;
+        card.photo_storage_path = nextStoragePath;
+        card.pet_photo_storage_path = nextStoragePath;
+        card.photo_updated_at = nextUpdatedAt;
+        card.pet_photo_updated_at = nextUpdatedAt;
+        card.has_pet_photo = Boolean(nextPhotoUrl);
+      }
+
+      async function buildPetPhotoUploadPayload(file){
+        const allowed = ["image/jpeg", "image/png", "image/webp"];
+        if (!allowed.includes(file.type)) {
+          throw new Error("登録できる写真形式は JPEG / PNG / WebP のみです。");
+        }
+
+        // 500KB以下なら原本をそのまま送る。超える場合はJPEGに圧縮する。
+        if (file.size <= 500 * 1024) {
+          return {
+            dataUrl: await readFileAsDataUrl(file),
+            mimeType: file.type || "image/jpeg",
+            fileName: file.name || "pet-photo"
+          };
+        }
+
+        const dataUrl = await resizeImageToDataUrl(file, {
+          maxWidth: 900,
+          maxHeight: 900,
+          maxBytes: 500 * 1024
+        });
+
+        return {
+          dataUrl,
+          mimeType: "image/jpeg",
+          fileName: (file.name || "pet-photo").replace(/\.[^.]+$/, "") + ".jpg"
+        };
+      }
+
+      function readFileAsDataUrl(file){
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(String(reader.result || ""));
+          reader.onerror = () => reject(new Error("写真ファイルを読み込めませんでした。"));
+          reader.readAsDataURL(file);
+        });
+      }
+
+      function resizeImageToDataUrl(file, options){
+        return new Promise((resolve, reject) => {
+          const img = new Image();
+          img.onload = () => {
+            try {
+              const maxWidth = Number(options.maxWidth || 900);
+              const maxHeight = Number(options.maxHeight || 900);
+              const maxBytes = Number(options.maxBytes || 500 * 1024);
+              const scale = Math.min(1, maxWidth / img.width, maxHeight / img.height);
+              let width = Math.max(1, Math.round(img.width * scale));
+              let height = Math.max(1, Math.round(img.height * scale));
+              const canvas = document.createElement("canvas");
+              const ctx = canvas.getContext("2d");
+
+              for (let shrink = 0; shrink < 4; shrink += 1) {
+                canvas.width = width;
+                canvas.height = height;
+                ctx.clearRect(0, 0, width, height);
+                ctx.drawImage(img, 0, 0, width, height);
+
+                for (const quality of [0.86, 0.78, 0.7, 0.62, 0.54, 0.46]) {
+                  const dataUrl = canvas.toDataURL("image/jpeg", quality);
+                  if (dataUrlBytes(dataUrl) <= maxBytes) {
+                    URL.revokeObjectURL(img.src);
+                    resolve(dataUrl);
+                    return;
+                  }
+                }
+
+                width = Math.max(1, Math.round(width * 0.82));
+                height = Math.max(1, Math.round(height * 0.82));
+              }
+
+              URL.revokeObjectURL(img.src);
+              reject(new Error("写真サイズを500KB以下にできませんでした。別の写真でお試しください。"));
+            } catch (error) {
+              URL.revokeObjectURL(img.src);
+              reject(error);
+            }
+          };
+          img.onerror = () => reject(new Error("写真画像を開けませんでした。別の画像でお試しください。"));
+          img.src = URL.createObjectURL(file);
+        });
+      }
+
+      function dataUrlBytes(dataUrl){
+        const base64 = String(dataUrl || "").split(",")[1] || "";
+        return Math.floor(base64.length * 3 / 4);
+      }
+
+      function setPetPhotoBusy(busy, message){
+        ["selectPetPhotoBtn", "deletePetPhotoBtn"].forEach((id) => {
+          const btn = $(id);
+          if (btn) btn.disabled = Boolean(busy);
+        });
+        if (message) setPetPhotoStatus(message, "");
+      }
+
+      function setPetPhotoStatus(message, type){
+        const node = $("petPhotoStatus");
+        if (!node) return;
+        node.className = `photoStatus ${type || ""}`.trim();
+        node.textContent = message || "";
       }
 
       function renderActionLinks(card){
