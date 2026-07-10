@@ -524,6 +524,35 @@
       font-weight:800;
       line-height:1.55;
     }
+    .patient-result-main{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width:0;
+    }
+    .patient-photo-mini{
+      width:54px;
+      height:54px;
+      border-radius:17px;
+      flex:0 0 auto;
+      display:grid;
+      place-items:center;
+      background:#e9f7ef;
+      border:1px solid #cde9dc;
+      font-size:24px;
+      overflow:hidden;
+    }
+    .patient-photo-mini img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+    .selected-patient-with-photo{
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
     .selected-patient-box{
       margin-top:12px;
       border:1px solid #bfd0ff;
@@ -553,6 +582,7 @@
     @media (max-width:720px){
       .search-row{grid-template-columns:1fr;}
       .patient-result{grid-template-columns:1fr;}
+      .patient-result-main{align-items:flex-start;}
     }
 
 
@@ -849,7 +879,7 @@
 <div class="brand">
 <div class="logo">📷</div>
 <div>
-<small>scan-ipad.html / STEP VET-PHOTO-1D</small>
+<small>scan-ipad.html / STEP VET-PHOTO-1D-R1</small>
 <strong>DPRO PET CARE LINE</strong>
 </div>
 </div>
@@ -862,7 +892,7 @@
 </nav>
 </header><section class="hero">
 <div class="hero-card">
-<span class="badge">STEP VET-PHOTO-1D｜受付iPad ペット写真アイコン表示対応</span>
+<span class="badge">STEP VET-PHOTO-1D-R1｜受付iPad 既存患者検索にも写真表示対応</span>
 <h1>今日の受付を中心に、<br/>必要な操作だけ開く。</h1>
 <p class="lead">iPad・タブレットで迷わないように、最初は「今日の受付」だけを表示します。QR受付・窓口受付・電話受付・既存患者検索・代理登録・フォローは、左メニューから必要な時だけ開きます。PC版で確認した安全な受付番号・ステータス更新・文面編集の流れに合わせ、完了・取消などの履歴は必要な時だけ開く控えめ表示にしています。</p>
 </div>
@@ -1422,7 +1452,7 @@
 </section>
 </div>
 </section><div class="footer-note">
-      STEP VET-PHOTO-1D：受付確認・本日の受付一覧にペット写真アイコンを表示します。写真未登録の場合は通常アイコンを表示します。
+      STEP VET-PHOTO-1D-R1：既存患者検索・選択中の患者・本日の受付一覧にペット写真アイコンを表示します。写真未登録の場合は通常アイコンを表示します。
     </div></main>
 <script>
     const CONFIG = window.DPRO_VET_CONFIG || window.DPRO_CONFIG || window.APP_CONFIG || {};
@@ -3298,6 +3328,15 @@
       return String(value || "").toLowerCase() === "linked" ? "line-linked-tag" : "line-unlinked-tag";
     }
 
+    function renderPatientPhotoMini(item){
+      const photoUrl = getPetPhotoUrl(item);
+      const label = escapeHtml((item?.pet_name || "ペット") + "の写真");
+      if (photoUrl) {
+        return `<div class="patient-photo-mini"><img src="${escapeHtml(photoUrl)}" alt="${label}" loading="lazy" onerror="this.closest('.patient-photo-mini').textContent='${petEmoji(item)}';"></div>`;
+      }
+      return `<div class="patient-photo-mini">${petEmoji(item)}</div>`;
+    }
+
     function renderExistingPatientResults(){
       const items = state.existingPatients || [];
 
@@ -3310,15 +3349,22 @@
         const phone = item.phone ? `電話：${escapeHtml(item.phone)}` : "電話：未登録";
         const cardNo = item.card_no ? `診察券：${escapeHtml(item.card_no)}` : "診察券：未発行";
         const species = item.species_label || item.species || "動物種未設定";
+        const photoTag = getPetPhotoUrl(item)
+          ? '<span class="tag green">写真あり</span>'
+          : '<span class="tag">写真未登録</span>';
         return `
           <article class="patient-result">
-            <div>
-              <h4>${escapeHtml(item.pet_name || "ペット")}｜${escapeHtml(item.guardian_name || "飼い主")}</h4>
-              <p>${phone} / ${cardNo} / ${escapeHtml(species)} ${item.breed ? ` / ${escapeHtml(item.breed)}` : ""}</p>
-              <div class="tagline" style="margin-top:8px;">
-                <span class="source-tag ${escapeHtml(lineStatusClass(item.line_link_status))}">${escapeHtml(lineStatusLabel(item.line_link_status))}</span>
-                ${item.pet_no ? `<span class="tag">ペット番号 ${escapeHtml(item.pet_no)}</span>` : ""}
-                ${item.guardian_no ? `<span class="tag">飼い主番号 ${escapeHtml(item.guardian_no)}</span>` : ""}
+            <div class="patient-result-main">
+              ${renderPatientPhotoMini(item)}
+              <div>
+                <h4>${escapeHtml(item.pet_name || "ペット")}｜${escapeHtml(item.guardian_name || "飼い主")}</h4>
+                <p>${phone} / ${cardNo} / ${escapeHtml(species)} ${item.breed ? ` / ${escapeHtml(item.breed)}` : ""}</p>
+                <div class="tagline" style="margin-top:8px;">
+                  <span class="source-tag ${escapeHtml(lineStatusClass(item.line_link_status))}">${escapeHtml(lineStatusLabel(item.line_link_status))}</span>
+                  ${photoTag}
+                  ${item.pet_no ? `<span class="tag">ペット番号 ${escapeHtml(item.pet_no)}</span>` : ""}
+                  ${item.guardian_no ? `<span class="tag">飼い主番号 ${escapeHtml(item.guardian_no)}</span>` : ""}
+                </div>
               </div>
             </div>
             <div class="entry-actions" style="justify-content:flex-end;">
@@ -3390,8 +3436,13 @@
       const phone = item.phone ? `電話：${escapeHtml(item.phone)}` : "電話：未登録";
       const cardNo = item.card_no ? `診察券：${escapeHtml(item.card_no)}` : "診察券：未発行";
       el.selectedExistingPatientBox.innerHTML = `
-        <strong>${escapeHtml(item.pet_name || "ペット")}｜${escapeHtml(item.guardian_name || "飼い主")}</strong>
-        <span>${phone} / ${cardNo} / ${escapeHtml(lineStatusLabel(item.line_link_status))}</span>
+        <div class="selected-patient-with-photo">
+          ${renderPatientPhotoMini(item)}
+          <div>
+            <strong>${escapeHtml(item.pet_name || "ペット")}｜${escapeHtml(item.guardian_name || "飼い主")}</strong>
+            <span>${phone} / ${cardNo} / ${escapeHtml(lineStatusLabel(item.line_link_status))}</span>
+          </div>
+        </div>
       `;
     }
 
