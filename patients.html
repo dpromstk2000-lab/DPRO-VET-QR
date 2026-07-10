@@ -241,6 +241,40 @@
     .tag.gray{background:#f5f6f5;border-color:#d8ded8;color:#58635d}
     .tag.red{background:#fff1f1;border-color:#f1b7b7;color:#9f3434}
     .tag.blue{background:#eff6ff;border-color:#bfdbfe;color:#1d4ed8}
+
+    .guardian-pets-preview{
+      display:flex;
+      gap:7px;
+      flex-wrap:wrap;
+      margin-top:9px;
+    }
+    .guardian-pet-chip{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      border:1px solid #dce7df;
+      background:#fbfffd;
+      border-radius:999px;
+      padding:4px 8px 4px 4px;
+      color:#26342e;
+      font-size:11px;
+      font-weight:900;
+      max-width:100%;
+    }
+    .guardian-pet-chip img,
+    .guardian-pet-chip .mini-fallback{
+      width:28px;
+      height:28px;
+      border-radius:10px;
+      object-fit:cover;
+      display:grid;
+      place-items:center;
+      background:#edf7f2;
+      border:1px solid #c9e7d8;
+      flex:0 0 28px;
+      font-size:16px;
+    }
+
     .detail-empty{
       min-height:260px;
       display:grid;
@@ -427,15 +461,15 @@
     <div class="wrap">
       <section class="hero">
         <div>
-          <span class="eyebrow">DPRO PET CARE LINE｜飼い主・ペット管理・写真確認</span>
+          <span class="eyebrow">DPRO PET CARE LINE｜飼い主・ペット管理・写真表示対応</span>
           <h1>DPROどうぶつ病院 管理画面</h1>
           <p class="lead">
             飼い主・ペット管理に加えて、LINE連携済み/未連携の確認、LINE連携解除、確認済みLINE IDの手動登録を行います。
           </p>
         </div>
         <div class="version">
-          STEP VET-PHOTO-1D<br />
-          line link status management
+          STEP VET-PHOTO-1D-R1<br />
+          patients detail photo display
           <div class="navlinks" style="margin-top:10px;">
             <a class="btn btn-sub" id="openScanPcLink" href="#" target="_blank" rel="noopener">受付PC</a>
             <a class="btn btn-sub" id="openOwnerLink" href="#" target="_blank" rel="noopener">医院設定</a>
@@ -652,6 +686,27 @@
       }
     }
 
+
+    function renderMiniPetPhoto(pet){
+      const url = petPhotoUrl(pet);
+      const name = pet?.pet_name || "ペット";
+      if (url) {
+        return `<img src="${escapeHtml(url)}" alt="${escapeHtml(name)}の写真" loading="lazy" onerror="this.outerHTML='<span class=&quot;mini-fallback&quot;>${petEmojiForPhoto(pet)}</span>';" />`;
+      }
+      return `<span class="mini-fallback">${petEmojiForPhoto(pet)}</span>`;
+    }
+
+    function renderGuardianPetPreview(pets){
+      const list = Array.isArray(pets) ? pets.slice(0, 4) : [];
+      if (!list.length) return '<p>ペット未登録</p>';
+      return `<div class="guardian-pets-preview">${list.map((pet) => `
+        <span class="guardian-pet-chip">
+          ${renderMiniPetPhoto(pet)}
+          <span>${escapeHtml(pet.pet_name || "ペット")}</span>
+        </span>
+      `).join("")}</div>`;
+    }
+
     function lineStatusTag(status){
       const text = String(status || "").toLowerCase();
       if (text === "linked") return '<span class="tag green">LINE連携済み</span>';
@@ -666,14 +721,14 @@
 
       el.guardianList.innerHTML = state.guardians.map((item) => {
         const active = item.guardian_id === state.selectedGuardianId ? " active" : "";
-        const petNames = (item.pets || []).slice(0,4).map(p => p.pet_name).join("、") || "ペット未登録";
         return `
           <article class="guardian-item${active}" data-guardian-id="${escapeHtml(item.guardian_id)}">
             <h3>${escapeHtml(item.guardian_name || "飼い主")}</h3>
             <p>${escapeHtml(item.phone || "電話未登録")} / ペット ${escapeHtml(item.pet_count || 0)}頭</p>
-            <p>${escapeHtml(petNames)}</p>
+            ${renderGuardianPetPreview(item.pets || [])}
             <div class="tagline">
               ${lineStatusTag(item.line_link_status)}
+              ${(item.pets || []).some((p) => petPhotoUrl(p)) ? '<span class="tag green">写真あり</span>' : '<span class="tag gray">写真未登録</span>'}
               ${item.guardian_no ? `<span class="tag">飼い主番号 ${escapeHtml(item.guardian_no)}</span>` : ""}
             </div>
           </article>
