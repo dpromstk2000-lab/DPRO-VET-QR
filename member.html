@@ -7,7 +7,7 @@
   <title>DPRO PET CARE LINE｜ペット診察券</title>
 
   <!--
-    STEP VET-PHOTO-1C
+    STEP VET-PHOTO-1C-R1
     DPRO PET CARE LINE 動物病院版
     member.html ペット写真アイコン登録対応 完全版
 
@@ -951,7 +951,7 @@
     </main>
 
     <div class="footer">
-      STEP VET-PHOTO-1C member.html pet photo icon ready<br>
+      STEP VET-PHOTO-1C-R1 member.html pet photo uuid safe ready<br>
       DPRO PET CARE LINE / 動物病院版
     </div>
   </div>
@@ -1604,16 +1604,21 @@
         if (!card) return;
 
         try {
+          setPetPhotoBusy(true, "診察券情報を確認中です...");
+          const resolvedCard = await resolveSelectedCardForPhoto(card);
+
           setPetPhotoBusy(true, "写真を準備中です...");
           const payload = await buildPetPhotoUploadPayload(file);
 
           setPetPhotoStatus("写真をアップロード中です...", "");
           const data = await apiPost(`${apiBase}/api/public/pets/photo/update`, {
             clinic_code: clinicCode,
-            pet_id: card.pet_id || card.id || "",
-            guardian_id: card.guardian_id || state.guardian?.guardian_id || state.guardian?.id || "",
+            pet_id: resolvedCard.pet_id || resolvedCard.id || "",
+            pet_name: resolvedCard.pet_name || "",
+            card_no: resolvedCard.card_no || "",
+            guardian_id: resolvedCard.guardian_id || state.guardian?.guardian_id || state.guardian?.id || "",
             line_user_id: state.lineUserId || "",
-            card_token: card.card_token || card.qr_token || "",
+            card_token: resolvedCard.card_token || resolvedCard.qr_token || extractCardToken(resolvedCard.qr_payload || ""),
             demo: isStep40DemoReady() ? "true" : "",
             photo_data_url: payload.dataUrl,
             file_name: payload.fileName,
@@ -1639,13 +1644,18 @@
         if (!confirm(`${card.pet_name || "このペット"}の写真を削除しますか？`)) return;
 
         try {
+          setPetPhotoBusy(true, "診察券情報を確認中です...");
+          const resolvedCard = await resolveSelectedCardForPhoto(card);
+
           setPetPhotoBusy(true, "写真を削除中です...");
           const data = await apiPost(`${apiBase}/api/public/pets/photo/delete`, {
             clinic_code: clinicCode,
-            pet_id: card.pet_id || card.id || "",
-            guardian_id: card.guardian_id || state.guardian?.guardian_id || state.guardian?.id || "",
+            pet_id: resolvedCard.pet_id || resolvedCard.id || "",
+            pet_name: resolvedCard.pet_name || "",
+            card_no: resolvedCard.card_no || "",
+            guardian_id: resolvedCard.guardian_id || state.guardian?.guardian_id || state.guardian?.id || "",
             line_user_id: state.lineUserId || "",
-            card_token: card.card_token || card.qr_token || "",
+            card_token: resolvedCard.card_token || resolvedCard.qr_token || extractCardToken(resolvedCard.qr_payload || ""),
             demo: isStep40DemoReady() ? "true" : ""
           });
 
@@ -1659,6 +1669,87 @@
         } finally {
           setPetPhotoBusy(false);
         }
+      }
+
+      function isUuidLike(value){
+        return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(clean(value));
+      }
+
+      function cardTokenOf(card){
+        return extractCardToken(card?.card_token || card?.qr_token || card?.qr_payload || "");
+      }
+
+      function mergeResolvedCardIntoState(originalCard, resolvedCard){
+        const index = state.cards.indexOf(originalCard) >= 0 ? state.cards.indexOf(originalCard) : state.selectedIndex;
+        const current = state.cards[index] || originalCard || {};
+        const merged = {
+          ...current,
+          ...resolvedCard,
+          card_token: resolvedCard.card_token || resolvedCard.qr_token || current.card_token || current.qr_token || "",
+          qr_token: resolvedCard.qr_token || resolvedCard.card_token || current.qr_token || current.card_token || "",
+          qr_payload: resolvedCard.qr_payload || current.qr_payload || ""
+        };
+        state.cards[index] = merged;
+        state.selectedIndex = index;
+        return merged;
+      }
+
+      async function resolveSelectedCardForPhoto(card){
+        if (!card) throw new Error("写真登録するペットを選択してください。");
+
+        // 実DBのUUIDがある場合はそのまま使う。
+        if (isUuidLike(card.pet_id || card.id)) return card;
+
+        // デモフォールバックの demo_pet_check 等はDBに保存できないため、診察券tokenから実データを取り直す。
+        const token = cardTokenOf(card);
+        if (token) {
+          try {
+            const data = await fetchByCardToken(token);
+            let resolved = null;
+
+            if (data?.item) {
+              resolved = normalizeCardRow(data.item, data);
+            } else if (data?.card || data?.pet) {
+              resolved = normalizeCardRow({ ...(data.card || {}), ...(data.pet || {}) }, data);
+            } else if (data?.pet_id || data?.qr_payload || data?.card_token) {
+              resolved = normalizeCardRow(data, data);
+            }
+
+            if (resolved && isUuidLike(resolved.pet_id || resolved.id)) {
+              return mergeResolvedCardIntoState(card, resolved);
+            }
+          } catch (error) {
+            console.warn("card token resolve failed:", error);
+          }
+        }
+
+        // LINE連携済みの場合は、my-cardsを再取得して同じカードを探す。
+        if (state.lineUserId) {
+          try {
+            const data = await fetchMyCards(state.lineUserId);
+            const rows = Array.isArray(data?.cards) ? data.cards : (Array.isArray(data?.items) ? data.items : []);
+            const resolvedCards = rows.map((row) => normalizeCardRow(row, data));
+            const currentToken = cardTokenOf(card);
+            const currentName = clean(card.pet_name);
+            const currentNo = clean(card.card_no);
+
+            const match = resolvedCards.find((row) => {
+              const rowToken = cardTokenOf(row);
+              if (currentToken && rowToken && currentToken === rowToken) return true;
+              if (currentNo && clean(row.card_no) === currentNo) return true;
+              if (currentName && clean(row.pet_name) === currentName) return true;
+              return false;
+            });
+
+            if (match && isUuidLike(match.pet_id || match.id)) {
+              return mergeResolvedCardIntoState(card, match);
+            }
+          } catch (error) {
+            console.warn("my-cards resolve failed:", error);
+          }
+        }
+
+        throw new Error("写真登録用の実データIDを確認できませんでした。営業前デモ準備を実行してから、この画面を再読み込みしてください。");
       }
 
       function applyPetPhotoResultToCurrentCard(data, deleted){
