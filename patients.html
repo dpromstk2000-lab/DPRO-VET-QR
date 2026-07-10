@@ -272,6 +272,33 @@
       background:#fff;
       margin-top:10px;
     }
+    
+    .pet-photo-head{
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+    .pet-photo-thumb{
+      width:58px;
+      height:58px;
+      border-radius:20px;
+      object-fit:cover;
+      display:block;
+      background:#edf7f2;
+      border:1px solid #c9e7d8;
+      flex:0 0 58px;
+    }
+    .pet-photo-fallback{
+      width:58px;
+      height:58px;
+      border-radius:20px;
+      display:grid;
+      place-items:center;
+      background:#edf7f2;
+      border:1px solid #c9e7d8;
+      flex:0 0 58px;
+      font-size:30px;
+    }
     .pet-card-head{
       display:flex;
       justify-content:space-between;
@@ -400,14 +427,14 @@
     <div class="wrap">
       <section class="hero">
         <div>
-          <span class="eyebrow">DPRO PET CARE LINE｜飼い主・ペット管理</span>
+          <span class="eyebrow">DPRO PET CARE LINE｜飼い主・ペット管理・写真確認</span>
           <h1>DPROどうぶつ病院 管理画面</h1>
           <p class="lead">
             飼い主・ペット管理に加えて、LINE連携済み/未連携の確認、LINE連携解除、確認済みLINE IDの手動登録を行います。
           </p>
         </div>
         <div class="version">
-          STEP VET-48<br />
+          STEP VET-PHOTO-1D<br />
           line link status management
           <div class="navlinks" style="margin-top:10px;">
             <a class="btn btn-sub" id="openScanPcLink" href="#" target="_blank" rel="noopener">受付PC</a>
@@ -989,19 +1016,43 @@
       `;
     }
 
+    function petPhotoUrl(pet){
+      return String(pet?.photo_url || pet?.pet_photo_url || pet?.image_url || pet?.pet_image_url || "").trim();
+    }
+
+    function petEmojiForPhoto(pet){
+      const s = String(pet?.species_label || pet?.species || pet?.animal_type || "").toLowerCase();
+      if (s.includes("cat") || s.includes("猫")) return "🐱";
+      if (s.includes("rabbit") || s.includes("うさ")) return "🐰";
+      return "🐶";
+    }
+
+    function renderPetPhotoThumb(pet){
+      const url = petPhotoUrl(pet);
+      const name = pet?.pet_name || "ペット";
+      if (url) {
+        return `<img class="pet-photo-thumb" src="${escapeHtml(url)}" alt="${escapeHtml(name)}の写真" loading="lazy" onerror="this.outerHTML='<div class=&quot;pet-photo-fallback&quot;>${petEmojiForPhoto(pet)}</div>';" />`;
+      }
+      return `<div class="pet-photo-fallback">${petEmojiForPhoto(pet)}</div>`;
+    }
+
     function renderPetCard(pet){
       const id = pet.pet_id || "";
       const enabled = pet.card_enabled !== false;
       return `
         <article class="pet-card">
           <div class="pet-card-head">
-            <div>
-              <h4>${escapeHtml(pet.pet_name || "ペット")}</h4>
+            <div class="pet-photo-head">
+              ${renderPetPhotoThumb(pet)}
+              <div>
+                <h4>${escapeHtml(pet.pet_name || "ペット")}</h4>
               <p>${escapeHtml(pet.species_label || pet.species || "動物種未設定")} ${pet.breed ? ` / ${escapeHtml(pet.breed)}` : ""}</p>
               <p>診察券：${escapeHtml(pet.card_no || "未発行")}</p>
               <div class="tagline">
                 <span class="tag ${pet.pet_status === "active" ? "green" : "gray"}">${pet.pet_status === "active" ? "ペット有効" : "ペット停止"}</span>
                 <span class="tag ${enabled ? "green" : "red"}">${enabled ? "診察券有効" : "診察券停止"}</span>
+                ${petPhotoUrl(pet) ? '<span class="tag green">写真あり</span>' : '<span class="tag gray">写真未登録</span>'}
+              </div>
               </div>
             </div>
             <div class="button-row" style="margin-top:0;">
