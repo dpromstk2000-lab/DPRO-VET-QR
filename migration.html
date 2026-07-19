@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="description" content="DPRO PET CARE LINE 既存システム乗り換え・患者／未来予約移行">
+  <title>DPRO PET CARE LINE｜既存システム移行</title>
+  <style>
+    :root{--bg:#f5f3ed;--card:#fffefa;--ink:#18332b;--muted:#66746e;--line:#d9e2dc;--green:#147a55;--green2:#0b563d;--blue:#245db6;--amber:#a76100;--danger:#b33636;--soft:#eaf5ef;--shadow:0 18px 48px rgba(18,55,42,.10);--radius:22px;--sans:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;min-height:100vh;font-family:var(--sans);font-size:16px;line-height:1.7;color:var(--ink);background:radial-gradient(circle at 0 0,rgba(20,122,85,.13),transparent 32%),linear-gradient(180deg,#fbfaf6,#f1eee7)}
+    button,input,select,textarea{font:inherit}.wrap{max-width:1380px;margin:auto;padding:22px 18px 60px}.hero{display:flex;justify-content:space-between;gap:18px;align-items:center;background:linear-gradient(135deg,#fff,#e8f5ed);border:1px solid var(--line);border-radius:28px;padding:24px;box-shadow:var(--shadow)}
+    .eyebrow{display:inline-flex;border:1px solid #bcd9c9;background:#fff;border-radius:999px;padding:5px 11px;font-size:13px;font-weight:900;color:var(--green2)}h1{font-size:clamp(27px,4vw,42px);line-height:1.18;margin:10px 0 5px;letter-spacing:-.04em}.hero p{margin:0;color:var(--muted);font-weight:700}.version{font-family:var(--mono);font-size:12px;text-align:right;color:#63756d;font-weight:800}
+    .safe{margin-top:14px;border:1px solid #b9dcc9;background:#edf9f2;border-radius:18px;padding:12px 15px;font-weight:800;color:#175d43}.settings{display:grid;grid-template-columns:1.25fr 1fr 1fr auto;gap:12px;margin-top:16px;background:var(--card);border:1px solid var(--line);border-radius:22px;padding:16px;box-shadow:var(--shadow);align-items:end}.field label{display:block;font-weight:900;font-size:13px;margin-bottom:5px}.field input,.field select,.field textarea{width:100%;border:1px solid #cfdad4;background:#fff;border-radius:13px;padding:11px 12px;min-height:46px;color:var(--ink)}.field textarea{min-height:96px;resize:vertical}.field input:focus,.field select:focus,.field textarea:focus{outline:0;border-color:#73b493;box-shadow:0 0 0 4px rgba(20,122,85,.10)}
+    .btn{border:0;border-radius:13px;padding:11px 15px;min-height:46px;font-weight:900;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:7px;text-decoration:none}.btn:disabled{opacity:.5;cursor:not-allowed}.btn-main{background:var(--green);color:white}.btn-main:hover{background:var(--green2)}.btn-sub{background:white;border:1px solid var(--line);color:var(--ink)}.btn-blue{background:#eaf2ff;color:#194a91;border:1px solid #bdd2f3}.btn-warn{background:#fff4df;color:#865000;border:1px solid #e6c886}.btn-danger{background:#fff0f0;color:#962f2f;border:1px solid #e5bcbc}.row{display:flex;gap:9px;flex-wrap:wrap;align-items:center}.tabs{display:flex;gap:8px;overflow:auto;margin:18px 0 14px;padding-bottom:2px}.tab{white-space:nowrap;border:1px solid var(--line);background:#fff;border-radius:999px;padding:10px 15px;font-weight:900;cursor:pointer;color:#50615a}.tab.active{background:var(--green);color:#fff;border-color:var(--green)}
+    .panel{display:none}.panel.active{display:block}.grid{display:grid;grid-template-columns:390px 1fr;gap:16px;align-items:start}.card{background:rgba(255,254,250,.97);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;margin-bottom:16px}.card h2{font-size:20px;margin:0 0 7px}.card h3{font-size:17px;margin:0 0 7px}.small{font-size:13px;color:var(--muted);font-weight:700;margin:0 0 12px}.notice{border-radius:15px;padding:11px 13px;border:1px solid var(--line);background:#f7faf8;color:#4b5d55;font-weight:800;font-size:13px;margin-top:10px}.notice.ok{background:#ebf8f0;border-color:#b7dfc8;color:#145f42}.notice.warn{background:#fff8e9;border-color:#e5cf9c;color:#7b520d}.notice.ng{background:#fff0f0;border-color:#e9bbbb;color:#922f2f}.notice.info{background:#eef4ff;border-color:#bfd1f0;color:#284c83}
+    .mapping{display:grid;grid-template-columns:1fr 1fr;gap:8px}.map-row{border:1px solid var(--line);border-radius:13px;padding:9px;background:#fff}.map-row label{font-size:12px;font-weight:900}.map-row select{width:100%;border:1px solid #d4ddd8;border-radius:10px;padding:7px;margin-top:4px}.required{color:var(--danger)}
+    .summary{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-bottom:14px}.metric{background:#fff;border:1px solid var(--line);border-radius:17px;padding:12px}.metric strong{font-size:28px;display:block;line-height:1.2}.metric span{font-size:12px;color:var(--muted);font-weight:900}.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:17px;background:#fff;max-height:620px}table{width:100%;border-collapse:collapse;min-width:900px;font-size:13px}th,td{padding:9px 10px;border-bottom:1px solid #e7ece8;text-align:left;vertical-align:top}th{position:sticky;top:0;background:#eff4f1;z-index:1;font-weight:900}.tag{display:inline-flex;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:900;border:1px solid #d4ddd8;background:#f5f7f6}.tag.create,.tag.import_priority,.tag.imported,.tag.linked{background:#e8f7ee;color:#12623f;border-color:#b6ddc6}.tag.merge,.tag.guided{background:#edf3ff;color:#28528c;border-color:#c1d3ef}.tag.skip_duplicate,.tag.manual_adjustment,.tag.manual,.tag.hold{background:#fff6e5;color:#845200;border-color:#e3ca93}.tag.error,.tag.failed,.tag.rollback_partial{background:#fff0f0;color:#942f2f;border-color:#e8baba}.confirm{border:2px solid #e4cd93;background:#fffaf0;border-radius:18px;padding:14px;margin-top:14px}.confirm code{font-family:var(--mono);font-weight:900;background:white;border:1px solid #dfd0ac;border-radius:8px;padding:3px 7px}.empty{padding:25px;text-align:center;color:var(--muted);font-weight:800}.muted{color:var(--muted)}.mono{font-family:var(--mono);font-size:12px}.hidden{display:none!important}.statusbar{position:fixed;right:18px;bottom:18px;max-width:440px;padding:13px 16px;border-radius:15px;background:#183c30;color:#fff;box-shadow:var(--shadow);font-weight:800;z-index:50;display:none}.statusbar.show{display:block}.statusbar.ng{background:#8f3131}
+    @media(max-width:980px){.settings,.grid{grid-template-columns:1fr}.version{text-align:left}.summary{grid-template-columns:repeat(2,1fr)}.mapping{grid-template-columns:1fr}.hero{display:block}}@media(max-width:560px){body{font-size:15px}.wrap{padding:12px 10px 45px}.hero,.card,.settings{border-radius:18px;padding:14px}.summary{grid-template-columns:1fr 1fr}.btn{width:100%}.row .btn{width:auto}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div><span class="eyebrow">DPRO PET CARE LINE｜STEP VET-MIGRATION-2</span><h1>既存システム乗り換え</h1><p>患者・ペット、未来の午前／午後優先受付、LINE再連携を安全に移します。</p></div>
+    <div class="version">generic migration module<br>preview → confirm → execute<br>2026-07-19</div>
+  </header>
+  <div class="safe">通常の動物病院システムとは別Workerで動作します。この画面を使わない病院の受付・診察券・患者管理には影響しません。</div>
+
+  <section class="settings">
+    <div class="field"><label for="apiUrl">乗り換え専用Worker API URL</label><input id="apiUrl" value="https://dpro-vet-migration-api.dpromstk2000.workers.dev"></div>
+    <div class="field"><label for="clinicCode">clinic_code</label><input id="clinicCode" value="dpro_vet_demo"></div>
+    <div class="field"><label for="adminCode">管理コード</label><input id="adminCode" type="password" placeholder="管理コードを入力" autocomplete="off"></div>
+    <div class="row"><button class="btn btn-main" id="saveSettings">保存</button><button class="btn btn-sub" id="clearAdmin">削除</button></div>
+  </section>
+
+  <nav class="tabs" aria-label="移行メニュー">
+    <button class="tab active" data-tab="patients">患者・ペット</button>
+    <button class="tab" data-tab="reservations">未来の優先受付</button>
+    <button class="tab" data-tab="history">移行履歴</button>
+    <button class="tab" data-tab="relink">LINE再連携</button>
+    <button class="tab" data-tab="check">導入チェック</button>
+  </nav>
+
+  <section class="panel active" id="panel-patients">
+    <div class="grid">
+      <aside>
+        <div class="card"><h2>1. 移行元とCSV</h2><div class="field"><label>移行元</label><select id="patientSource"><option value="sotomachi">ソトマチ</option><option value="other_reservation">他社予約システム</option><option value="electronic_record">電子カルテ出力</option><option value="excel">Excel・CSV管理</option><option value="paper">紙台帳の入力データ</option><option value="other">その他</option></select></div><div class="field"><label>患者CSV</label><input type="file" id="patientFile" accept=".csv,text/csv"></div><div class="row" style="margin-top:10px"><button class="btn btn-blue" id="loadPatientFile">CSVを読み込む</button><button class="btn btn-sub" id="downloadPatientTemplate">テンプレート</button></div><div id="patientFileStatus" class="notice info">CSVを読み込み、列を対応付けます。</div></div>
+        <div class="card"><h2>2. 列の対応付け</h2><p class="small">ソトマチ以外のCSVでも、右の列を選び直せば使用できます。</p><div id="patientMapping" class="mapping"><div class="empty">CSV読込後に表示します。</div></div></div>
+        <div class="card"><h2>3. 事前チェック</h2><div class="field"><label>取込メモ</label><textarea id="patientNote" placeholder="例：2026年8月 ソトマチから初回移行"></textarea></div><button class="btn btn-blue" id="previewPatients">患者CSV事前チェック</button><div id="patientPreviewStatus" class="notice">事前チェックでは患者本体を変更しません。</div></div>
+      </aside>
+      <main>
+        <div class="card"><h2>患者・ペット事前チェック結果</h2><div id="patientSummary" class="summary"></div><div id="patientResults" class="table-wrap"><div class="empty">まだ事前チェックを実行していません。</div></div><div class="confirm hidden" id="patientConfirmBox"><strong>本登録</strong><p class="small">内容を確認し、次の確認文言を入力してください： <code>既存患者移行を実行</code></p><div class="field"><input id="patientConfirmText" placeholder="確認文言を入力"></div><div class="row" style="margin-top:10px"><button class="btn btn-main" id="executePatients">患者移行を実行</button></div><div id="patientExecuteStatus" class="notice warn">実行後はLINE未連携として登録し、既存の連携済み患者は解除しません。</div></div></div>
+      </main>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-reservations">
+    <div class="grid">
+      <aside>
+        <div class="card"><h2>1. 未来予約CSV</h2><div class="field"><label>移行元</label><select id="reservationSource"><option value="sotomachi">ソトマチ</option><option value="other_reservation">他社予約システム</option><option value="excel">Excel・CSV管理</option><option value="other">その他</option></select></div><div class="field"><label>未来予約CSV</label><input type="file" id="reservationFile" accept=".csv,text/csv"></div><div class="row" style="margin-top:10px"><button class="btn btn-blue" id="loadReservationFile">CSVを読み込む</button><button class="btn btn-sub" id="downloadReservationTemplate">テンプレート</button></div><div id="reservationFileStatus" class="notice info">患者移行後に実行してください。</div></div>
+        <div class="card"><h2>2. 列の対応付け</h2><div id="reservationMapping" class="mapping"><div class="empty">CSV読込後に表示します。</div></div></div>
+        <div class="card"><h2>3. 事前チェック</h2><div class="field"><label>取込メモ</label><textarea id="reservationNote" placeholder="例：切替日以降の予約"></textarea></div><button class="btn btn-blue" id="previewReservations">未来予約事前チェック</button><div class="notice warn">10:00等の時刻確約予約は、明示的に「優先受付へ移行」と指定しない限り自動登録しません。</div></div>
+      </aside>
+      <main><div class="card"><h2>未来予約事前チェック結果</h2><div id="reservationSummary" class="summary"></div><div id="reservationResults" class="table-wrap"><div class="empty">まだ事前チェックを実行していません。</div></div><div class="confirm hidden" id="reservationConfirmBox"><strong>本登録</strong><p class="small">確認文言： <code>未来予約移行を実行</code></p><div class="field"><input id="reservationConfirmText" placeholder="確認文言を入力"></div><div class="row" style="margin-top:10px"><button class="btn btn-main" id="executeReservations">未来予約移行を実行</button></div><div id="reservationExecuteStatus" class="notice warn">午前／午後の優先受付として登録します。元の時刻はメモに保存し、診察開始時刻は保証しません。</div></div></div></main>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-history"><div class="card"><div class="row" style="justify-content:space-between"><div><h2>移行履歴</h2><p class="small">取込バッチごとの件数・状態を確認します。</p></div><button class="btn btn-blue" id="loadHistory">履歴を更新</button></div><div id="historyResults" class="table-wrap"><div class="empty">履歴を更新してください。</div></div><div class="confirm"><strong>バッチ取消の安全ルール</strong><p class="small">事前チェックのみはそのまま取消可能です。実行済み患者は、通常受付・診療・予防等で使われていない新規データだけを削除します。利用済みデータは保持します。</p></div></div></section>
+
+  <section class="panel" id="panel-relink"><div class="card"><div class="row" style="justify-content:space-between"><div><h2>LINE再連携管理</h2><p class="small">CSV移行後の飼い主とDPRO診察券の初回連携状況です。</p></div><button class="btn btn-blue" id="loadRelink">一覧を更新</button></div><div id="relinkResults" class="table-wrap"><div class="empty">一覧を更新してください。</div></div></div></section>
+
+  <section class="panel" id="panel-check"><div class="grid"><aside><div class="card"><h2>乗り換え専用モジュール確認</h2><button class="btn btn-main" id="runCheck">一括チェック</button><div class="notice">通常のdpro-vet-qr-apiではなく、乗り換え専用Workerを確認します。</div></div></aside><main><div class="card"><h2>チェック結果</h2><div id="checkResults"><div class="empty">一括チェックを実行してください。</div></div></div></main></div></section>
+</div>
+<div class="statusbar" id="statusbar"></div>
+<script>
+(() => {
+  "use strict";
+  const VERSION="VET-MIGRATION-2-HTML-20260719";
+  const $=id=>document.getElementById(id);
+  const state={patientCsv:null,reservationCsv:null,patientPreview:null,reservationPreview:null};
+  const storage={api:"dpro_vet_migration_api_url",clinic:"dpro_vet_clinic_code",admin:"dpro_vet_admin_token"};
+
+  const patientDefs=[
+    ["external_guardian_id","旧飼い主ID",false,["旧飼い主ID","飼い主ID","owner_id","guardian_id"]],
+    ["external_pet_id","旧ペットID",false,["旧ペットID","ペットID","患者ID","pet_id","patient_id"]],
+    ["guardian_name","飼い主名",true,["飼い主名","飼主名","オーナー名","氏名","guardian_name"]],
+    ["guardian_kana","ふりがな",false,["ふりがな","フリガナ","氏名カナ","guardian_kana"]],
+    ["phone","電話番号",false,["電話番号","携帯電話","電話","phone","tel"]],
+    ["email","メール",false,["メール","メールアドレス","email"]],
+    ["postal_code","郵便番号",false,["郵便番号","postal_code"]],
+    ["address","住所",false,["住所","address"]],
+    ["pet_name","ペット名",true,["ペット名","動物名","患者名","pet_name"]],
+    ["species","動物種",false,["動物種","種別","species"]],
+    ["breed","品種",false,["品種","breed"]],
+    ["sex","性別",false,["性別","sex","gender"]],
+    ["birth_date","生年月日",false,["生年月日","誕生日","birth_date"]],
+    ["age_note","年齢メモ",false,["年齢","年齢メモ","age"]],
+    ["weight_kg","体重kg",false,["体重kg","体重","weight"]],
+    ["neutered_status","避妊去勢",false,["避妊去勢","避妊・去勢","neutered"]],
+    ["allergies","アレルギー",false,["アレルギー","allergies"]],
+    ["chronic_conditions","持病",false,["持病","既往歴","chronic_conditions"]],
+    ["caution_memo","注意メモ",false,["注意メモ","注意事項","caution_memo"]],
+    ["card_no","診察券番号",false,["診察券番号","カルテ番号","患者番号","card_no"]],
+    ["memo","メモ",false,["メモ","備考","note","memo"]]
+  ];
+  const reservationDefs=[
+    ["external_reservation_id","旧予約ID",false,["旧予約ID","予約ID","reservation_id"]],
+    ["reservation_date","予約日",true,["予約日","日付","reservation_date"]],
+    ["source_exact_time","元の時刻",false,["元の時刻","予約時刻","時間","source_exact_time"]],
+    ["dpro_time_band","DPRO時間帯",false,["DPRO時間帯","時間帯","午前午後","dpro_time_band"]],
+    ["reception_type","受付種別",false,["受付種別","診療区分","予約種別","reception_type"]],
+    ["guardian_name","飼い主名",false,["飼い主名","オーナー名","氏名","guardian_name"]],
+    ["phone","電話番号",false,["電話番号","携帯電話","電話","phone","tel"]],
+    ["pet_name","ペット名",true,["ペット名","動物名","患者名","pet_name"]],
+    ["species","動物種",false,["動物種","種別","species"]],
+    ["purpose","目的",false,["目的","診療内容","予約内容","purpose"]],
+    ["symptoms_or_request","症状・要望",false,["症状・要望","症状","要望","問診","symptoms"]],
+    ["assigned_vet_name","担当獣医師",false,["担当獣医師","担当医","doctor"]],
+    ["source_status","元ステータス",false,["元ステータス","予約状況","status"]],
+    ["migration_decision","移行判定",false,["移行判定","migration_decision"]],
+    ["manual_adjustment_note","手動調整メモ",false,["手動調整メモ","備考","note"]]
+  ];
+  function normHeader(v){return String(v||"").toLowerCase().replace(/[\s_\-・/／（）()]/g,"");}
+  function escapeHtml(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+  function notify(message,ng=false){const el=$("statusbar");el.textContent=message;el.className="statusbar show"+(ng?" ng":"");clearTimeout(notify.t);notify.t=setTimeout(()=>el.className="statusbar",4500);}
+  function saveSettings(){localStorage.setItem(storage.api,$("apiUrl").value.trim());localStorage.setItem(storage.clinic,$("clinicCode").value.trim());localStorage.setItem(storage.admin,$("adminCode").value);notify("設定を保存しました。");}
+  function loadSettings(){$("apiUrl").value=localStorage.getItem(storage.api)||$("apiUrl").value;$("clinicCode").value=localStorage.getItem(storage.clinic)||$("clinicCode").value;$("adminCode").value=localStorage.getItem(storage.admin)||"";}
+  async function api(path,options={}){const base=$("apiUrl").value.trim().replace(/\/+$/,"");const res=await fetch(base+path,{method:options.method||"GET",headers:{"Content-Type":"application/json","X-Admin-Token":$("adminCode").value,...(options.headers||{})},body:options.body?JSON.stringify(options.body):undefined});const text=await res.text();let data;try{data=JSON.parse(text)}catch{data={ok:false,message:text||`HTTP ${res.status}`}}if(!res.ok||data.ok===false)throw new Error(data.message||data.error||`HTTP ${res.status}`);return data}
+  function clinic(){return $("clinicCode").value.trim()||"dpro_vet_demo"}
+  function switchTab(name){document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x.dataset.tab===name));document.querySelectorAll(".panel").forEach(x=>x.classList.toggle("active",x.id===`panel-${name}`));if(name==="history")loadHistory();if(name==="relink")loadRelink();}
+
+  async function readFile(file){const buf=await file.arrayBuffer();let text=new TextDecoder("utf-8",{fatal:false}).decode(buf);const bad=(text.match(/�/g)||[]).length;if(bad>2){try{text=new TextDecoder("shift-jis").decode(buf)}catch{}}return text.replace(/^\uFEFF/,"")}
+  function parseCSV(text){const rows=[];let row=[],field="",quoted=false;for(let i=0;i<text.length;i++){const c=text[i],n=text[i+1];if(quoted){if(c==='"'&&n==='"'){field+='"';i++}else if(c==='"'){quoted=false}else field+=c}else{if(c==='"')quoted=true;else if(c===','){row.push(field);field=""}else if(c==='\n'){row.push(field);rows.push(row);row=[];field=""}else if(c!=='\r')field+=c}}row.push(field);if(row.some(x=>x!==""))rows.push(row);const headers=(rows.shift()||[]).map(x=>x.trim());const records=rows.filter(r=>r.some(x=>String(x).trim())).map(r=>Object.fromEntries(headers.map((h,i)=>[h,r[i]??""])));return{headers,records}}
+  function buildMapping(targetId,defs,headers,prefix){const target=$(targetId);if(!headers.length){target.innerHTML='<div class="empty">CSVに列がありません。</div>';return}target.innerHTML=defs.map(([key,label,required,aliases])=>{const norms=aliases.map(normHeader);let selected=headers.find(h=>norms.includes(normHeader(h)))||"";return `<div class="map-row"><label>${escapeHtml(label)}${required?'<span class="required"> 必須</span>':''}</label><select id="${prefix}-${key}"><option value="">使用しない</option>${headers.map(h=>`<option value="${escapeHtml(h)}" ${h===selected?'selected':''}>${escapeHtml(h)}</option>`).join("")}</select></div>`}).join("")}
+  function mappedRows(csv,defs,prefix){return csv.records.map(rec=>{const out={};defs.forEach(([key])=>{const h=$(prefix+"-"+key)?.value||"";out[key]=h?rec[h]??"":""});return out})}
+  function csvText(headers,rows){const q=v=>{const s=String(v??"");return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s};return '\uFEFF'+[headers,...rows].map(r=>r.map(q).join(',')).join('\r\n')}
+  function download(name,text,type="text/csv;charset=utf-8"){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+  function renderSummary(id,s){const data=[["総行数",s.row_count||0],["登録・移行",s.valid_count||0],["重複",s.duplicate_count||0],["手動調整",s.manual_count||0],["エラー",s.error_count||0]];$(id).innerHTML=data.map(([l,v])=>`<div class="metric"><strong>${v}</strong><span>${l}</span></div>`).join("")}
+  function actionLabel(a){return({create:"新規登録",merge:"既存飼い主へ追加",skip_duplicate:"重複スキップ",import_priority:"優先受付へ移行",manual_adjustment:"手動調整",error:"エラー",imported:"取込済み",linked:"連携済み",guided:"案内済み",unlinked:"未連携",no_line:"LINE利用なし",hold:"保留"})[a]||a}
+  function renderPreview(id,rows,type){if(!rows?.length){$(id).innerHTML='<div class="empty">対象行がありません。</div>';return}const cols=type==="patients"?["行","判定","飼い主","電話","ペット","種別","診察券","確認内容"]:["行","判定","予約日","元時刻","時間帯","飼い主","ペット","目的","確認内容"];$(id).innerHTML=`<table><thead><tr>${cols.map(c=>`<th>${c}</th>`).join("")}</tr></thead><tbody>${rows.map(r=>{const n=r.normalized_data||{};const cells=type==="patients"?[r.row_no,`<span class="tag ${r.action}">${actionLabel(r.action)}</span>`,n.guardian_name,n.phone,n.pet_name,n.species_label,n.card_no,(r.messages||[]).join(" / ")]:[r.row_no,`<span class="tag ${r.action}">${actionLabel(r.action)}</span>`,n.reservation_date,n.source_exact_time,n.day_part==="morning"?"午前":n.day_part==="afternoon"?"午後":n.day_part,n.guardian_name,n.pet_name,n.purpose,(r.messages||[]).join(" / ")];return `<tr>${cells.map(c=>`<td>${typeof c==="string"&&c.startsWith("<span")?c:escapeHtml(c)}</td>`).join("")}</tr>`}).join("")}</tbody></table>`}
+
+  async function loadPatients(){const file=$("patientFile").files[0];if(!file)return notify("患者CSVを選択してください。",true);try{state.patientCsv=parseCSV(await readFile(file));buildMapping("patientMapping",patientDefs,state.patientCsv.headers,"pm");$("patientFileStatus").className="notice ok";$("patientFileStatus").textContent=`${state.patientCsv.records.length}行、${state.patientCsv.headers.length}列を読み込みました。`;notify("患者CSVを読み込みました。")}catch(e){notify(e.message,true)}}
+  async function loadReservations(){const file=$("reservationFile").files[0];if(!file)return notify("未来予約CSVを選択してください。",true);try{state.reservationCsv=parseCSV(await readFile(file));buildMapping("reservationMapping",reservationDefs,state.reservationCsv.headers,"rm");$("reservationFileStatus").className="notice ok";$("reservationFileStatus").textContent=`${state.reservationCsv.records.length}行、${state.reservationCsv.headers.length}列を読み込みました。`;notify("未来予約CSVを読み込みました。")}catch(e){notify(e.message,true)}}
+  async function previewPatients(){if(!state.patientCsv)return notify("先に患者CSVを読み込んでください。",true);try{$("previewPatients").disabled=true;const data=await api("/api/migration/patients/preview",{method:"POST",body:{clinic_code:clinic(),source_system:$("patientSource").value,file_name:$("patientFile").files[0]?.name||"",note:$("patientNote").value,actor:"管理者",rows:mappedRows(state.patientCsv,patientDefs,"pm")}});state.patientPreview=data;renderSummary("patientSummary",data.summary);renderPreview("patientResults",data.rows,"patients");$("patientConfirmBox").classList.remove("hidden");$("patientPreviewStatus").className="notice ok";$("patientPreviewStatus").textContent=`事前チェック完了。バッチID: ${data.batch.id}`;notify("患者事前チェックが完了しました。DB本体は未変更です。")}catch(e){notify(e.message,true)}finally{$("previewPatients").disabled=false}}
+  async function executePatients(){const p=state.patientPreview;if(!p)return notify("事前チェックを実行してください。",true);try{$("executePatients").disabled=true;const data=await api("/api/migration/patients/execute",{method:"POST",body:{clinic_code:clinic(),batch_id:p.batch.id,execution_token:p.execution_token,confirm_text:$("patientConfirmText").value,actor:"管理者"}});$("patientExecuteStatus").className=data.summary.failed?"notice warn":"notice ok";$("patientExecuteStatus").textContent=`完了：新規 ${data.summary.imported}／統合 ${data.summary.merged}／重複 ${data.summary.skipped}／失敗 ${data.summary.failed}`;notify("患者移行が完了しました。")}catch(e){notify(e.message,true)}finally{$("executePatients").disabled=false}}
+  async function previewReservations(){if(!state.reservationCsv)return notify("先に未来予約CSVを読み込んでください。",true);try{$("previewReservations").disabled=true;const data=await api("/api/migration/reservations/preview",{method:"POST",body:{clinic_code:clinic(),source_system:$("reservationSource").value,file_name:$("reservationFile").files[0]?.name||"",note:$("reservationNote").value,actor:"管理者",rows:mappedRows(state.reservationCsv,reservationDefs,"rm")}});state.reservationPreview=data;renderSummary("reservationSummary",data.summary);renderPreview("reservationResults",data.rows,"reservations");$("reservationConfirmBox").classList.remove("hidden");notify("未来予約事前チェックが完了しました。予約本体は未変更です。")}catch(e){notify(e.message,true)}finally{$("previewReservations").disabled=false}}
+  async function executeReservations(){const p=state.reservationPreview;if(!p)return notify("事前チェックを実行してください。",true);try{$("executeReservations").disabled=true;const data=await api("/api/migration/reservations/execute",{method:"POST",body:{clinic_code:clinic(),batch_id:p.batch.id,execution_token:p.execution_token,confirm_text:$("reservationConfirmText").value,actor:"管理者"}});$("reservationExecuteStatus").className=data.summary.failed?"notice warn":"notice ok";$("reservationExecuteStatus").textContent=`完了：優先受付 ${data.summary.imported}／重複 ${data.summary.skipped}／手動調整 ${data.summary.manual}／失敗 ${data.summary.failed}`;notify("未来予約移行が完了しました。")}catch(e){notify(e.message,true)}finally{$("executeReservations").disabled=false}}
+
+  async function loadHistory(){try{const d=await api(`/api/migration/batches?clinic_code=${encodeURIComponent(clinic())}&limit=100`);const rows=d.items||[];$("historyResults").innerHTML=rows.length?`<table><thead><tr><th>作成日時</th><th>種類</th><th>移行元</th><th>状態</th><th>総数</th><th>取込</th><th>重複/手動/失敗</th><th>操作</th></tr></thead><tbody>${rows.map(b=>`<tr><td>${escapeHtml(new Date(b.created_at).toLocaleString("ja-JP"))}<br><span class="mono">${escapeHtml(b.id)}</span></td><td>${b.migration_type==="patients"?"患者・ペット":"未来予約"}</td><td>${escapeHtml(b.source_system)}</td><td><span class="tag ${b.status}">${escapeHtml(b.status)}</span></td><td>${b.row_count}</td><td>${b.imported_count+b.merged_count}</td><td>${b.duplicate_count}/${b.manual_count}/${b.failed_count}</td><td><button class="btn btn-danger cancel-batch" data-id="${b.id}">取消</button></td></tr>`).join("")}</tbody></table>`:'<div class="empty">移行履歴はありません。</div>';document.querySelectorAll(".cancel-batch").forEach(btn=>btn.onclick=()=>cancelBatch(btn.dataset.id))}catch(e){notify(e.message,true)}}
+  async function cancelBatch(id){const text=prompt("安全確認のため『移行バッチを取消』と入力してください。");if(text===null)return;try{const d=await api("/api/migration/batch/cancel",{method:"POST",body:{clinic_code:clinic(),batch_id:id,confirm_text:text,actor:"管理者"}});notify(`${d.message} 削除:${d.summary?.deleted||0} 保持:${d.summary?.blocked||0}`);loadHistory()}catch(e){notify(e.message,true)}}
+  async function loadRelink(){try{const d=await api(`/api/migration/relink?clinic_code=${encodeURIComponent(clinic())}`);const rows=d.items||[];$("relinkResults").innerHTML=rows.length?`<table><thead><tr><th>飼い主</th><th>電話</th><th>ペット</th><th>LINE</th><th>移行進捗</th><th>確認</th><th>更新</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${escapeHtml(r.guardian_name)}<br><span class="mono">${escapeHtml(r.guardian_no||"")}</span></td><td>${escapeHtml(r.phone||"")}</td><td>${escapeHtml(r.pet_names||"")}</td><td>${r.line_user_id?'<span class="tag linked">DPRO連携済み</span>':'<span class="tag unlinked">未連携</span>'}</td><td><select id="rs-${r.guardian_id}"><option value="unlinked" ${r.migration_relink_status==='unlinked'?'selected':''}>未連携</option><option value="guided" ${r.migration_relink_status==='guided'?'selected':''}>案内済み</option><option value="linked" ${r.migration_relink_status==='linked'?'selected':''}>連携済み</option><option value="no_line" ${r.migration_relink_status==='no_line'?'selected':''}>LINE利用なし</option><option value="hold" ${r.migration_relink_status==='hold'?'selected':''}>保留</option></select></td><td><label><input type="checkbox" id="rc-${r.guardian_id}" ${r.staff_confirmed?'checked':''}> スタッフ確認</label></td><td><button class="btn btn-blue relink-update" data-id="${r.guardian_id}">保存</button></td></tr>`).join("")}</tbody></table>`:'<div class="empty">患者移行後の対象者はいません。</div>';document.querySelectorAll(".relink-update").forEach(btn=>btn.onclick=()=>updateRelink(btn.dataset.id))}catch(e){notify(e.message,true)}}
+  async function updateRelink(id){try{await api("/api/migration/relink/update",{method:"POST",body:{clinic_code:clinic(),guardian_id:id,status:$("rs-"+id).value,staff_confirmed:$("rc-"+id).checked,contact_method:"line"}});notify("LINE再連携状況を保存しました。");loadRelink()}catch(e){notify(e.message,true)}}
+  async function runCheck(){try{$("runCheck").disabled=true;const health=await fetch($("apiUrl").value.trim().replace(/\/+$/,"")+"/api/health").then(r=>r.json());const db=await api(`/api/migration/check?clinic_code=${encodeURIComponent(clinic())}`);const checks=[["乗り換え専用Worker",health.ok,health.version],["通常APIと分離",health.separated_from_normal_api,"dpro-vet-qr-apiを上書きしない"],["clinic_code",Boolean(db.clinic?.id),db.clinic?.clinic_name||""],["移行SQL",Boolean(db.database?.ok),(db.database?.missing_tables||[]).join(", ")||"必要テーブルあり"],["通常システム非変更",db.normal_system_unchanged===true,"任意モジュール"]];$("checkResults").innerHTML=checks.map(([l,ok,d])=>`<div class="notice ${ok?'ok':'ng'}"><strong>${ok?'OK':'NG'}｜${escapeHtml(l)}</strong><br>${escapeHtml(d)}</div>`).join("");notify(checks.every(x=>x[1])?"乗り換えモジュールは正常です。":"NG項目を確認してください。",!checks.every(x=>x[1]))}catch(e){notify(e.message,true)}finally{$("runCheck").disabled=false}}
+
+  document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>switchTab(b.dataset.tab)));
+  $("saveSettings").onclick=saveSettings;$("clearAdmin").onclick=()=>{$("adminCode").value="";localStorage.removeItem(storage.admin);notify("保存した管理コードを削除しました。")} ;
+  $("loadPatientFile").onclick=loadPatients;$("loadReservationFile").onclick=loadReservations;$("previewPatients").onclick=previewPatients;$("executePatients").onclick=executePatients;$("previewReservations").onclick=previewReservations;$("executeReservations").onclick=executeReservations;$("loadHistory").onclick=loadHistory;$("loadRelink").onclick=loadRelink;$("runCheck").onclick=runCheck;
+  $("downloadPatientTemplate").onclick=()=>download("vet_existing_patients_migration_template.csv",csvText(["external_guardian_id","external_pet_id","guardian_name","guardian_kana","phone","email","postal_code","address","pet_name","species","breed","sex","birth_date","age_note","weight_kg","neutered_status","allergies","chronic_conditions","caution_memo","card_no","memo"],[["OWNER-001","PET-001","山田 花子","やまだ はなこ","090-1234-5678","hanako@example.com","000-0000","福岡県サンプル市1-2-3","ココ","犬","トイプードル","女の子","2019-04-12","","4.2","済み","特になし","","怖がり","VET-100001","移行サンプル"]]));
+  $("downloadReservationTemplate").onclick=()=>download("vet_future_priority_reception_migration_template.csv",csvText(["external_reservation_id","reservation_date","source_exact_time","dpro_time_band","reception_type","guardian_name","phone","pet_name","species","purpose","symptoms_or_request","assigned_vet_name","source_status","migration_decision","manual_adjustment_note"],[["RES-001","2026-08-01","10:30","午前","通常診察","山田 花子","090-1234-5678","ココ","犬","再診","皮膚のかゆみ","佐藤先生","confirmed","優先受付へ移行","元の10:30は時刻保証なし"]]));
+  loadSettings();
+  console.info(VERSION);
+})();
+</script>
+</body>
+</html>
