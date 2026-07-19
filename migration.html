@@ -21,7 +21,7 @@
 <body>
 <div class="wrap">
   <header class="hero">
-    <div><span class="eyebrow">DPRO PET CARE LINE｜STEP VET-MIGRATION-2</span><h1>既存システム乗り換え</h1><p>患者・ペット、未来の午前／午後優先受付、LINE再連携を安全に移します。</p></div>
+    <div><span class="eyebrow">DPRO PET CARE LINE｜STEP VET-MIGRATION-2-R1</span><h1>既存システム乗り換え</h1><p>患者・ペット、未来の午前／午後優先受付、LINE再連携を安全に移します。</p></div>
     <div class="version">generic migration module<br>preview → confirm → execute<br>2026-07-19</div>
   </header>
   <div class="safe">通常の動物病院システムとは別Workerで動作します。この画面を使わない病院の受付・診察券・患者管理には影響しません。</div>
@@ -75,7 +75,7 @@
 <script>
 (() => {
   "use strict";
-  const VERSION="VET-MIGRATION-2-HTML-20260719";
+  const VERSION="VET-MIGRATION-2-R1-AUTO-MAPPING-20260719";
   const $=id=>document.getElementById(id);
   const state={patientCsv:null,reservationCsv:null,patientPreview:null,reservationPreview:null};
   const storage={api:"dpro_vet_migration_api_url",clinic:"dpro_vet_clinic_code",admin:"dpro_vet_admin_token"};
@@ -131,7 +131,7 @@
 
   async function readFile(file){const buf=await file.arrayBuffer();let text=new TextDecoder("utf-8",{fatal:false}).decode(buf);const bad=(text.match(/�/g)||[]).length;if(bad>2){try{text=new TextDecoder("shift-jis").decode(buf)}catch{}}return text.replace(/^\uFEFF/,"")}
   function parseCSV(text){const rows=[];let row=[],field="",quoted=false;for(let i=0;i<text.length;i++){const c=text[i],n=text[i+1];if(quoted){if(c==='"'&&n==='"'){field+='"';i++}else if(c==='"'){quoted=false}else field+=c}else{if(c==='"')quoted=true;else if(c===','){row.push(field);field=""}else if(c==='\n'){row.push(field);rows.push(row);row=[];field=""}else if(c!=='\r')field+=c}}row.push(field);if(row.some(x=>x!==""))rows.push(row);const headers=(rows.shift()||[]).map(x=>x.trim());const records=rows.filter(r=>r.some(x=>String(x).trim())).map(r=>Object.fromEntries(headers.map((h,i)=>[h,r[i]??""])));return{headers,records}}
-  function buildMapping(targetId,defs,headers,prefix){const target=$(targetId);if(!headers.length){target.innerHTML='<div class="empty">CSVに列がありません。</div>';return}target.innerHTML=defs.map(([key,label,required,aliases])=>{const norms=aliases.map(normHeader);let selected=headers.find(h=>norms.includes(normHeader(h)))||"";return `<div class="map-row"><label>${escapeHtml(label)}${required?'<span class="required"> 必須</span>':''}</label><select id="${prefix}-${key}"><option value="">使用しない</option>${headers.map(h=>`<option value="${escapeHtml(h)}" ${h===selected?'selected':''}>${escapeHtml(h)}</option>`).join("")}</select></div>`}).join("")}
+  function buildMapping(targetId,defs,headers,prefix){const target=$(targetId);if(!headers.length){target.innerHTML='<div class="empty">CSVに列がありません。</div>';return}target.innerHTML=defs.map(([key,label,required,aliases])=>{const norms=[key,...aliases].map(normHeader);let selected=headers.find(h=>norms.includes(normHeader(h)))||"";return `<div class="map-row"><label>${escapeHtml(label)}${required?'<span class="required"> 必須</span>':''}</label><select id="${prefix}-${key}"><option value="">使用しない</option>${headers.map(h=>`<option value="${escapeHtml(h)}" ${h===selected?'selected':''}>${escapeHtml(h)}</option>`).join("")}</select></div>`}).join("")}
   function mappedRows(csv,defs,prefix){return csv.records.map(rec=>{const out={};defs.forEach(([key])=>{const h=$(prefix+"-"+key)?.value||"";out[key]=h?rec[h]??"":""});return out})}
   function csvText(headers,rows){const q=v=>{const s=String(v??"");return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s};return '\uFEFF'+[headers,...rows].map(r=>r.map(q).join(',')).join('\r\n')}
   function download(name,text,type="text/csv;charset=utf-8"){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
