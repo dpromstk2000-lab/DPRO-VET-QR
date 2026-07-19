@@ -21,7 +21,7 @@
 <body>
 <div class="wrap">
   <header class="hero">
-    <div><span class="eyebrow">DPRO PET CARE LINE｜STEP VET-MIGRATION-2-R2</span><h1>既存システム乗り換え</h1><p>患者・ペット、未来の午前／午後優先受付、LINE再連携を安全に移します。</p></div>
+    <div><span class="eyebrow">DPRO PET CARE LINE｜STEP VET-MIGRATION-2-R3</span><h1>既存システム乗り換え</h1><p>患者・ペット、未来の午前／午後優先受付、LINE再連携を安全に移します。</p></div>
     <div class="version">generic migration module<br>preview → confirm → execute<br>2026-07-19</div>
   </header>
   <div class="safe">通常の動物病院システムとは別Workerで動作します。この画面を使わない病院の受付・診察券・患者管理には影響しません。</div>
@@ -142,7 +142,51 @@
   async function loadPatients(){const file=$("patientFile").files[0];if(!file)return notify("患者CSVを選択してください。",true);try{state.patientCsv=parseCSV(await readFile(file));buildMapping("patientMapping",patientDefs,state.patientCsv.headers,"pm");$("patientFileStatus").className="notice ok";$("patientFileStatus").textContent=`${state.patientCsv.records.length}行、${state.patientCsv.headers.length}列を読み込みました。`;notify("患者CSVを読み込みました。")}catch(e){notify(e.message,true)}}
   async function loadReservations(){const file=$("reservationFile").files[0];if(!file)return notify("未来予約CSVを選択してください。",true);try{state.reservationCsv=parseCSV(await readFile(file));buildMapping("reservationMapping",reservationDefs,state.reservationCsv.headers,"rm");$("reservationFileStatus").className="notice ok";$("reservationFileStatus").textContent=`${state.reservationCsv.records.length}行、${state.reservationCsv.headers.length}列を読み込みました。`;notify("未来予約CSVを読み込みました。")}catch(e){notify(e.message,true)}}
   async function previewPatients(){if(!state.patientCsv)return notify("先に患者CSVを読み込んでください。",true);try{$("previewPatients").disabled=true;const data=await api("/api/migration/patients/preview",{method:"POST",body:{clinic_code:clinic(),source_system:$("patientSource").value,file_name:$("patientFile").files[0]?.name||"",note:$("patientNote").value,actor:"管理者",rows:mappedRows(state.patientCsv,patientDefs,"pm")}});state.patientPreview=data;renderSummary("patientSummary",data.summary);renderPreview("patientResults",data.rows,"patients");$("patientConfirmBox").classList.remove("hidden");$("patientPreviewStatus").className="notice ok";$("patientPreviewStatus").textContent=`事前チェック完了。バッチID: ${data.batch.id}`;notify("患者事前チェックが完了しました。DB本体は未変更です。")}catch(e){notify(e.message,true)}finally{$("previewPatients").disabled=false}}
-  async function executePatients(){const p=state.patientPreview;if(!p)return notify("事前チェックを実行してください。",true);try{$("executePatients").disabled=true;let first=true;let data=null;do{data=await api("/api/migration/patients/execute",{method:"POST",body:{clinic_code:clinic(),batch_id:p.batch.id,execution_token:p.execution_token,confirm_text:$("patientConfirmText").value,actor:"管理者",retry_failed:first}});first=false;$("patientExecuteStatus").className="notice info";$("patientExecuteStatus").textContent=data.done?`完了：新規 ${data.summary.imported}／統合 ${data.summary.merged}／重複 ${data.summary.skipped}／失敗 ${data.summary.failed}`:`処理中：残り ${data.summary.pending}件（登録 ${data.summary.imported}／失敗 ${data.summary.failed}）`;if(!data.done)await new Promise(r=>setTimeout(r,350));}while(data&&!data.done);$("patientExecuteStatus").className=data.summary.failed?"notice warn":"notice ok";notify(data.summary.failed?"患者移行は完了しましたが、失敗行があります。":"患者移行が完了しました。",Boolean(data.summary.failed))}catch(e){$("patientExecuteStatus").className="notice ng";$("patientExecuteStatus").textContent=e.message;notify(e.message,true)}finally{$("executePatients").disabled=false}}
+  function patientFailureHtml(rows){
+    if(!Array.isArray(rows)||!rows.length)return "";
+    return `<div style="margin-top:10px"><strong>失敗内容</strong>${rows.map(r=>`<div class="notice ng">行${escapeHtml(r.row_no)}｜${escapeHtml(r.guardian_name||"-")}／${escapeHtml(r.pet_name||"-")}<br>${escapeHtml(r.error_message||"取込に失敗しました。")}</div>`).join("")}<div class="notice info">設定修正後は、同じ「患者移行を実行」ボタンで失敗行だけ再試行できます。</div></div>`;
+  }
+  async function executePatients(){
+    const p=state.patientPreview;
+    if(!p)return notify("事前チェックを実行してください。",true);
+    try{
+      $("executePatients").disabled=true;
+      let first=true;
+      let data=null;
+      do{
+        data=await api("/api/migration/patients/execute",{
+          method:"POST",
+          body:{
+            clinic_code:clinic(),
+            batch_id:p.batch.id,
+            execution_token:p.execution_token,
+            confirm_text:$("patientConfirmText").value,
+            actor:"管理者",
+            retry_failed:first
+          }
+        });
+        first=false;
+        $("patientExecuteStatus").className="notice info";
+        $("patientExecuteStatus").textContent=data.done
+          ?`完了：新規 ${data.summary.imported}／統合 ${data.summary.merged}／重複 ${data.summary.skipped}／失敗 ${data.summary.failed}`
+          :`処理中：残り ${data.summary.pending}件（登録 ${data.summary.imported}／失敗 ${data.summary.failed}）`;
+        if(!data.done)await new Promise(r=>setTimeout(r,350));
+      }while(data&&!data.done);
+
+      $("patientExecuteStatus").className=data.summary.failed?"notice warn":"notice ok";
+      $("patientExecuteStatus").innerHTML=
+        `完了：新規 ${data.summary.imported}／統合 ${data.summary.merged}／重複 ${data.summary.skipped}／失敗 ${data.summary.failed}`+
+        patientFailureHtml(data.failed_rows);
+      $("executePatients").textContent=data.summary.failed?"失敗行を再試行":"患者移行を実行";
+      notify(data.summary.failed?"患者移行は完了しましたが、失敗理由を確認してください。":"患者移行が完了しました。",Boolean(data.summary.failed));
+    }catch(e){
+      $("patientExecuteStatus").className="notice ng";
+      $("patientExecuteStatus").textContent=e.message;
+      notify(e.message,true);
+    }finally{
+      $("executePatients").disabled=false;
+    }
+  }
   async function previewReservations(){if(!state.reservationCsv)return notify("先に未来予約CSVを読み込んでください。",true);try{$("previewReservations").disabled=true;const data=await api("/api/migration/reservations/preview",{method:"POST",body:{clinic_code:clinic(),source_system:$("reservationSource").value,file_name:$("reservationFile").files[0]?.name||"",note:$("reservationNote").value,actor:"管理者",rows:mappedRows(state.reservationCsv,reservationDefs,"rm")}});state.reservationPreview=data;renderSummary("reservationSummary",data.summary);renderPreview("reservationResults",data.rows,"reservations");$("reservationConfirmBox").classList.remove("hidden");notify("未来予約事前チェックが完了しました。予約本体は未変更です。")}catch(e){notify(e.message,true)}finally{$("previewReservations").disabled=false}}
   async function executeReservations(){const p=state.reservationPreview;if(!p)return notify("事前チェックを実行してください。",true);try{$("executeReservations").disabled=true;const data=await api("/api/migration/reservations/execute",{method:"POST",body:{clinic_code:clinic(),batch_id:p.batch.id,execution_token:p.execution_token,confirm_text:$("reservationConfirmText").value,actor:"管理者"}});$("reservationExecuteStatus").className=data.summary.failed?"notice warn":"notice ok";$("reservationExecuteStatus").textContent=`完了：優先受付 ${data.summary.imported}／重複 ${data.summary.skipped}／手動調整 ${data.summary.manual}／失敗 ${data.summary.failed}`;notify("未来予約移行が完了しました。")}catch(e){notify(e.message,true)}finally{$("executeReservations").disabled=false}}
 
@@ -150,7 +194,28 @@
   async function cancelBatch(id){const text=prompt("安全確認のため『移行バッチを取消』と入力してください。");if(text===null)return;try{const d=await api("/api/migration/batch/cancel",{method:"POST",body:{clinic_code:clinic(),batch_id:id,confirm_text:text,actor:"管理者"}});notify(`${d.message} 削除:${d.summary?.deleted||0} 保持:${d.summary?.blocked||0}`);loadHistory()}catch(e){notify(e.message,true)}}
   async function loadRelink(){try{const d=await api(`/api/migration/relink?clinic_code=${encodeURIComponent(clinic())}`);const rows=d.items||[];$("relinkResults").innerHTML=rows.length?`<table><thead><tr><th>飼い主</th><th>電話</th><th>ペット</th><th>LINE</th><th>移行進捗</th><th>確認</th><th>更新</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${escapeHtml(r.guardian_name)}<br><span class="mono">${escapeHtml(r.guardian_no||"")}</span></td><td>${escapeHtml(r.phone||"")}</td><td>${escapeHtml(r.pet_names||"")}</td><td>${r.line_user_id?'<span class="tag linked">DPRO連携済み</span>':'<span class="tag unlinked">未連携</span>'}</td><td><select id="rs-${r.guardian_id}"><option value="unlinked" ${r.migration_relink_status==='unlinked'?'selected':''}>未連携</option><option value="guided" ${r.migration_relink_status==='guided'?'selected':''}>案内済み</option><option value="linked" ${r.migration_relink_status==='linked'?'selected':''}>連携済み</option><option value="no_line" ${r.migration_relink_status==='no_line'?'selected':''}>LINE利用なし</option><option value="hold" ${r.migration_relink_status==='hold'?'selected':''}>保留</option></select></td><td><label><input type="checkbox" id="rc-${r.guardian_id}" ${r.staff_confirmed?'checked':''}> スタッフ確認</label></td><td><button class="btn btn-blue relink-update" data-id="${r.guardian_id}">保存</button></td></tr>`).join("")}</tbody></table>`:'<div class="empty">患者移行後の対象者はいません。</div>';document.querySelectorAll(".relink-update").forEach(btn=>btn.onclick=()=>updateRelink(btn.dataset.id))}catch(e){notify(e.message,true)}}
   async function updateRelink(id){try{await api("/api/migration/relink/update",{method:"POST",body:{clinic_code:clinic(),guardian_id:id,status:$("rs-"+id).value,staff_confirmed:$("rc-"+id).checked,contact_method:"line"}});notify("LINE再連携状況を保存しました。");loadRelink()}catch(e){notify(e.message,true)}}
-  async function runCheck(){try{$("runCheck").disabled=true;const health=await fetch($("apiUrl").value.trim().replace(/\/+$/,"")+"/api/health").then(r=>r.json());const db=await api(`/api/migration/check?clinic_code=${encodeURIComponent(clinic())}`);const checks=[["乗り換え専用Worker",health.ok,health.version],["通常APIと分離",health.separated_from_normal_api,"dpro-vet-qr-apiを上書きしない"],["clinic_code",Boolean(db.clinic?.id),db.clinic?.clinic_name||""],["移行SQL",Boolean(db.database?.ok),(db.database?.missing_tables||[]).join(", ")||"必要テーブルあり"],["通常システム非変更",db.normal_system_unchanged===true,"任意モジュール"]];$("checkResults").innerHTML=checks.map(([l,ok,d])=>`<div class="notice ${ok?'ok':'ng'}"><strong>${ok?'OK':'NG'}｜${escapeHtml(l)}</strong><br>${escapeHtml(d)}</div>`).join("");notify(checks.every(x=>x[1])?"乗り換えモジュールは正常です。":"NG項目を確認してください。",!checks.every(x=>x[1]))}catch(e){notify(e.message,true)}finally{$("runCheck").disabled=false}}
+  async function runCheck(){
+    try{
+      $("runCheck").disabled=true;
+      const health=await fetch($("apiUrl").value.trim().replace(/\/+$/,"")+"/api/health").then(r=>r.json());
+      const db=await api(`/api/migration/check?clinic_code=${encodeURIComponent(clinic())}`);
+      const bridge=db.normal_api_bridge||{};
+      const checks=[
+        ["乗り換え専用Worker",health.ok,health.version],
+        ["通常APIと分離",health.separated_from_normal_api,"dpro-vet-qr-apiを上書きしない"],
+        ["clinic_code",Boolean(db.clinic?.id),db.clinic?.clinic_name||""],
+        ["移行SQL",Boolean(db.database?.ok),(db.database?.missing_tables||[]).join(", ")||"必要テーブルあり"],
+        ["通常VET登録認証",Boolean(bridge.ok),bridge.message||"NORMAL_VET_ADMIN_TOKENを確認"],
+        ["通常システム非変更",db.normal_system_unchanged===true,"任意モジュール"]
+      ];
+      $("checkResults").innerHTML=checks.map(([l,ok,d])=>`<div class="notice ${ok?'ok':'ng'}"><strong>${ok?'OK':'NG'}｜${escapeHtml(l)}</strong><br>${escapeHtml(d)}</div>`).join("");
+      notify(checks.every(x=>x[1])?"乗り換えモジュールは正常です。":"NG項目を確認してください。",!checks.every(x=>x[1]));
+    }catch(e){
+      notify(e.message,true);
+    }finally{
+      $("runCheck").disabled=false;
+    }
+  }
 
   document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>switchTab(b.dataset.tab)));
   $("saveSettings").onclick=saveSettings;$("clearAdmin").onclick=()=>{$("adminCode").value="";localStorage.removeItem(storage.admin);notify("保存した管理コードを削除しました。")} ;
