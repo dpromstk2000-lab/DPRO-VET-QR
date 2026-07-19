@@ -14,14 +14,29 @@
     .btn{border:0;border-radius:13px;padding:11px 15px;min-height:46px;font-weight:900;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:7px;text-decoration:none}.btn:disabled{opacity:.5;cursor:not-allowed}.btn-main{background:var(--green);color:white}.btn-main:hover{background:var(--green2)}.btn-sub{background:white;border:1px solid var(--line);color:var(--ink)}.btn-blue{background:#eaf2ff;color:#194a91;border:1px solid #bdd2f3}.btn-warn{background:#fff4df;color:#865000;border:1px solid #e6c886}.btn-danger{background:#fff0f0;color:#962f2f;border:1px solid #e5bcbc}.row{display:flex;gap:9px;flex-wrap:wrap;align-items:center}.tabs{display:flex;gap:8px;overflow:auto;margin:18px 0 14px;padding-bottom:2px}.tab{white-space:nowrap;border:1px solid var(--line);background:#fff;border-radius:999px;padding:10px 15px;font-weight:900;cursor:pointer;color:#50615a}.tab.active{background:var(--green);color:#fff;border-color:var(--green)}
     .panel{display:none}.panel.active{display:block}.grid{display:grid;grid-template-columns:390px 1fr;gap:16px;align-items:start}.card{background:rgba(255,254,250,.97);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;margin-bottom:16px}.card h2{font-size:20px;margin:0 0 7px}.card h3{font-size:17px;margin:0 0 7px}.small{font-size:13px;color:var(--muted);font-weight:700;margin:0 0 12px}.notice{border-radius:15px;padding:11px 13px;border:1px solid var(--line);background:#f7faf8;color:#4b5d55;font-weight:800;font-size:13px;margin-top:10px}.notice.ok{background:#ebf8f0;border-color:#b7dfc8;color:#145f42}.notice.warn{background:#fff8e9;border-color:#e5cf9c;color:#7b520d}.notice.ng{background:#fff0f0;border-color:#e9bbbb;color:#922f2f}.notice.info{background:#eef4ff;border-color:#bfd1f0;color:#284c83}
     .mapping{display:grid;grid-template-columns:1fr 1fr;gap:8px}.map-row{border:1px solid var(--line);border-radius:13px;padding:9px;background:#fff}.map-row label{font-size:12px;font-weight:900}.map-row select{width:100%;border:1px solid #d4ddd8;border-radius:10px;padding:7px;margin-top:4px}.required{color:var(--danger)}
-    .summary{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-bottom:14px}.metric{background:#fff;border:1px solid var(--line);border-radius:17px;padding:12px}.metric strong{font-size:28px;display:block;line-height:1.2}.metric span{font-size:12px;color:var(--muted);font-weight:900}.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:17px;background:#fff;max-height:620px}table{width:100%;border-collapse:collapse;min-width:900px;font-size:13px}th,td{padding:9px 10px;border-bottom:1px solid #e7ece8;text-align:left;vertical-align:top}th{position:sticky;top:0;background:#eff4f1;z-index:1;font-weight:900}.tag{display:inline-flex;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:900;border:1px solid #d4ddd8;background:#f5f7f6}.tag.create,.tag.import_priority,.tag.imported,.tag.linked{background:#e8f7ee;color:#12623f;border-color:#b6ddc6}.tag.merge,.tag.guided{background:#edf3ff;color:#28528c;border-color:#c1d3ef}.tag.skip_duplicate,.tag.manual_adjustment,.tag.manual,.tag.hold{background:#fff6e5;color:#845200;border-color:#e3ca93}.tag.error,.tag.failed,.tag.rollback_partial{background:#fff0f0;color:#942f2f;border-color:#e8baba}.confirm{border:2px solid #e4cd93;background:#fffaf0;border-radius:18px;padding:14px;margin-top:14px}.confirm code{font-family:var(--mono);font-weight:900;background:white;border:1px solid #dfd0ac;border-radius:8px;padding:3px 7px}.empty{padding:25px;text-align:center;color:var(--muted);font-weight:800}.muted{color:var(--muted)}.mono{font-family:var(--mono);font-size:12px}.hidden{display:none!important}.statusbar{position:fixed;right:18px;bottom:18px;max-width:440px;padding:13px 16px;border-radius:15px;background:#183c30;color:#fff;box-shadow:var(--shadow);font-weight:800;z-index:50;display:none}.statusbar.show{display:block}.statusbar.ng{background:#8f3131}
+    .summary{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-bottom:14px}.metric{background:#fff;border:1px solid var(--line);border-radius:17px;padding:12px}.metric strong{font-size:28px;display:block;line-height:1.2}.metric span{font-size:12px;color:var(--muted);font-weight:900}.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:17px;background:#fff;max-height:620px}table{width:100%;border-collapse:collapse;min-width:900px;font-size:13px}th,td{padding:9px 10px;border-bottom:1px solid #e7ece8;text-align:left;vertical-align:top}th{position:sticky;top:0;background:#eff4f1;z-index:1;font-weight:900}.tag{display:inline-flex;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:900;border:1px solid #d4ddd8;background:#f5f7f6}.tag.create,.tag.import_priority,.tag.imported,.tag.linked{background:#e8f7ee;color:#12623f;border-color:#b6ddc6}.tag.merge,.tag.guided{background:#edf3ff;color:#28528c;border-color:#c1d3ef}.tag.skip_duplicate,.tag.manual_adjustment,.tag.manual,.tag.hold{background:#fff6e5;color:#845200;border-color:#e3ca93}.tag.error,.tag.failed,.tag.rollback_partial{background:#fff0f0;color:#942f2f;border-color:#e8baba}.confirm{border:2px solid #e4cd93;background:#fffaf0;border-radius:18px;padding:14px;margin-top:14px}.confirm code{font-family:var(--mono);font-weight:900;background:white;border:1px solid #dfd0ac;border-radius:8px;padding:3px 7px}.empty{padding:25px;text-align:center;color:var(--muted);font-weight:800}.muted{color:var(--muted)}.mono{font-family:var(--mono);font-size:12px}.hidden{display:none!important}
+    .relink-guide{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:12px 0 14px;padding:12px 14px;border:1px solid #c8d9d0;border-radius:15px;background:#f5faf7;font-weight:800;color:#35564a}
+    .relink-guide strong{color:var(--green2)}
+    .relink-row.is-dirty td{background:#fffaf0}
+    .relink-row.is-saving td{background:#eef4ff}
+    .relink-row.is-saved td{background:#eff9f3}
+    .save-state{display:block;margin-top:6px;font-size:12px;font-weight:900;white-space:nowrap}
+    .save-state.idle{color:var(--muted)}
+    .save-state.dirty{color:#956000}
+    .save-state.saving{color:#245db6}
+    .save-state.saved{color:#147a55}
+    .save-state.error{color:#b33636}
+    .relink-save.btn-dirty{background:#a76100;color:#fff;border-color:#a76100}
+    .relink-save.btn-saved{background:#e8f7ee;color:#12623f;border-color:#b6ddc6}
+
+    .statusbar{position:fixed;right:18px;bottom:18px;max-width:440px;padding:13px 16px;border-radius:15px;background:#183c30;color:#fff;box-shadow:var(--shadow);font-weight:800;z-index:50;display:none}.statusbar.show{display:block}.statusbar.ng{background:#8f3131}
     @media(max-width:980px){.settings,.grid{grid-template-columns:1fr}.version{text-align:left}.summary{grid-template-columns:repeat(2,1fr)}.mapping{grid-template-columns:1fr}.hero{display:block}}@media(max-width:560px){body{font-size:15px}.wrap{padding:12px 10px 45px}.hero,.card,.settings{border-radius:18px;padding:14px}.summary{grid-template-columns:1fr 1fr}.btn{width:100%}.row .btn{width:auto}}
   </style>
 </head>
 <body>
 <div class="wrap">
   <header class="hero">
-    <div><span class="eyebrow">DPRO PET CARE LINE｜STEP VET-MIGRATION-2-R4</span><h1>既存システム乗り換え</h1><p>患者・ペット、未来の午前／午後優先受付、LINE再連携を安全に移します。</p></div>
+    <div><span class="eyebrow">DPRO PET CARE LINE｜STEP VET-MIGRATION-2-R4-R4</span><h1>既存システム乗り換え</h1><p>患者・ペット、未来の午前／午後優先受付、LINE再連携を安全に移します。</p></div>
     <div class="version">generic migration module<br>preview → confirm → execute<br>2026-07-19</div>
   </header>
   <div class="safe">通常の動物病院システムとは別Workerで動作します。この画面を使わない病院の受付・診察券・患者管理には影響しません。</div>
@@ -67,7 +82,7 @@
 
   <section class="panel" id="panel-history"><div class="card"><div class="row" style="justify-content:space-between"><div><h2>移行履歴</h2><p class="small">取込バッチごとの件数・状態を確認します。</p></div><button class="btn btn-blue" id="loadHistory">履歴を更新</button></div><div id="historyResults" class="table-wrap"><div class="empty">履歴を更新してください。</div></div><div class="confirm"><strong>バッチ取消の安全ルール</strong><p class="small">事前チェックのみはそのまま取消可能です。実行済み患者は、通常受付・診療・予防等で使われていない新規データだけを削除します。利用済みデータは保持します。</p></div></div></section>
 
-  <section class="panel" id="panel-relink"><div class="card"><div class="row" style="justify-content:space-between"><div><h2>LINE再連携管理</h2><p class="small">CSV移行後の飼い主とDPRO診察券の初回連携状況です。</p></div><button class="btn btn-blue" id="loadRelink">一覧を更新</button></div><div id="relinkResults" class="table-wrap"><div class="empty">一覧を更新してください。</div></div></div></section>
+  <section class="panel" id="panel-relink"><div class="card"><div class="row" style="justify-content:space-between"><div><h2>LINE再連携管理</h2><p class="small">CSV移行後の飼い主とDPRO診察券の初回連携状況です。</p></div><button class="btn btn-blue" id="loadRelink">最新状態を再読込</button></div><div class="relink-guide"><strong>操作方法</strong><span>進捗またはスタッフ確認を変更すると「未保存」と表示されます。右端の「変更を保存」を押してください。</span></div><div id="relinkResults" class="table-wrap"><div class="empty">「最新状態を再読込」を押してください。</div></div></div></section>
 
   <section class="panel" id="panel-check"><div class="grid"><aside><div class="card"><h2>乗り換え専用モジュール確認</h2><button class="btn btn-main" id="runCheck">一括チェック</button><div class="notice">通常のdpro-vet-qr-apiではなく、乗り換え専用Workerを確認します。</div></div></aside><main><div class="card"><h2>チェック結果</h2><div id="checkResults"><div class="empty">一括チェックを実行してください。</div></div></div></main></div></section>
 </div>
@@ -192,8 +207,78 @@
 
   async function loadHistory(){try{const d=await api(`/api/migration/batches?clinic_code=${encodeURIComponent(clinic())}&limit=100`);const rows=d.items||[];$("historyResults").innerHTML=rows.length?`<table><thead><tr><th>作成日時</th><th>種類</th><th>移行元</th><th>状態</th><th>総数</th><th>取込</th><th>重複/手動/失敗</th><th>操作</th></tr></thead><tbody>${rows.map(b=>`<tr><td>${escapeHtml(new Date(b.created_at).toLocaleString("ja-JP"))}<br><span class="mono">${escapeHtml(b.id)}</span></td><td>${b.migration_type==="patients"?"患者・ペット":"未来予約"}</td><td>${escapeHtml(b.source_system)}</td><td><span class="tag ${b.status}">${escapeHtml(b.status)}</span></td><td>${b.row_count}</td><td>${b.imported_count+b.merged_count}</td><td>${b.duplicate_count}/${b.manual_count}/${b.failed_count}</td><td><button class="btn btn-danger cancel-batch" data-id="${b.id}">取消</button></td></tr>`).join("")}</tbody></table>`:'<div class="empty">移行履歴はありません。</div>';document.querySelectorAll(".cancel-batch").forEach(btn=>btn.onclick=()=>cancelBatch(btn.dataset.id))}catch(e){notify(e.message,true)}}
   async function cancelBatch(id){const text=prompt("安全確認のため『移行バッチを取消』と入力してください。");if(text===null)return;try{const d=await api("/api/migration/batch/cancel",{method:"POST",body:{clinic_code:clinic(),batch_id:id,confirm_text:text,actor:"管理者"}});notify(`${d.message} 削除:${d.summary?.deleted||0} 保持:${d.summary?.blocked||0}`);loadHistory()}catch(e){notify(e.message,true)}}
-  async function loadRelink(){try{const d=await api(`/api/migration/relink?clinic_code=${encodeURIComponent(clinic())}`);const rows=d.items||[];$("relinkResults").innerHTML=rows.length?`<table><thead><tr><th>飼い主</th><th>電話</th><th>ペット</th><th>LINE</th><th>移行進捗</th><th>確認</th><th>更新</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${escapeHtml(r.guardian_name)}<br><span class="mono">${escapeHtml(r.guardian_no||"")}</span></td><td>${escapeHtml(r.phone||"")}</td><td>${escapeHtml(r.pet_names||"")}</td><td>${r.line_user_id?'<span class="tag linked">DPRO連携済み</span>':'<span class="tag unlinked">未連携</span>'}</td><td><select id="rs-${r.guardian_id}"><option value="unlinked" ${r.migration_relink_status==='unlinked'?'selected':''}>未連携</option><option value="guided" ${r.migration_relink_status==='guided'?'selected':''}>案内済み</option><option value="linked" ${r.migration_relink_status==='linked'?'selected':''}>連携済み</option><option value="no_line" ${r.migration_relink_status==='no_line'?'selected':''}>LINE利用なし</option><option value="hold" ${r.migration_relink_status==='hold'?'selected':''}>保留</option></select></td><td><label><input type="checkbox" id="rc-${r.guardian_id}" ${r.staff_confirmed?'checked':''}> スタッフ確認</label></td><td><button class="btn btn-blue relink-update" data-id="${r.guardian_id}">保存</button></td></tr>`).join("")}</tbody></table>`:'<div class="empty">患者移行後の対象者はいません。</div>';document.querySelectorAll(".relink-update").forEach(btn=>btn.onclick=()=>updateRelink(btn.dataset.id))}catch(e){notify(e.message,true)}}
-  async function updateRelink(id){try{await api("/api/migration/relink/update",{method:"POST",body:{clinic_code:clinic(),guardian_id:id,status:$("rs-"+id).value,staff_confirmed:$("rc-"+id).checked,contact_method:"line"}});notify("LINE再連携状況を保存しました。");loadRelink()}catch(e){notify(e.message,true)}}
+  function relinkRow(id){return document.querySelector(`.relink-row[data-id="${id}"]`)}
+  function relinkState(id){return $("rstate-"+id)}
+  function relinkButton(id){return document.querySelector(`.relink-save[data-id="${id}"]`)}
+  function setRelinkVisualState(id,state,message){
+    const row=relinkRow(id),el=relinkState(id),btn=relinkButton(id);
+    if(!row||!el||!btn)return;
+    row.classList.remove("is-dirty","is-saving","is-saved");
+    el.className="save-state "+state;
+    el.textContent=message;
+    btn.classList.remove("btn-dirty","btn-saved");
+    if(state==="dirty"){
+      row.classList.add("is-dirty");
+      btn.classList.add("btn-dirty");
+      btn.textContent="変更を保存";
+      btn.disabled=false;
+    }else if(state==="saving"){
+      row.classList.add("is-saving");
+      btn.textContent="保存中…";
+      btn.disabled=true;
+    }else if(state==="saved"){
+      row.classList.add("is-saved");
+      btn.classList.add("btn-saved");
+      btn.textContent="保存済み ✓";
+      btn.disabled=true;
+    }else if(state==="error"){
+      btn.classList.add("btn-dirty");
+      btn.textContent="再度保存";
+      btn.disabled=false;
+    }else{
+      btn.textContent="変更なし";
+      btn.disabled=true;
+    }
+  }
+  function markRelinkDirty(id){setRelinkVisualState(id,"dirty","未保存の変更があります")}
+  async function loadRelink(){
+    try{
+      const d=await api(`/api/migration/relink?clinic_code=${encodeURIComponent(clinic())}`);
+      const rows=d.items||[];
+      $("relinkResults").innerHTML=rows.length
+        ?`<table><thead><tr><th>飼い主</th><th>電話</th><th>ペット</th><th>LINE</th><th>移行進捗</th><th>確認</th><th>アクション</th></tr></thead><tbody>${rows.map(r=>`<tr class="relink-row" data-id="${r.guardian_id}"><td>${escapeHtml(r.guardian_name)}<br><span class="mono">${escapeHtml(r.guardian_no||"")}</span></td><td>${escapeHtml(r.phone||"")}</td><td>${escapeHtml(r.pet_names||"")}</td><td>${r.line_user_id?'<span class="tag linked">DPRO連携済み</span>':'<span class="tag unlinked">未連携</span>'}</td><td><select id="rs-${r.guardian_id}"><option value="unlinked" ${r.migration_relink_status==='unlinked'?'selected':''}>未連携</option><option value="guided" ${r.migration_relink_status==='guided'?'selected':''}>案内済み</option><option value="linked" ${r.migration_relink_status==='linked'?'selected':''}>連携済み</option><option value="no_line" ${r.migration_relink_status==='no_line'?'selected':''}>LINE利用なし</option><option value="hold" ${r.migration_relink_status==='hold'?'selected':''}>保留</option></select></td><td><label><input type="checkbox" id="rc-${r.guardian_id}" ${r.staff_confirmed?'checked':''}> スタッフ確認</label></td><td><button class="btn btn-sub relink-save" data-id="${r.guardian_id}" disabled>変更なし</button><span class="save-state idle" id="rstate-${r.guardian_id}">現在の保存内容を表示中</span></td></tr>`).join("")}</tbody></table>`
+        :'<div class="empty">患者移行後の対象者はいません。</div>';
+      document.querySelectorAll(".relink-save").forEach(btn=>btn.onclick=()=>updateRelink(btn.dataset.id));
+      rows.forEach(r=>{
+        $("rs-"+r.guardian_id)?.addEventListener("change",()=>markRelinkDirty(r.guardian_id));
+        $("rc-"+r.guardian_id)?.addEventListener("change",()=>markRelinkDirty(r.guardian_id));
+      });
+      notify("LINE再連携の最新状態を読み込みました。");
+    }catch(e){
+      notify(e.message,true);
+    }
+  }
+  async function updateRelink(id){
+    try{
+      setRelinkVisualState(id,"saving","保存しています…");
+      await api("/api/migration/relink/update",{
+        method:"POST",
+        body:{
+          clinic_code:clinic(),
+          guardian_id:id,
+          status:$("rs-"+id).value,
+          staff_confirmed:$("rc-"+id).checked,
+          contact_method:"line"
+        }
+      });
+      const time=new Date().toLocaleTimeString("ja-JP",{hour:"2-digit",minute:"2-digit"});
+      setRelinkVisualState(id,"saved",`${time} 保存完了`);
+      notify("LINE再連携状況を保存しました。");
+    }catch(e){
+      setRelinkVisualState(id,"error",`保存失敗：${e.message}`);
+      notify(e.message,true);
+    }
+  }
   async function runCheck(){
     try{
       $("runCheck").disabled=true;
