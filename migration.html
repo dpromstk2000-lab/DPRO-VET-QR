@@ -21,17 +21,17 @@
 <body>
 <div class="wrap">
   <header class="hero">
-    <div><span class="eyebrow">DPRO PET CARE LINE｜STEP VET-MIGRATION-2-R1</span><h1>既存システム乗り換え</h1><p>患者・ペット、未来の午前／午後優先受付、LINE再連携を安全に移します。</p></div>
+    <div><span class="eyebrow">DPRO PET CARE LINE｜STEP VET-MIGRATION-2-R2</span><h1>既存システム乗り換え</h1><p>患者・ペット、未来の午前／午後優先受付、LINE再連携を安全に移します。</p></div>
     <div class="version">generic migration module<br>preview → confirm → execute<br>2026-07-19</div>
   </header>
   <div class="safe">通常の動物病院システムとは別Workerで動作します。この画面を使わない病院の受付・診察券・患者管理には影響しません。</div>
 
-  <section class="settings">
+  <form class="settings" id="settingsForm" onsubmit="return false">
     <div class="field"><label for="apiUrl">乗り換え専用Worker API URL</label><input id="apiUrl" value="https://dpro-vet-migration-api.dpromstk2000.workers.dev"></div>
     <div class="field"><label for="clinicCode">clinic_code</label><input id="clinicCode" value="dpro_vet_demo"></div>
     <div class="field"><label for="adminCode">管理コード</label><input id="adminCode" type="password" placeholder="管理コードを入力" autocomplete="off"></div>
     <div class="row"><button class="btn btn-main" id="saveSettings">保存</button><button class="btn btn-sub" id="clearAdmin">削除</button></div>
-  </section>
+  </form>
 
   <nav class="tabs" aria-label="移行メニュー">
     <button class="tab active" data-tab="patients">患者・ペット</button>
@@ -49,7 +49,7 @@
         <div class="card"><h2>3. 事前チェック</h2><div class="field"><label>取込メモ</label><textarea id="patientNote" placeholder="例：2026年8月 ソトマチから初回移行"></textarea></div><button class="btn btn-blue" id="previewPatients">患者CSV事前チェック</button><div id="patientPreviewStatus" class="notice">事前チェックでは患者本体を変更しません。</div></div>
       </aside>
       <main>
-        <div class="card"><h2>患者・ペット事前チェック結果</h2><div id="patientSummary" class="summary"></div><div id="patientResults" class="table-wrap"><div class="empty">まだ事前チェックを実行していません。</div></div><div class="confirm hidden" id="patientConfirmBox"><strong>本登録</strong><p class="small">内容を確認し、次の確認文言を入力してください： <code>既存患者移行を実行</code></p><div class="field"><input id="patientConfirmText" placeholder="確認文言を入力"></div><div class="row" style="margin-top:10px"><button class="btn btn-main" id="executePatients">患者移行を実行</button></div><div id="patientExecuteStatus" class="notice warn">実行後はLINE未連携として登録し、既存の連携済み患者は解除しません。</div></div></div>
+        <div class="card"><h2>患者・ペット事前チェック結果</h2><div id="patientSummary" class="summary"></div><div id="patientResults" class="table-wrap"><div class="empty">まだ事前チェックを実行していません。</div></div><div class="confirm hidden" id="patientConfirmBox"><strong>本登録</strong><p class="small">内容を確認し、次の確認文言を入力してください： <code>既存患者移行を実行</code></p><div class="field"><input id="patientConfirmText" placeholder="確認文言を入力"></div><div class="row" style="margin-top:10px"><button class="btn btn-main" id="executePatients">患者移行を実行</button></div><div id="patientExecuteStatus" class="notice warn">実行後はLINE未連携として登録し、既存の連携済み患者は解除しません。大量データは少量ずつ自動処理します。</div></div></div>
       </main>
     </div>
   </section>
@@ -75,7 +75,7 @@
 <script>
 (() => {
   "use strict";
-  const VERSION="VET-MIGRATION-2-R1-AUTO-MAPPING-20260719";
+  const VERSION="VET-MIGRATION-2-R2-CHUNK-EXECUTE-20260719";
   const $=id=>document.getElementById(id);
   const state={patientCsv:null,reservationCsv:null,patientPreview:null,reservationPreview:null};
   const storage={api:"dpro_vet_migration_api_url",clinic:"dpro_vet_clinic_code",admin:"dpro_vet_admin_token"};
@@ -142,7 +142,7 @@
   async function loadPatients(){const file=$("patientFile").files[0];if(!file)return notify("患者CSVを選択してください。",true);try{state.patientCsv=parseCSV(await readFile(file));buildMapping("patientMapping",patientDefs,state.patientCsv.headers,"pm");$("patientFileStatus").className="notice ok";$("patientFileStatus").textContent=`${state.patientCsv.records.length}行、${state.patientCsv.headers.length}列を読み込みました。`;notify("患者CSVを読み込みました。")}catch(e){notify(e.message,true)}}
   async function loadReservations(){const file=$("reservationFile").files[0];if(!file)return notify("未来予約CSVを選択してください。",true);try{state.reservationCsv=parseCSV(await readFile(file));buildMapping("reservationMapping",reservationDefs,state.reservationCsv.headers,"rm");$("reservationFileStatus").className="notice ok";$("reservationFileStatus").textContent=`${state.reservationCsv.records.length}行、${state.reservationCsv.headers.length}列を読み込みました。`;notify("未来予約CSVを読み込みました。")}catch(e){notify(e.message,true)}}
   async function previewPatients(){if(!state.patientCsv)return notify("先に患者CSVを読み込んでください。",true);try{$("previewPatients").disabled=true;const data=await api("/api/migration/patients/preview",{method:"POST",body:{clinic_code:clinic(),source_system:$("patientSource").value,file_name:$("patientFile").files[0]?.name||"",note:$("patientNote").value,actor:"管理者",rows:mappedRows(state.patientCsv,patientDefs,"pm")}});state.patientPreview=data;renderSummary("patientSummary",data.summary);renderPreview("patientResults",data.rows,"patients");$("patientConfirmBox").classList.remove("hidden");$("patientPreviewStatus").className="notice ok";$("patientPreviewStatus").textContent=`事前チェック完了。バッチID: ${data.batch.id}`;notify("患者事前チェックが完了しました。DB本体は未変更です。")}catch(e){notify(e.message,true)}finally{$("previewPatients").disabled=false}}
-  async function executePatients(){const p=state.patientPreview;if(!p)return notify("事前チェックを実行してください。",true);try{$("executePatients").disabled=true;const data=await api("/api/migration/patients/execute",{method:"POST",body:{clinic_code:clinic(),batch_id:p.batch.id,execution_token:p.execution_token,confirm_text:$("patientConfirmText").value,actor:"管理者"}});$("patientExecuteStatus").className=data.summary.failed?"notice warn":"notice ok";$("patientExecuteStatus").textContent=`完了：新規 ${data.summary.imported}／統合 ${data.summary.merged}／重複 ${data.summary.skipped}／失敗 ${data.summary.failed}`;notify("患者移行が完了しました。")}catch(e){notify(e.message,true)}finally{$("executePatients").disabled=false}}
+  async function executePatients(){const p=state.patientPreview;if(!p)return notify("事前チェックを実行してください。",true);try{$("executePatients").disabled=true;let first=true;let data=null;do{data=await api("/api/migration/patients/execute",{method:"POST",body:{clinic_code:clinic(),batch_id:p.batch.id,execution_token:p.execution_token,confirm_text:$("patientConfirmText").value,actor:"管理者",retry_failed:first}});first=false;$("patientExecuteStatus").className="notice info";$("patientExecuteStatus").textContent=data.done?`完了：新規 ${data.summary.imported}／統合 ${data.summary.merged}／重複 ${data.summary.skipped}／失敗 ${data.summary.failed}`:`処理中：残り ${data.summary.pending}件（登録 ${data.summary.imported}／失敗 ${data.summary.failed}）`;if(!data.done)await new Promise(r=>setTimeout(r,350));}while(data&&!data.done);$("patientExecuteStatus").className=data.summary.failed?"notice warn":"notice ok";notify(data.summary.failed?"患者移行は完了しましたが、失敗行があります。":"患者移行が完了しました。",Boolean(data.summary.failed))}catch(e){$("patientExecuteStatus").className="notice ng";$("patientExecuteStatus").textContent=e.message;notify(e.message,true)}finally{$("executePatients").disabled=false}}
   async function previewReservations(){if(!state.reservationCsv)return notify("先に未来予約CSVを読み込んでください。",true);try{$("previewReservations").disabled=true;const data=await api("/api/migration/reservations/preview",{method:"POST",body:{clinic_code:clinic(),source_system:$("reservationSource").value,file_name:$("reservationFile").files[0]?.name||"",note:$("reservationNote").value,actor:"管理者",rows:mappedRows(state.reservationCsv,reservationDefs,"rm")}});state.reservationPreview=data;renderSummary("reservationSummary",data.summary);renderPreview("reservationResults",data.rows,"reservations");$("reservationConfirmBox").classList.remove("hidden");notify("未来予約事前チェックが完了しました。予約本体は未変更です。")}catch(e){notify(e.message,true)}finally{$("previewReservations").disabled=false}}
   async function executeReservations(){const p=state.reservationPreview;if(!p)return notify("事前チェックを実行してください。",true);try{$("executeReservations").disabled=true;const data=await api("/api/migration/reservations/execute",{method:"POST",body:{clinic_code:clinic(),batch_id:p.batch.id,execution_token:p.execution_token,confirm_text:$("reservationConfirmText").value,actor:"管理者"}});$("reservationExecuteStatus").className=data.summary.failed?"notice warn":"notice ok";$("reservationExecuteStatus").textContent=`完了：優先受付 ${data.summary.imported}／重複 ${data.summary.skipped}／手動調整 ${data.summary.manual}／失敗 ${data.summary.failed}`;notify("未来予約移行が完了しました。")}catch(e){notify(e.message,true)}finally{$("executeReservations").disabled=false}}
 
