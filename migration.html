@@ -21,7 +21,7 @@
 <body>
 <div class="wrap">
   <header class="hero">
-    <div><span class="eyebrow">DPRO PET CARE LINE｜STEP VET-MIGRATION-2-R3-R1</span><h1>既存システム乗り換え</h1><p>患者・ペット、未来の午前／午後優先受付、LINE再連携を安全に移します。</p></div>
+    <div><span class="eyebrow">DPRO PET CARE LINE｜STEP VET-MIGRATION-2-R4</span><h1>既存システム乗り換え</h1><p>患者・ペット、未来の午前／午後優先受付、LINE再連携を安全に移します。</p></div>
     <div class="version">generic migration module<br>preview → confirm → execute<br>2026-07-19</div>
   </header>
   <div class="safe">通常の動物病院システムとは別Workerで動作します。この画面を使わない病院の受付・診察券・患者管理には影響しません。</div>
@@ -198,42 +198,24 @@
     try{
       $("runCheck").disabled=true;
       const base=$("apiUrl").value.trim().replace(/\/+$/,"");
-      const healthRes=await fetch(base+"/api/health",{cache:"no-store"});
-      const healthText=await healthRes.text();
-      let health={};
-      try{health=healthText?JSON.parse(healthText):{}}
-      catch{throw new Error(`ヘルスチェック応答を解析できません（HTTP ${healthRes.status}）`)}
-      if(!healthRes.ok)throw new Error(health.message||health.error||`ヘルスチェック HTTP ${healthRes.status}`);
-
-      const checkRes=await fetch(`${base}/api/migration/check?clinic_code=${encodeURIComponent(clinic())}`,{
-        method:"GET",
-        headers:{
-          "Accept":"application/json",
-          "X-Admin-Token":$("adminCode").value
-        },
-        cache:"no-store"
+      const health=await fetch(base+"/api/health").then(r=>r.json());
+      const db=await api(`/api/migration/check?clinic_code=${encodeURIComponent(clinic())}`,{
+        allowBusinessError:true
       });
-      const checkText=await checkRes.text();
-      let db={};
-      try{db=checkText?JSON.parse(checkText):{}}
-      catch{throw new Error(`導入チェック応答を解析できません（HTTP ${checkRes.status}）`)}
-      if(!checkRes.ok)throw new Error(db.message||db.error||`導入チェック HTTP ${checkRes.status}`);
-
-      const bridge=db.normal_api_bridge||{};
       const checks=[
-        ["乗り換え専用Worker",Boolean(health.ok),health.version||""],
-        ["通常APIと分離",health.separated_from_normal_api===true,"dpro-vet-qr-apiを上書きしない"],
+        ["乗り換え専用Worker",health.ok,health.version],
+        ["通常APIと分離",health.separated_from_normal_api,"dpro-vet-qr-apiを上書きしない"],
         ["clinic_code",Boolean(db.clinic?.id),db.clinic?.clinic_name||""],
         ["移行SQL",Boolean(db.database?.ok),(db.database?.missing_tables||[]).join(", ")||"必要テーブルあり"],
-        ["通常VET登録認証",Boolean(bridge.ok),bridge.message||"NORMAL_VET_ADMIN_TOKENを確認"],
+        ["患者登録RPC",Boolean(db.registration_rpc_ok),db.registration_rpc_ok?"Supabase一括登録RPCあり":"R4 SQLを実行してください"],
+        ["Error 1042回避",db.worker_to_worker_fetch===false,"Worker間fetchを使用しない"],
         ["通常システム非変更",db.normal_system_unchanged===true,"任意モジュール"]
       ];
       $("checkResults").innerHTML=checks.map(([l,ok,d])=>`<div class="notice ${ok?'ok':'ng'}"><strong>${ok?'OK':'NG'}｜${escapeHtml(l)}</strong><br>${escapeHtml(d)}</div>`).join("");
-      const allOk=checks.every(x=>x[1]);
-      notify(allOk?"乗り換えモジュールは正常です。":"NG項目の具体的な内容を確認してください。",!allOk);
+      notify(checks.every(x=>x[1])?"乗り換えモジュールは正常です。":"NG項目を確認してください。",!checks.every(x=>x[1]));
     }catch(e){
-      $("checkResults").innerHTML=`<div class="notice ng"><strong>導入チェックを実行できませんでした。</strong><br>${escapeHtml(e.message)}</div>`;
-      notify(e.message,true);
+      $("checkResults").innerHTML=`<div class="notice ng"><strong>チェック通信エラー</strong><br>${escapeHtml(e.message||e)}</div>`;
+      notify(e.message||String(e),true);
     }finally{
       $("runCheck").disabled=false;
     }
