@@ -174,6 +174,13 @@
     }
     textarea{min-height:92px;resize:vertical;line-height:1.65}
     input:focus,select:focus,textarea:focus{border-color:rgba(47,125,100,.62);box-shadow:0 0 0 4px rgba(47,125,100,.11)}
+    #adminCode.adminCodeSaved{
+      border-color:#8bc9ad;
+      background:#edf8f2;
+      color:#176a51;
+      font-weight:950;
+    }
+
     .section{display:none}
     .section.active{display:block}
     .buttonRow{display:flex;flex-wrap:wrap;gap:9px;align-items:center;margin-top:14px}
@@ -280,7 +287,7 @@
 <body>
   <main class="page">
     <section class="hero">
-      <span class="badge">STEP VET-MIGRATION-3-R1｜管理コード削除・デモ自動補完停止修正</span>
+      <span class="badge">STEP VET-MIGRATION-3-R2｜管理コード保存状態表示改善</span>
       <h1>医院設定</h1>
       <p class="lead">
         受付ボタンを押す前に、定休日・臨時休業・受付時間が分かるようにするための管理画面です。
@@ -755,10 +762,25 @@
 
     function renderAdminStatus(){
       const has = !!getAdminToken();
+      const input = $("adminCode");
+
       $("adminStatus").className = has ? "notice ok" : "notice warn";
       $("adminStatus").textContent = has
         ? "管理コード保存済みです。医院設定を保存できます。"
         : "管理コード未保存です。表示はできますが、保存には管理コードが必要です。";
+
+      // 実際の管理コードはDOMへ戻さず、安全なマスク表示だけを出す。
+      if (input) {
+        input.value = "";
+        input.placeholder = has ? "••••  保存済み" : "管理コードを入力";
+        input.classList.toggle("adminCodeSaved", has);
+        input.setAttribute("aria-label", has ? "管理コード保存済み。変更する場合のみ入力" : "管理コード");
+      }
+
+      const saveButton = $("saveAdminCodeBtn");
+      if (saveButton) {
+        saveButton.textContent = has ? "保存済み ✓／変更" : "保存";
+      }
     }
 
     function updateLinks(){
@@ -1118,12 +1140,13 @@
         const input = $("adminCode");
         if (!saveAdminToken(input.value)) {
           $("adminStatus").className = "notice warn";
-          $("adminStatus").textContent = "管理コードを入力してから保存してください。";
+          $("adminStatus").textContent = getAdminToken()
+            ? "管理コードは保存済みです。変更する場合だけ新しいコードを入力してください。"
+            : "管理コードを入力してから保存してください。";
           input.focus();
           return;
         }
 
-        input.value = "";
         renderAdminStatus();
         $("adminStatus").textContent = "管理コードをブラウザへ保存しました。";
         loadSettings();
