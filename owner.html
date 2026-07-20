@@ -292,6 +292,7 @@
         <a id="navLineSetup" href="./line-setup.html?v=step-vet-34e-r6&clinic_code=dpro_vet_demo">受付登録/LINE連携へ</a>
         <a id="navMember" href="./member.html?v=step-vet-34g-r3&clinic_code=dpro_vet_demo&line_user_id=demo_line_link_001">診察券確認へ</a>
         <a id="navSystem" href="./system-check.html?v=step-vet-34i-r4&clinic_code=dpro_vet_demo">システム確認へ</a>
+        <a id="navOwnerData" href="./owner-data.html?clinic_code=dpro_vet_demo">データ管理／乗り換えへ</a>
       </div>
     </section>
 
@@ -747,6 +748,7 @@
       $("navLineSetup").href = `./line-setup.html?v=step-vet-34e-r6&clinic_code=${cc}`;
       $("navMember").href = `./member.html?v=step-vet-34g-r3&clinic_code=${cc}&line_user_id=demo_line_link_001`;
       $("navSystem").href = `./system-check.html?v=step-vet-34i-r4&clinic_code=${cc}`;
+      $("navOwnerData").href = `./owner-data.html?clinic_code=${cc}`;
     }
 
     function buildTimeOptions(slot){
