@@ -280,7 +280,7 @@
 <body>
   <main class="page">
     <section class="hero">
-      <span class="badge">STEP VET-PHONE-2｜管理コード1234統一・電話番号入力ゆれ対策</span>
+      <span class="badge">STEP VET-MIGRATION-3-R1｜管理コード削除・デモ自動補完停止修正</span>
       <h1>医院設定</h1>
       <p class="lead">
         受付ボタンを押す前に、定休日・臨時休業・受付時間が分かるようにするための管理画面です。
@@ -313,10 +313,10 @@
         </div>
 
         <label for="adminCode" style="margin-top:12px;">管理コード</label>
-        <input id="adminCode" type="password" placeholder="1234" autocomplete="off">
+        <input id="adminCode" name="dpro_vet_owner_admin_code_input" type="password" placeholder="管理コードを入力" autocomplete="new-password" data-lpignore="true">
         <div class="buttonRow">
           <button class="btn btnMain" id="saveAdminCodeBtn" type="button">保存</button>
-          <button class="btn btnDanger" id="clearAdminCodeBtn" type="button">削除</button>
+          <button class="btn btnDanger" id="clearAdminCodeBtn" type="button">保存コードを削除</button>
         </div>
 
         <div id="adminStatus" class="notice">管理コード未保存です。</div>
@@ -571,6 +571,9 @@
       "dpro_admin_token"
     ];
 
+    // デモURLの1234自動補完より、利用者が押した「削除」を優先する。
+    const ADMIN_DELETED_KEY = `dpro_vet_admin_deleted_${CLINIC_CODE}`;
+
     const weekdayLabels = ["日曜", "月曜", "火曜", "水曜", "木曜", "金曜", "土曜"];
     const closedTypeLabels = {
       none: "通常",
@@ -649,7 +652,15 @@
       return text;
     }
 
+    function adminDeletionRequested(){
+      return localStorage.getItem(ADMIN_DELETED_KEY) === "1" ||
+             sessionStorage.getItem(ADMIN_DELETED_KEY) === "1";
+    }
+
     function getAdminToken(){
+      // 「保存コードを削除」を押した後は、デモ用1234も自動復元しない。
+      if (adminDeletionRequested()) return "";
+
       if (typeof CONFIG.getAdminToken === "function") {
         const v = CONFIG.getAdminToken();
         if (v) return String(v).trim();
@@ -663,12 +674,17 @@
 
     function saveAdminToken(token){
       const v = String(token || "").trim();
-      if (!v) return;
+      if (!v) return false;
+
+      localStorage.removeItem(ADMIN_DELETED_KEY);
+      sessionStorage.removeItem(ADMIN_DELETED_KEY);
+
       if (typeof CONFIG.setAdminToken === "function") CONFIG.setAdminToken(v, true);
       ADMIN_TOKEN_KEYS.forEach((key) => {
         localStorage.setItem(key, v);
         sessionStorage.setItem(key, v);
       });
+      return true;
     }
 
     function clearAdminToken(){
@@ -677,6 +693,10 @@
         localStorage.removeItem(key);
         sessionStorage.removeItem(key);
       });
+
+      // 明示削除を記録し、デモURLによる1234自動補完を停止する。
+      localStorage.setItem(ADMIN_DELETED_KEY, "1");
+      sessionStorage.setItem(ADMIN_DELETED_KEY, "1");
     }
 
     function headers(json=false, admin=false){
@@ -1095,15 +1115,31 @@
       });
 
       $("saveAdminCodeBtn").addEventListener("click", () => {
-        saveAdminToken($("adminCode").value);
-        $("adminCode").value = IS_DEMO_1234 ? DEMO_ADMIN_CODE : "";
+        const input = $("adminCode");
+        if (!saveAdminToken(input.value)) {
+          $("adminStatus").className = "notice warn";
+          $("adminStatus").textContent = "管理コードを入力してから保存してください。";
+          input.focus();
+          return;
+        }
+
+        input.value = "";
         renderAdminStatus();
+        $("adminStatus").textContent = "管理コードをブラウザへ保存しました。";
         loadSettings();
       });
 
       $("clearAdminCodeBtn").addEventListener("click", () => {
         clearAdminToken();
+
+        // 入力欄・ブラウザ保存・デモ自動補完をすべて解除する。
+        const input = $("adminCode");
+        input.value = "";
+        input.blur();
+
         renderAdminStatus();
+        $("adminStatus").className = "notice warn";
+        $("adminStatus").textContent = "管理コードを削除しました。再度保存するまで管理操作はできません。";
         loadSettings();
       });
 
