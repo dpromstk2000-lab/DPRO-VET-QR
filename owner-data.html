@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#2f7d64">
+  <meta name="description" content="DPRO PET CARE LINE オーナー用データ管理">
+  <title>DPRO PET CARE LINE｜オーナー用データ管理</title>
+  <style>
+    :root{--bg:#f4f7f1;--card:#fff;--ink:#20312b;--muted:#6d7b74;--line:#dbe6df;--main:#2f7d64;--soft:#edf7f2;--blue:#386fa6;--bluebg:#eef6ff;--warn:#936915;--warnbg:#fff7df;--shadow:0 18px 46px rgba(31,49,43,.10);--radius:24px}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:system-ui,-apple-system,"Segoe UI","Noto Sans JP",sans-serif;color:var(--ink);background:radial-gradient(circle at 8% 0%,rgba(47,125,100,.14),transparent 34%),linear-gradient(180deg,#fbfdf9,var(--bg));line-height:1.7}
+    button,input{font:inherit}.page{width:min(1180px,calc(100% - 28px));margin:auto;padding:18px 0 60px}.hero{border-radius:32px;padding:clamp(22px,4vw,42px);color:#fff;background:linear-gradient(135deg,#244d40,#37906d);box-shadow:var(--shadow)}.badge{display:inline-flex;border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:6px 10px;font-size:12px;font-weight:900}.hero h1{font-size:clamp(30px,5vw,54px);line-height:1.1;margin:12px 0 8px}.hero p{font-weight:750;color:rgba(255,255,255,.9)}
+    .settings{display:grid;grid-template-columns:1fr 1fr auto;gap:12px;align-items:end;margin:16px 0;padding:17px;border-radius:22px;background:rgba(255,255,255,.96);border:1px solid var(--line);box-shadow:var(--shadow)}label{display:block;font-size:13px;font-weight:900;margin-bottom:5px}input{width:100%;min-height:46px;border:1px solid #d9e3dd;border-radius:14px;padding:10px 12px}.btn{display:inline-flex;align-items:center;justify-content:center;min-height:46px;border-radius:14px;padding:10px 15px;font-weight:900;text-decoration:none;border:1px solid var(--line);cursor:pointer}.btn-main{background:var(--main);color:#fff;border-color:transparent}.btn-sub{background:#fff;color:var(--ink)}.btn-blue{background:var(--bluebg);color:#285b8e;border-color:#c4daf1}
+    .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}.card{background:rgba(255,255,255,.96);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px}.card h2{margin:0 0 7px;font-size:22px}.card p{margin:0;color:var(--muted);font-weight:700}.actions{display:grid;gap:9px;margin-top:15px}.actions a{justify-content:flex-start}.notice{margin-top:12px;border:1px solid #c9e7d8;border-radius:16px;padding:12px 14px;background:var(--soft);color:#176a51;font-weight:850;font-size:13px}.notice.warn{background:var(--warnbg);border-color:#f0d68d;color:#87610f}.steps{counter-reset:step;display:grid;gap:10px;margin-top:12px}.step{display:grid;grid-template-columns:auto 1fr;gap:10px;border:1px solid var(--line);border-radius:16px;padding:11px;background:#fff}.step:before{counter-increment:step;content:counter(step);display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--main);color:#fff;font-weight:900}.step strong{display:block}.step span{display:block;color:var(--muted);font-size:12px;font-weight:700}.footer{margin-top:16px;text-align:center;color:var(--muted);font-size:12px;font-weight:800}
+    @media(max-width:800px){.settings,.grid{grid-template-columns:1fr}.settings .btn{width:100%}.hero{border-radius:24px}}
+  </style>
+</head>
+<body>
+<main class="page">
+  <section class="hero">
+    <span class="badge">DPRO PET CARE LINE｜STEP VET-MIGRATION-3</span>
+    <h1>オーナー用データ管理</h1>
+    <p>医院設定、既存システムからの乗り換え、本番切替確認をここから開きます。</p>
+  </section>
+
+  <form class="settings" onsubmit="return false">
+    <div><label for="clinicCode">clinic_code</label><input id="clinicCode" value="dpro_vet_demo"></div>
+    <div><label for="adminCode">管理コード</label><input id="adminCode" type="password" placeholder="管理コードを入力" autocomplete="off"></div>
+    <button class="btn btn-main" id="saveBtn">設定を保存</button>
+  </form>
+
+  <section class="grid">
+    <article class="card">
+      <h2>通常運用</h2>
+      <p>受付時間、定休日、病院情報などの日常設定です。</p>
+      <div class="actions">
+        <a class="btn btn-main" id="ownerLink" href="./owner.html">医院設定を開く</a>
+        <a class="btn btn-sub" id="systemLink" href="./system-check.html">通常システム確認</a>
+      </div>
+      <div class="notice">乗り換え機能を使用しない病院は、通常運用だけで問題ありません。</div>
+    </article>
+
+    <article class="card">
+      <h2>既存システムから乗り換え</h2>
+      <p>患者・ペット、未来の優先受付、LINE再連携を管理します。</p>
+      <div class="actions">
+        <a class="btn btn-blue" data-migration-tab="patients">患者・ペット移行</a>
+        <a class="btn btn-blue" data-migration-tab="reservations">未来予約移行</a>
+        <a class="btn btn-blue" data-migration-tab="history">移行履歴</a>
+        <a class="btn btn-blue" data-migration-tab="relink">LINE再連携</a>
+        <a class="btn btn-blue" data-migration-tab="cutover">本番切替チェック</a>
+        <a class="btn btn-blue" data-migration-tab="check">乗り換え導入チェック</a>
+      </div>
+      <div class="notice warn">「移行完了」の履歴は取消できません。修正は通常の患者管理・受付管理で個別に行います。</div>
+    </article>
+
+    <article class="card">
+      <h2>本番切替の順番</h2>
+      <div class="steps">
+        <div class="step"><div><strong>旧システムを入力停止</strong><span>最終CSV出力後は閲覧専用にします。</span></div></div>
+        <div class="step"><div><strong>患者・ペットを移行</strong><span>事前チェックで重複・エラーを確認します。</span></div></div>
+        <div class="step"><div><strong>未来予約を移行</strong><span>時刻確約は手動調整へ分けます。</span></div></div>
+        <div class="step"><div><strong>LINE再連携を案内</strong><span>飼い主ごとに案内済み・連携済みを管理します。</span></div></div>
+      </div>
+    </article>
+
+    <article class="card">
+      <h2>解約前に確認</h2>
+      <div class="notice warn">患者・予約・添付資料・会計・カルテの保存義務と、データ再出力期限を確認するまで旧サービスを解約しません。</div>
+      <div class="actions"><a class="btn btn-main" data-migration-tab="cutover">本番切替チェックを開く</a></div>
+    </article>
+  </section>
+  <div class="footer">VET-MIGRATION-3-OWNER-DATA-20260720</div>
+</main>
+<script>
+(() => {
+  "use strict";
+  const params=new URLSearchParams(location.search);
+  const keys=["dpro_vet_admin_code","DPRO_VET_ADMIN_CODE","DPRO_VET_ADMIN_TOKEN","dpro_vet_admin_token","DPRO_ADMIN_TOKEN","dpro_admin_token"];
+  const clinicKey="dpro_vet_clinic_code";
+  const $=id=>document.getElementById(id);
+  function clinic(){return $("clinicCode").value.trim()||"dpro_vet_demo"}
+  function savedAdmin(){for(const key of keys){const v=localStorage.getItem(key)||sessionStorage.getItem(key);if(v)return v}return""}
+  function save(){
+    const cc=clinic(),token=$("adminCode").value.trim();
+    localStorage.setItem(clinicKey,cc);
+    if(token)keys.forEach(key=>{localStorage.setItem(key,token);sessionStorage.setItem(key,token)});
+    updateLinks();
+    alert("オーナー用データ管理の設定を保存しました。");
+  }
+  function updateLinks(){
+    const cc=encodeURIComponent(clinic());
+    $("ownerLink").href=`./owner.html?clinic_code=${cc}`;
+    $("systemLink").href=`./system-check.html?clinic_code=${cc}`;
+    document.querySelectorAll("[data-migration-tab]").forEach(a=>{
+      a.href=`./migration.html?clinic_code=${cc}&tab=${encodeURIComponent(a.dataset.migrationTab)}&v=vet-migration-3`;
+    });
+  }
+  $("clinicCode").value=params.get("clinic_code")||localStorage.getItem(clinicKey)||"dpro_vet_demo";
+  $("adminCode").value=savedAdmin();
+  $("saveBtn").onclick=save;
+  updateLinks();
+})();
+</script>
+</body>
+</html>
