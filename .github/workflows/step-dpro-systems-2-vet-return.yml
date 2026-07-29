@@ -1,0 +1,53 @@
+name: STEP DPRO-SYSTEMS-2 VET Return Link
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/step-dpro-systems-2-vet-return.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Add official explanation return link
+        shell: python
+        run: |
+          from pathlib import Path
+
+          path = Path("index.html")
+          text = path.read_text(encoding="utf-8")
+
+          return_link = '        <a class="pill" href="https://dpro-shop.com/systems/vet">詳しい説明に戻る</a>'
+          anchor = '        <a class="pill" href="./scan-ipad.html?clinic_code=dpro_vet_demo&demo=ready&v=step-vet-52-5x-camera-qr" target="_blank" rel="noopener">受付iPad</a>'
+
+          if return_link not in text:
+              if anchor not in text:
+                  raise SystemExit("ERROR: 受付iPad button target not found")
+              text = text.replace(anchor, anchor + "\n" + return_link, 1)
+              path.write_text(text, encoding="utf-8")
+
+          updated = path.read_text(encoding="utf-8")
+          assert updated.count(return_link) == 1
+          assert 'href="https://dpro-shop.com/systems/vet"' in updated
+          assert updated.index(anchor) < updated.index(return_link)
+
+      - name: Commit changes
+        shell: bash
+        run: |
+          git config user.name "dpro-systems-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add index.html
+
+          if git diff --cached --quiet; then
+            echo "No changes needed"
+            exit 0
+          fi
+
+          git commit -m "STEP DPRO-SYSTEMS-2 add official VET explanation return link"
+          git push
