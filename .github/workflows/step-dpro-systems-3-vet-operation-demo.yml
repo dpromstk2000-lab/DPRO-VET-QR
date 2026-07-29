@@ -1,0 +1,211 @@
+name: STEP DPRO-SYSTEMS-3 VET Operation Demo
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/step-dpro-systems-3-vet-operation-demo.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Clarify operation demo and remove internal checks
+        shell: python
+        run: |
+          from pathlib import Path
+
+          path = Path("index.html")
+          text = path.read_text(encoding="utf-8")
+
+          def replace_once(text, old, new, label):
+              if new in text:
+                  return text
+              if old not in text:
+                  raise SystemExit(f"ERROR: {label} target not found")
+              return text.replace(old, new, 1)
+
+          text = replace_once(
+              text,
+              '<body>',
+              '<body class="operation-demo-page">',
+              "operation demo body class"
+          )
+
+          text = replace_once(
+              text,
+              '<strong>動物病院版 営業デモトップ</strong>',
+              '<strong>動物病院版 操作デモ</strong>',
+              "demo page title"
+          )
+
+          system_check_link = '        <a class="pill" href="./system-check.html?clinic_code=dpro_vet_demo&demo=ready&v=step-vet-52-5u-demo-check" target="_blank" rel="noopener">システム確認</a>\n'
+          text = text.replace(system_check_link, "", 1)
+
+          topbar_end = """      </div>
+              </div>
+
+              <section class="hero">"""
+          demo_notice = """      </div>
+              </div>
+
+              <div class="demoNotice">
+                <div><small>OPERATION DEMO</small><strong>これは実際に操作する体験用画面です</strong><span>機能や導入効果を読むページではなく、飼い主・受付・獣医師画面を試すためのデモです。</span></div>
+                <a href="https://dpro-shop.com/systems/vet">公式の機能説明を見る</a>
+              </div>
+
+              <section class="hero">"""
+          text = replace_once(text, topbar_end, demo_notice, "operation demo notice")
+
+          text = replace_once(
+              text,
+              '<div class="step">最新デモ導線｜STEP VET-56</div>',
+              '<div class="step">操作デモ｜DPRO PET CARE LINE</div>',
+              "hero demo label"
+          )
+
+          old_status = """        <div class="statusBox">
+                    <h2>現在の確認済み状態</h2>
+                    <ul class="checkList">
+                      <li>Worker：step-vet-52-5u-sales-demo-prepare-verify-complete</li>
+                      <li>system-check.html：STEP VET-52.5U</li>
+                      <li>scan-pc.html：STEP VET-52.5V</li>
+                      <li>scan-ipad.html：STEP VET-52.5X カメラQR読取対応</li>
+                      <li>doctor.html：STEP VET-52.5P 診察済み→会計待ち</li>
+                    </ul>
+                  </div>"""
+          new_status = """        <div class="statusBox">
+                    <h2>このデモで体験できること</h2>
+                    <ul class="checkList">
+                      <li>飼い主のLINE診察券と多頭ペット切替</li>
+                      <li>順番受付と診察券QR表示</li>
+                      <li>受付PC・受付iPadでの来院受付</li>
+                      <li>獣医師画面から会計待ちへの進行</li>
+                      <li>公式説明ページへ戻って機能・料金を確認</li>
+                    </ul>
+                  </div>"""
+          text = replace_once(text, old_status, new_status, "owner-facing status box")
+
+          old_first_card = """      <article class="card">
+                    <div class="cardHead">
+                      <div class="icon">✅</div>
+                      <div>
+                        <h3>営業前チェック</h3>
+                        <small>system-check.html</small>
+                      </div>
+                    </div>
+                    <p>
+                      API接続、Worker version、管理コード、営業デモ準備、本日の受付1〜4を確認します。
+                      営業デモの最初はここから開きます。
+                    </p>
+                    <a class="open" href="./system-check.html?clinic_code=dpro_vet_demo&demo=ready&v=step-vet-52-5u-demo-check" target="_blank" rel="noopener">システム確認を開く</a>
+                  </article>"""
+          new_first_card = """      <article class="card">
+                    <div class="cardHead">
+                      <div class="icon">🐾</div>
+                      <div>
+                        <h3>飼い主LINE診察券</h3>
+                        <small>member.html</small>
+                      </div>
+                    </div>
+                    <p>
+                      飼い主情報、複数ペットの切替、ペットごとの診察券QR、順番受付への入口を体験します。
+                    </p>
+                    <a class="open" href="./member.html?clinic_code=dpro_vet_demo&demo=ready&v=step-vet-56" target="_blank" rel="noopener">LINE診察券を開く</a>
+                  </article>"""
+          text = replace_once(text, old_first_card, new_first_card, "replace internal system check card")
+
+          css_marker = "/* DPRO-SYSTEMS-3 OPERATION DEMO DISTINCTION */"
+          demo_css = """
+              /* DPRO-SYSTEMS-3 OPERATION DEMO DISTINCTION */
+              .demoNotice{
+                margin:0 0 18px;
+                padding:17px 19px;
+                display:flex;
+                align-items:center;
+                justify-content:space-between;
+                gap:20px;
+                border:1px solid #cfe5d8;
+                border-radius:20px;
+                background:linear-gradient(135deg,#f7fcf9,#eaf8f1);
+                box-shadow:0 14px 34px rgba(31,45,39,.08);
+              }
+              .demoNotice div{display:flex;flex-direction:column}
+              .demoNotice small{
+                color:var(--main);
+                font-size:10px;
+                font-weight:1000;
+                letter-spacing:.14em;
+              }
+              .demoNotice strong{
+                margin-top:4px;
+                font-size:18px;
+                line-height:1.35;
+              }
+              .demoNotice span{
+                margin-top:4px;
+                color:var(--muted);
+                font-size:12px;
+                font-weight:750;
+              }
+              .demoNotice a{
+                flex:0 0 auto;
+                padding:11px 15px;
+                border-radius:999px;
+                background:var(--main);
+                color:#fff;
+                text-decoration:none;
+                font-size:12px;
+                font-weight:1000;
+                box-shadow:0 10px 24px rgba(20,135,95,.2);
+              }
+              .operation-demo-page .topbar{
+                padding:12px;
+                border:1px solid rgba(20,135,95,.14);
+                border-radius:22px;
+                background:rgba(255,255,255,.72);
+              }
+              @media(max-width:720px){
+                .demoNotice{align-items:flex-start;flex-direction:column}
+                .demoNotice a{width:100%;text-align:center}
+              }
+          """
+
+          if css_marker not in text:
+              if "</style>" not in text:
+                  raise SystemExit("ERROR: style closing tag not found")
+              text = text.replace(
+                  "</style>",
+                  "\n" + "\n".join(line.rstrip() for line in demo_css.strip().splitlines()) + "\n  </style>",
+                  1
+              )
+
+          path.write_text(text, encoding="utf-8")
+
+          updated = path.read_text(encoding="utf-8")
+          assert 'operation-demo-page' in updated
+          assert '動物病院版 操作デモ' in updated
+          assert 'これは実際に操作する体験用画面です' in updated
+          assert '>システム確認</a>' not in updated
+          assert '<h3>営業前チェック</h3>' not in updated
+          assert '<h3>飼い主LINE診察券</h3>' in updated
+          assert '公式の機能説明を見る' in updated
+          assert css_marker in updated
+
+      - name: Commit changes
+        shell: bash
+        run: |
+          git config user.name "dpro-systems-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add index.html
+          if git diff --cached --quiet; then
+            echo "No changes needed"
+            exit 0
+          fi
+          git commit -m "STEP DPRO-SYSTEMS-3 clarify VET operation demo"
+          git push
