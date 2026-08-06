@@ -37,7 +37,7 @@
   </aside>
 
   <main class="main">
-    <div class="top"><div><h2 id="pageTitle">日時指定予約一覧</h2><p id="clinicName">病院情報を読み込み中です。</p></div><div class="topActions"><a id="ownerLink" href="./owner.html">オーナー画面</a><a id="publicLink" href="./appointment.html" target="_blank">飼い主予約画面</a><a id="waitingLink" href="./waiting.html" target="_blank">順番受付</a></div></div>
+    <div class="top"><div><h2 id="pageTitle">日時指定予約一覧</h2><p id="clinicName">病院情報を読み込み中です。</p></div><div class="topActions"><a id="ownerLink" href="./owner.html">オーナー画面</a><a id="publicLink" href="./appointment.html" target="_blank">飼い主予約画面</a><a id="waitingLink" href="./waiting.html" target="_blank">順番受付</a><a id="lineCallLink" href="./line-call-admin.html">LINE呼び出し</a></div></div>
 
     <section class="login">
       <div class="field"><label for="adminCode">管理コード</label><input id="adminCode" type="password" placeholder="Cloudflare Worker Secretの管理コード"></div>
@@ -145,7 +145,7 @@
   function statusLabel(s){return({scheduled:"予約受付",confirmed:"確認済み",checked_in:"来院済み",completed:"完了",cancelled:"キャンセル",no_show:"不在"})[s]||s;}
   function time(v){return String(v||"").slice(0,5)}
   function pageUrl(file){const u=new URL(file,location.href);u.searchParams.set("clinic_code",CLINIC);if(DEMO)u.searchParams.set("demo","ready");u.searchParams.set("v","step-vet-appointment-1-r2");return u.toString();}
-  $("ownerLink").href=pageUrl("owner.html");$("publicLink").href=pageUrl("appointment.html");$("waitingLink").href=pageUrl("waiting.html");
+  $("ownerLink").href=pageUrl("owner.html");$("publicLink").href=pageUrl("appointment.html");$("waitingLink").href=pageUrl("waiting.html");$("lineCallLink").href=pageUrl("line-call-admin.html");
 
   document.querySelectorAll("[data-panel]").forEach(b=>b.onclick=()=>{document.querySelectorAll("[data-panel]").forEach(x=>x.classList.toggle("active",x===b));document.querySelectorAll(".panel").forEach(x=>x.classList.remove("active"));$(`panel-${b.dataset.panel}`).classList.add("active");$("pageTitle").textContent=({appointments:"日時指定予約一覧",create:"スタッフ受付",services:"予約内容設定",settings:"基本設定"})[b.dataset.panel];});
   $("adminCode").value=getCode();
