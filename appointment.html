@@ -33,7 +33,7 @@
 <body>
 <main class="page">
   <section class="hero">
-    <span class="badge">STEP VET-APPOINTMENT-1｜30分単位の日時指定予約</span>
+    <span class="badge">STEP VET-APPOINTMENT-1-R2｜30分単位の日時指定予約</span>
     <h1>日時を選んで<br>診療予約</h1>
     <p class="lead">順番受付を置き換える機能ではありません。ワクチン・健康診断・再診など、病院が時間予約を受け付ける内容だけに利用します。</p>
     <div class="heroNav">
@@ -115,7 +115,7 @@
   const CLINIC_CODE = params.get("clinic_code") || CONFIG?.clinic?.clinicCode || "dpro_vet_demo";
   const LINE_USER_ID = params.get("line_user_id") || params.get("lineUserId") || params.get("uid") || CONFIG?.demo?.lineUserId || "";
   const DEMO = CLINIC_CODE === "dpro_vet_demo" && ["ready","true","1"].includes(String(params.get("demo") || "").toLowerCase());
-  const VERSION = "step-vet-appointment-1";
+  const VERSION = "step-vet-appointment-1-r2";
 
   const state = { clinic:null, settings:null, services:[], guardian:null, cards:[], appointments:[], pet:null, service:null, date:"", time:"", editing:null };
   const $ = (id) => document.getElementById(id);
@@ -177,7 +177,7 @@
 
   function renderPets(){
     $("petGrid").innerHTML=state.cards.map(card=>`<button class="choice ${state.pet?.pet_id===card.pet_id?"active":""}" type="button" data-pet="${esc(card.pet_id)}"><b>${esc(card.pet_name||"ペット")}</b><span>${esc(card.species_label||card.species||"")} ${esc(card.breed||"")}</span><small>${esc(card.card_no||"")}</small></button>`).join("");
-    document.querySelectorAll("[data-pet]").forEach(btn=>btn.onclick=()=>{state.pet=state.cards.find(x=>x.pet_id===btn.dataset.pet)||null;renderPets();updateSummary();});
+    document.querySelectorAll("[data-pet]").forEach(btn=>btn.onclick=async()=>{state.pet=state.cards.find(x=>x.pet_id===btn.dataset.pet)||null;renderPets();updateSummary();await loadAvailability(state.editing?.id||"");});
     updateSummary();
   }
   function renderServices(){
@@ -194,7 +194,7 @@
     if(!state.settings?.exact_time_booking_enabled||!state.service||!state.date){area.innerHTML='<div class="notice info full">日付と診療内容を選択してください。</div>';return;}
     area.innerHTML='<div class="notice info full">空き時間を確認中です。</div>';
     try{
-      const data=await get("/api/public/exact-appointments/availability",{date:state.date,service_id:state.service.id,exclude_appointment_id:excludeId});
+      const data=await get("/api/public/exact-appointments/availability",{date:state.date,service_id:state.service.id,pet_id:state.pet?.pet_id||"",exclude_appointment_id:excludeId});
       if(!data.slots?.length){area.innerHTML=`<div class="notice ng full">${esc(data.reason||"予約可能な時間がありません。")}</div>`;return;}
       area.innerHTML=data.slots.map(slot=>`<button type="button" class="slot" data-time="${esc(slot.start_time)}" ${slot.available?"":"disabled"}>${esc(slot.start_time)}<small>${slot.available?`残り${slot.remaining}枠`:esc(slot.reason||"満席")}</small></button>`).join("");
       area.querySelectorAll("[data-time]").forEach(btn=>btn.onclick=()=>{state.time=btn.dataset.time;area.querySelectorAll(".slot").forEach(x=>x.classList.remove("active"));btn.classList.add("active");$("selectedTimeDisplay").value=state.time;updateSummary();});
@@ -251,7 +251,7 @@
 
   async function init(){
     try{await Promise.all([loadSettings(),loadCards()]);await loadAvailability();await loadAppointments();updateSummary();}
-    catch(error){notice("globalNotice","ng",error.message.includes("relation")?"日時指定予約のデータベース設定がまだ反映されていません。STEP VET-APPOINTMENT-1のSQLを実行してください。":error.message);}
+    catch(error){notice("globalNotice","ng",error.message.includes("relation")?"日時指定予約のデータベース設定がまだ反映されていません。STEP VET-APPOINTMENT-1-R2のSQLを実行してください。":error.message);}
   }
   init();
 })();
