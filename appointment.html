@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#123d31">
+  <title>DPRO PET CARE LINE｜日時指定予約</title>
+  <script src="./config.js"></script>
+  <style>
+    :root{--green:#123d31;--green2:#1c6a51;--sage:#e7f2ec;--mint:#f4faf7;--ivory:#fbfaf6;--ink:#18312a;--muted:#667a73;--line:#d8e4de;--gold:#b99b63;--danger:#a13e3e;--warn:#8a641e;--white:#fff;--shadow:0 18px 50px rgba(21,54,44,.12)}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:linear-gradient(180deg,#eef6f1 0,#fbfaf6 34%,#f4f7f5 100%);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;line-height:1.65}
+    button,input,select,textarea{font:inherit}button{cursor:pointer}.page{width:min(1120px,calc(100% - 28px));margin:0 auto;padding:20px 0 56px}
+    .hero{position:relative;overflow:hidden;border-radius:30px;padding:30px;background:linear-gradient(135deg,#10392d,#1a6a50);color:#fff;box-shadow:var(--shadow)}
+    .hero:after{content:"";position:absolute;width:320px;height:320px;border-radius:50%;right:-120px;top:-160px;background:radial-gradient(circle,rgba(255,255,255,.22),rgba(255,255,255,0) 68%)}
+    .badge{display:inline-flex;align-items:center;gap:8px;padding:6px 11px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);font-size:12px;font-weight:900;letter-spacing:.04em}
+    h1{font-size:clamp(28px,5vw,48px);line-height:1.2;margin:14px 0 8px;letter-spacing:-.03em}.lead{max-width:730px;margin:0;color:rgba(255,255,255,.9);font-weight:700}
+    .heroNav{display:flex;flex-wrap:wrap;gap:9px;margin-top:20px}.heroNav a{color:#fff;text-decoration:none;border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.13);padding:9px 13px;border-radius:12px;font-weight:850;font-size:13px}
+    .modeStrip{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:22px;position:relative;z-index:1}.mode{padding:13px;border-radius:16px;background:rgba(255,255,255,.11);border:1px solid rgba(255,255,255,.18)}.mode.active{background:#fff;color:var(--green)}.mode b{display:block;font-size:14px}.mode span{font-size:12px;opacity:.85}
+    .notice{margin-top:14px;padding:13px 15px;border-radius:14px;background:#fff;border:1px solid var(--line);font-weight:750;font-size:13px}.notice.info{background:#eef8f3;color:#245c49}.notice.ng{background:#fff2f2;color:#8b3131;border-color:#efcccc}.notice.ok{background:#eff9f1;color:#23613f;border-color:#cce7d4}.hidden{display:none!important}
+    .layout{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(340px,.95fr);gap:18px;margin-top:18px}.card{background:rgba(255,255,255,.94);border:1px solid rgba(210,226,217,.9);border-radius:24px;padding:22px;box-shadow:0 12px 34px rgba(34,70,58,.08)}
+    .sectionTitle{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:16px}.sectionTitle h2{margin:0;font-size:22px;line-height:1.35}.sectionTitle p{margin:4px 0 0;color:var(--muted);font-size:13px}.stepNo{flex:0 0 auto;width:38px;height:38px;border-radius:13px;background:var(--sage);color:var(--green);display:grid;place-items:center;font-weight:950}
+    label{display:block;margin:0 0 6px;font-size:13px;font-weight:900}select,input,textarea{width:100%;border:1px solid #cddbd4;border-radius:12px;background:#fff;padding:12px 13px;color:var(--ink);outline:none;transition:.2s}select:focus,input:focus,textarea:focus{border-color:#4f9b7a;box-shadow:0 0 0 4px rgba(69,143,112,.12)}textarea{min-height:86px;resize:vertical}.grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}.full{grid-column:1/-1}
+    .serviceGrid,.petGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.choice{appearance:none;text-align:left;border:1px solid var(--line);border-radius:15px;padding:13px;background:#fff;color:var(--ink);transition:.2s}.choice:hover{transform:translateY(-1px);border-color:#8fb8a7}.choice.active{border-color:var(--green2);background:var(--mint);box-shadow:0 0 0 3px rgba(40,126,92,.09)}.choice b{display:block;font-size:14px}.choice span{display:block;color:var(--muted);font-size:12px;margin-top:3px}.choice small{display:inline-block;margin-top:7px;color:var(--green2);font-weight:900}
+    .slotGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin-top:12px}.slot{border:1px solid var(--line);background:#fff;border-radius:12px;padding:11px 7px;font-weight:900;color:var(--green);text-align:center}.slot:hover:not(:disabled){border-color:var(--green2);background:var(--mint)}.slot.active{background:var(--green);color:#fff;border-color:var(--green)}.slot:disabled{cursor:not-allowed;background:#f1f3f2;color:#9aa6a1;text-decoration:line-through}.slot small{display:block;font-size:10px;font-weight:700;text-decoration:none}
+    .actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:17px}.btn{border:0;border-radius:13px;padding:12px 17px;font-weight:950;transition:.2s}.btn:hover{transform:translateY(-1px)}.btnMain{background:var(--green);color:#fff;box-shadow:0 9px 22px rgba(18,61,49,.19)}.btnSoft{background:var(--sage);color:var(--green)}.btnDanger{background:#fff0f0;color:var(--danger);border:1px solid #efcccc}.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+    .summary{margin-top:16px;border-radius:17px;background:var(--ivory);border:1px solid #e7dfcf;padding:15px}.summary h3{margin:0 0 9px;font-size:15px}.summary dl{display:grid;grid-template-columns:100px 1fr;gap:7px 10px;margin:0}.summary dt{color:var(--muted);font-size:12px;font-weight:850}.summary dd{margin:0;font-size:13px;font-weight:850}
+    .appointmentList{display:grid;gap:11px}.appointmentItem{border:1px solid var(--line);border-radius:17px;background:#fff;padding:15px}.appointmentTop{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.appointmentTop h3{margin:0;font-size:16px}.appointmentTop p{margin:3px 0 0;color:var(--muted);font-size:12px}.status{display:inline-flex;padding:4px 9px;border-radius:999px;font-size:11px;font-weight:950;background:var(--sage);color:var(--green)}.status.cancelled,.status.no_show{background:#f5eded;color:#8d4848}.status.completed{background:#edf0ef;color:#53615c}.appointmentMeta{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-top:12px;font-size:12px}.appointmentMeta div{padding:9px;border-radius:10px;background:#f6f9f7}.appointmentMeta b{display:block;font-size:11px;color:var(--muted)}.miniActions{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px}.miniActions button{padding:8px 11px;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--green);font-size:12px;font-weight:900}
+    .policy{margin-top:15px;padding:14px;border-left:4px solid var(--gold);border-radius:10px;background:#fffaf0;color:#574a31;font-size:12px}.footerNote{text-align:center;color:var(--muted);font-size:12px;margin-top:20px}
+    @media(max-width:820px){.layout{grid-template-columns:1fr}.modeStrip{grid-template-columns:1fr}.grid{grid-template-columns:1fr}.full{grid-column:auto}.slotGrid{grid-template-columns:repeat(3,1fr)}}
+    @media(max-width:480px){.page{width:min(100% - 18px,1120px);padding-top:9px}.hero{padding:22px 18px;border-radius:22px}.card{padding:17px;border-radius:20px}.serviceGrid,.petGrid{grid-template-columns:1fr}.slotGrid{grid-template-columns:repeat(2,1fr)}.appointmentMeta{grid-template-columns:1fr}.summary dl{grid-template-columns:82px 1fr}}
+  </style>
+</head>
+<body>
+<main class="page">
+  <section class="hero">
+    <span class="badge">STEP VET-APPOINTMENT-1｜30分単位の日時指定予約</span>
+    <h1>日時を選んで<br>診療予約</h1>
+    <p class="lead">順番受付を置き換える機能ではありません。ワクチン・健康診断・再診など、病院が時間予約を受け付ける内容だけに利用します。</p>
+    <div class="heroNav">
+      <a id="waitingLink" href="./waiting.html">今日の順番受付</a>
+      <a id="memberLink" href="./member.html">ペット診察券</a>
+      <a id="menuLink" href="./rich-menu.html">メニューへ</a>
+    </div>
+    <div class="modeStrip">
+      <div class="mode"><b>今日の順番受付</b><span>急な症状・通常診療</span></div>
+      <div class="mode"><b>午前／午後の優先受付</b><span>診察開始時刻は確約しない</span></div>
+      <div class="mode active"><b>30分単位の日時指定予約</b><span>病院がONにした診療内容のみ</span></div>
+    </div>
+  </section>
+
+  <div id="globalNotice" class="notice info">病院の予約設定を読み込んでいます。</div>
+
+  <section class="layout">
+    <div class="card">
+      <div class="sectionTitle"><div><h2>予約内容を選択</h2><p>ペット、診療内容、日付、空き時間の順に選びます。</p></div><span class="stepNo">1</span></div>
+
+      <label>予約するペット</label>
+      <div id="petGrid" class="petGrid"><div class="notice info">診察券を読み込み中です。</div></div>
+
+      <label style="margin-top:18px">診療内容</label>
+      <div id="serviceGrid" class="serviceGrid"><div class="notice info">予約内容を読み込み中です。</div></div>
+
+      <div class="grid" style="margin-top:18px">
+        <div>
+          <label for="appointmentDate">予約日</label>
+          <input id="appointmentDate" type="date">
+        </div>
+        <div>
+          <label>選択時刻</label>
+          <input id="selectedTimeDisplay" type="text" value="未選択" readonly>
+        </div>
+        <div class="full">
+          <label>空き時間</label>
+          <div id="slotGrid" class="slotGrid"><div class="notice info full">日付と診療内容を選択してください。</div></div>
+        </div>
+        <div class="full">
+          <label for="requestNote">病院へ伝えたいこと</label>
+          <textarea id="requestNote" placeholder="例：前回の診察後から食欲は戻りました。経過確認を希望します。"></textarea>
+        </div>
+      </div>
+
+      <div id="bookingSummary" class="summary">
+        <h3>予約内容の確認</h3>
+        <dl>
+          <dt>ペット</dt><dd id="sumPet">未選択</dd>
+          <dt>診療内容</dt><dd id="sumService">未選択</dd>
+          <dt>予約日時</dt><dd id="sumDateTime">未選択</dd>
+          <dt>所要時間</dt><dd id="sumDuration">未選択</dd>
+        </dl>
+      </div>
+
+      <div class="policy" id="publicNote">診療内容や急患対応により、開始時刻が前後する場合があります。</div>
+      <div class="actions">
+        <button id="submitButton" class="btn btnMain" type="button" disabled>この内容で予約する</button>
+        <button id="resetButton" class="btn btnSoft" type="button">選択をリセット</button>
+      </div>
+      <div id="submitNotice" class="notice hidden"></div>
+    </div>
+
+    <div class="card">
+      <div class="sectionTitle"><div><h2>現在の日時指定予約</h2><p>変更・キャンセル可能な期限は病院設定に従います。</p></div><span class="stepNo">2</span></div>
+      <div id="appointmentList" class="appointmentList"><div class="notice info">予約を読み込み中です。</div></div>
+      <div class="actions"><button id="reloadButton" class="btn btnSoft" type="button">予約を再読み込み</button></div>
+    </div>
+  </section>
+  <p class="footerNote">日時指定予約がOFFの場合も、今日の順番受付・午前午後優先受付・お薬予防受付はそのまま利用できます。</p>
+</main>
+
+<script>
+(() => {
+  "use strict";
+  const CONFIG = window.DPRO_VET_CONFIG || window.DPRO_CONFIG || window.APP_CONFIG || {};
+  const API_BASE = String(CONFIG?.api?.baseUrl || CONFIG?.urls?.apiBaseUrl || "https://dpro-vet-qr-api.dpromstk2000.workers.dev").replace(/\/$/, "");
+  const params = new URLSearchParams(location.search);
+  const CLINIC_CODE = params.get("clinic_code") || CONFIG?.clinic?.clinicCode || "dpro_vet_demo";
+  const LINE_USER_ID = params.get("line_user_id") || params.get("lineUserId") || params.get("uid") || CONFIG?.demo?.lineUserId || "";
+  const DEMO = CLINIC_CODE === "dpro_vet_demo" && ["ready","true","1"].includes(String(params.get("demo") || "").toLowerCase());
+  const VERSION = "step-vet-appointment-1";
+
+  const state = { clinic:null, settings:null, services:[], guardian:null, cards:[], appointments:[], pet:null, service:null, date:"", time:"", editing:null };
+  const $ = (id) => document.getElementById(id);
+  const esc = (v) => String(v ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
+
+  function pageUrl(file){
+    const url = new URL(file, location.href);
+    url.searchParams.set("clinic_code", CLINIC_CODE);
+    if (LINE_USER_ID) url.searchParams.set("line_user_id", LINE_USER_ID);
+    if (DEMO) url.searchParams.set("demo", "ready");
+    url.searchParams.set("v", VERSION);
+    return url.toString();
+  }
+  $("waitingLink").href = pageUrl("waiting.html");
+  $("memberLink").href = pageUrl("member.html");
+  $("menuLink").href = pageUrl("rich-menu.html");
+
+  function apiUrl(path, extra={}){
+    const url = new URL(API_BASE + path);
+    Object.entries({clinic_code:CLINIC_CODE,line_user_id:LINE_USER_ID,demo:DEMO?"true":"",...extra}).forEach(([k,v])=>{if(v!==undefined&&v!==null&&String(v)!=="")url.searchParams.set(k,String(v));});
+    return url;
+  }
+  async function get(path, extra={}){
+    const res = await fetch(apiUrl(path,extra),{cache:"no-store",headers:{Accept:"application/json"}});
+    const data = await res.json().catch(()=>({}));
+    if(!res.ok||data.ok===false) throw new Error(data.message||data.error||`API Error ${res.status}`);
+    return data;
+  }
+  async function post(path, body={}){
+    const res = await fetch(API_BASE+path,{method:"POST",headers:{"Content-Type":"application/json",Accept:"application/json"},body:JSON.stringify({clinic_code:CLINIC_CODE,line_user_id:LINE_USER_ID,guardian_id:state.guardian?.id||state.guardian?.guardian_id||"",demo:DEMO,...body})});
+    const data = await res.json().catch(()=>({}));
+    if(!res.ok||data.ok===false) throw new Error(data.message||data.error||`API Error ${res.status}`);
+    return data;
+  }
+  function notice(id,type,text){const el=$(id);el.className=`notice ${type||""}`;el.textContent=text;el.classList.remove("hidden");}
+  function hideNotice(id){$(id).classList.add("hidden");}
+  function tokenKey(id){return `dpro_vet_exact_booking_token_${id}`;}
+  function statusLabel(status){return ({scheduled:"予約受付",confirmed:"確認済み",checked_in:"来院済み",completed:"完了",cancelled:"キャンセル",no_show:"不在"})[status]||status;}
+  function dateLabel(value){if(!value)return"-";const [y,m,d]=value.split("-");return`${y}年${Number(m)}月${Number(d)}日`;}
+  function timeLabel(value){return String(value||"").slice(0,5)||"-";}
+
+  async function loadSettings(){
+    const data=await get("/api/public/exact-appointments/settings");
+    state.clinic=data.clinic||null;state.settings=data.settings||{};state.services=data.services||[];
+    $("publicNote").textContent=state.settings.public_note||"診療内容や急患対応により、開始時刻が前後する場合があります。";
+    const date=$("appointmentDate");date.min=data.min_date||"";date.max=data.max_date||"";
+    if(!date.value) date.value=data.min_date||"";state.date=date.value;
+    if(!state.settings.exact_time_booking_enabled){notice("globalNotice","ng","この病院では日時指定予約を現在受け付けていません。今日の順番受付をご利用ください。");}
+    else notice("globalNotice","ok",`${state.clinic?.clinic_name||state.clinic?.name||"動物病院"}の日時指定予約を受け付けています。`);
+    renderServices();
+  }
+
+  async function loadCards(){
+    const data=await get("/api/member/pet-cards",{guardian_id:params.get("guardian_id")||""});
+    state.guardian=data.guardian||null;state.cards=data.cards||[];
+    if(!state.cards.length){$("petGrid").innerHTML='<div class="notice ng full">LINE連携済みのペット診察券が見つかりません。先に診察券登録を行ってください。</div>';return;}
+    if(!state.pet) state.pet=state.cards[0];renderPets();
+  }
+
+  function renderPets(){
+    $("petGrid").innerHTML=state.cards.map(card=>`<button class="choice ${state.pet?.pet_id===card.pet_id?"active":""}" type="button" data-pet="${esc(card.pet_id)}"><b>${esc(card.pet_name||"ペット")}</b><span>${esc(card.species_label||card.species||"")} ${esc(card.breed||"")}</span><small>${esc(card.card_no||"")}</small></button>`).join("");
+    document.querySelectorAll("[data-pet]").forEach(btn=>btn.onclick=()=>{state.pet=state.cards.find(x=>x.pet_id===btn.dataset.pet)||null;renderPets();updateSummary();});
+    updateSummary();
+  }
+  function renderServices(){
+    if(!state.services.length){$("serviceGrid").innerHTML='<div class="notice ng full">予約できる診療内容が設定されていません。</div>';return;}
+    if(!state.service) state.service=state.services[0];
+    $("serviceGrid").innerHTML=state.services.map(s=>`<button class="choice ${state.service?.id===s.id?"active":""}" type="button" data-service="${esc(s.id)}"><b>${esc(s.service_name)}</b><span>${esc(s.description||"")}</span><small>${Number(s.duration_minutes||30)}分</small></button>`).join("");
+    document.querySelectorAll("[data-service]").forEach(btn=>btn.onclick=async()=>{state.service=state.services.find(x=>x.id===btn.dataset.service)||null;state.time="";renderServices();updateSummary();await loadAvailability();});
+    updateSummary();
+  }
+
+  async function loadAvailability(excludeId=""){
+    const area=$("slotGrid");
+    state.date=$("appointmentDate").value;state.time="";$("selectedTimeDisplay").value="未選択";updateSummary();
+    if(!state.settings?.exact_time_booking_enabled||!state.service||!state.date){area.innerHTML='<div class="notice info full">日付と診療内容を選択してください。</div>';return;}
+    area.innerHTML='<div class="notice info full">空き時間を確認中です。</div>';
+    try{
+      const data=await get("/api/public/exact-appointments/availability",{date:state.date,service_id:state.service.id,exclude_appointment_id:excludeId});
+      if(!data.slots?.length){area.innerHTML=`<div class="notice ng full">${esc(data.reason||"予約可能な時間がありません。")}</div>`;return;}
+      area.innerHTML=data.slots.map(slot=>`<button type="button" class="slot" data-time="${esc(slot.start_time)}" ${slot.available?"":"disabled"}>${esc(slot.start_time)}<small>${slot.available?`残り${slot.remaining}枠`:esc(slot.reason||"満席")}</small></button>`).join("");
+      area.querySelectorAll("[data-time]").forEach(btn=>btn.onclick=()=>{state.time=btn.dataset.time;area.querySelectorAll(".slot").forEach(x=>x.classList.remove("active"));btn.classList.add("active");$("selectedTimeDisplay").value=state.time;updateSummary();});
+    }catch(error){area.innerHTML=`<div class="notice ng full">${esc(error.message)}</div>`;}
+  }
+
+  function updateSummary(){
+    $("sumPet").textContent=state.pet?.pet_name||"未選択";
+    $("sumService").textContent=state.service?.service_name||"未選択";
+    $("sumDateTime").textContent=state.date&&state.time?`${dateLabel(state.date)} ${state.time}`:"未選択";
+    $("sumDuration").textContent=state.service?`${Number(state.service.duration_minutes||30)}分`:"未選択";
+    $("submitButton").textContent=state.editing?"この内容へ予約を変更":"この内容で予約する";
+    $("submitButton").disabled=!(state.settings?.exact_time_booking_enabled&&state.pet&&state.service&&state.date&&state.time);
+  }
+
+  async function submitBooking(){
+    hideNotice("submitNotice");$("submitButton").disabled=true;
+    const payload={pet_id:state.pet.pet_id,service_id:state.service.id,appointment_date:state.date,start_time:state.time,request_note:$("requestNote").value.trim()};
+    try{
+      let data;
+      if(state.editing){data=await post("/api/member/exact-appointments/change",{...payload,appointment_id:state.editing.id,booking_token:localStorage.getItem(tokenKey(state.editing.id))||"",reason:"LINE画面から変更"});notice("submitNotice","ok",data.message||"予約を変更しました。");}
+      else{data=await post("/api/member/exact-appointments/create",payload);if(data.appointment?.id&&data.booking_token)localStorage.setItem(tokenKey(data.appointment.id),data.booking_token);notice("submitNotice","ok",data.message||"予約を受け付けました。");}
+      state.editing=null;resetSelection(false);await loadAppointments();await loadAvailability();
+    }catch(error){notice("submitNotice","ng",error.message);}finally{updateSummary();}
+  }
+
+  async function loadAppointments(){
+    const area=$("appointmentList");area.innerHTML='<div class="notice info">予約を読み込み中です。</div>';
+    try{
+      const data=await get("/api/member/exact-appointments",{guardian_id:state.guardian?.id||state.guardian?.guardian_id||""});state.appointments=data.appointments||[];
+      if(!state.appointments.length){area.innerHTML='<div class="notice info">現在の日時指定予約はありません。</div>';return;}
+      area.innerHTML=state.appointments.map(a=>`<article class="appointmentItem"><div class="appointmentTop"><div><h3>${esc(a.service_name||"日時指定予約")}</h3><p>${esc(a.pet_name_snapshot||"ペット")}｜予約番号 ${esc(a.appointment_no||"")}</p></div><span class="status ${esc(a.status)}">${esc(statusLabel(a.status))}</span></div><div class="appointmentMeta"><div><b>予約日</b>${esc(dateLabel(a.appointment_date))}</div><div><b>予約時間</b>${esc(timeLabel(a.start_time))}〜${esc(timeLabel(a.end_time))}</div></div>${a.request_note?`<div class="policy">${esc(a.request_note)}</div>`:""}<div class="miniActions">${a.can_member_change?`<button type="button" data-change="${esc(a.id)}">変更する</button>`:""}${a.can_member_cancel?`<button type="button" data-cancel="${esc(a.id)}">キャンセル</button>`:""}</div></article>`).join("");
+      area.querySelectorAll("[data-change]").forEach(btn=>btn.onclick=()=>startChange(btn.dataset.change));
+      area.querySelectorAll("[data-cancel]").forEach(btn=>btn.onclick=()=>cancelAppointment(btn.dataset.cancel));
+    }catch(error){area.innerHTML=`<div class="notice ng">${esc(error.message)}</div>`;}
+  }
+
+  async function startChange(id){
+    const item=state.appointments.find(x=>x.id===id);if(!item)return;
+    state.editing=item;state.pet=state.cards.find(x=>x.pet_id===item.pet_id)||state.pet;state.service=state.services.find(x=>x.id===item.service_type_id)||state.service;state.date=item.appointment_date;state.time="";
+    $("appointmentDate").value=state.date;$("requestNote").value=item.request_note||"";renderPets();renderServices();await loadAvailability(item.id);updateSummary();scrollTo({top:$("serviceGrid").getBoundingClientRect().top+scrollY-20,behavior:"smooth"});notice("submitNotice","info","変更後の日付と空き時間を選択してください。");
+  }
+  async function cancelAppointment(id){
+    const item=state.appointments.find(x=>x.id===id);if(!item)return;
+    const reason=prompt(`${dateLabel(item.appointment_date)} ${timeLabel(item.start_time)}の予約をキャンセルします。理由を入力してください。`,`都合が悪くなったため`);if(reason===null)return;
+    try{const data=await post("/api/member/exact-appointments/cancel",{appointment_id:id,booking_token:localStorage.getItem(tokenKey(id))||"",reason});notice("globalNotice","ok",data.message||"予約をキャンセルしました。");await loadAppointments();await loadAvailability();}catch(error){notice("globalNotice","ng",error.message);}
+  }
+  function resetSelection(clearPet=true){state.editing=null;state.time="";if(clearPet)state.pet=state.cards[0]||null;state.service=state.services[0]||null;$("selectedTimeDisplay").value="未選択";$("requestNote").value="";renderPets();renderServices();updateSummary();}
+
+  $("appointmentDate").addEventListener("change",()=>loadAvailability(state.editing?.id||""));
+  $("submitButton").addEventListener("click",submitBooking);
+  $("resetButton").addEventListener("click",()=>{resetSelection();loadAvailability();hideNotice("submitNotice");});
+  $("reloadButton").addEventListener("click",loadAppointments);
+
+  async function init(){
+    try{await Promise.all([loadSettings(),loadCards()]);await loadAvailability();await loadAppointments();updateSummary();}
+    catch(error){notice("globalNotice","ng",error.message.includes("relation")?"日時指定予約のデータベース設定がまだ反映されていません。STEP VET-APPOINTMENT-1のSQLを実行してください。":error.message);}
+  }
+  init();
+})();
+</script>
+</body>
+</html>

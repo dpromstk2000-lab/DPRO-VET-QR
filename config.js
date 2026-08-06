@@ -28,7 +28,7 @@
   const API_BASE_URL = "https://dpro-vet-qr-api.dpromstk2000.workers.dev";
 
   const CONFIG = {
-    version: "step-vet-21a-admin-code-storage-unified",
+    version: "step-vet-appointment-1-exact-time-booking",
     project: {
       repoName: "DPRO-VET-QR",
       serviceId: "dpro-pet-care-line",
@@ -59,6 +59,8 @@
       owner: `${SITE_BASE_URL}/owner.html`,
       admin: `${SITE_BASE_URL}/admin.html`,
       adminQueue: `${SITE_BASE_URL}/admin-queue.html`,
+      appointment: `${SITE_BASE_URL}/appointment.html`,
+      appointmentAdmin: `${SITE_BASE_URL}/appointment-admin.html`,
       waiting: `${SITE_BASE_URL}/waiting.html`,
       richMenu: `${SITE_BASE_URL}/rich-menu.html`,
       doctor: `${SITE_BASE_URL}/doctor.html`,
@@ -83,6 +85,8 @@
       publicClinic: `${API_BASE_URL}/api/public/clinic`,
       publicClinicSettings: `${API_BASE_URL}/api/public/clinic-settings`,
       publicAppointmentOptions: `${API_BASE_URL}/api/public/appointment-options`,
+      publicExactAppointmentSettings: `${API_BASE_URL}/api/public/exact-appointments/settings`,
+      publicExactAppointmentAvailability: `${API_BASE_URL}/api/public/exact-appointments/availability`,
 
       // member / LIFF
       memberPetCard: `${API_BASE_URL}/api/member/pet-card`,
@@ -90,6 +94,10 @@
       memberLineLinkStatus: `${API_BASE_URL}/api/member/line-link/status`,
       memberLineLinkComplete: `${API_BASE_URL}/api/member/line-link/complete`,
       memberQuestionnaireCreate: `${API_BASE_URL}/api/member/questionnaire/create`,
+      memberExactAppointments: `${API_BASE_URL}/api/member/exact-appointments`,
+      memberExactAppointmentCreate: `${API_BASE_URL}/api/member/exact-appointments/create`,
+      memberExactAppointmentChange: `${API_BASE_URL}/api/member/exact-appointments/change`,
+      memberExactAppointmentCancel: `${API_BASE_URL}/api/member/exact-appointments/cancel`,
 
       // scan / reception
       scanLookup: `${API_BASE_URL}/api/scan/lookup`,
@@ -123,6 +131,14 @@
       adminSpecialDayUpsert: `${API_BASE_URL}/api/admin/special-days/upsert`,
       adminSpecialDayDelete: `${API_BASE_URL}/api/admin/special-days/delete`,
       adminAppointmentOptions: `${API_BASE_URL}/api/admin/appointment-options`,
+      adminExactAppointmentSettings: `${API_BASE_URL}/api/admin/exact-appointments/settings`,
+      adminExactAppointmentServices: `${API_BASE_URL}/api/admin/exact-appointments/services`,
+      adminExactAppointmentServiceSave: `${API_BASE_URL}/api/admin/exact-appointments/services/save`,
+      adminExactAppointmentServiceArchive: `${API_BASE_URL}/api/admin/exact-appointments/services/archive`,
+      adminExactAppointments: `${API_BASE_URL}/api/admin/exact-appointments`,
+      adminExactAppointmentCreate: `${API_BASE_URL}/api/admin/exact-appointments/create`,
+      adminExactAppointmentStatus: `${API_BASE_URL}/api/admin/exact-appointments/status`,
+      adminExactAppointmentCheck: `${API_BASE_URL}/api/admin/exact-appointments/check`,
       adminGuardiansSearch: `${API_BASE_URL}/api/admin/guardians/search`,
       adminGuardianCreate: `${API_BASE_URL}/api/admin/guardians/create`,
       adminGuardianUpdate: `${API_BASE_URL}/api/admin/guardians/update`,
@@ -209,7 +225,7 @@
         {
           id: "reservation",
           label: "予約・受付",
-          description: "予約・順番受付への導線",
+          description: "順番受付・優先受付・日時指定予約への導線",
           url: `${SITE_BASE_URL}/member.html`
         },
         {
