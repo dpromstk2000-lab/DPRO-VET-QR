@@ -33,7 +33,7 @@
 <body>
 <main class="page">
   <section class="hero">
-    <span class="badge">STEP VET-APPOINTMENT-1-R2｜30分単位の日時指定予約</span>
+    <span class="badge">STEP VET-DOCTOR-SLOT-1｜獣医師別・30分単位の日時指定予約</span>
     <h1>日時を選んで<br>診療予約</h1>
     <p class="lead">順番受付を置き換える機能ではありません。ワクチン・健康診断・再診など、病院が時間予約を受け付ける内容だけに利用します。</p>
     <div class="heroNav">
@@ -60,6 +60,12 @@
       <label style="margin-top:18px">診療内容</label>
       <div id="serviceGrid" class="serviceGrid"><div class="notice info">予約内容を読み込み中です。</div></div>
 
+      <div id="doctorSection" class="hidden" style="margin-top:18px">
+        <label for="appointmentDoctor">担当獣医師</label>
+        <select id="appointmentDoctor"><option value="">おまかせ</option></select>
+        <div id="doctorHelp" class="notice info" style="margin-top:8px">「おまかせ」を選ぶと、この時間に担当できる獣医師へ自動で割り当てます。</div>
+      </div>
+
       <div class="grid" style="margin-top:18px">
         <div>
           <label for="appointmentDate">予約日</label>
@@ -84,6 +90,7 @@
         <dl>
           <dt>ペット</dt><dd id="sumPet">未選択</dd>
           <dt>診療内容</dt><dd id="sumService">未選択</dd>
+          <dt>担当獣医師</dt><dd id="sumDoctor">おまかせ</dd>
           <dt>予約日時</dt><dd id="sumDateTime">未選択</dd>
           <dt>所要時間</dt><dd id="sumDuration">未選択</dd>
         </dl>
@@ -117,7 +124,7 @@
   const DEMO = CLINIC_CODE === "dpro_vet_demo" && ["ready","true","1"].includes(String(params.get("demo") || "").toLowerCase());
   const VERSION = "step-vet-appointment-1-r2";
 
-  const state = { clinic:null, settings:null, services:[], guardian:null, cards:[], appointments:[], pet:null, service:null, date:"", time:"", editing:null };
+  const state = { clinic:null, settings:null, services:[], doctors:[], guardian:null, cards:[], appointments:[], pet:null, service:null, doctorId:"", date:"", time:"", editing:null };
   const $ = (id) => document.getElementById(id);
   const esc = (v) => String(v ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
 
@@ -159,13 +166,14 @@
 
   async function loadSettings(){
     const data=await get("/api/public/exact-appointments/settings");
-    state.clinic=data.clinic||null;state.settings=data.settings||{};state.services=data.services||[];
+    state.clinic=data.clinic||null;state.settings=data.settings||{};state.services=data.services||[];state.doctors=data.doctors||[];
     $("publicNote").textContent=state.settings.public_note||"診療内容や急患対応により、開始時刻が前後する場合があります。";
     const date=$("appointmentDate");date.min=data.min_date||"";date.max=data.max_date||"";
     if(!date.value) date.value=data.min_date||"";state.date=date.value;
     if(!state.settings.exact_time_booking_enabled){notice("globalNotice","ng","この病院では日時指定予約を現在受け付けていません。今日の順番受付をご利用ください。");}
     else notice("globalNotice","ok",`${state.clinic?.clinic_name||state.clinic?.name||"動物病院"}の日時指定予約を受け付けています。`);
     renderServices();
+    renderDoctors();
   }
 
   async function loadCards(){
@@ -184,7 +192,26 @@
     if(!state.services.length){$("serviceGrid").innerHTML='<div class="notice ng full">予約できる診療内容が設定されていません。</div>';return;}
     if(!state.service) state.service=state.services[0];
     $("serviceGrid").innerHTML=state.services.map(s=>`<button class="choice ${state.service?.id===s.id?"active":""}" type="button" data-service="${esc(s.id)}"><b>${esc(s.service_name)}</b><span>${esc(s.description||"")}</span><small>${Number(s.duration_minutes||30)}分</small></button>`).join("");
-    document.querySelectorAll("[data-service]").forEach(btn=>btn.onclick=async()=>{state.service=state.services.find(x=>x.id===btn.dataset.service)||null;state.time="";renderServices();updateSummary();await loadAvailability();});
+    document.querySelectorAll("[data-service]").forEach(btn=>btn.onclick=async()=>{state.service=state.services.find(x=>x.id===btn.dataset.service)||null;state.time="";state.doctorId="";renderServices();renderDoctors();updateSummary();await loadAvailability();});
+    updateSummary();
+  }
+
+  function eligibleDoctors(){
+    if(!state.settings?.doctor_booking_enabled||!state.service)return[];
+    return (state.doctors||[]).filter(d=>d.is_active!==false&&(!Array.isArray(d.service_ids)||!d.service_ids.length||d.service_ids.includes(state.service.id)));
+  }
+  function renderDoctors(){
+    const section=$("doctorSection"),select=$("appointmentDoctor"),help=$("doctorHelp");
+    if(!state.settings?.doctor_booking_enabled){section.classList.add("hidden");state.doctorId="";return;}
+    section.classList.remove("hidden");
+    const docs=eligibleDoctors();
+    const required=state.settings.doctor_selection_mode==="required";
+    const canChange=!state.editing||state.settings.allow_member_doctor_change!==false;
+    const first=required?'<option value="">担当獣医師を選択してください</option>':'<option value="">おまかせ（空いている獣医師）</option>';
+    select.innerHTML=first+docs.map(d=>`<option value="${esc(d.id)}">${esc(d.display_name||d.doctor_name||"獣医師")}</option>`).join("");
+    if(state.doctorId&&docs.some(d=>d.id===state.doctorId))select.value=state.doctorId;else if(required&&docs.length&&!state.editing){state.doctorId=docs[0].id;select.value=state.doctorId}else{select.value=state.doctorId||""}
+    select.disabled=!canChange;
+    help.textContent=required?"この診療内容では担当獣医師の選択が必要です。":(state.settings.auto_assign_doctor!==false?"「おまかせ」を選ぶと、この時間に担当できる獣医師へ自動で割り当てます。":"担当獣医師は病院側で確認します。");
     updateSummary();
   }
 
@@ -194,9 +221,9 @@
     if(!state.settings?.exact_time_booking_enabled||!state.service||!state.date){area.innerHTML='<div class="notice info full">日付と診療内容を選択してください。</div>';return;}
     area.innerHTML='<div class="notice info full">空き時間を確認中です。</div>';
     try{
-      const data=await get("/api/public/exact-appointments/availability",{date:state.date,service_id:state.service.id,pet_id:state.pet?.pet_id||"",exclude_appointment_id:excludeId});
+      const data=await get("/api/public/exact-appointments/availability",{date:state.date,service_id:state.service.id,pet_id:state.pet?.pet_id||"",doctor_id:state.doctorId||"",exclude_appointment_id:excludeId});
       if(!data.slots?.length){area.innerHTML=`<div class="notice ng full">${esc(data.reason||"予約可能な時間がありません。")}</div>`;return;}
-      area.innerHTML=data.slots.map(slot=>`<button type="button" class="slot" data-time="${esc(slot.start_time)}" ${slot.available?"":"disabled"}>${esc(slot.start_time)}<small>${slot.available?`残り${slot.remaining}枠`:esc(slot.reason||"満席")}</small></button>`).join("");
+      area.innerHTML=data.slots.map(slot=>`<button type="button" class="slot" data-time="${esc(slot.start_time)}" ${slot.available?"":"disabled"}>${esc(slot.start_time)}<small>${slot.available?(state.settings?.doctor_booking_enabled&&!state.doctorId?`担当可能${slot.available_doctor_count||0}名・残り${slot.remaining}枠`:`残り${slot.remaining}枠`):esc(slot.reason||"満席")}</small></button>`).join("");
       area.querySelectorAll("[data-time]").forEach(btn=>btn.onclick=()=>{state.time=btn.dataset.time;area.querySelectorAll(".slot").forEach(x=>x.classList.remove("active"));btn.classList.add("active");$("selectedTimeDisplay").value=state.time;updateSummary();});
     }catch(error){area.innerHTML=`<div class="notice ng full">${esc(error.message)}</div>`;}
   }
@@ -204,15 +231,17 @@
   function updateSummary(){
     $("sumPet").textContent=state.pet?.pet_name||"未選択";
     $("sumService").textContent=state.service?.service_name||"未選択";
+    const doc=state.doctors.find(d=>d.id===state.doctorId);$("sumDoctor").textContent=doc?.display_name||doc?.doctor_name||(state.settings?.doctor_booking_enabled?"おまかせ":"指定なし");
     $("sumDateTime").textContent=state.date&&state.time?`${dateLabel(state.date)} ${state.time}`:"未選択";
     $("sumDuration").textContent=state.service?`${Number(state.service.duration_minutes||30)}分`:"未選択";
     $("submitButton").textContent=state.editing?"この内容へ予約を変更":"この内容で予約する";
-    $("submitButton").disabled=!(state.settings?.exact_time_booking_enabled&&state.pet&&state.service&&state.date&&state.time);
+    const doctorOk=!state.settings?.doctor_booking_enabled||state.settings.doctor_selection_mode!=="required"||Boolean(state.doctorId);
+    $("submitButton").disabled=!(state.settings?.exact_time_booking_enabled&&state.pet&&state.service&&state.date&&state.time&&doctorOk);
   }
 
   async function submitBooking(){
     hideNotice("submitNotice");$("submitButton").disabled=true;
-    const payload={pet_id:state.pet.pet_id,service_id:state.service.id,appointment_date:state.date,start_time:state.time,request_note:$("requestNote").value.trim()};
+    const payload={pet_id:state.pet.pet_id,service_id:state.service.id,doctor_id:state.doctorId||null,appointment_date:state.date,start_time:state.time,request_note:$("requestNote").value.trim()};
     try{
       let data;
       if(state.editing){data=await post("/api/member/exact-appointments/change",{...payload,appointment_id:state.editing.id,booking_token:localStorage.getItem(tokenKey(state.editing.id))||"",reason:"LINE画面から変更"});notice("submitNotice","ok",data.message||"予約を変更しました。");}
@@ -226,7 +255,7 @@
     try{
       const data=await get("/api/member/exact-appointments",{guardian_id:state.guardian?.id||state.guardian?.guardian_id||""});state.appointments=data.appointments||[];
       if(!state.appointments.length){area.innerHTML='<div class="notice info">現在の日時指定予約はありません。</div>';return;}
-      area.innerHTML=state.appointments.map(a=>`<article class="appointmentItem"><div class="appointmentTop"><div><h3>${esc(a.service_name||"日時指定予約")}</h3><p>${esc(a.pet_name_snapshot||"ペット")}｜予約番号 ${esc(a.appointment_no||"")}</p></div><span class="status ${esc(a.status)}">${esc(statusLabel(a.status))}</span></div><div class="appointmentMeta"><div><b>予約日</b>${esc(dateLabel(a.appointment_date))}</div><div><b>予約時間</b>${esc(timeLabel(a.start_time))}〜${esc(timeLabel(a.end_time))}</div></div>${a.request_note?`<div class="policy">${esc(a.request_note)}</div>`:""}<div class="miniActions">${a.can_member_change?`<button type="button" data-change="${esc(a.id)}">変更する</button>`:""}${a.can_member_cancel?`<button type="button" data-cancel="${esc(a.id)}">キャンセル</button>`:""}</div></article>`).join("");
+      area.innerHTML=state.appointments.map(a=>`<article class="appointmentItem"><div class="appointmentTop"><div><h3>${esc(a.service_name||"日時指定予約")}</h3><p>${esc(a.pet_name_snapshot||"ペット")}｜予約番号 ${esc(a.appointment_no||"")}</p></div><span class="status ${esc(a.status)}">${esc(statusLabel(a.status))}</span></div><div class="appointmentMeta"><div><b>予約日</b>${esc(dateLabel(a.appointment_date))}</div><div><b>予約時間</b>${esc(timeLabel(a.start_time))}〜${esc(timeLabel(a.end_time))}</div><div><b>担当獣医師</b>${esc(a.doctor_name||a.doctor_name_snapshot||"おまかせ")}</div></div>${a.request_note?`<div class="policy">${esc(a.request_note)}</div>`:""}<div class="miniActions">${a.can_member_change?`<button type="button" data-change="${esc(a.id)}">変更する</button>`:""}${a.can_member_cancel?`<button type="button" data-cancel="${esc(a.id)}">キャンセル</button>`:""}</div></article>`).join("");
       area.querySelectorAll("[data-change]").forEach(btn=>btn.onclick=()=>startChange(btn.dataset.change));
       area.querySelectorAll("[data-cancel]").forEach(btn=>btn.onclick=()=>cancelAppointment(btn.dataset.cancel));
     }catch(error){area.innerHTML=`<div class="notice ng">${esc(error.message)}</div>`;}
@@ -234,16 +263,17 @@
 
   async function startChange(id){
     const item=state.appointments.find(x=>x.id===id);if(!item)return;
-    state.editing=item;state.pet=state.cards.find(x=>x.pet_id===item.pet_id)||state.pet;state.service=state.services.find(x=>x.id===item.service_type_id)||state.service;state.date=item.appointment_date;state.time="";
-    $("appointmentDate").value=state.date;$("requestNote").value=item.request_note||"";renderPets();renderServices();await loadAvailability(item.id);updateSummary();scrollTo({top:$("serviceGrid").getBoundingClientRect().top+scrollY-20,behavior:"smooth"});notice("submitNotice","info","変更後の日付と空き時間を選択してください。");
+    state.editing=item;state.pet=state.cards.find(x=>x.pet_id===item.pet_id)||state.pet;state.service=state.services.find(x=>x.id===item.service_type_id)||state.service;state.doctorId=item.doctor_id||"";state.date=item.appointment_date;state.time="";
+    $("appointmentDate").value=state.date;$("requestNote").value=item.request_note||"";renderPets();renderServices();renderDoctors();await loadAvailability(item.id);updateSummary();scrollTo({top:$("serviceGrid").getBoundingClientRect().top+scrollY-20,behavior:"smooth"});notice("submitNotice","info","変更後の日付と空き時間を選択してください。");
   }
   async function cancelAppointment(id){
     const item=state.appointments.find(x=>x.id===id);if(!item)return;
     const reason=prompt(`${dateLabel(item.appointment_date)} ${timeLabel(item.start_time)}の予約をキャンセルします。理由を入力してください。`,`都合が悪くなったため`);if(reason===null)return;
     try{const data=await post("/api/member/exact-appointments/cancel",{appointment_id:id,booking_token:localStorage.getItem(tokenKey(id))||"",reason});notice("globalNotice","ok",data.message||"予約をキャンセルしました。");await loadAppointments();await loadAvailability();}catch(error){notice("globalNotice","ng",error.message);}
   }
-  function resetSelection(clearPet=true){state.editing=null;state.time="";if(clearPet)state.pet=state.cards[0]||null;state.service=state.services[0]||null;$("selectedTimeDisplay").value="未選択";$("requestNote").value="";renderPets();renderServices();updateSummary();}
+  function resetSelection(clearPet=true){state.editing=null;state.time="";state.doctorId="";if(clearPet)state.pet=state.cards[0]||null;state.service=state.services[0]||null;$("selectedTimeDisplay").value="未選択";$("requestNote").value="";renderPets();renderServices();renderDoctors();updateSummary();}
 
+  $("appointmentDoctor").addEventListener("change",async()=>{state.doctorId=$("appointmentDoctor").value||"";state.time="";updateSummary();await loadAvailability(state.editing?.id||"");});
   $("appointmentDate").addEventListener("change",()=>loadAvailability(state.editing?.id||""));
   $("submitButton").addEventListener("click",submitBooking);
   $("resetButton").addEventListener("click",()=>{resetSelection();loadAvailability();hideNotice("submitNotice");});
