@@ -16,7 +16,7 @@
 <body>
 <main class="page">
   <section class="hero">
-    <div><span class="badge">STEP VET-LINE-CALL-1｜安全なLINE直接呼び出し</span><h1>必要な飼い主へ<br>LINEで直接ご案内</h1><p>未連携・二重送信・デモ誤送信をWorker側で防止し、送信履歴を残します。</p><div class="heroLinks"><a id="queueLink" href="./admin-queue.html">順番受付管理</a><a id="appointmentLink" href="./appointment-admin.html">日時指定予約管理</a><a id="ownerLink" href="./owner.html">オーナー画面</a></div></div>
+    <div><span class="badge">STEP VET-LINE-CALL-1-R2｜安全なLINE直接呼び出し</span><h1>必要な飼い主へ<br>LINEで直接ご案内</h1><p>未連携・二重送信・デモ誤送信をWorker側で防止し、送信履歴を残します。</p><div class="heroLinks"><a id="queueLink" href="./admin-queue.html">順番受付管理</a><a id="appointmentLink" href="./appointment-admin.html">日時指定予約管理</a><a id="ownerLink" href="./owner.html">オーナー画面</a></div></div>
     <div class="modeCard"><div class="modeBox"><strong id="modeTitle">設定を確認中</strong><span id="modeDetail">デモ医院は実送信せず保留保存します。</span></div><div class="modeBox"><strong id="tokenTitle">LINEトークン確認中</strong><span>トークン自体は画面へ表示しません。</span></div></div>
   </section>
 
@@ -65,7 +65,7 @@
   function hide(id){$(id).classList.add("hidden")}
   function today(){return new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Tokyo",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date())}
   function addDays(t,n){const d=new Date(`${t}T00:00:00+09:00`);d.setDate(d.getDate()+n);return new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Tokyo",year:"numeric",month:"2-digit",day:"2-digit"}).format(d)}
-  function page(file){const u=new URL(file,location.href);u.searchParams.set("clinic_code",CLINIC);if(DEMO)u.searchParams.set("demo","ready");u.searchParams.set("v","vet-line-call-1");return u.toString()}
+  function page(file){const u=new URL(file,location.href);u.searchParams.set("clinic_code",CLINIC);if(DEMO)u.searchParams.set("demo","ready");u.searchParams.set("v","vet-line-call-1-r2");return u.toString()}
   $("queueLink").href=page("admin-queue.html");$("appointmentLink").href=page("appointment-admin.html");$("ownerLink").href=page("owner.html");
   document.querySelectorAll("[data-panel]").forEach(b=>b.onclick=()=>{document.querySelectorAll("[data-panel]").forEach(x=>x.classList.toggle("active",x===b));document.querySelectorAll(".panel").forEach(x=>x.classList.remove("active"));$(`panel-${b.dataset.panel}`).classList.add("active");if(b.dataset.panel==="history")loadHistory();if(b.dataset.panel==="settings")loadSettings()});
   $("adminCode").value=code();$("saveCode").onclick=async()=>{const v=$("adminCode").value.trim();if(!v)return notice("globalNotice","ng","管理コードを入力してください。");saveCode(v);await init()};$("clearCode").onclick=()=>{removeCode();$("adminCode").value="";notice("globalNotice","info","保存した管理コードを削除しました。")};
@@ -81,7 +81,38 @@
   async function loadHistory(){const a=$("historyList");a.innerHTML='<div class="notice info">履歴を読み込み中です。</div>';try{const d=await get("/api/admin/line-call/history",{delivery_status:$("historyStatus").value,limit:150});state.history=d.items||[];if(!state.history.length){a.innerHTML='<div class="notice info">履歴はありません。</div>';return}a.innerHTML=state.history.map(x=>`<div class="historyRow"><div><strong>${esc((x.created_at||"").replace("T"," ").slice(0,16))}</strong>${esc(x.recipient_name||"")}</div><div><strong>${esc(x.pet_name_snapshot||"")}</strong>${esc(x.message_type||"")}</div><div>${esc(x.body||"").replaceAll("\n","<br>")}${x.error_message?`<div style="color:#9f3939">${esc(x.error_message)}</div>`:""}</div><div><span class="status ${esc(x.delivery_status)}">${esc(x.delivery_status)}</span><div class="actions">${["held","failed"].includes(x.delivery_status)?`<button data-retry="${esc(x.id)}">再実行</button><button data-cancel="${esc(x.id)}">取消</button>`:""}</div></div></div>`).join("");a.querySelectorAll("[data-retry]").forEach(b=>b.onclick=()=>retry(b.dataset.retry));a.querySelectorAll("[data-cancel]").forEach(b=>b.onclick=()=>cancelItem(b.dataset.cancel))}catch(e){a.innerHTML=`<div class="notice ng">${esc(e.message)}</div>`}}
   async function retry(id){if(!confirm("この履歴を再実行しますか？"))return;try{const d=await post("/api/admin/line-call/retry",{message_id:id});notice("globalNotice","ok",d.message);await loadHistory()}catch(e){notice("globalNotice","ng",e.message)}}
   async function cancelItem(id){if(!confirm("この送信予定を取り消しますか？"))return;try{const d=await post("/api/admin/line-call/cancel",{message_id:id,reason:"管理画面から取消"});notice("globalNotice","ok",d.message);await loadHistory()}catch(e){notice("globalNotice","ng",e.message)}}
-  async function runCheck(){const a=$("checkList");a.innerHTML='<div class="notice info">検査中です。</div>';try{const d=await get("/api/admin/line-call/check");a.innerHTML=(d.checks||[]).map(x=>`<div class="checkItem"><span><b>${esc(x.label)}</b><br>${esc(typeof x.detail==="string"?x.detail:JSON.stringify(x.detail))}</span><strong>${x.ok?"OK":"確認"}</strong></div>`).join("");notice("globalNotice",d.ok?"ok":"ng",d.ok?"LINE呼び出しの接続検査に合格しました。":"確認が必要な項目があります。") }catch(e){a.innerHTML=`<div class="notice ng">${esc(e.message)}</div>`;notice("globalNotice","ng",e.message)}}
+  async function runCheck(){
+    const a=$("checkList");
+    const btn=$("runCheck");
+    const settingsTab=document.querySelector('[data-panel="settings"]');
+    if(settingsTab){
+      document.querySelectorAll("[data-panel]").forEach(x=>x.classList.toggle("active",x===settingsTab));
+      document.querySelectorAll(".panel").forEach(x=>x.classList.remove("active"));
+      $("panel-settings").classList.add("active");
+    }
+    const originalText=btn.textContent;
+    btn.disabled=true;
+    btn.textContent="検査中…";
+    a.innerHTML='<div class="notice info"><b>接続検査を実行中です…</b><br>DB・LINE設定・送信安全ガードを確認しています。</div>';
+    a.scrollIntoView({behavior:"smooth",block:"center"});
+    try{
+      await loadSettings();
+      const d=await get("/api/admin/line-call/check");
+      const checks=d.checks||[];
+      const okCount=checks.filter(x=>x.ok).length;
+      const checkedAt=new Intl.DateTimeFormat("ja-JP",{year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit"}).format(new Date());
+      const summary=`<div class="notice ${d.ok?"ok":"ng"}"><b>${d.ok?"✓ 接続検査 合格":"⚠ 接続検査 要確認"}</b><br>${okCount}/${checks.length}項目 OK　｜　${esc(checkedAt)}</div>`;
+      const details=checks.map(x=>`<div class="checkItem"><span><b>${x.ok?"✓ ":"⚠ "}${esc(x.label)}</b><br>${esc(typeof x.detail==="string"?x.detail:JSON.stringify(x.detail))}</span><strong>${x.ok?"OK":"確認"}</strong></div>`).join("");
+      a.innerHTML=summary+details;
+      notice("globalNotice",d.ok?"ok":"ng",d.ok?`接続検査：${okCount}/${checks.length}項目すべてOKです。`:`接続検査：${okCount}/${checks.length}項目OK。確認が必要な項目があります。`);
+    }catch(e){
+      a.innerHTML=`<div class="notice ng"><b>接続検査に失敗しました。</b><br>${esc(e.message)}</div>`;
+      notice("globalNotice","ng",e.message);
+    }finally{
+      btn.disabled=false;
+      btn.textContent=originalText;
+    }
+  }
   $("runCheck").onclick=runCheck;$("saveSettings").onclick=async()=>{try{const d=await post("/api/admin/line-call/settings",{enabled:$("setEnabled").value==="true",delivery_mode:$("setMode").value,queue_call_enabled:$("setQueue").value==="true",medicine_ready_enabled:$("setMedicine").value==="true",appointment_reminder_enabled:$("setReminder").value==="true",allow_manual_message:$("setManual").value==="true",max_messages_per_minute:Number($("setRate").value),owner_note:$("setNote").value,staff_name:$("staffName").value||"管理者"});notice("settingsNotice","ok",d.message);await loadSettings()}catch(e){notice("settingsNotice","ng",e.message)}};
   $("loadQueue").onclick=loadQueue;$("loadAppointments").onclick=loadAppointments;$("queueFilter").onchange=loadQueue;$("appointmentFilter").onchange=loadAppointments;$("historyStatus").onchange=loadHistory;
   async function init(){if(!code())return notice("globalNotice","ng","管理コードを入力して保存してください。");try{$("queueDate").value=$("queueDate").value||today();$("appointmentDate").value=$("appointmentDate").value||addDays(today(),1);await loadSettings();await Promise.all([loadQueue(),loadAppointments(),loadHistory()]);notice("globalNotice","ok","LINE呼び出し管理を読み込みました。") }catch(e){notice("globalNotice","ng",e.message.includes("relation")||e.message.includes("column")?"STEP VET-LINE-CALL-1のSQLを先に実行してください。":e.message)}}
