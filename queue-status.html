@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#123d31">
+  <title>DPRO PET CARE LINE｜現在の受付状況</title>
+  <script src="./config.js"></script>
+  <style>
+    :root{--green:#123d31;--green2:#1b7255;--sage:#e7f3ed;--mint:#f4faf7;--ivory:#fbfaf6;--ink:#17312a;--muted:#687b74;--line:#d7e3dd;--warn:#8a641e;--danger:#9a3d3d;--white:#fff;--shadow:0 16px 45px rgba(22,58,47,.11)}
+    *{box-sizing:border-box}html,body{margin:0}body{background:linear-gradient(180deg,#eef6f1 0,#fbfaf6 48%,#f3f6f4 100%);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;line-height:1.55}
+    button,a{font:inherit}.page{width:min(980px,calc(100% - 24px));margin:0 auto;padding:18px 0 38px}.hero{border-radius:26px;padding:24px;background:linear-gradient(135deg,#10392d,#1b6b50);color:#fff;box-shadow:var(--shadow);position:relative;overflow:hidden}.hero:after{content:"WAIT STATUS";position:absolute;right:-12px;bottom:-22px;font-weight:1000;font-size:66px;opacity:.055;letter-spacing:.04em}.badge{display:inline-flex;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);font-size:11px;font-weight:900}.hero h1{font-size:clamp(27px,5vw,43px);line-height:1.18;margin:11px 0 6px}.hero p{margin:0;color:rgba(255,255,255,.88);font-weight:700;font-size:13px}.heroActions{display:flex;flex-wrap:wrap;gap:8px;margin-top:15px;position:relative;z-index:1}.heroActions a,.heroActions button{border:1px solid rgba(255,255,255,.26);background:rgba(255,255,255,.1);color:#fff;text-decoration:none;border-radius:11px;padding:8px 11px;font-size:12px;font-weight:900;cursor:pointer}
+    .notice{margin-top:13px;padding:12px 14px;border-radius:14px;background:#fff;border:1px solid var(--line);font-size:13px;font-weight:750}.notice.ok{background:#eef9f2;color:#24623f;border-color:#cce7d4}.notice.ng{background:#fff2f2;color:#8b3131;border-color:#efcccc}.notice.info{background:#eef7fb;color:#285f77;border-color:#cde0e9}
+    .statusGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:14px}.statusCard{background:rgba(255,255,255,.97);border:1px solid var(--line);border-radius:22px;padding:18px;box-shadow:0 10px 28px rgba(25,60,49,.07)}.statusTop{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.statusTop h2{font-size:19px;margin:0}.statusTop p{font-size:11px;color:var(--muted);margin:3px 0 0}.level{display:inline-flex;padding:5px 9px;border-radius:999px;background:var(--sage);color:var(--green);font-size:11px;font-weight:950;white-space:nowrap}.level.crowded{background:#fff2db;color:#815b13}.level.closed{background:#f4eaea;color:#8b3f3f}.numbers{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:15px}.metric{padding:12px;border-radius:13px;background:#f5f8f6;text-align:center}.metric b{display:block;font-size:25px;line-height:1.1;color:var(--green)}.metric span{display:block;margin-top:4px;font-size:10px;color:var(--muted);font-weight:850}.message{margin-top:13px;padding:12px;border-radius:13px;background:var(--ivory);border:1px solid #ebe1cd;font-size:12px;font-weight:800}.closedMsg{background:#fff1f1;border-color:#efd0d0;color:#8b3131}.section{margin-top:14px;background:#fff;border:1px solid var(--line);border-radius:20px;padding:17px;box-shadow:0 10px 28px rgba(25,60,49,.06)}.section h3{margin:0 0 8px;font-size:16px}.section p{margin:0;color:var(--muted);font-size:12px}.links{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}.links a{display:block;text-align:center;text-decoration:none;padding:11px;border-radius:12px;background:var(--sage);color:var(--green);font-size:12px;font-weight:950}.metaLine{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:12px;color:var(--muted);font-size:11px}.embedNote{display:none}
+    body.embed{background:transparent}.embed .page{width:100%;padding:0}.embed .hero{display:none}.embed .section.actionSection{display:none}.embed .statusGrid{margin-top:0}.embed .statusCard{box-shadow:none}.embed .embedNote{display:block;margin-top:8px;text-align:right;color:var(--muted);font-size:10px}
+    @media(max-width:700px){.statusGrid{grid-template-columns:1fr}.links{grid-template-columns:1fr}.numbers{grid-template-columns:repeat(3,1fr)}}
+    @media(max-width:420px){.page{width:min(100% - 14px,980px);padding-top:7px}.hero{border-radius:20px;padding:20px 16px}.statusCard{padding:15px}.metric{padding:10px 5px}.metric b{font-size:22px}}
+  </style>
+</head>
+<body>
+<main class="page">
+  <section class="hero">
+    <span class="badge">DPRO PET CARE LINE｜公開受付状況</span>
+    <h1>現在の受付状況</h1>
+    <p id="clinicLead">病院の受付状況を確認しています。</p>
+    <div class="heroActions"><a id="waitingLink" href="./waiting.html">今日の受付へ</a><a id="appointmentLink" href="./appointment.html">日時指定予約</a><button id="refreshButton" type="button">最新情報に更新</button></div>
+  </section>
+
+  <div id="globalNotice" class="notice info">受付状況を読み込んでいます。</div>
+  <section id="statusGrid" class="statusGrid"><div class="statusCard"><div class="notice info">読み込み中です。</div></div></section>
+
+  <section class="section actionSection">
+    <h3>来院方法を選択</h3>
+    <p>急な症状・通常診療は当日の順番受付、病院が時間予約を受け付けている診療は日時指定予約を利用できます。</p>
+    <div class="links"><a id="waitingLink2" href="./waiting.html">今日の順番受付</a><a id="appointmentLink2" href="./appointment.html">日時指定予約</a><a id="memberLink" href="./member.html">ペット診察券</a></div>
+  </section>
+
+  <div class="metaLine"><span id="updatedAt">最終更新：-</span><span>表示は30秒ごとに自動更新</span></div>
+  <div class="embedNote">DPRO PET CARE LINE｜現在の受付状況</div>
+</main>
+<script>
+(() => {
+  "use strict";
+  const CONFIG=window.DPRO_VET_CONFIG||window.DPRO_CONFIG||window.APP_CONFIG||{};
+  const params=new URLSearchParams(location.search);
+  const API=(CONFIG?.api?.baseUrl||CONFIG?.urls?.apiBaseUrl||"https://dpro-vet-qr-api.dpromstk2000.workers.dev").replace(/\/$/,"");
+  const CLINIC=params.get("clinic_code")||CONFIG?.clinic?.clinicCode||"dpro_vet_demo";
+  const DEMO=CLINIC==="dpro_vet_demo"&&["ready","true","1"].includes(String(params.get("demo")||"").toLowerCase());
+  const EMBED=["1","true","yes"].includes(String(params.get("embed")||"").toLowerCase());
+  const $=id=>document.getElementById(id);
+  const esc=v=>String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
+  if(EMBED)document.body.classList.add("embed");
+  function pageUrl(file){const u=new URL(file,location.href);u.searchParams.set("clinic_code",CLINIC);if(DEMO)u.searchParams.set("demo","ready");return u.toString()}
+  ["waitingLink","waitingLink2"].forEach(id=>$(id).href=pageUrl("./waiting.html"));["appointmentLink","appointmentLink2"].forEach(id=>$(id).href=pageUrl("./appointment.html"));$("memberLink").href=pageUrl("./member.html");
+  function todayJST(){return new Intl.DateTimeFormat("sv-SE",{timeZone:"Asia/Tokyo",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date())}
+  function timeJST(){return new Intl.DateTimeFormat("ja-JP",{timeZone:"Asia/Tokyo",hour:"2-digit",minute:"2-digit",second:"2-digit"}).format(new Date())}
+  async function getSummary(){const u=new URL(API+"/api/public/queue/summary");u.searchParams.set("clinic_code",CLINIC);u.searchParams.set("date",todayJST());const r=await fetch(u,{cache:"no-store",headers:{Accept:"application/json"}});const d=await r.json().catch(()=>({}));if(!r.ok||d.ok===false)throw new Error(d.message||d.error||`API Error ${r.status}`);return d}
+  function labelDayPart(v){if(v==="morning")return"午前";if(v==="afternoon")return"午後";return"本日"}
+  function levelClass(row){if(row.reception_closed)return"closed";if(["crowded","very_crowded"].includes(String(row.display_level||"")))return"crowded";return""}
+  function card(row){const closed=row.reception_closed===true;const active=Number(row.active_total_count||0);const waiting=Number(row.waiting_general_exam_count||0);const current=Number(row.current_exam_number||0);const label=closed?"受付停止中":(row.display_level_label||"受付中");const message=closed?(row.closed_reason||"現在受付を停止しています。"):(row.manual_message||row.display_message||"現在の受付状況をご確認ください。");return `<article class="statusCard"><div class="statusTop"><div><h2>${esc(labelDayPart(row.day_part))}の受付</h2><p>${esc(row.target_date||todayJST())}</p></div><span class="level ${levelClass(row)}">${esc(label)}</span></div><div class="numbers"><div class="metric"><b>${active}</b><span>現在の受付件数</span></div><div class="metric"><b>${waiting}</b><span>診察待ち</span></div><div class="metric"><b>${current||"-"}</b><span>現在の診察番号</span></div></div><div class="message ${closed?"closedMsg":""}">${esc(message)}</div></article>`}
+  async function load(){const n=$("globalNotice");n.className="notice info";n.textContent="最新の受付状況を確認しています。";try{const d=await getSummary();const clinic=d.clinic||{};$("clinicLead").textContent=`${clinic.clinic_name||clinic.display_name||"動物病院"}の本日の受付状況です。`;const settings=d.settings||{};if(settings.congestion_public_enabled===false){$("statusGrid").innerHTML='<div class="statusCard"><div class="notice info">現在、混雑状況の公開を停止しています。受付は「今日の受付」からご確認ください。</div></div>';n.className="notice ok";n.textContent="病院からのお知らせを表示しています。";}else{const items=(d.items||[]).filter(Boolean);$("statusGrid").innerHTML=(items.length?items:[d.summary]).filter(Boolean).map(card).join("");n.className="notice ok";n.textContent="受付状況を更新しました。";}$("updatedAt").textContent=`最終更新：${timeJST()}`;}catch(e){$("statusGrid").innerHTML=`<div class="statusCard"><div class="notice ng">受付状況を取得できませんでした。しばらくしてから再度お試しください。<br>${esc(e.message)}</div></div>`;n.className="notice ng";n.textContent="受付状況の取得に失敗しました。";$("updatedAt").textContent=`最終確認：${timeJST()}`}}
+  $("refreshButton").addEventListener("click",load);load();setInterval(load,30000);
+})();
+</script>
+</body>
+</html>
