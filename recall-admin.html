@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#123d31">
+<title>DPRO PET CARE LINE｜予防・再診リコール運用ボード</title>
+<script src="./config.js"></script>
+<style>
+:root{
+  --green:#123d31;--green2:#1d7255;--sage:#e7f2ec;--ivory:#fbfaf6;
+  --ink:#18312a;--muted:#667a73;--line:#d8e4de;--gold:#b99b63;
+  --danger:#a13e3e;--warn:#8a641e;--white:#fff;
+  --shadow:0 18px 50px rgba(21,54,44,.12)
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:linear-gradient(180deg,#edf6f1 0,#fbfaf6 38%,#f4f7f5 100%);
+  color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP",
+  "Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;line-height:1.65
+}
+button,input{font:inherit}button{cursor:pointer}
+.page{width:min(1260px,calc(100% - 28px));margin:0 auto;padding:18px 0 56px}
+.hero{
+  display:grid;grid-template-columns:1.2fr .8fr;gap:18px;
+  background:linear-gradient(135deg,#10392d,#1b6b50);color:#fff;
+  border-radius:30px;padding:28px;box-shadow:var(--shadow);overflow:hidden;position:relative
+}
+.hero:after{
+  content:"RECALL";position:absolute;right:-22px;bottom:-46px;font-size:108px;
+  font-weight:1000;opacity:.055;letter-spacing:.05em
+}
+.badge{
+  display:inline-flex;padding:6px 11px;border-radius:999px;background:rgba(255,255,255,.14);
+  border:1px solid rgba(255,255,255,.22);font-size:12px;font-weight:900
+}
+.hero h1{font-size:clamp(29px,4vw,50px);line-height:1.15;margin:13px 0 8px}
+.hero p{margin:0;color:rgba(255,255,255,.88);font-weight:700}
+.heroLinks{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.heroLinks a{
+  color:#fff;text-decoration:none;border:1px solid rgba(255,255,255,.28);
+  padding:8px 12px;border-radius:12px;background:rgba(255,255,255,.11);font-size:13px;font-weight:850
+}
+.modeCard{align-self:stretch;display:grid;align-content:center;gap:10px;position:relative;z-index:1}
+.modeBox{padding:14px;border-radius:17px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2)}
+.modeBox strong{display:block;font-size:17px}.modeBox span{font-size:12px;opacity:.87}
+
+.login{
+  display:grid;grid-template-columns:1fr auto auto auto;gap:9px;margin-top:16px;
+  background:#fff;border:1px solid var(--line);border-radius:18px;padding:13px;
+  box-shadow:0 10px 30px rgba(24,49,42,.07)
+}
+input{width:100%;border:1px solid #cddbd4;border-radius:11px;background:#fff;padding:10px 12px;color:var(--ink);outline:none}
+.btn{border:0;border-radius:12px;padding:10px 14px;font-weight:900}
+.btn.main{background:var(--green);color:#fff}.btn.soft{background:var(--sage);color:var(--green)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.notice{margin-top:12px;padding:12px 14px;border-radius:14px;background:#fff;border:1px solid var(--line);font-size:13px;font-weight:750}
+.notice.ok{background:#eef9f2;color:#24623f;border-color:#cce7d4}
+.notice.ng{background:#fff2f2;color:#8b3131;border-color:#efcccc}
+.notice.info{background:#eef7fb;color:#285f77;border-color:#cde0e9}
+
+.summaryGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:16px}
+.metric{background:#fff;border:1px solid var(--line);border-radius:20px;padding:18px;box-shadow:0 12px 34px rgba(34,70,58,.06)}
+.metric small{display:block;color:var(--muted);font-size:11px;font-weight:900}
+.metric b{display:block;font-size:34px;line-height:1.15;margin-top:3px}
+.metric span{display:block;color:var(--muted);font-size:11px;margin-top:5px;font-weight:750}
+
+.layout{display:grid;grid-template-columns:1.15fr .85fr;gap:16px;margin-top:16px}
+.card{background:rgba(255,255,255,.95);border:1px solid rgba(210,226,217,.92);border-radius:22px;padding:20px;box-shadow:0 12px 34px rgba(34,70,58,.08)}
+.sectionTop{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:14px}
+.sectionTop h2{font-size:22px;margin:0}.sectionTop p{font-size:12px;color:var(--muted);margin:3px 0 0}
+.recallList{display:grid;gap:10px}
+.recallRow{
+  display:grid;grid-template-columns:1fr 84px 84px 84px;gap:10px;align-items:center;
+  border:1px solid var(--line);border-radius:16px;padding:14px;background:#fff
+}
+.recallRow strong{display:block;font-size:15px}.recallRow span{display:block;color:var(--muted);font-size:11px}
+.numberBox{text-align:center;border-radius:12px;padding:9px;background:#f5f8f6}
+.numberBox b{display:block;font-size:22px}.numberBox small{display:block;font-size:9px;color:var(--muted);font-weight:900}
+.numberBox.linked{background:#eef9f2;color:#24623f}.numberBox.unlinked{background:#fff5dc;color:var(--warn)}
+
+.statusGrid{display:grid;gap:9px}
+.statusItem{display:flex;justify-content:space-between;gap:12px;border:1px solid var(--line);border-radius:13px;padding:11px;background:#fff;font-size:12px}
+.statusItem span{color:var(--muted);font-weight:800}.statusItem b{text-align:right}
+.tag{display:inline-flex;padding:4px 8px;border-radius:999px;background:var(--sage);color:var(--green);font-size:11px;font-weight:900}
+.tag.warn{background:#fff5dc;color:var(--warn)}.tag.danger{background:#fff0f0;color:var(--danger)}
+.help{margin-top:12px;padding:13px;border-radius:14px;background:var(--ivory);border:1px solid #eadfc8;color:#6c5c3d;font-size:12px;font-weight:750}
+.footer{text-align:center;color:var(--muted);font-size:12px;margin-top:20px}
+
+@media(max-width:900px){
+  .hero,.layout{grid-template-columns:1fr}.login{grid-template-columns:1fr 1fr}
+  .summaryGrid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:620px){
+  .page{width:min(100% - 18px,1260px);padding-top:9px}.hero{padding:21px 17px;border-radius:22px}
+  .login,.summaryGrid{grid-template-columns:1fr}
+  .recallRow{grid-template-columns:1fr 1fr 1fr}.recallRow>div:first-child{grid-column:1/-1}
+}
+</style>
+</head>
+<body>
+<main class="page">
+  <section class="hero">
+    <div>
+      <span class="badge">STEP VET-RECALL-DASHBOARD-1｜継続診療リコール運用</span>
+      <h1>予防・再診の対象を、<br>今日の件数で確認。</h1>
+      <p>7日前の予防案内、予防予定日、再診予定日を自動リコールの状態と一緒に確認します。</p>
+      <div class="heroLinks">
+        <a id="lineCallLink" href="./line-call-admin.html">LINE呼び出し管理</a>
+        <a id="todayBoardLink" href="./today-board.html">本日の統合ボード</a>
+        <a id="calendarLink" href="./appointment-calendar.html">週間予約ボード</a>
+        <a id="ownerLink" href="./owner.html">オーナー画面</a>
+      </div>
+    </div>
+    <div class="modeCard">
+      <div class="modeBox"><strong id="modeTitle">自動化状態を確認中</strong><span id="modeDetail">デモ医院は実送信せずhold保存します。</span></div>
+      <div class="modeBox"><strong id="productionTitle">本番ガード確認中</strong><span id="productionDetail">本番では明示的にONにするまで停止します。</span></div>
+    </div>
+  </section>
+
+  <section class="login">
+    <input id="adminCode" type="password" placeholder="管理コード">
+    <button id="saveCode" class="btn main">保存して接続</button>
+    <button id="runCheck" class="btn soft">最新状態を確認</button>
+    <button id="clearCode" class="btn soft">削除</button>
+  </section>
+
+  <div id="globalNotice" class="notice info">管理コードを保存すると、自動リコールの状態を確認します。</div>
+
+  <section class="summaryGrid">
+    <div class="metric"><small>予防7日前</small><b id="mAdvance">-</b><span id="mAdvanceSub">対象件数</span></div>
+    <div class="metric"><small>予防予定日</small><b id="mDue">-</b><span id="mDueSub">対象件数</span></div>
+    <div class="metric"><small>再診予定日</small><b id="mFollow">-</b><span id="mFollowSub">対象件数</span></div>
+    <div class="metric"><small>LINE未連携</small><b id="mUnlinked">-</b><span>自動送信対象外</span></div>
+  </section>
+
+  <section class="layout">
+    <div class="card">
+      <div class="sectionTop"><div><h2>本日のリコール対象</h2><p>自動化が判定している件数をLINE連携状況と分けて表示します。</p></div></div>
+      <div class="recallList">
+        <div class="recallRow">
+          <div><strong>予防予定の7日前</strong><span id="advanceDate">対象日を確認中</span></div>
+          <div class="numberBox"><b id="aTotal">-</b><small>合計</small></div>
+          <div class="numberBox linked"><b id="aLinked">-</b><small>LINE連携済</small></div>
+          <div class="numberBox unlinked"><b id="aUnlinked">-</b><small>未連携</small></div>
+        </div>
+        <div class="recallRow">
+          <div><strong>予防予定日</strong><span id="dueDate">本日の対象</span></div>
+          <div class="numberBox"><b id="dTotal">-</b><small>合計</small></div>
+          <div class="numberBox linked"><b id="dLinked">-</b><small>LINE連携済</small></div>
+          <div class="numberBox unlinked"><b id="dUnlinked">-</b><small>未連携</small></div>
+        </div>
+        <div class="recallRow">
+          <div><strong>再診・経過確認の予定日</strong><span id="followDate">本日の対象</span></div>
+          <div class="numberBox"><b id="fTotal">-</b><small>合計</small></div>
+          <div class="numberBox linked"><b id="fLinked">-</b><small>LINE連携済</small></div>
+          <div class="numberBox unlinked"><b id="fUnlinked">-</b><small>未連携</small></div>
+        </div>
+      </div>
+      <div class="help">この画面は確認専用です。実際の送信はCronとWorkerが行い、同じ対象・同じ段階は二重送信防止キーで再送しません。</div>
+    </div>
+
+    <aside class="card">
+      <div class="sectionTop"><div><h2>自動化・安全設定</h2><p>本番誤送信を防ぐための状態を確認します。</p></div></div>
+      <div class="statusGrid">
+        <div class="statusItem"><span>機能バージョン</span><b id="version">-</b></div>
+        <div class="statusItem"><span>自動リコール</span><b id="enabled">-</b></div>
+        <div class="statusItem"><span>実効送信モード</span><b id="mode">-</b></div>
+        <div class="statusItem"><span>デモ強制hold</span><b id="demoHold">-</b></div>
+        <div class="statusItem"><span>本番opt-in</span><b id="productionOptIn">-</b></div>
+        <div class="statusItem"><span>基準日</span><b id="today">-</b></div>
+      </div>
+      <div id="safetyNotice" class="notice info">状態を読み込むと安全設定を表示します。</div>
+    </aside>
+  </section>
+
+  <div class="footer">DPRO PET CARE LINE｜予防・再診を飼い主の記憶任せにしない運用へ</div>
+</main>
+
+<script>
+(()=>{
+  "use strict";
+  const CONFIG=window.DPRO_VET_CONFIG||window.DPRO_CONFIG||window.APP_CONFIG||{};
+  const params=new URLSearchParams(location.search);
+  const API=(CONFIG?.api?.baseUrl||CONFIG?.urls?.apiBaseUrl||"https://dpro-vet-qr-api.dpromstk2000.workers.dev").replace(/\/$/,"");
+  const CLINIC=params.get("clinic_code")||CONFIG?.clinic?.clinicCode||"dpro_vet_demo";
+  const DEMO=CLINIC==="dpro_vet_demo"&&["ready","true","1"].includes(String(params.get("demo")||"").toLowerCase());
+  const $=id=>document.getElementById(id);
+  const keys=CONFIG?.admin?.tokenStorageKeys||["dpro_vet_admin_code","DPRO_VET_ADMIN_CODE"];
+
+  function code(){
+    if(typeof CONFIG.getAdminCode==="function") return CONFIG.getAdminCode()||"";
+    for(const k of keys){const v=localStorage.getItem(k)||sessionStorage.getItem(k);if(v)return v}
+    return "";
+  }
+  function saveCode(v){
+    if(typeof CONFIG.setAdminCode==="function") CONFIG.setAdminCode(v,true);
+    else keys.forEach(k=>localStorage.setItem(k,v));
+  }
+  function clearCode(){
+    if(typeof CONFIG.clearAdminCode==="function") CONFIG.clearAdminCode();
+    else keys.forEach(k=>{localStorage.removeItem(k);sessionStorage.removeItem(k)});
+  }
+  function page(file){
+    const u=new URL(file,location.href);
+    u.searchParams.set("clinic_code",CLINIC);
+    if(DEMO)u.searchParams.set("demo","ready");
+    return u.toString();
+  }
+  [["lineCallLink","./line-call-admin.html"],["todayBoardLink","./today-board.html"],["calendarLink","./appointment-calendar.html"],["ownerLink","./owner.html"]]
+    .forEach(([id,file])=>$(id).href=page(file));
+
+  async function get(path){
+    const c=code();
+    const u=new URL(API+path);
+    u.searchParams.set("clinic_code",CLINIC);
+    const r=await fetch(u,{cache:"no-store",headers:{Accept:"application/json","X-DPRO-Admin-Code":c,Authorization:`Bearer ${c}`}});
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok||d.ok===false) throw new Error(d.message||d.error||`API Error ${r.status}`);
+    return d;
+  }
+
+  function n(v){return Number(v||0)}
+  function setGroup(prefix,obj){
+    $(prefix+"Total").textContent=n(obj?.total);
+    $(prefix+"Linked").textContent=n(obj?.linked);
+    $(prefix+"Unlinked").textContent=n(obj?.unlinked);
+  }
+  function tag(text,type=""){
+    return `<span class="tag ${type}">${String(text)}</span>`;
+  }
+
+  async function load(){
+    const notice=$("globalNotice");
+    if(!code()){
+      notice.className="notice ng";
+      notice.textContent="管理コードを入力して「保存して接続」を押してください。";
+      return;
+    }
+    notice.className="notice info";
+    notice.textContent="自動リコールの状態を確認しています。";
+    try{
+      const d=await get("/api/admin/recall-automation/status");
+      const c=d.candidates||{};
+      const adv=c.prevention_advance_7d||{};
+      const due=c.prevention_due_today||{};
+      const fol=c.followup_due_today||{};
+
+      setGroup("a",adv);setGroup("d",due);setGroup("f",fol);
+
+      $("mAdvance").textContent=n(adv.total);
+      $("mDue").textContent=n(due.total);
+      $("mFollow").textContent=n(fol.total);
+      $("mUnlinked").textContent=n(adv.unlinked)+n(due.unlinked)+n(fol.unlinked);
+      $("mAdvanceSub").textContent=`LINE連携済 ${n(adv.linked)}件`;
+      $("mDueSub").textContent=`LINE連携済 ${n(due.linked)}件`;
+      $("mFollowSub").textContent=`LINE連携済 ${n(fol.linked)}件`;
+
+      $("advanceDate").textContent=`対象予定日：${d.advance_date||"-"}`;
+      $("dueDate").textContent=`基準日：${d.today||"-"}`;
+      $("followDate").textContent=`基準日：${d.today||"-"}`;
+
+      $("version").textContent=d.automation_version||"-";
+      $("enabled").innerHTML=d.enabled===true?tag("有効"):tag("停止","danger");
+      $("mode").innerHTML=String(d.effective_mode||"") === "hold" ? tag("hold","warn") : tag(d.effective_mode||"-");
+      $("demoHold").innerHTML=d.demo_forced_hold===true?tag("有効","warn"):tag("対象外");
+      $("productionOptIn").innerHTML=d.production_opt_in===true?tag("ON"):tag("OFF","warn");
+      $("today").textContent=d.today||"-";
+
+      if(d.demo_forced_hold===true){
+        $("modeTitle").textContent="保留保存モード";
+        $("modeDetail").textContent="デモ医院なので実際のLINEには送信せず、履歴だけ保存します。";
+      }else if(d.effective_mode==="send"){
+        $("modeTitle").textContent="LINE実送信モード";
+        $("modeDetail").textContent="本番設定に基づいてLINEへ自動案内します。";
+      }else{
+        $("modeTitle").textContent="保留保存モード";
+        $("modeDetail").textContent="LINE実送信は停止されています。";
+      }
+
+      if(d.production_opt_in===true){
+        $("productionTitle").textContent="本番自動リコール ON";
+        $("productionDetail").textContent="VET_RECALL_AUTOMATION_ENABLED が有効です。";
+      }else{
+        $("productionTitle").textContent="本番自動リコール OFF";
+        $("productionDetail").textContent="本番医院では明示的にONにするまで自動送信しません。";
+      }
+
+      const s=$("safetyNotice");
+      s.className="notice ok";
+      s.textContent=d.demo_forced_hold===true
+        ?"安全確認OK：デモ医院は強制hold。本番opt-inもOFFです。"
+        :(d.production_opt_in===true
+          ?"本番自動リコールがONです。LINEトークン・送信モード・対象件数を確認してください。"
+          :"安全確認OK：本番自動リコールはOFFです。");
+
+      notice.className="notice ok";
+      notice.textContent=`確認完了：予防7日前 ${n(adv.total)}件／予防予定日 ${n(due.total)}件／再診予定日 ${n(fol.total)}件。`;
+    }catch(e){
+      notice.className="notice ng";
+      notice.textContent=`読み込みに失敗しました：${e.message}`;
+    }
+  }
+
+  $("saveCode").onclick=()=>{
+    const v=$("adminCode").value.trim();
+    if(!v){
+      $("globalNotice").className="notice ng";
+      $("globalNotice").textContent="管理コードを入力してください。";
+      return;
+    }
+    saveCode(v);$("adminCode").value="••••";load();
+  };
+  $("runCheck").onclick=load;
+  $("clearCode").onclick=()=>{
+    clearCode();$("adminCode").value="";
+    $("globalNotice").className="notice info";
+    $("globalNotice").textContent="管理コードを削除しました。";
+  };
+
+  if(code()){$("adminCode").value="••••";load()}
+  setInterval(()=>{if(code())load()},60000);
+})();
+</script>
+</body>
+</html>
