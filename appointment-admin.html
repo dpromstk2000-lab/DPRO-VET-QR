@@ -34,11 +34,11 @@
       <button data-panel="doctors">獣医師・予約枠</button>
       <button data-panel="settings">基本設定</button>
     </nav>
-    <div class="sideFoot">STEP VET-DOCTOR-SLOT-1<br>獣医師別予約・おまかせ自動割当</div>
+    <div class="sideFoot">STEP VET-APPOINTMENT-CHECKIN-1<br>日時指定予約 → 来院受付連動</div>
   </aside>
 
   <main class="main">
-    <div class="top"><div><h2 id="pageTitle">日時指定予約一覧</h2><p id="clinicName">病院情報を読み込み中です。</p></div><div class="topActions"><a id="ownerLink" href="./owner.html">オーナー画面</a><a id="publicLink" href="./appointment.html" target="_blank">飼い主予約画面</a><a id="waitingLink" href="./waiting.html" target="_blank">順番受付</a><a id="lineCallLink" href="./line-call-admin.html">LINE呼び出し</a></div></div>
+    <div class="top"><div><h2 id="pageTitle">日時指定予約一覧</h2><p id="clinicName">病院情報を読み込み中です。</p></div><div class="topActions"><a id="todayBoardLink" href="./today-board.html">本日の統合ボード</a><a id="ownerLink" href="./owner.html">オーナー画面</a><a id="publicLink" href="./appointment.html" target="_blank">飼い主予約画面</a><a id="waitingLink" href="./waiting.html" target="_blank">順番受付</a><a id="lineCallLink" href="./line-call-admin.html">LINE呼び出し</a></div></div>
 
     <section class="login">
       <div class="field"><label for="adminCode">管理コード</label><input id="adminCode" type="password" placeholder="Cloudflare Worker Secretの管理コード"></div>
@@ -192,7 +192,7 @@
   function statusLabel(s){return({scheduled:"予約受付",confirmed:"確認済み",checked_in:"来院済み",completed:"完了",cancelled:"キャンセル",no_show:"不在"})[s]||s;}
   function time(v){return String(v||"").slice(0,5)}
   function pageUrl(file){const u=new URL(file,location.href);u.searchParams.set("clinic_code",CLINIC);if(DEMO)u.searchParams.set("demo","ready");u.searchParams.set("v","step-vet-appointment-1-r2");return u.toString();}
-  $("ownerLink").href=pageUrl("owner.html");$("publicLink").href=pageUrl("appointment.html");$("waitingLink").href=pageUrl("waiting.html");$("lineCallLink").href=pageUrl("line-call-admin.html");
+  $("todayBoardLink").href=pageUrl("today-board.html");$("ownerLink").href=pageUrl("owner.html");$("publicLink").href=pageUrl("appointment.html");$("waitingLink").href=pageUrl("waiting.html");$("lineCallLink").href=pageUrl("line-call-admin.html");
 
   document.querySelectorAll("[data-panel]").forEach(b=>b.onclick=()=>{document.querySelectorAll("[data-panel]").forEach(x=>x.classList.toggle("active",x===b));document.querySelectorAll(".panel").forEach(x=>x.classList.remove("active"));$(`panel-${b.dataset.panel}`).classList.add("active");$("pageTitle").textContent=({appointments:"日時指定予約一覧",create:"スタッフ受付",services:"予約内容設定",doctors:"獣医師・予約枠",settings:"基本設定"})[b.dataset.panel];});
   $("adminCode").value=getCode();
@@ -227,8 +227,19 @@
   $("saveService").onclick=async()=>{try{const d=await post("/api/admin/exact-appointments/services/save",{id:$("serviceId").value,service_code:$("serviceCode").value,service_name:$("serviceName").value,category:$("serviceCategory").value,duration_minutes:Number($("serviceDuration").value),capacity_per_slot:Number($("serviceCapacity").value),sort_order:Number($("serviceSort").value),description:$("serviceDescription").value,allow_existing_patient:$("serviceExisting").checked,allow_new_patient:$("serviceNew").checked,is_active:$("serviceActive").checked,staff_name:$("createStaff").value});state.services=d.services||[];clearService();renderServices();await loadServices();notice("serviceNotice","ok",d.message);}catch(e){notice("serviceNotice","ng",e.message);}};
   async function archiveService(id){if(!confirm("この予約内容を飼い主画面から非表示にしますか？"))return;try{const d=await post("/api/admin/exact-appointments/services/archive",{service_id:id});state.services=d.services||[];renderServices();await loadServices();}catch(e){notice("serviceNotice","ng",e.message);}}
 
-  async function loadAppointments(){const a=$("appointmentList");a.innerHTML='<div class="notice">読み込み中です。</div>';try{const d=await get("/api/admin/exact-appointments",{from:$("listFrom").value,to:$("listTo").value,status:$("listStatus").value});state.appointments=d.appointments||[];if(!state.appointments.length){a.innerHTML='<div class="notice">指定期間の予約はありません。</div>';return;}a.innerHTML='<div class="appointmentRow header"><span>日付</span><span>時間</span><span>ペット・飼い主</span><span>予約内容</span><span>状態</span><span>操作</span></div>'+state.appointments.map(x=>`<div class="appointmentRow"><span>${esc(x.appointment_date)}</span><span>${esc(time(x.start_time))}</span><span><b>${esc(x.pet_name_snapshot||"")}</b><small>${esc(x.guardian_name_snapshot||"")}</small></span><span>${esc(x.service_name||"")}<small>担当：${esc(x.doctor_name||x.doctor_name_snapshot||"未割当")}</small></span><span class="status ${esc(x.status)}">${esc(statusLabel(x.status))}</span><span><button class="btn soft" data-status="${esc(x.id)}" style="padding:7px 9px;font-size:11px">状態変更</button><button class="btn soft" data-doctor-assign="${esc(x.id)}" style="padding:7px 9px;font-size:11px;margin-left:4px">担当変更</button></span></div>`).join("");a.querySelectorAll("[data-status]").forEach(b=>b.onclick=()=>openStatus(b.dataset.status));a.querySelectorAll("[data-doctor-assign]").forEach(b=>b.onclick=()=>openDoctorAssign(b.dataset.doctorAssign));}catch(e){a.innerHTML=`<div class="notice ng">${esc(e.message)}</div>`;}}
+  async function loadAppointments(){const a=$("appointmentList");a.innerHTML='<div class="notice">読み込み中です。</div>';try{const d=await get("/api/admin/exact-appointments",{from:$("listFrom").value,to:$("listTo").value,status:$("listStatus").value});state.appointments=d.appointments||[];if(!state.appointments.length){a.innerHTML='<div class="notice">指定期間の予約はありません。</div>';return;}a.innerHTML='<div class="appointmentRow header"><span>日付</span><span>時間</span><span>ペット・飼い主</span><span>予約内容</span><span>状態</span><span>操作</span></div>'+state.appointments.map(x=>`<div class="appointmentRow"><span>${esc(x.appointment_date)}</span><span>${esc(time(x.start_time))}</span><span><b>${esc(x.pet_name_snapshot||"")}</b><small>${esc(x.guardian_name_snapshot||"")}</small></span><span>${esc(x.service_name||"")}<small>担当：${esc(x.doctor_name||x.doctor_name_snapshot||"未割当")}</small></span><span class="status ${esc(x.status)}">${esc(statusLabel(x.status))}</span><span>${x.appointment_date===today()&&["scheduled","confirmed"].includes(x.status)?`<button class="btn primary" data-checkin="${esc(x.id)}" style="padding:7px 9px;font-size:11px">${x.waiting_entry_id?"受付済み":"来院受付"}</button>`:""}<button class="btn soft" data-status="${esc(x.id)}" style="padding:7px 9px;font-size:11px;margin-left:4px">状態変更</button><button class="btn soft" data-doctor-assign="${esc(x.id)}" style="padding:7px 9px;font-size:11px;margin-left:4px">担当変更</button></span></div>`).join("");a.querySelectorAll("[data-checkin]").forEach(b=>b.onclick=()=>checkInAppointment(b.dataset.checkin));a.querySelectorAll("[data-status]").forEach(b=>b.onclick=()=>openStatus(b.dataset.status));a.querySelectorAll("[data-doctor-assign]").forEach(b=>b.onclick=()=>openDoctorAssign(b.dataset.doctorAssign));}catch(e){a.innerHTML=`<div class="notice ng">${esc(e.message)}</div>`;}}
   $("reloadAppointments").onclick=loadAppointments;["listFrom","listTo","listStatus"].forEach(id=>$(id).onchange=loadAppointments);
+  async function checkInAppointment(id){
+    const x=state.appointments.find(a=>a.id===id);if(!x)return;
+    if(x.waiting_entry_id){notice("globalNotice","ok","この予約はすでに来院受付済みです。");return;}
+    const who=x.pet_name_snapshot||"ペット";
+    if(!confirm(`${x.appointment_date} ${time(x.start_time)}｜${who}\n日時指定予約を「本日の順番受付」へ追加して来院受付にしますか？`))return;
+    try{
+      const d=await post("/api/admin/exact-appointments/check-in",{appointment_id:id,staff_name:$("createStaff").value||"受付"});
+      notice("globalNotice","ok",d.message||"来院受付にしました。");
+      await loadAppointments();
+    }catch(e){notice("globalNotice","ng",e.message);}
+  }
   function openStatus(id){const x=state.appointments.find(a=>a.id===id);if(!x)return;state.statusTarget=x;$("statusAppointmentId").value=id;$("statusValue").value=x.status;$("statusTarget").textContent=`${x.appointment_date} ${time(x.start_time)}｜${x.pet_name_snapshot||""}｜${x.service_name||""}`;$("statusModal").classList.remove("hidden");}
   $("closeStatus").onclick=()=>$("statusModal").classList.add("hidden");
   $("saveStatus").onclick=async()=>{try{await post("/api/admin/exact-appointments/status",{appointment_id:$("statusAppointmentId").value,status:$("statusValue").value,staff_name:$("statusStaff").value,reason:$("statusReason").value});$("statusModal").classList.add("hidden");await loadAppointments();notice("globalNotice","ok","予約ステータスを更新しました。");}catch(e){alert(e.message);}};
