@@ -258,7 +258,7 @@
     try{
       const date=todayJST();
       const [q,a]=await Promise.all([
-        get("/api/public/queue/entries",{date,limit:300},false),
+        get("/api/admin/queue/entries",{date,limit:300},true),
         get("/api/admin/exact-appointments",{from:date,to:date},true)
       ]);
       const queueItems=(q.items||q.rows||[]).filter(Boolean);
