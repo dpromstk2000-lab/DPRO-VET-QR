@@ -6,6 +6,7 @@
   <meta name="theme-color" content="#123d31">
   <title>DPRO PET CARE LINE｜日時指定予約</title>
   <script src="./config.js"></script>
+  <script src="./feature-switch.js"></script>
   <style>
     :root{--green:#123d31;--green2:#1c6a51;--sage:#e7f2ec;--mint:#f4faf7;--ivory:#fbfaf6;--ink:#18312a;--muted:#667a73;--line:#d8e4de;--gold:#b99b63;--danger:#a13e3e;--warn:#8a641e;--white:#fff;--shadow:0 18px 50px rgba(21,54,44,.12)}
     *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:linear-gradient(180deg,#eef6f1 0,#fbfaf6 34%,#f4f7f5 100%);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;line-height:1.65}
@@ -39,6 +40,7 @@
     <div class="heroNav">
       <a id="waitingLink" href="./waiting.html">今日の順番受付</a>
       <a id="memberLink" href="./member.html">ペット診察券</a>
+      <a id="multiBookingLink" class="hidden" href="./appointment-multi.html">複数ペット予約</a>
       <a id="menuLink" href="./rich-menu.html">メニューへ</a>
     </div>
     <div class="modeStrip">
@@ -142,6 +144,10 @@
   $("waitingLink").href = pageUrl("waiting.html");
   $("memberLink").href = pageUrl("member.html");
   $("menuLink").href = pageUrl("rich-menu.html");
+  $("multiBookingLink").href = pageUrl("appointment-multi.html");
+  Promise.resolve(window.DPRO_VET_FEATURES?.load?.()).then((featureState)=>{
+    if(featureState?.flags?.multi_pet_booking===true) $("multiBookingLink").classList.remove("hidden");
+  }).catch(()=>{});
 
   function apiUrl(path, extra={}){
     const url = new URL(API_BASE + path);

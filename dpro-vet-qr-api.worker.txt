@@ -96,7 +96,7 @@ const TABLES = {
 };
 
 const DEFAULT_CLINIC_CODE = "dpro_vet_demo";
-const WORKER_VERSION = "ANIMARY-COUNTER-V1.1-FINAL-AUDIT-R1-20260815";
+const WORKER_VERSION = "ANIMARY-COUNTER-V1.2-R1-20260815";
 const FEATURE_SWITCH_VERSION = "DPRO-VET-FEATURE-SWITCH-V1.1";
 const WEB_QUESTIONNAIRE_VERSION = "DPRO-VET-WEB-QUESTIONNAIRE-V1.1.6";
 const QUESTIONNAIRE_VISIT_LINK_VERSION = "DPRO-VET-QUESTIONNAIRE-VISIT-LINK-V1.1";
@@ -111,6 +111,7 @@ const APPOINTMENT_ACTION_NOTICE_FEATURE_VERSION = "VET-APPOINTMENT-NOTIFY-1";
 const RECALL_AUTOMATION_VERSION = "VET-RECALL-AUTO-1";
 const FINAL_AUDIT_VERSION = "FINAL-VET-AUDIT-1-R1";
 const V11_FINAL_AUDIT_VERSION = "DPRO-VET-V1.1-FINAL-AUDIT-R1";
+const MULTI_PET_BOOKING_VERSION = "DPRO-VET-MULTI-PET-BOOKING-V1.2";
 const APPOINTMENT_REMINDER_RECOMMENDED_CRON = "0 0,1,2 * * *"; // JST 09:00 / 10:00 / 11:00
 const LINE_PUSH_ENDPOINT = "https://api.line.me/v2/bot/message/push";
 const LINE_BOT_INFO_ENDPOINT = "https://api.line.me/v2/bot/info";
@@ -320,6 +321,8 @@ function memberIdentityProtectedPath(path) {
     "/api/member/questionnaire/image-upload-url",
     "/api/member/exact-appointments","/api/member/exact-appointments/create",
     "/api/member/exact-appointments/change","/api/member/exact-appointments/cancel",
+    "/api/member/exact-appointments/multi-availability","/api/member/exact-appointments/multi-create",
+    "/api/member/exact-appointments/multi-change","/api/member/exact-appointments/multi-cancel",
     "/api/member/queue/create","/api/member/waiting/create","/api/member/waiting-entry/create",
     "/api/public/pets/photo/update","/api/member/pets/photo/update",
     "/api/public/pet-photo/update","/api/member/pet-photo/update",
@@ -346,7 +349,11 @@ function memberExistingGuardianRequiredPath(path) {
     "/api/member/queue/create",
     "/api/member/waiting/create",
     "/api/member/waiting-entry/create",
-    "/api/member/exact-appointments/create"
+    "/api/member/exact-appointments/create",
+    "/api/member/exact-appointments/multi-availability",
+    "/api/member/exact-appointments/multi-create",
+    "/api/member/exact-appointments/multi-change",
+    "/api/member/exact-appointments/multi-cancel"
   ]).has(path);
 }
 
@@ -597,6 +604,12 @@ export default {
           v11_final_audit_clinic_code_mismatch_guard: true,
           v11_final_audit_verified_guardian_guard: true,
           v11_final_audit_staff_image_switch_enforced: true,
+          multi_pet_booking_version: MULTI_PET_BOOKING_VERSION,
+          multi_pet_booking_group_model: "one_exact_appointment_per_pet",
+          multi_pet_booking_modes: ["consecutive", "same_time"],
+          multi_pet_booking_feature_switch: "multi_pet_booking",
+          multi_pet_booking_single_fallback: true,
+          multi_pet_booking_compensating_rollback: true,
           exact_appointment_guard_version: EXACT_APPOINTMENT_GUARD_VERSION,
           line_call_feature_version: LINE_CALL_FEATURE_VERSION,
           doctor_slot_feature_version: DOCTOR_SLOT_FEATURE_VERSION,
@@ -782,6 +795,20 @@ export default {
       }
       if (path === "/api/member/exact-appointments/cancel" && request.method === "POST") {
         return handleMemberExactAppointmentCancel(request, env);
+      }
+
+      // DPRO PET CARE LINE V1.2: 複数ペット同時予約（既存1予約=1ペット構造をグループ化）
+      if (path === "/api/member/exact-appointments/multi-availability" && request.method === "POST") {
+        return handleMemberMultiExactAppointmentAvailability(request, env);
+      }
+      if (path === "/api/member/exact-appointments/multi-create" && request.method === "POST") {
+        return handleMemberMultiExactAppointmentCreate(request, env);
+      }
+      if (path === "/api/member/exact-appointments/multi-change" && request.method === "POST") {
+        return handleMemberMultiExactAppointmentChange(request, env);
+      }
+      if (path === "/api/member/exact-appointments/multi-cancel" && request.method === "POST") {
+        return handleMemberMultiExactAppointmentCancel(request, env);
       }
 
       // STEP VET-15: 飼い主用 順番受付 / 優先受付予約 / お薬・予防受付 / 混雑目安
@@ -12535,7 +12562,7 @@ async function exactAppointmentAvailability(env, clinic, settings, service, date
   const now = nowJstParts();
   const leadMinutes = Math.max(0, Number(settings.booking_lead_minutes || 0));
   const activeStatuses = "in.(scheduled,confirmed,checked_in)";
-  const existing = await selectRows(env, TABLES.exactAppointments, {
+  const existingRaw = await selectRows(env, TABLES.exactAppointments, {
     select: "id,pet_id,doctor_id,appointment_date,start_time,end_time,status,service_type_id",
     clinic_id: `eq.${clinic.id}`,
     appointment_date: `eq.${dateText}`,
@@ -12544,6 +12571,11 @@ async function exactAppointmentAvailability(env, clinic, settings, service, date
   });
 
   const excludeId = cleanString(options.excludeAppointmentId || "");
+  const excludeIds = new Set([
+    excludeId,
+    ...(Array.isArray(options.excludeAppointmentIds) ? options.excludeAppointmentIds.map((v) => cleanString(v)) : [])
+  ].filter(Boolean));
+  const existing = existingRaw.filter((row) => !excludeIds.has(cleanString(row.id)));
   const petId = cleanString(options.petId || "");
   const clinicCapacity = Math.max(1, Number(settings.default_capacity || 1));
   const serviceCapacity = Math.max(1, Number(normalizedService.capacity_per_slot || clinicCapacity));
@@ -12987,7 +13019,7 @@ async function handleExactAppointmentAvailability(request, env) {
   return jsonResponse({ ok: true, worker_version: WORKER_VERSION, clinic, settings: exactAppointmentPublicSettings(settings), ...availability });
 }
 
-async function createExactAppointmentCore(request, env, body, adminMode = false) {
+async function createExactAppointmentCore(request, env, body, adminMode = false, options = {}) {
   const clinicCode = getRequestedClinicCode(request, body);
   const featureState = await getClinicFeatureState(env, clinicCode);
   const clinic = featureState.clinic;
@@ -13070,13 +13102,17 @@ async function createExactAppointmentCore(request, env, body, adminMode = false)
     doctor_name: appointment?.doctor_name_snapshot || null,
     source
   });
-  const questionnaireLink = appointment?.id ? await linkRecentQuestionnaireToAppointment(env, clinic, {
-    appointment_id: appointment.id, pet_id: pet.id, pet_name: pet.pet_name || "", appointment_date: dateText, actor_name: actorName
-  }) : {ok:true,linked:false,skipped:true,reason:"appointment_id_missing"};
+  const questionnaireLink = options.suppressQuestionnaireLink === true
+    ? {ok:true,linked:false,skipped:true,reason:"suppressed_for_multi_transaction"}
+    : (appointment?.id ? await linkRecentQuestionnaireToAppointment(env, clinic, {
+        appointment_id: appointment.id, pet_id: pet.id, pet_name: pet.pet_name || "", appointment_date: dateText, actor_name: actorName
+      }) : {ok:true,linked:false,skipped:true,reason:"appointment_id_missing"});
   const enriched = await enrichExactAppointments(env, [appointment], settings);
-  const notification = appointment?.id
-    ? await autoNotifyExactAppointmentAction(env, clinic, appointment.id, "created", actorName)
-    : { ok: false, skipped: true, reason: "appointment_id_missing" };
+  const notification = options.suppressNotification === true
+    ? { ok: true, skipped: true, reason: "suppressed_for_multi_transaction" }
+    : (appointment?.id
+        ? await autoNotifyExactAppointmentAction(env, clinic, appointment.id, "created", actorName)
+        : { ok: false, skipped: true, reason: "appointment_id_missing" });
   return { clinic, settings, appointment: enriched[0], booking_token: bookingToken, notification, questionnaire_link: questionnaireLink, questionnaire_visit_link_version: QUESTIONNAIRE_VISIT_LINK_VERSION };
 }
 
@@ -13179,6 +13215,476 @@ async function handleMemberExactAppointmentCancel(request, env) {
     ? await autoNotifyExactAppointmentAction(env, clinic, appointment.id, "cancelled", found.member.guardian?.guardian_name || "飼い主")
     : { ok: false, skipped: true, reason: "appointment_id_missing" };
   return jsonResponse({ ok: true, worker_version: WORKER_VERSION, message: "予約をキャンセルしました。", clinic, appointment, notification });
+}
+
+
+// =========================================================
+// DPRO PET CARE LINE V1.2 / 複数ペット同時予約
+// 重要: vet_exact_appointments は 1行=1ペットを維持する。
+// booking_group_* は複数頭を束ねるメタデータのみで、受付・問診・QR・獣医師枠は各ペット単位。
+// =========================================================
+function normalizeMultiBookingMode(value) {
+  const mode = cleanString(value || "consecutive").toLowerCase();
+  if (!["consecutive", "same_time"].includes(mode)) throw new Error("複数ペット予約方式が不正です。");
+  return mode;
+}
+
+function multiBookingFeatureEnabled(env, clinicCode, featureState, body = {}) {
+  let flags = featureState.feature_flags;
+  if (isDemoClinicCodeForAudit(env, clinicCode) && body.demo_feature_flags && typeof body.demo_feature_flags === "object" && !Array.isArray(body.demo_feature_flags)) {
+    flags = normalizeFeatureFlags({ ...featureState.feature_flags, ...body.demo_feature_flags });
+  }
+  return flags.multi_pet_booking === true;
+}
+
+function normalizeMultiBookingItems(input) {
+  if (!Array.isArray(input)) throw new Error("複数ペット予約の対象を選択してください。");
+  if (input.length < 2) throw new Error("複数ペット予約は2頭以上を選択してください。");
+  if (input.length > 10) throw new Error("一度に予約できるペットは10頭までです。");
+  const items = input.map((item, index) => ({
+    index,
+    appointment_id: cleanString(item?.appointment_id || item?.id || ""),
+    pet_id: cleanString(item?.pet_id || ""),
+    service_id: cleanString(item?.service_id || item?.service_type_id || ""),
+    doctor_id: item?.doctor_id === null ? "" : cleanString(item?.doctor_id || ""),
+    request_note: cleanString(item?.request_note || item?.note || "")
+  }));
+  const petIds = items.map((item) => item.pet_id);
+  if (petIds.some((id) => !id)) throw new Error("予約するペットをすべて選択してください。");
+  if (new Set(petIds).size !== petIds.length) throw new Error("同じペットを複数回選択することはできません。");
+  if (items.some((item) => !item.service_id)) throw new Error("各ペットの予約内容を選択してください。");
+  return items;
+}
+
+function buildMultiBookingGroupNo(dateText) {
+  const suffix = createToken("g").replace(/[^a-z0-9]/gi, "").slice(-8).toUpperCase();
+  return `VETG-${String(dateText || "").replaceAll("-", "")}-${suffix}`;
+}
+
+function intervalsOverlap(a, b) {
+  return timeToMinutes(a.start_time) < timeToMinutes(b.end_time) && timeToMinutes(a.end_time) > timeToMinutes(b.start_time);
+}
+
+function hasDistinctDoctorAssignment(plans) {
+  const ordered = plans
+    .map((plan, idx) => ({ idx, choices: (plan.slot?.available_doctors || []).map((d) => cleanString(d.id)).filter(Boolean) }))
+    .sort((a, b) => a.choices.length - b.choices.length);
+  const used = new Set();
+  function walk(pos) {
+    if (pos >= ordered.length) return true;
+    for (const doctorId of ordered[pos].choices) {
+      if (used.has(doctorId)) continue;
+      used.add(doctorId);
+      if (walk(pos + 1)) return true;
+      used.delete(doctorId);
+    }
+    return false;
+  }
+  return ordered.every((x) => x.choices.length > 0) && walk(0);
+}
+
+async function resolveMultiBookingContext(request, env, body, options = {}) {
+  const clinicCode = getRequestedClinicCode(request, body);
+  const featureState = await getClinicFeatureState(env, clinicCode);
+  const clinic = featureState.clinic;
+  if (featureState.feature_flags.exact_appointment !== true) throw new Error("日時指定予約は病院設定でOFFです。");
+  if (!multiBookingFeatureEnabled(env, clinicCode, featureState, body)) {
+    throw new Error("複数ペット同時予約は病院設定でOFFです。");
+  }
+  const settings = await getExactAppointmentSettings(env, clinic);
+  if (settings.exact_time_booking_enabled !== true || settings.status === "inactive") throw new Error("日時指定予約を現在受け付けていません。");
+  const member = await resolveExactAppointmentMember(env, clinic, request, body);
+  if (!member.guardian) throw new Error("LINE連携済みの飼い主情報が見つかりません。診察券画面から開き直してください。");
+  return { clinicCode, featureState, clinic, settings, member };
+}
+
+async function prepareMultiBookingItems(env, context, rawItems) {
+  const items = normalizeMultiBookingItems(rawItems);
+  const doctorSettingsRaw = exactDoctorPublicSettings(context.settings);
+  const doctorSettings = context.featureState.feature_flags.doctor_selection === true
+    ? doctorSettingsRaw
+    : { ...doctorSettingsRaw, doctor_booking_enabled: false, doctor_selection_mode: "off", auto_assign_doctor: false };
+  const prepared = [];
+  for (const item of items) {
+    const pet = await resolveExactAppointmentPet(env, context.clinic, context.member.guardian, item.pet_id);
+    const service = await getExactAppointmentServiceByInput(env, context.clinic, { service_id: item.service_id });
+    let doctorId = doctorSettings.doctor_booking_enabled ? item.doctor_id : "";
+    if (doctorSettings.doctor_booking_enabled && doctorSettings.doctor_selection_mode === "required" && !doctorId) {
+      throw new Error(`${pet.pet_name || "ペット"}の担当獣医師を選択してください。`);
+    }
+    prepared.push({ ...item, pet, service, doctor_id: doctorId });
+  }
+  return { items: prepared, doctorSettings };
+}
+
+async function evaluateMultiBookingStart(env, context, prepared, dateText, candidateStart, mode, excludeByPet = new Map(), excludeAppointmentIds = []) {
+  const plans = [];
+  let cursor = timeToMinutes(candidateStart);
+  for (const item of prepared.items) {
+    const startTime = mode === "same_time" ? candidateStart : minutesToTime(cursor);
+    const excludeAppointmentId = cleanString(excludeByPet.get(item.pet.id) || item.appointment_id || "");
+    const availability = await exactAppointmentAvailability(env, context.clinic, context.settings, item.service, dateText, {
+      excludeAppointmentId,
+      excludeAppointmentIds,
+      petId: item.pet.id,
+      doctorId: item.doctor_id
+    });
+    const slot = (availability.slots || []).find((s) => s.start_time === startTime);
+    if (!slot || !slot.available) {
+      return { available: false, reason: `${item.pet.pet_name || "ペット"}：${slot?.reason || availability.reason || "予約できません"}`, start_time: candidateStart, items: plans };
+    }
+    plans.push({ ...item, start_time: slot.start_time, end_time: slot.end_time, slot, availability });
+    if (mode === "consecutive") cursor = timeToMinutes(slot.end_time);
+  }
+
+  // 既存予約に加えて、このグループ内の同時重複数を容量へ加算する。
+  for (const plan of plans) {
+    const simultaneous = plans.filter((other) => intervalsOverlap(plan, other));
+    if (Number(plan.slot.clinic_booked_count || 0) + simultaneous.length > Number(plan.slot.clinic_capacity || 1)) {
+      return { available: false, reason: "病院全体の同時予約枠が不足しています。", start_time: candidateStart, items: plans };
+    }
+    const sameService = simultaneous.filter((other) => other.service.id === plan.service.id);
+    if (Number(plan.slot.service_booked_count || 0) + sameService.length > Number(plan.slot.service_capacity || 1)) {
+      return { available: false, reason: `${plan.service.service_name || "予約内容"}の同時予約枠が不足しています。`, start_time: candidateStart, items: plans };
+    }
+  }
+
+  // 獣医師枠を使う場合、重なる予約には異なる獣医師を割り当てられる必要がある。
+  if (prepared.doctorSettings.doctor_booking_enabled && plans.some((a, i) => plans.some((b, j) => i !== j && intervalsOverlap(a, b)))) {
+    const fixed = plans.filter((p) => p.doctor_id);
+    for (let i = 0; i < fixed.length; i++) {
+      for (let j = i + 1; j < fixed.length; j++) {
+        if (fixed[i].doctor_id === fixed[j].doctor_id && intervalsOverlap(fixed[i], fixed[j])) {
+          return { available: false, reason: "同じ獣医師を同時間帯に複数頭へ指定できません。", start_time: candidateStart, items: plans };
+        }
+      }
+    }
+    if (!hasDistinctDoctorAssignment(plans)) {
+      return { available: false, reason: "同時間帯に担当できる獣医師数が不足しています。", start_time: candidateStart, items: plans };
+    }
+  }
+
+  return {
+    available: true,
+    reason: "",
+    start_time: candidateStart,
+    end_time: plans.reduce((latest, p) => timeToMinutes(p.end_time) > timeToMinutes(latest) ? p.end_time : latest, plans[0]?.end_time || candidateStart),
+    items: plans
+  };
+}
+
+async function buildMultiBookingAvailability(env, context, body, options = {}) {
+  const mode = normalizeMultiBookingMode(body.booking_mode || body.mode);
+  const dateText = cleanString(body.appointment_date || body.date);
+  if (!dateText) throw new Error("予約日を選択してください。");
+  const prepared = await prepareMultiBookingItems(env, context, body.items);
+  const first = prepared.items[0];
+  const excludeByPet = options.excludeByPet || new Map();
+  const excludeAppointmentIds = Array.isArray(options.excludeAppointmentIds) ? options.excludeAppointmentIds.map((v) => cleanString(v)).filter(Boolean) : [];
+  const firstAvailability = await exactAppointmentAvailability(env, context.clinic, context.settings, first.service, dateText, {
+    excludeAppointmentId: cleanString(excludeByPet.get(first.pet.id) || first.appointment_id || ""),
+    excludeAppointmentIds,
+    petId: first.pet.id,
+    doctorId: first.doctor_id
+  });
+  const candidateStarts = (firstAvailability.slots || []).map((slot) => slot.start_time);
+  const slots = [];
+  for (const start of candidateStarts) {
+    const evaluated = await evaluateMultiBookingStart(env, context, prepared, dateText, start, mode, excludeByPet, excludeAppointmentIds);
+    slots.push({
+      start_time: start,
+      end_time: evaluated.end_time || "",
+      available: evaluated.available === true,
+      reason: evaluated.reason || "",
+      items: (evaluated.items || []).map((p) => ({
+        pet_id: p.pet.id,
+        pet_name: p.pet.pet_name || "ペット",
+        service_id: p.service.id,
+        service_name: p.service.service_name || "日時指定予約",
+        doctor_id: p.doctor_id || null,
+        start_time: p.start_time,
+        end_time: p.end_time,
+        available_doctor_count: p.slot?.available_doctor_count || 0,
+        available_doctors: p.slot?.available_doctors || []
+      }))
+    });
+  }
+  return { mode, date: dateText, prepared, slots, available: slots.some((s) => s.available), min_date: firstAvailability.min_date, max_date: firstAvailability.max_date };
+}
+
+async function handleMemberMultiExactAppointmentAvailability(request, env) {
+  const body = await readJson(request);
+  const context = await resolveMultiBookingContext(request, env, body);
+  const result = await buildMultiBookingAvailability(env, context, body);
+  return jsonResponse({
+    ok: true,
+    worker_version: WORKER_VERSION,
+    multi_pet_booking_version: MULTI_PET_BOOKING_VERSION,
+    clinic: context.clinic,
+    settings: exactAppointmentPublicSettings(context.settings),
+    booking_mode: result.mode,
+    date: result.date,
+    min_date: result.min_date,
+    max_date: result.max_date,
+    available: result.available,
+    reason: result.available ? "" : "選択した複数ペットで予約できる時間がありません。",
+    slots: result.slots
+  });
+}
+
+async function cancelCreatedAppointmentsForRollback(env, appointments, actorName, reason) {
+  const results = [];
+  for (const appointment of [...appointments].reverse()) {
+    if (!appointment?.id) continue;
+    try {
+      const rows = await supabaseRpc(env, "vet_cancel_exact_appointment", {
+        p_appointment_id: appointment.id,
+        p_actor_type: "system",
+        p_actor_name: actorName,
+        p_reason: reason
+      });
+      await updateRows(env, TABLES.exactAppointments, { id: `eq.${appointment.id}` }, {
+        booking_group_id: null,
+        booking_group_no: null,
+        booking_group_token_hash: null,
+        booking_group_order: null,
+        booking_group_size: null,
+        booking_group_mode: null,
+        booking_group_created_at: null
+      }).catch(() => []);
+      results.push({ id: appointment.id, ok: true, row: Array.isArray(rows) ? rows[0] : rows });
+    } catch (error) {
+      results.push({ id: appointment.id, ok: false, error: error?.message || String(error) });
+    }
+  }
+  return results;
+}
+
+async function handleMemberMultiExactAppointmentCreate(request, env) {
+  const body = await readJson(request);
+  const context = await resolveMultiBookingContext(request, env, body);
+  const availability = await buildMultiBookingAvailability(env, context, body);
+  const startTime = normalizeTime(body.start_time || body.time);
+  if (!startTime) throw new Error("予約時間を選択してください。");
+  const selected = availability.slots.find((slot) => slot.start_time === startTime);
+  if (!selected || !selected.available) throw new Error(selected?.reason || "選択した複数ペット予約枠は利用できません。");
+
+  const groupId = crypto.randomUUID ? crypto.randomUUID() : createToken("vetgroup");
+  const groupNo = buildMultiBookingGroupNo(availability.date);
+  const groupToken = createToken("vetgroup");
+  const groupTokenHash = await sha256Hex(groupToken);
+  const created = [];
+  const actorName = context.member.guardian.guardian_name || "飼い主";
+  try {
+    for (let i = 0; i < selected.items.length; i++) {
+      const plan = selected.items[i];
+      const input = availability.prepared.items.find((item) => item.pet.id === plan.pet_id);
+      const result = await createExactAppointmentCore(request, env, {
+        ...body,
+        pet_id: plan.pet_id,
+        service_id: plan.service_id,
+        doctor_id: input?.doctor_id || null,
+        appointment_date: availability.date,
+        start_time: plan.start_time,
+        request_note: input?.request_note || "",
+        source: "line"
+      }, false, { suppressNotification: true, suppressQuestionnaireLink: true });
+      created.push({ ...result.appointment, booking_group_id: groupId, booking_group_no: groupNo, booking_group_order: i + 1, booking_group_size: selected.items.length, booking_group_mode: availability.mode, booking_token: result.booking_token });
+      await updateRows(env, TABLES.exactAppointments, { id: `eq.${result.appointment.id}`, clinic_id: `eq.${context.clinic.id}` }, {
+        booking_group_id: groupId,
+        booking_group_no: groupNo,
+        booking_group_token_hash: groupTokenHash,
+        booking_group_order: i + 1,
+        booking_group_size: selected.items.length,
+        booking_group_mode: availability.mode,
+        booking_group_created_at: new Date().toISOString()
+      });
+    }
+  } catch (error) {
+    const rollback = await cancelCreatedAppointmentsForRollback(env, created, "複数ペット予約ロールバック", "複数ペット予約の途中失敗を自動取消");
+    await logOperation(env, context.clinic.id, "system", "複数ペット予約", "multi_exact_appointment_create_rollback", "booking_group", groupId, { group_no: groupNo, error: error?.message || String(error), rollback });
+    throw new Error(`複数ペット予約を確定できなかったため、途中登録分を自動取消しました。${error?.message || ""}`);
+  }
+
+  const finalized = await selectRows(env, TABLES.exactAppointments, { select: "*", clinic_id: `eq.${context.clinic.id}`, booking_group_id: `eq.${groupId}`, order: "booking_group_order.asc" });
+  const enriched = await enrichExactAppointments(env, finalized, context.settings);
+  const notifications = [];
+  const questionnaireLinks = [];
+  for (const appointment of enriched) {
+    questionnaireLinks.push(await linkRecentQuestionnaireToAppointment(env, context.clinic, {
+      appointment_id: appointment.id, pet_id: appointment.pet_id, pet_name: appointment.pet_name_snapshot || "", appointment_date: appointment.appointment_date, actor_name: actorName
+    }));
+    notifications.push(await autoNotifyExactAppointmentAction(env, context.clinic, appointment.id, "created", actorName));
+  }
+  await logOperation(env, context.clinic.id, "member", actorName, "multi_exact_appointment_create", "booking_group", groupId, { group_no: groupNo, mode: availability.mode, count: enriched.length, appointment_ids: enriched.map((a) => a.id) });
+  return jsonResponse({
+    ok: true,
+    worker_version: WORKER_VERSION,
+    multi_pet_booking_version: MULTI_PET_BOOKING_VERSION,
+    message: `${enriched.length}頭分の予約をまとめて受け付けました。`,
+    clinic: context.clinic,
+    booking_group: { id: groupId, group_no: groupNo, mode: availability.mode, size: enriched.length, booking_token: groupToken },
+    appointments: enriched.map((a) => ({ ...a, booking_token: created.find((c) => c.id === a.id)?.booking_token || "" })),
+    questionnaire_links: questionnaireLinks,
+    notifications
+  });
+}
+
+async function findMultiBookingGroupForMember(env, context, body) {
+  const groupId = cleanString(body.booking_group_id || body.group_id || "");
+  const groupNo = cleanString(body.booking_group_no || body.group_no || "");
+  if (!groupId && !groupNo) throw new Error("複数ペット予約グループを指定してください。");
+  const query = { select: "*", clinic_id: `eq.${context.clinic.id}`, order: "booking_group_order.asc,appointment_date.asc,start_time.asc" };
+  if (groupId) query.booking_group_id = `eq.${groupId}`;
+  else query.booking_group_no = `eq.${groupNo}`;
+  const rows = await selectRows(env, TABLES.exactAppointments, query);
+  if (!rows.length) throw new Error("複数ペット予約グループが見つかりません。");
+  const guardianOwns = rows.every((row) => cleanString(row.guardian_id) === cleanString(context.member.guardian.id));
+  if (!guardianOwns) throw new Error("この複数ペット予約を操作する権限がありません。");
+  return rows;
+}
+
+async function handleMemberMultiExactAppointmentChange(request, env) {
+  const body = await readJson(request);
+  const context = await resolveMultiBookingContext(request, env, body);
+  if (context.settings.allow_member_change !== true) throw new Error("予約変更は病院へ直接ご連絡ください。");
+  const currentRows = await findMultiBookingGroupForMember(env, context, body);
+  const activeRows = currentRows.filter((row) => ["scheduled", "confirmed"].includes(row.status));
+  if (activeRows.length < 2) throw new Error("まとめて変更できる予約が2頭分以上ありません。");
+  if (activeRows.some((row) => !exactAppointmentDeadlineOk(row, context.settings.change_deadline_hours))) throw new Error("LINEから変更できる期限を過ぎた予約が含まれています。病院へ直接ご連絡ください。");
+
+  const requestedItems = normalizeMultiBookingItems(body.items);
+  const currentByPet = new Map(activeRows.map((row) => [cleanString(row.pet_id), row]));
+  if (requestedItems.length !== activeRows.length || requestedItems.some((item) => !currentByPet.has(item.pet_id))) {
+    throw new Error("まとめて変更では、現在の予約グループと同じペットをすべて指定してください。1頭だけ変更する場合は通常の変更を使用してください。");
+  }
+  body.items = requestedItems.map((item) => ({ ...item, appointment_id: currentByPet.get(item.pet_id).id }));
+  const excludeByPet = new Map(activeRows.map((row) => [cleanString(row.pet_id), cleanString(row.id)]));
+  const availability = await buildMultiBookingAvailability(env, context, body, { excludeByPet, excludeAppointmentIds: activeRows.map((row) => row.id) });
+  const startTime = normalizeTime(body.start_time || body.time);
+  const selected = availability.slots.find((slot) => slot.start_time === startTime);
+  if (!selected || !selected.available) throw new Error(selected?.reason || "選択した変更先は利用できません。");
+
+  const changed = [];
+  const actorName = context.member.guardian.guardian_name || "飼い主";
+  try {
+    for (const plan of selected.items) {
+      const old = currentByPet.get(plan.pet_id);
+      const input = availability.prepared.items.find((item) => item.pet.id === plan.pet_id);
+      const doctorSettings = exactDoctorPublicSettings(context.settings);
+      const rows = await supabaseRpc(env, "vet_change_exact_appointment_doctor", {
+        p_appointment_id: old.id,
+        p_new_service_type_id: plan.service_id,
+        p_new_appointment_date: availability.date,
+        p_new_start_time: plan.start_time,
+        p_new_end_time: plan.end_time,
+        p_capacity: Number(input.service.capacity_per_slot || context.settings.default_capacity || 1),
+        p_request_note: input.request_note || null,
+        p_actor_type: "member",
+        p_actor_name: actorName,
+        p_reason: cleanString(body.reason || "LINEから複数ペット予約をまとめて変更"),
+        p_new_doctor_id: input.doctor_id || null,
+        p_doctor_assignment_source: input.doctor_id ? "selected" : "unassigned",
+        p_auto_assign_doctor: doctorSettings.auto_assign_doctor === true
+      });
+      changed.push({ old, row: Array.isArray(rows) ? rows[0] : rows });
+    }
+    for (const entry of changed) {
+      await updateRows(env, TABLES.exactAppointments, { id: `eq.${entry.old.id}`, clinic_id: `eq.${context.clinic.id}` }, {
+        booking_group_mode: availability.mode,
+        booking_group_size: activeRows.length
+      });
+    }
+  } catch (error) {
+    const rollback = [];
+    for (const entry of [...changed].reverse()) {
+      try {
+        const oldService = await getExactAppointmentServiceByInput(env, context.clinic, { service_id: entry.old.service_type_id }, false);
+        const rows = await supabaseRpc(env, "vet_change_exact_appointment_doctor", {
+          p_appointment_id: entry.old.id,
+          p_new_service_type_id: entry.old.service_type_id,
+          p_new_appointment_date: entry.old.appointment_date,
+          p_new_start_time: normalizeTime(entry.old.start_time),
+          p_new_end_time: normalizeTime(entry.old.end_time),
+          p_capacity: Number(oldService.capacity_per_slot || context.settings.default_capacity || 1),
+          p_request_note: entry.old.request_note || null,
+          p_actor_type: "system",
+          p_actor_name: "複数ペット予約ロールバック",
+          p_reason: "まとめて変更の途中失敗を元へ戻す",
+          p_new_doctor_id: entry.old.doctor_id || null,
+          p_doctor_assignment_source: entry.old.doctor_id ? "selected" : "unassigned",
+          p_auto_assign_doctor: false
+        });
+        await updateRows(env, TABLES.exactAppointments, { id: `eq.${entry.old.id}`, clinic_id: `eq.${context.clinic.id}` }, {
+          booking_group_mode: entry.old.booking_group_mode || "consecutive",
+          booking_group_size: entry.old.booking_group_size || activeRows.length
+        }).catch(() => []);
+        rollback.push({ id: entry.old.id, ok: true, row: Array.isArray(rows) ? rows[0] : rows });
+      } catch (rollbackError) {
+        rollback.push({ id: entry.old.id, ok: false, error: rollbackError?.message || String(rollbackError) });
+      }
+    }
+    await logOperation(env, context.clinic.id, "system", "複数ペット予約", "multi_exact_appointment_change_rollback", "booking_group", currentRows[0].booking_group_id || null, { error: error?.message || String(error), rollback });
+    throw new Error(`まとめて変更を完了できなかったため、変更済み分を元へ戻しました。${error?.message || ""}`);
+  }
+
+  const refreshed = await selectRows(env, TABLES.exactAppointments, { select: "*", clinic_id: `eq.${context.clinic.id}`, booking_group_id: `eq.${currentRows[0].booking_group_id}`, order: "booking_group_order.asc" });
+  const enriched = await enrichExactAppointments(env, refreshed, context.settings);
+  const notifications = [];
+  for (const appointment of enriched.filter((a) => ["scheduled", "confirmed"].includes(a.status))) {
+    notifications.push(await autoNotifyExactAppointmentAction(env, context.clinic, appointment.id, "changed", actorName));
+  }
+  await logOperation(env, context.clinic.id, "member", actorName, "multi_exact_appointment_change", "booking_group", currentRows[0].booking_group_id || null, { group_no: currentRows[0].booking_group_no || "", mode: availability.mode, count: changed.length });
+  return jsonResponse({ ok: true, worker_version: WORKER_VERSION, multi_pet_booking_version: MULTI_PET_BOOKING_VERSION, message: `${changed.length}頭分の予約をまとめて変更しました。`, booking_group: { id: currentRows[0].booking_group_id, group_no: currentRows[0].booking_group_no, mode: availability.mode, size: changed.length }, appointments: enriched, notifications });
+}
+
+async function handleMemberMultiExactAppointmentCancel(request, env) {
+  const body = await readJson(request);
+  const context = await resolveMultiBookingContext(request, env, body);
+  if (context.settings.allow_member_cancel !== true) throw new Error("予約キャンセルは病院へ直接ご連絡ください。");
+  const currentRows = await findMultiBookingGroupForMember(env, context, body);
+  const activeRows = currentRows.filter((row) => ["scheduled", "confirmed"].includes(row.status));
+  if (!activeRows.length) throw new Error("キャンセルできる予約がありません。");
+  if (activeRows.some((row) => !exactAppointmentDeadlineOk(row, context.settings.cancel_deadline_hours))) throw new Error("LINEからキャンセルできる期限を過ぎた予約が含まれています。病院へ直接ご連絡ください。");
+  const actorName = context.member.guardian.guardian_name || "飼い主";
+  const reason = cleanString(body.reason || "飼い主都合（複数ペットまとめて取消）");
+  const cancelled = [];
+  try {
+    for (const appointment of activeRows) {
+      const rows = await supabaseRpc(env, "vet_cancel_exact_appointment", {
+        p_appointment_id: appointment.id,
+        p_actor_type: "member",
+        p_actor_name: actorName,
+        p_reason: reason
+      });
+      cancelled.push({ old: appointment, row: Array.isArray(rows) ? rows[0] : rows });
+    }
+  } catch (error) {
+    const rollback = [];
+    for (const entry of [...cancelled].reverse()) {
+      try {
+        const rows = await supabaseRpc(env, "vet_update_exact_appointment_status", {
+          p_appointment_id: entry.old.id,
+          p_new_status: entry.old.status,
+          p_actor_type: "system",
+          p_actor_name: "複数ペット予約ロールバック",
+          p_reason: "まとめてキャンセルの途中失敗を元へ戻す"
+        });
+        rollback.push({ id: entry.old.id, ok: true, row: Array.isArray(rows) ? rows[0] : rows });
+      } catch (rollbackError) {
+        rollback.push({ id: entry.old.id, ok: false, error: rollbackError?.message || String(rollbackError) });
+      }
+    }
+    await logOperation(env, context.clinic.id, "system", "複数ペット予約", "multi_exact_appointment_cancel_rollback", "booking_group", currentRows[0].booking_group_id || null, { error: error?.message || String(error), rollback });
+    throw new Error(`まとめてキャンセルを完了できなかったため、取消済み分を元へ戻しました。${error?.message || ""}`);
+  }
+
+  const notifications = [];
+  for (const entry of cancelled) notifications.push(await autoNotifyExactAppointmentAction(env, context.clinic, entry.old.id, "cancelled", actorName));
+  const refreshed = await selectRows(env, TABLES.exactAppointments, { select: "*", clinic_id: `eq.${context.clinic.id}`, booking_group_id: `eq.${currentRows[0].booking_group_id}`, order: "booking_group_order.asc" });
+  const enriched = await enrichExactAppointments(env, refreshed, context.settings);
+  await logOperation(env, context.clinic.id, "member", actorName, "multi_exact_appointment_cancel", "booking_group", currentRows[0].booking_group_id || null, { group_no: currentRows[0].booking_group_no || "", count: cancelled.length, reason });
+  return jsonResponse({ ok: true, worker_version: WORKER_VERSION, multi_pet_booking_version: MULTI_PET_BOOKING_VERSION, message: `${cancelled.length}頭分の予約をまとめてキャンセルしました。`, appointments: enriched, notifications });
 }
 
 async function handleAdminExactAppointmentSettingsGet(request, env) {

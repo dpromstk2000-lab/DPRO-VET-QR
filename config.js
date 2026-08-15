@@ -349,6 +349,8 @@
     "/api/member/questionnaire/create",
     "/api/member/exact-appointments","/api/member/exact-appointments/create",
     "/api/member/exact-appointments/change","/api/member/exact-appointments/cancel",
+    "/api/member/exact-appointments/multi-availability","/api/member/exact-appointments/multi-create",
+    "/api/member/exact-appointments/multi-change","/api/member/exact-appointments/multi-cancel",
     "/api/member/queue/create","/api/member/waiting/create","/api/member/waiting-entry/create",
     "/api/public/pets/photo/update","/api/member/pets/photo/update",
     "/api/public/pet-photo/update","/api/member/pet-photo/update",
