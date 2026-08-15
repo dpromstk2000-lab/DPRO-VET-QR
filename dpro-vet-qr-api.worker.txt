@@ -96,10 +96,11 @@ const TABLES = {
 };
 
 const DEFAULT_CLINIC_CODE = "dpro_vet_demo";
-const WORKER_VERSION = "ANIMARY-COUNTER-V1.1-6-QUESTIONNAIRE-VISIT-LINK-20260815";
+const WORKER_VERSION = "ANIMARY-COUNTER-V1.1-FINAL-AUDIT-R1-20260815";
 const FEATURE_SWITCH_VERSION = "DPRO-VET-FEATURE-SWITCH-V1.1";
 const WEB_QUESTIONNAIRE_VERSION = "DPRO-VET-WEB-QUESTIONNAIRE-V1.1.6";
 const QUESTIONNAIRE_VISIT_LINK_VERSION = "DPRO-VET-QUESTIONNAIRE-VISIT-LINK-V1.1";
+const DOCTOR_QUESTIONNAIRE_IMAGE_VIEW_VERSION = "DPRO-VET-DOCTOR-QUESTIONNAIRE-IMAGE-VIEW-V1.1";
 const EXACT_APPOINTMENT_GUARD_VERSION = "VET-APPOINTMENT-1-R2";
 const LINE_CALL_FEATURE_VERSION = "VET-LINE-CALL-1";
 const DOCTOR_SLOT_FEATURE_VERSION = "VET-DOCTOR-SLOT-1";
@@ -109,6 +110,7 @@ const QR_APPOINTMENT_LINK_FEATURE_VERSION = "VET-QR-APPOINTMENT-LINK-1";
 const APPOINTMENT_ACTION_NOTICE_FEATURE_VERSION = "VET-APPOINTMENT-NOTIFY-1";
 const RECALL_AUTOMATION_VERSION = "VET-RECALL-AUTO-1";
 const FINAL_AUDIT_VERSION = "FINAL-VET-AUDIT-1-R1";
+const V11_FINAL_AUDIT_VERSION = "DPRO-VET-V1.1-FINAL-AUDIT-R1";
 const APPOINTMENT_REMINDER_RECOMMENDED_CRON = "0 0,1,2 * * *"; // JST 09:00 / 10:00 / 11:00
 const LINE_PUSH_ENDPOINT = "https://api.line.me/v2/bot/message/push";
 const LINE_BOT_INFO_ENDPOINT = "https://api.line.me/v2/bot/info";
@@ -337,17 +339,30 @@ function requestHasCardCredential(path, body = {}, request = null) {
   ));
 }
 
+function memberExistingGuardianRequiredPath(path) {
+  return new Set([
+    "/api/member/questionnaire/create",
+    "/api/member/questionnaire/image-upload-url",
+    "/api/member/queue/create",
+    "/api/member/waiting/create",
+    "/api/member/waiting-entry/create",
+    "/api/member/exact-appointments/create"
+  ]).has(path);
+}
+
 async function enforceProductionMemberIdentity(request, env, path) {
   if (!memberIdentityProtectedPath(path)) return {ok:true, request, protected:false};
 
-  // V1.1-4-R1: DEMOの画像付き問診では巨大JSONを認証判定のためだけに二重読込しない。
-  // clinic_code をURLに明示したDEMOだけを先に安全に判定する。本番clinicには影響しない。
-  const queryClinicCode = cleanString(getParam(request, "clinic_code", ""));
-  if (queryClinicCode && isDemoClinicCodeForAudit(env, queryClinicCode)) {
-    return {ok:true, request, protected:true, demo_bypass:true, clinic_code:queryClinicCode, demo_fast_path:true};
-  }
-
+  // V1.1 FINAL-AUDIT-R1:
+  // R2以降は画像本体をJSONへ載せないため、DEMO判定のためのquery-only fast pathは不要。
+  // URLとbodyでclinic_codeが食い違う場合は、DEMO偽装による本番認証迂回を防ぐため拒否する。
   const body = request.method === "GET" || request.method === "HEAD" ? {} : await readJson(request);
+  const queryClinicCode = cleanString(getParam(request, "clinic_code", ""));
+  const bodyClinicCode = cleanString(body.clinic_code || "");
+  if (queryClinicCode && bodyClinicCode && queryClinicCode !== bodyClinicCode) {
+    return {ok:false, status:400, code:"clinic_code_mismatch",
+      message:"医院コードの指定が一致しません。画面を開き直してください。"};
+  }
   const clinicCode = getRequestedClinicCode(request, body);
   if (isDemoClinicCodeForAudit(env, clinicCode)) {
     return {ok:true, request, protected:true, demo_bypass:true, clinic_code:clinicCode};
@@ -364,6 +379,11 @@ async function enforceProductionMemberIdentity(request, env, path) {
     select:"*", clinic_id:`eq.${clinic.id}`,
     line_user_id:`eq.${verified.line_user_id}`, status:"eq.active", limit:1
   }).catch(() => null);
+
+  if (!guardian && memberExistingGuardianRequiredPath(path)) {
+    return {ok:false,status:403,code:"verified_guardian_required",
+      message:"この操作にはLINE連携済みの飼い主情報が必要です。診察券画面から開き直してください。"};
+  }
 
   const nextHeaders = new Headers(request.headers);
   nextHeaders.set("X-DPRO-Verified-Line-User-Id", verified.line_user_id);
@@ -570,6 +590,13 @@ export default {
           questionnaire_auto_link_mode: "pet_context_safe",
           questionnaire_queue_enrichment: true,
           questionnaire_appointment_enrichment: true,
+          doctor_questionnaire_image_view_version: DOCTOR_QUESTIONNAIRE_IMAGE_VIEW_VERSION,
+          doctor_questionnaire_image_view_feature_switch: "questionnaire_images",
+          doctor_questionnaire_image_signed_url_seconds: QUESTIONNAIRE_IMAGE_SIGNED_URL_SECONDS,
+          v11_final_audit_version: V11_FINAL_AUDIT_VERSION,
+          v11_final_audit_clinic_code_mismatch_guard: true,
+          v11_final_audit_verified_guardian_guard: true,
+          v11_final_audit_staff_image_switch_enforced: true,
           exact_appointment_guard_version: EXACT_APPOINTMENT_GUARD_VERSION,
           line_call_feature_version: LINE_CALL_FEATURE_VERSION,
           doctor_slot_feature_version: DOCTOR_SLOT_FEATURE_VERSION,
@@ -815,6 +842,10 @@ export default {
       // ANIMARY-COUNTER-V1.1-5: 院内側WEB問診確認
       if ((path === "/api/admin/questionnaires" || path === "/api/owner/questionnaires" || path === "/api/doctor/questionnaires") && request.method === "GET") {
         return handleQuestionnaireAdminList(request, env, false);
+      }
+      // ANIMARY-COUNTER-V1.1-7: ドクター画面から1問診の詳細・症状画像を安全に取得
+      if (path === "/api/doctor/questionnaire-detail" && request.method === "GET") {
+        return handleDoctorQuestionnaireDetail(request, env);
       }
       if ((path === "/api/admin/questionnaires/review" || path === "/api/owner/questionnaires/review" || path === "/api/doctor/questionnaires/review") && request.method === "POST") {
         return handleQuestionnaireReview(request, env, false);
@@ -3088,7 +3119,31 @@ async function handleQuestionnaireAdminList(request, env, demoOnly = false) {
       if (!guard.ok) return errorResponse(guard.message, guard.status, { route: "demo_questionnaires" });
     }
     const clinicCode = getParam(request, "clinic_code", DEFAULT_CLINIC_CODE);
-    const clinic = await getClinicByCode(env, clinicCode);
+    const featureState = await getClinicFeatureState(env, clinicCode);
+    const clinic = featureState.clinic;
+    const isDemo = isDemoClinicCodeForAudit(env, clinicCode);
+    const demoMarker = cleanString(getParam(request, "demo", "")).toLowerCase();
+    const demoOverrideAllowed = demoOnly && isDemo && ["ready", "true", "1"].includes(demoMarker);
+    const demoPrevisit = demoOverrideAllowed && toBool(getParam(request, "demo_previsit_questionnaire", "false"), false);
+    const demoImages = demoOverrideAllowed && toBool(getParam(request, "demo_questionnaire_images", "false"), false);
+    const previsitEnabled = featureState.feature_flags.previsit_questionnaire === true || demoPrevisit;
+    const imagesEnabled = featureState.feature_flags.questionnaire_images === true || demoImages;
+
+    if (!previsitEnabled) {
+      return jsonResponse({
+        ok: true,
+        clinic: normalizeClinicForPublic(clinic),
+        items: [],
+        count: 0,
+        demo_only: demoOnly,
+        previsit_questionnaire_enabled: false,
+        questionnaire_images_enabled: false,
+        feature_disabled: "previsit_questionnaire",
+        feature_switch_version: FEATURE_SWITCH_VERSION,
+        web_questionnaire_version: WEB_QUESTIONNAIRE_VERSION
+      });
+    }
+
     const limit = normalizeLimit(getParam(request, "limit", "80"), 80, 200);
     const status = cleanString(getParam(request, "status", ""));
     const query = {
@@ -3100,18 +3155,77 @@ async function handleQuestionnaireAdminList(request, env, demoOnly = false) {
     if (status) query.status = `eq.${status}`;
     const rows = await selectRows(env, TABLES.questionnaires, query);
     const items = [];
-    for (const row of rows) items.push(await attachQuestionnaireSignedImages(env, row));
+    for (const row of rows) {
+      if (imagesEnabled) items.push(await attachQuestionnaireSignedImages(env, row));
+      else items.push({ ...row, image_count: 0, images: [] });
+    }
     return jsonResponse({
       ok: true,
       clinic: normalizeClinicForPublic(clinic),
       items,
       count: items.length,
       demo_only: demoOnly,
-      questionnaire_image_storage_mode: "private_signed_url",
-      web_questionnaire_version: WEB_QUESTIONNAIRE_VERSION
+      previsit_questionnaire_enabled: true,
+      questionnaire_images_enabled: imagesEnabled,
+      questionnaire_image_storage_mode: imagesEnabled ? "private_signed_url" : "hidden_by_feature_switch",
+      feature_switch_version: FEATURE_SWITCH_VERSION,
+      web_questionnaire_version: WEB_QUESTIONNAIRE_VERSION,
+      demo_feature_override_applied: demoOverrideAllowed && (demoPrevisit || demoImages)
     });
   } catch (error) {
     return errorResponse(error?.message || "WEB問診一覧を取得できませんでした。", 400, { route: "questionnaires_list" });
+  }
+}
+
+async function handleDoctorQuestionnaireDetail(request, env) {
+  try {
+    const clinicCode = getParam(request, "clinic_code", DEFAULT_CLINIC_CODE);
+    const featureState = await getClinicFeatureState(env, clinicCode);
+    const clinic = featureState.clinic;
+    const isDemo = isDemoClinicCodeForAudit(env, clinicCode);
+    const demoMarker = cleanString(getParam(request, "demo", "")).toLowerCase();
+    const demoOverrideAllowed = isDemo && ["ready", "true", "1"].includes(demoMarker);
+    const demoPrevisit = demoOverrideAllowed && toBool(getParam(request, "demo_previsit_questionnaire", "false"), false);
+    const demoImages = demoOverrideAllowed && toBool(getParam(request, "demo_questionnaire_images", "false"), false);
+
+    const previsitEnabled = featureState.feature_flags.previsit_questionnaire === true || demoPrevisit;
+    const imagesEnabled = featureState.feature_flags.questionnaire_images === true || demoImages;
+    if (!previsitEnabled) {
+      return featureDisabledResponse("previsit_questionnaire", "この動物病院ではWEB問診を使用していません。");
+    }
+
+    const questionnaireId = cleanString(getParam(request, "questionnaire_id", ""));
+    const waitingEntryId = cleanString(getParam(request, "waiting_entry_id", ""));
+    if (!questionnaireId && !waitingEntryId) {
+      return errorResponse("問診IDまたは受付IDがありません。", 400, { route: "doctor_questionnaire_detail" });
+    }
+
+    const query = { select: "*", clinic_id: `eq.${clinic.id}`, limit: 1 };
+    if (questionnaireId) query.id = `eq.${questionnaireId}`;
+    else query.waiting_entry_id = `eq.${waitingEntryId}`;
+    if (!questionnaireId) query.order = "submitted_at.desc.nullslast,created_at.desc";
+    const rows = await selectRows(env, TABLES.questionnaires, query);
+    const row = rows?.[0] || null;
+    if (!row) return errorResponse("この受付に紐づくWEB問診を確認できませんでした。", 404, { route: "doctor_questionnaire_detail" });
+
+    let item = { ...row, image_count: questionnaireImageMeta(row).length, images: [] };
+    if (imagesEnabled) item = await attachQuestionnaireSignedImages(env, row);
+
+    return jsonResponse({
+      ok: true,
+      item,
+      questionnaire_images_enabled: imagesEnabled,
+      questionnaire_image_storage_mode: "private_signed_url",
+      signed_url_expires_in: QUESTIONNAIRE_IMAGE_SIGNED_URL_SECONDS,
+      doctor_questionnaire_image_view_version: DOCTOR_QUESTIONNAIRE_IMAGE_VIEW_VERSION,
+      feature_switch_version: FEATURE_SWITCH_VERSION,
+      demo_feature_override_applied: demoOverrideAllowed && (demoPrevisit || demoImages)
+    });
+  } catch (error) {
+    return errorResponse(error?.message || "診察用WEB問診詳細を取得できませんでした。", 400, {
+      route: "doctor_questionnaire_detail",
+      doctor_questionnaire_image_view_version: DOCTOR_QUESTIONNAIRE_IMAGE_VIEW_VERSION
+    });
   }
 }
 
