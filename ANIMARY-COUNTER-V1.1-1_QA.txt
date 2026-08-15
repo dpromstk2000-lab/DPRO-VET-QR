@@ -1,0 +1,21 @@
+DPRO PET CARE LINE
+ANIMARY-COUNTER-V1.1-1 QA
+
+STATIC QA
+- worker.js JavaScript syntax: PASS
+- worker.js / worker.txt identical: PASS
+- feature-switch.js JavaScript syntax: PASS
+- feature-settings.html inline JavaScript syntax: PASS
+- Worker diff restricted to feature switch foundation: PASS
+- Existing V1.0 default behavior retained: PASS (defaults ON)
+
+DEPLOY QA REQUIRED AFTER USER ACTION
+1. Run 12_V11_FEATURE_SWITCH.sql in the general/VET Supabase project.
+2. Deploy patched worker.js to dpro-vet-qr-api.
+3. Upload feature-settings.html and feature-switch.js to GitHub main.
+4. GET /api/public/clinic-settings?clinic_code=dpro_vet_demo
+   Confirm settings.feature_flags is present.
+5. Open feature-settings.html?clinic_code=dpro_vet_demo
+   Confirm admin authentication and saving.
+6. Change one non-critical switch, reload, confirm persistence, then restore it.
+7. Do not enable planned V1.1+/V1.2/V1.3 switches until the corresponding UI/API enforcement step is deployed.

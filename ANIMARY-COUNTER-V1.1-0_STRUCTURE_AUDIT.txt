@@ -1,0 +1,62 @@
+DPRO PET CARE LINE
+ANIMARY-COUNTER-V1.1-0 STRUCTURE AUDIT
+Date: 2026-08-15
+
+STATUS: COMPLETE / PASS
+
+1. BASELINE
+- GitHub: dpromstk2000-lab/DPRO-VET-QR
+- Current main contains V1.0 COMPLETE / PASS markers.
+- Canonical Worker source size in production starter: 508,565 bytes.
+- Existing V1.0 flows remain the baseline and must not be disabled by default.
+
+2. EXISTING SETTINGS FOUNDATION
+The current Worker already has the correct central settings path:
+- table: vet_clinic_settings
+- admin read/write: /api/admin/settings
+- public read: /api/public/clinic-settings
+
+Conclusion:
+Do NOT create a separate settings service.
+Add hospital-specific feature switches to vet_clinic_settings and expose them through the existing APIs.
+
+3. FEATURE SWITCH POLICY
+Core/safety functions are not user-removable.
+Optional functions are controlled per clinic.
+Existing V1.0 optional functions default ON to preserve current behavior.
+New V1.1 / V1.2 / V1.3 functions default OFF until their implementation is deployed.
+
+4. SWITCH GROUPS
+- Pet card / multi-pet card
+- Same-day reception parent + general / medicine-prevention / care
+- Previsit questionnaire + branching / images / consent
+- Exact appointment + doctor selection
+- QR check-in + congestion display
+- LINE call + post-visit follow-up + prevention / revisit recall
+- Future: multi-pet booking / vaccine interval / cancel waitlist / HP sync
+
+5. DEPENDENCY RULES
+- reception_general / reception_medicine_prevention / reception_care require reception_queue.
+- doctor_selection requires exact_appointment.
+- questionnaire_branching / questionnaire_images / questionnaire_consent require previsit_questionnaire.
+- multi_pet_booking will require exact_appointment when V1.2 is released.
+- vaccine_interval_control will require prevention_recall or exact_appointment depending on the hospital workflow.
+
+6. UI POLICY
+OFF means the function must eventually be removed from:
+- patient-facing page links/buttons
+- staff navigation where appropriate
+- internal workflow prompts
+- LINE route generation / rich-menu setup output
+It must not merely show a disabled button.
+
+7. RESULT
+Architecture selected:
+vet_clinic_settings.feature_flags JSONB
++ feature_preset
++ existing admin/public settings APIs
++ shared browser helper feature-switch.js
++ hospital admin screen feature-settings.html
+
+NEXT:
+ANIMARY-COUNTER-V1.1-1 Feature Switch foundation implementation.

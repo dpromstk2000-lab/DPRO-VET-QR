@@ -1,0 +1,14 @@
+{
+  "system": "DPRO PET CARE LINE",
+  "phase": "ANIMARY-COUNTER-V1.1-1",
+  "date": "2026-08-15",
+  "status": "IMPLEMENTATION_PACKAGE_COMPLETE",
+  "deployed": false,
+  "worker_version": "ANIMARY-COUNTER-V1.1-1-FEATURE-SWITCH-20260815",
+  "feature_switch_version": "DPRO-VET-FEATURE-SWITCH-V1.1",
+  "database_table": "vet_clinic_settings",
+  "columns": ["feature_preset", "feature_flags"],
+  "existing_v1_0_default": "ON",
+  "future_features_default": "OFF",
+  "next_step": "ANIMARY-COUNTER-V1.1-2_PAGE_ENFORCEMENT_AND_WEB_QUESTIONNAIRE"
+}

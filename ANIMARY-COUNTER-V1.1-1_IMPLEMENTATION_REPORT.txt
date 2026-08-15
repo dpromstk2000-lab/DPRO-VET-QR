@@ -1,0 +1,39 @@
+DPRO PET CARE LINE
+ANIMARY-COUNTER-V1.1-1 FEATURE SWITCH FOUNDATION
+Date: 2026-08-15
+
+STATUS: IMPLEMENTATION PACKAGE COMPLETE
+DEPLOYED: NO
+
+Implemented in the package:
+1. Supabase additive SQL
+   - vet_clinic_settings.feature_preset
+   - vet_clinic_settings.feature_flags JSONB
+   - idempotent defaults and checks
+
+2. Canonical Worker candidate
+   - Worker version updated to ANIMARY-COUNTER-V1.1-1-FEATURE-SWITCH-20260815
+   - feature flag defaults
+   - allowlisted normalization (unknown keys ignored)
+   - /api/admin/settings GET returns normalized feature state
+   - /api/admin/settings POST saves normalized feature state
+   - /api/public/clinic-settings exposes only normalized safe feature booleans
+   - settings change operation log includes feature switch metadata
+
+3. GitHub frontend files
+   - feature-settings.html
+     Hospital admin ON/OFF screen with Simple / Standard / Full / Custom presets.
+   - feature-switch.js
+     Shared client helper for later patient/staff page integration.
+
+Safety behavior:
+- V1.0 functions default ON.
+- V1.1+ not-yet-released functions default OFF.
+- Unknown feature keys are ignored by Worker.
+- No dental_qr_ tables are touched.
+- No LINE secret is stored in GitHub files.
+
+Important scope note:
+V1.1-1 is the central switch foundation.
+Existing patient/staff pages have not all been wired to hide/show by feature flag yet.
+That enforcement is the next step (V1.1-2 integration) and must be completed before calling the full switch system product-complete.

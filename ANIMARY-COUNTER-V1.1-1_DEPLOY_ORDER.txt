@@ -1,0 +1,26 @@
+DPRO PET CARE LINE V1.1-1
+DEPLOY ORDER
+
+1. Supabase SQL
+   Execute: 12_V11_FEATURE_SWITCH.sql
+
+2. Cloudflare Worker
+   Replace dpro-vet-qr-api with worker.js from the Worker ZIP and Deploy.
+   Do not deploy migration-worker.
+
+3. GitHub main
+   Upload these root files:
+   - feature-settings.html
+   - feature-settings.html.txt
+   - feature-switch.js
+   - feature-switch.js.txt
+
+4. Verify
+   Worker:
+   https://dpro-vet-qr-api.dpromstk2000.workers.dev/api/health
+
+   Feature settings page:
+   https://dpromstk2000-lab.github.io/DPRO-VET-QR/feature-settings.html?clinic_code=dpro_vet_demo
+
+5. This step does not require changing LINE Manager yet.
+   Full hide/show enforcement across existing pages is V1.1-2.
