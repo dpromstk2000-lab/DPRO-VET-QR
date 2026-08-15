@@ -1,0 +1,339 @@
+VET-AUDIT-FINAL REPORT
+DPRO PET CARE LINE
+Date: 2026-08-15
+
+FINAL STATUS: COMPLETE / PASS
+PRODUCT STATUS: DPRO PET CARE LINE V1.0 PRODUCT COMPLETE
+RUNTIME LOGIC CHANGE: NONE
+CLOUDFLARE WORKER DEPLOY REQUIRED: NO
+SUPABASE SQL REQUIRED: NO
+FUNCTIONAL GITHUB FILE REPLACEMENT REQUIRED: NO
+
+============================================================
+1. FINAL SCOPE
+============================================================
+Final E2E audit of the completed product:
+
+LINE入口
+→ ペット診察券
+→ 当日順番受付 / 日時指定予約
+→ QR来院受付
+→ 受付PC / 受付iPad
+→ 獣医師診察
+→ 会計待ち
+→ 受付完了
+→ LINE呼び出し / 診察後フォロー / 予防・再診リコール
+
+This audit does not add new features.
+
+============================================================
+2. SOURCE / DEPLOYMENT BASELINE
+============================================================
+GitHub repository:
+https://github.com/dpromstk2000-lab/DPRO-VET-QR
+
+GitHub Pages:
+https://dpromstk2000-lab.github.io/DPRO-VET-QR/
+
+Final audited main commit:
+5bdd5fafd2567a8b3b5040303a359e6250854b32
+
+Latest Pages deployment for the audited commit:
+PASS / completed / success
+
+Canonical normal Worker:
+dpro-vet-qr-api
+version = FINAL-VET-AUDIT-1-R1-SECURITY-20260807
+
+Canonical migration Worker:
+dpro-vet-migration-api
+version = VET-MIGRATION-3-OWNER-INTEGRATION-COMPLETED-CANCEL-GUARD-20260720
+
+============================================================
+3. FORMAL SCREEN REGISTRY
+============================================================
+PASS: all formal screen-registry paths present in GitHub main.
+
+Public:
+- member.html
+- rich-menu.html
+- waiting.html
+- appointment.html
+- register.html
+- link.html
+- queue-status.html
+- access.html
+
+Staff:
+- owner.html
+- admin.html
+- admin-queue.html
+- appointment-admin.html
+- appointment-calendar.html
+- doctor.html
+- scan-ipad.html
+- scan-pc.html
+- line-setup.html
+- patients.html
+- line-call-admin.html
+- recall-admin.html
+- line-unlinked-follow.html
+- today-board.html
+- owner-data.html
+- import-patients.html
+- migration.html
+- production-check.html
+
+Demo / operation:
+- index.html
+- demo-guide.html
+- demo-qr.html
+- operations.html
+- operation-guide.html
+- system-check.html
+- debug.html
+
+Formal registry count: 33
+Missing formal screen: 0
+
+============================================================
+4. LINE ENTRY / OWNER ROUTES
+============================================================
+PASS: canonical six routes remain fixed.
+
+1. ペット診察券
+   member.html
+
+2. 今日の順番受付
+   waiting.html?mode=today_queue
+
+3. 日時指定予約
+   appointment.html
+
+4. お薬・予防受付
+   waiting.html?mode=medicine_prevention
+
+5. 混雑目安
+   queue-status.html
+
+6. 診療時間・アクセス
+   access.html
+
+PASS: old priority-reservation menu removed.
+PASS: old broken congestion anchor replaced.
+PASS: legacy questionnaire / prevention / old LINE demo routes are not formal routes.
+
+============================================================
+5. PRODUCTION LINE IDENTITY
+============================================================
+PASS: production protected member APIs use LINE ID Token verification.
+
+Frontend:
+LIFF
+→ liff.getIDToken()
+→ X-Line-ID-Token
+
+Worker:
+X-Line-ID-Token
+→ LINE official ID-token verification
+→ verified sub
+→ verified line_user_id
+
+PASS: URL-supplied line_user_id is not trusted as production identity.
+PASS: protected production query/body identity fields are sanitized.
+PASS: verified guardian ownership check exists.
+PASS: DEMO clinic bypass remains limited to the demo clinic.
+PASS: card credential route remains available for the intended QR/photo flow.
+
+============================================================
+6. PET CARD / MULTI-PET / QR
+============================================================
+PASS: member.html remains the formal LINE pet-card screen.
+PASS: multi-pet card switching is retained.
+PASS: pet photo support is retained.
+PASS: QR payload uses card token instead of embedding owner personal data directly.
+PASS: QR check-in endpoints remain present.
+
+============================================================
+7. SAME-DAY QUEUE / MEDICINE / PREVENTION
+============================================================
+PASS: waiting.html supports:
+- today_queue
+- medicine_prevention
+- previsit flow inside the reception path
+
+PASS: queue create and duplicate protection remain in Worker.
+PASS: queue summary / congestion paths remain present.
+PASS: public queue detail protection remains enabled in final Worker.
+
+============================================================
+8. EXACT-TIME APPOINTMENT
+============================================================
+PASS:
+- 30-minute exact-time appointment
+- appointment settings
+- service selection
+- doctor selection
+- doctor schedule / blocks
+- same-pet overlap guard
+- capacity guard
+- owner change/cancel
+- staff appointment creation
+
+PASS: appointment-to-queue check-in linkage remains present.
+PASS: only today's appointment can be checked in.
+PASS: already-linked appointments are protected from duplicate reception.
+PASS: QR/same-day queue linkage remains present.
+
+============================================================
+9. QR ARRIVAL / RECEPTION
+============================================================
+PASS: scan endpoints:
+- /api/scan/lookup
+- /api/scan/today
+- /api/scan/check-in
+- /api/scan/check-in/cancel
+
+PASS: scan-pc.html formal operational status flow:
+来院待ち
+→ 院内受付済み
+→ 診察中
+→ 会計待ち
+→ 完了
+
+PASS: reception status updates are persisted through Worker / Supabase.
+PASS: queue status update has safe fallback if an older RPC rejects a newer status.
+PASS: linked exact appointment status is synchronized from queue updates.
+
+============================================================
+10. DOCTOR / ACCOUNTING HANDOFF
+============================================================
+PASS: doctor.html shows checked-in / examining patients.
+PASS: doctor exam-start endpoint remains present.
+PASS: doctor memo endpoint remains present.
+
+CRITICAL PASS:
+The doctor's "診察済みにする" cannot directly finalize accounting.
+Worker forces:
+exam complete
+→ accounting
+
+Even if completed is requested from the doctor path,
+it is normalized back to accounting.
+
+Reception staff performs the final:
+accounting
+→ completed
+
+Historical real-data verification also recorded:
+ハナちゃん / 受付番号3
+診察中
+→ doctor診察済み
+→ 会計待ち
+→ 完了
+
+============================================================
+11. LINE CALL / FOLLOW-UP
+============================================================
+PASS: LINE call admin screen exists.
+PASS Worker routes:
+- settings
+- targets
+- preview
+- send
+- retry
+- cancel
+- history
+- check
+
+PASS: LINE-unlinked owners are blocked from direct sending.
+PASS: duplicate-send protection exists.
+PASS: send/hold mode exists.
+PASS: send history is saved.
+PASS: doctor-side "LINEフォロー文面コピー済み" recording exists.
+PASS: follow-up APIs remain present.
+
+DEMO SAFETY:
+dpro_vet_demo is intentionally forced to HOLD.
+The demo therefore verifies generation/history/flow without sending a real LINE message.
+
+Production real delivery requires customer production setup:
+- LINE_CHANNEL_ACCESS_TOKEN
+- appropriate LINE delivery mode
+- production clinic configuration
+
+============================================================
+12. PREVENTION / RECALL
+============================================================
+PASS:
+- prevention schedules
+- follow-up records
+- recall-admin screen
+- recall automation status
+- prevention advance reminder
+- prevention due reminder
+- follow-up due reminder
+
+PASS: production recall is opt-in.
+PASS: unlinked LINE targets are skipped.
+PASS: duplicates are skipped.
+PASS: demo is forced to hold.
+
+============================================================
+13. WORKER SOURCE OF TRUTH
+============================================================
+PASS:
+dpro-vet-qr-api and dpro-vet-migration-api are formally separated.
+
+Normal Worker:
+product runtime API
+
+Migration Worker:
+existing-system migration only
+
+PASS: migration Worker does not replace normal runtime Worker.
+PASS: current canonical code is archived in GitHub.
+PASS: no Worker runtime change was required in FINAL.
+
+============================================================
+14. FINAL AUDIT LIMITATION
+============================================================
+During this FINAL run, direct HTTP re-check of:
+- GitHub Pages
+- workers.dev
+
+could not be executed because the audit execution environment could not resolve those hosts by DNS.
+
+This is an audit-environment network limitation, not an application error.
+
+Compensating verification completed:
+- GitHub main contents checked
+- latest audited commit checked
+- GitHub Pages build/deploy success checked
+- canonical Worker source checked
+- current frontend routes checked
+- E2E Worker state transitions checked
+- prior actual Worker→Supabase→screen re-read E2E verification checked
+- no later FIX-1 to FIX-5 change replaced the core reception/doctor/accounting runtime logic
+
+============================================================
+15. FINAL VERDICT
+============================================================
+VET-AUDIT-FIX-1: PASS
+VET-AUDIT-FIX-2: PASS
+VET-AUDIT-FIX-3: PASS
+VET-AUDIT-FIX-4: PASS
+VET-AUDIT-FIX-5: PASS
+VET-AUDIT-FINAL: PASS
+
+FINAL PRODUCT VERDICT:
+
+DPRO PET CARE LINE V1.0
+PRODUCT COMPLETE
+
+No additional product-finish fix is required before closing this audit series.
+
+Customer production deployment remains a separate deployment operation:
+customer clinic_code / clinic information / LIFF ID / LINE Login Channel ID /
+LINE Messaging token / production delivery opt-in are customer-specific settings,
+not unfinished V1.0 product development.
