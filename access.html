@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#2f6f5e">
+  <title>DPRO PET CARE LINE｜診療時間・アクセス</title>
+  <script src="./config.js"></script>
+  <style>
+    :root{
+      --bg:#f4f7f3;--card:#fff;--ink:#1f2f29;--muted:#68766f;--line:#dbe6df;
+      --main:#2f6f5e;--main2:#4f9a7f;--soft:#eaf5ef;--soft2:#f8fbf9;
+      --warn:#8a6515;--warnbg:#fff7df;--danger:#a94545;--dangerbg:#fff0ef;
+      --blue:#2f6c9d;--bluebg:#eef6ff;--shadow:0 18px 45px rgba(29,60,48,.11);--radius:24px;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Yu Gothic","Noto Sans JP",Meiryo,sans-serif;color:var(--ink);background:radial-gradient(circle at top left,rgba(79,154,127,.18),transparent 34%),linear-gradient(180deg,#fbfdfb 0%,var(--bg) 100%);line-height:1.7}
+    a{color:inherit;text-decoration:none}button{font:inherit}
+    .page{width:min(1040px,calc(100% - 28px));margin:0 auto;padding:18px 0 56px}
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+    .brand{display:flex;align-items:center;gap:11px}.logo{width:50px;height:50px;border-radius:18px;display:grid;place-items:center;background:linear-gradient(135deg,var(--main),#83c99f);color:#fff;font-size:25px;box-shadow:0 12px 26px rgba(47,111,94,.2)}
+    .brand small{display:block;color:var(--muted);font-size:11px;font-weight:900;letter-spacing:.08em}.brand strong{display:block;font-size:clamp(18px,2.6vw,28px);line-height:1.15}
+    .nav{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}.pill,.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:42px;padding:9px 13px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--ink);font-weight:900;font-size:13px}.btn.main{background:var(--main);color:#fff;border-color:transparent;box-shadow:0 12px 24px rgba(47,111,94,.2)}.btn.soft{background:var(--soft);color:var(--main);border-color:#cfe4d6}.btn.blue{background:var(--bluebg);color:var(--blue);border-color:#c6dcf1}
+    .hero{position:relative;overflow:hidden;border-radius:30px;padding:clamp(24px,4vw,40px);color:#fff;background:linear-gradient(135deg,rgba(37,83,69,.98),rgba(71,151,121,.94));box-shadow:var(--shadow)}
+    .hero:after{content:"MAP";position:absolute;right:-8px;bottom:-42px;font-size:clamp(90px,18vw,180px);font-weight:1000;opacity:.07;letter-spacing:.05em}.badge{position:relative;z-index:1;display:inline-flex;padding:7px 11px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);font-size:12px;font-weight:950}.hero h1{position:relative;z-index:1;margin:14px 0 8px;font-size:clamp(34px,6vw,60px);line-height:1.06;letter-spacing:-.055em}.hero p{position:relative;z-index:1;margin:0;max-width:760px;color:rgba(255,255,255,.92);font-weight:750}
+    .heroActions{position:relative;z-index:1;display:flex;gap:9px;flex-wrap:wrap;margin-top:18px}.heroActions .btn{background:#fff;color:var(--main);border-color:rgba(255,255,255,.3)}.heroActions .btn.ghost{background:rgba(255,255,255,.13);color:#fff}
+    .grid{display:grid;grid-template-columns:1.05fr .95fr;gap:14px;margin-top:14px}.card{background:rgba(255,255,255,.95);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px}.card h2{margin:0 0 10px;font-size:22px}.card h3{margin:0 0 7px;font-size:17px}.muted{color:var(--muted);font-size:13px;font-weight:750}
+    .status{border-radius:20px;padding:16px;border:1px solid #cfe4d6;background:linear-gradient(180deg,#fff,#f2faf5)}.status.closed{border-color:#efc5c5;background:linear-gradient(180deg,#fff,#fff4f4)}.status.half{border-color:#ead49a;background:linear-gradient(180deg,#fff,#fffaf0)}
+    .statusHead{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap}.statusTag{display:inline-flex;border-radius:999px;padding:5px 9px;background:var(--soft);color:var(--main);font-size:12px;font-weight:950}.status.closed .statusTag{background:var(--dangerbg);color:var(--danger)}.status.half .statusTag{background:var(--warnbg);color:var(--warn)}
+    .timeGrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}.timeBox{border:1px solid var(--line);border-radius:16px;padding:12px;background:#fff}.timeBox small{display:block;color:var(--muted);font-size:11px;font-weight:900}.timeBox b{display:block;margin-top:2px;font-size:16px}.timeBox.off{background:#fff6f5;border-color:#efc5c5;color:var(--danger)}
+    .infoList{display:grid;gap:10px}.info{border:1px solid var(--line);border-radius:18px;background:#fff;padding:13px}.info small{display:block;color:var(--muted);font-size:11px;font-weight:900;margin-bottom:3px}.info strong{display:block;font-size:15px;white-space:pre-wrap;word-break:break-word}
+    .actionGrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}.actionGrid .btn{width:100%}
+    .notice{border-radius:16px;padding:12px 13px;margin-top:12px;background:var(--bluebg);border:1px solid #c6dcf1;color:var(--blue);font-size:13px;font-weight:800}.notice.warn{background:var(--warnbg);border-color:#ead49a;color:var(--warn)}.notice.ng{background:var(--dangerbg);border-color:#efc5c5;color:var(--danger)}
+    .schedule{display:grid;gap:8px;margin-top:10px}.scheduleRow{display:grid;grid-template-columns:90px 1fr;gap:10px;border:1px solid var(--line);border-radius:16px;padding:11px;background:#fff}.scheduleRow b{font-size:13px}.scheduleRow span{font-size:13px;color:#4c5f56;font-weight:750}.empty{border:1px dashed #d3ddd7;border-radius:16px;padding:14px;text-align:center;color:var(--muted);font-size:13px;font-weight:800;background:#fbfdfb}
+    .footer{margin-top:14px;text-align:center;color:var(--muted);font-size:11px;font-weight:750}
+    @media(max-width:780px){.topbar{align-items:flex-start;flex-direction:column}.nav{justify-content:flex-start}.grid{grid-template-columns:1fr}.timeGrid,.actionGrid{grid-template-columns:1fr}.hero{border-radius:24px}.card{border-radius:20px}}
+  </style>
+</head>
+<body>
+<main class="page">
+  <header class="topbar">
+    <div class="brand"><div class="logo">📍</div><div><small>DPRO PET CARE LINE</small><strong>診療時間・アクセス</strong></div></div>
+    <nav class="nav"><a class="pill" id="menuLink" href="./rich-menu.html">LINEメニューへ</a><a class="pill" id="cardLink" href="./member.html">ペット診察券</a></nav>
+  </header>
+
+  <section class="hero">
+    <span class="badge">VET-AUDIT-FIX-2｜飼い主向け公開画面</span>
+    <h1 id="heroClinicName">動物病院情報</h1>
+    <p>診療時間、休診日、本日の受付状況、住所・電話番号をここで確認できます。</p>
+    <div class="heroActions"><a class="btn" id="phoneHero" href="#">電話する</a><a class="btn ghost" id="mapHero" href="#" target="_blank" rel="noopener">Googleマップ</a></div>
+  </section>
+
+  <section class="grid">
+    <div>
+      <article class="card">
+        <h2>本日の受付状況</h2>
+        <div id="todayStatus" class="status">
+          <div class="statusHead"><div><strong>確認中です</strong><div class="muted">最新の受付状況を読み込んでいます。</div></div><span class="statusTag">確認中</span></div>
+        </div>
+        <div id="loadNotice" class="notice">病院情報を読み込んでいます。</div>
+      </article>
+
+      <article class="card" style="margin-top:14px">
+        <h2>診療時間・受付時間</h2>
+        <div class="timeGrid">
+          <div class="timeBox"><small>午前受付</small><b id="morningRegular">--:--〜--:--</b></div>
+          <div class="timeBox"><small>午後受付</small><b id="afternoonRegular">--:--〜--:--</b></div>
+        </div>
+        <div class="infoList" style="margin-top:10px">
+          <div class="info"><small>診療時間メモ</small><strong id="businessHoursNote">確認中</strong></div>
+          <div class="info"><small>休診日</small><strong id="closedDaysNote">確認中</strong></div>
+        </div>
+      </article>
+
+      <article class="card" style="margin-top:14px">
+        <h2>直近の休診・変更予定</h2>
+        <div id="upcomingSchedule" class="schedule"><div class="empty">予定を確認中です。</div></div>
+      </article>
+    </div>
+
+    <aside>
+      <article class="card">
+        <h2>病院情報</h2>
+        <div class="infoList">
+          <div class="info"><small>病院名</small><strong id="clinicName">確認中</strong></div>
+          <div class="info"><small>住所</small><strong id="clinicAddress">確認中</strong></div>
+          <div class="info"><small>電話番号</small><strong id="clinicPhone">確認中</strong></div>
+          <div class="info"><small>病院からのお知らせ</small><strong id="publicNotice">現在のお知らせはありません。</strong></div>
+        </div>
+        <div class="actionGrid"><a class="btn main" id="phoneBtn" href="#">電話する</a><a class="btn blue" id="mapBtn" href="#" target="_blank" rel="noopener">Googleマップ</a></div>
+      </article>
+
+      <article class="card" style="margin-top:14px">
+        <h3>受付をする方へ</h3>
+        <p class="muted">順番受付やお薬・予防受付はLINEメニューから進めます。休診・受付終了の場合は受付できません。</p>
+        <div class="actionGrid"><a class="btn soft" id="todayQueueLink" href="./waiting.html?mode=today_queue">今日の順番受付</a><a class="btn soft" id="backMenuLink" href="./rich-menu.html">LINEメニューへ</a></div>
+      </article>
+    </aside>
+  </section>
+
+  <div class="footer">DPRO PET CARE LINE｜VET-AUDIT-FIX-2</div>
+</main>
+<script>
+(function(){
+  "use strict";
+  const CONFIG = window.DPRO_VET_CONFIG || window.DPRO_CONFIG || {};
+  const url = new URL(location.href);
+  const API_BASE = String(CONFIG.API_BASE_URL || CONFIG.API_BASE || CONFIG?.api?.baseUrl || "https://dpro-vet-qr-api.dpromstk2000.workers.dev").replace(/\/+$/,"");
+  const clinicCode = String(url.searchParams.get("clinic_code") || CONFIG?.clinic?.clinicCode || CONFIG?.DEMO_CLINIC_CODE || "dpro_vet_demo").trim();
+  const isDemo = ["ready","true","1"].includes(String(url.searchParams.get("demo") || "").toLowerCase());
+  const state = { clinic:null, settings:null, calendar:[], today:null };
+  const $ = (id)=>document.getElementById(id);
+  const esc = (v)=>String(v ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
+  const time = (v)=>String(v || "").slice(0,5) || "-";
+
+  function todayString(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;}
+  function addMonthsString(dateText,months){const [y,m,d]=dateText.split("-").map(Number);const x=new Date(y,m-1+months,d);return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,"0")}-${String(x.getDate()).padStart(2,"0")}`;}
+  function buildPage(file,extra={}){const u=new URL(file,location.href);u.searchParams.set("clinic_code",clinicCode);if(isDemo)u.searchParams.set("demo","ready");Object.entries(extra).forEach(([k,v])=>{if(v!==undefined&&v!==null&&String(v)!=="")u.searchParams.set(k,String(v));});return u.toString();}
+  function setLink(id,href,disabled=false){const a=$(id);if(!a)return;if(disabled||!href){a.href="javascript:void(0)";a.style.opacity=".55";a.style.pointerEvents="none";a.setAttribute("aria-disabled","true");}else{a.href=href;a.style.opacity="";a.style.pointerEvents="";a.setAttribute("aria-disabled","false");}}
+  function phoneHref(phone){const raw=String(phone||"").trim();if(!raw)return "";return `tel:${raw.replace(/[^0-9+]/g,"")}`;}
+  function mapHref(address){const raw=String(address||"").trim();if(!raw)return "";return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(raw)}`;}
+
+  function setStaticLinks(){setLink("menuLink",buildPage("rich-menu.html"));setLink("backMenuLink",buildPage("rich-menu.html"));setLink("cardLink",buildPage("member.html"));setLink("todayQueueLink",buildPage("waiting.html",{mode:"today_queue"}));}
+
+  async function load(){
+    setStaticLinks();
+    const from=todayString(),to=addMonthsString(from,2);
+    try{
+      const apiUrl=new URL(`${API_BASE}/api/public/clinic-settings`);
+      apiUrl.searchParams.set("clinic_code",clinicCode);apiUrl.searchParams.set("from",from);apiUrl.searchParams.set("to",to);
+      const res=await fetch(apiUrl.toString(),{headers:{"Accept":"application/json"}});
+      const data=await res.json().catch(()=>({}));
+      if(!res.ok||data.ok===false)throw new Error(data.message||data.error||`APIエラー ${res.status}`);
+      state.clinic=data.clinic||{};state.settings=data.settings||{};state.calendar=Array.isArray(data.calendar)?data.calendar:[];state.today=data.today_status||state.calendar.find(x=>x.target_date===from)||null;
+      render();
+      $("loadNotice").className="notice";$("loadNotice").textContent="最新の病院情報を表示しています。";
+    }catch(error){
+      console.warn("access clinic-settings load failed",error);
+      state.clinic={clinic_name:CONFIG?.clinic?.clinicName,address:CONFIG?.clinic?.address,phone:CONFIG?.clinic?.phone};
+      state.settings={business_hours_note:CONFIG?.clinic?.businessHoursNote,closed_days_note:CONFIG?.clinic?.closedDaysNote,address:CONFIG?.clinic?.address,phone:CONFIG?.clinic?.phone};
+      render();
+      $("loadNotice").className="notice warn";$("loadNotice").textContent="最新情報を取得できなかったため、登録済みの基本情報を表示しています。";
+    }
+  }
+
+  function render(){
+    const c=state.clinic||{},s=state.settings||{},t=state.today||{};
+    const name=s.display_name||s.clinic_name||c.clinic_name||c.name||CONFIG?.clinic?.clinicName||"動物病院";
+    const address=s.address||c.address||CONFIG?.clinic?.address||"住所未登録";
+    const phone=s.phone||c.phone||CONFIG?.clinic?.phone||"";
+    $("heroClinicName").textContent=name;$("clinicName").textContent=name;$("clinicAddress").textContent=address;$("clinicPhone").textContent=phone||"電話番号未登録";
+    $("businessHoursNote").textContent=s.business_hours_note||s.businessHoursNote||CONFIG?.clinic?.businessHoursNote||"-";
+    $("closedDaysNote").textContent=s.closed_days_note||s.closedDaysNote||CONFIG?.clinic?.closedDaysNote||"-";
+    $("publicNotice").textContent=s.public_notice||s.publicNote||c.public_notice||"現在のお知らせはありません。";
+    $("morningRegular").textContent=`${time(s.morning_open_time||"09:00")}〜${time(s.morning_last_accept_time||"11:30")}`;
+    $("afternoonRegular").textContent=`${time(s.afternoon_open_time||"15:00")}〜${time(s.afternoon_last_accept_time||"18:00")}`;
+    const ph=phoneHref(phone),mh=mapHref(address);["phoneBtn","phoneHero"].forEach(id=>setLink(id,ph,!ph));["mapBtn","mapHero"].forEach(id=>setLink(id,mh,!mh));
+    renderToday(t,s);renderSchedule();
+  }
+
+  function renderToday(t,s){
+    const has=Boolean(state.today);const label=t.reception_label||"確認中";const full=t.is_full_closed===true||label==="休診";const mc=t.is_morning_closed===true||full;const ac=t.is_afternoon_closed===true||full;
+    const canM=t.can_accept_morning===true||(!full&&!mc&&has);const canA=t.can_accept_afternoon===true||(!full&&!ac&&has);
+    const mText=mc?"受付できません":`${time(s.morning_open_time||t.morning_open_time||"09:00")}〜${time(s.morning_last_accept_time||t.morning_last_accept_time||"11:30")}`;
+    const aText=ac?"受付できません":`${time(s.afternoon_open_time||t.afternoon_open_time||"15:00")}〜${time(s.afternoon_last_accept_time||t.afternoon_last_accept_time||"18:00")}`;
+    const message=t.display_message||s.public_notice||(has?"本日の受付状況をご確認ください。":"本日の受付状況を取得できませんでした。");
+    const tag=!has?"確認中":full?"本日休診":(!canM||!canA)?label:"受付中";
+    const cls=full?"status closed":(!canM||!canA)&&has?"status half":"status";
+    $("todayStatus").className=cls;$("todayStatus").innerHTML=`<div class="statusHead"><div><strong>${esc(message)}</strong>${t.special_title?`<div class="muted" style="margin-top:4px">${esc(t.special_title)}</div>`:""}</div><span class="statusTag">${esc(tag)}</span></div><div class="timeGrid"><div class="timeBox ${mc?"off":""}"><small>午前受付</small><b>${esc(mText)}</b></div><div class="timeBox ${ac?"off":""}"><small>午後受付</small><b>${esc(aText)}</b></div></div>`;
+  }
+
+  function renderSchedule(){
+    const root=$("upcomingSchedule");
+    const rows=(state.calendar||[]).filter(r=>r.target_date&&r.target_date>=todayString()).filter(r=>r.reception_label&&r.reception_label!=="通常受付").slice(0,8);
+    if(!rows.length){root.innerHTML='<div class="empty">現在、表示する休診・変更予定はありません。</div>';return;}
+    root.innerHTML=rows.map(r=>`<div class="scheduleRow"><b>${esc(r.target_date)}</b><span>${esc(r.reception_label||"")}${r.special_title?`｜${esc(r.special_title)}`:""}${r.display_message?`<br>${esc(r.display_message)}`:""}</span></div>`).join("");
+  }
+
+  load();
+})();
+</script>
+</body>
+</html>
