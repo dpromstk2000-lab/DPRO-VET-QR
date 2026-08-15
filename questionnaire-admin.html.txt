@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#243b35">
+<title>DPRO PET CARE LINE｜院内WEB問診一覧 V1.1</title>
+<script src="./config.js"></script>
+<style>
+:root{--bg:#f3f7f4;--card:#fff;--ink:#1e2924;--muted:#68746d;--line:#dbe5dc;--main:#2f6f5e;--soft:#edf7f2;--blue:#2d68a6;--blueSoft:#edf5ff;--amber:#8a621f;--amberSoft:#fff6de;--shadow:0 16px 40px rgba(35,64,50,.10)}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#f9fcfa,#f2f7f3);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Yu Gothic",Meiryo,sans-serif;line-height:1.6}.page{width:min(1180px,calc(100% - 24px));margin:auto;padding:16px 0 50px}.hero{padding:24px;border-radius:28px;background:linear-gradient(135deg,#243b35,#2f6f5e);color:#fff;box-shadow:var(--shadow)}.hero small{font-weight:900;opacity:.9}.hero h1{margin:7px 0 4px;font-size:clamp(28px,4vw,42px)}.hero p{margin:0;opacity:.88;font-weight:750}.toolbar{margin-top:14px;padding:14px;background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow)}.row{display:flex;gap:9px;align-items:end;flex-wrap:wrap}.field{flex:1 1 210px}.field label{display:block;font-size:12px;font-weight:900;color:var(--muted);margin-bottom:4px}.field input,.field select{width:100%;min-height:44px;padding:9px 11px;border:1px solid #cddbd2;border-radius:13px;background:#fff}.btn{border:0;border-radius:999px;min-height:44px;padding:10px 16px;background:var(--main);color:#fff;font-weight:950;cursor:pointer}.btn.secondary{background:#fff;color:var(--main);border:1px solid #cddbd2}.status{margin-top:9px;padding:10px 12px;border-radius:14px;background:var(--blueSoft);color:var(--blue);font-weight:850;font-size:13px}.status.ok{background:var(--soft);color:#176a51}.status.warn{background:var(--amberSoft);color:#6d501b}.cards{display:grid;gap:12px;margin-top:14px}.empty{padding:30px;text-align:center;background:#fff;border:1px solid var(--line);border-radius:22px;color:var(--muted)}.card{background:#fff;border:1px solid var(--line);border-radius:22px;box-shadow:0 10px 26px rgba(35,64,50,.06);overflow:hidden}.cardHead{display:grid;grid-template-columns:1fr auto;gap:12px;padding:15px 16px;border-bottom:1px solid #edf1ee;background:linear-gradient(180deg,#fff,#fbfdfb)}.petName{font-size:20px;font-weight:1000}.meta{font-size:12px;color:var(--muted);font-weight:800;margin-top:2px}.badge{align-self:start;border-radius:999px;padding:5px 9px;background:var(--amberSoft);color:var(--amber);font-size:11px;font-weight:950}.badge.reviewed{background:var(--soft);color:#176a51}.cardBody{padding:15px 16px}.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.kv{padding:10px 11px;border:1px solid #e3ebe5;border-radius:14px;background:#fcfdfc}.kv small{display:block;color:var(--muted);font-weight:850;font-size:11px}.kv strong{display:block;margin-top:2px;font-size:14px}.complaint{margin-top:10px;padding:12px;border-radius:15px;background:#f7faf8;border:1px solid #e1e9e3;white-space:pre-wrap}.answers{margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:8px}.answer{padding:9px 10px;border-left:4px solid #cfe2d6;background:#f9fbfa;border-radius:10px;font-size:13px}.answer b{display:block;font-size:11px;color:var(--muted)}.images{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:12px}.images a{display:block;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:#f5f5f5}.images img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover}.cardActions{display:flex;gap:9px;justify-content:flex-end;margin-top:13px;flex-wrap:wrap}.hidden{display:none!important}@media(max-width:760px){.summary,.answers,.images{grid-template-columns:1fr}.cardHead{grid-template-columns:1fr}.row{align-items:stretch}.btn{width:100%}}
+</style>
+</head>
+<body>
+<main class="page">
+<section class="hero"><small>ANIMARY-COUNTER-V1.1-5｜院内WEB問診確認</small><h1>来院前WEB問診一覧</h1><p>飼い主が送信した症状・条件分岐回答・症状画像を、受付・診察前にまとめて確認します。</p></section>
+<section class="toolbar">
+  <div class="row">
+    <div class="field" id="adminField"><label>管理コード（本番医院のみ）</label><input id="adminCode" type="password" autocomplete="off"></div>
+    <div class="field"><label>表示</label><select id="statusFilter"><option value="">すべて</option><option value="submitted">未確認</option><option value="reviewed">確認済み</option></select></div>
+    <button id="loadBtn" class="btn" type="button">問診を読み込む</button>
+    <button id="refreshBtn" class="btn secondary" type="button">再読み込み</button>
+  </div>
+  <div id="status" class="status">準備中です。</div>
+</section>
+<section id="cards" class="cards"><div class="empty">問診を読み込んでいます。</div></section>
+</main>
+<script>
+(()=>{
+"use strict";
+const CONFIG=window.DPRO_VET_CONFIG||window.DPRO_CONFIG||{};
+const params=new URLSearchParams(location.search);
+const CLINIC_CODE=params.get("clinic_code")||CONFIG?.clinic?.clinicCode||"dpro_vet_demo";
+const DEMO_CODE=CONFIG?.demo?.clinicCode||"dpro_vet_demo";
+const IS_DEMO=CLINIC_CODE===DEMO_CODE;
+const API_BASE=String(CONFIG?.api?.baseUrl||CONFIG.API_BASE_URL||"https://dpro-vet-qr-api.dpromstk2000.workers.dev").replace(/\/$/,"");
+const ADMIN_KEY="dpro_vet_admin_code";
+const $=id=>document.getElementById(id);
+const esc=v=>String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
+const labels={general:"体調不良",vaccine:"ワクチン",health_check:"健康診断",skin:"皮膚",digestive:"消化器",respiratory:"呼吸器",eye:"眼",ear:"耳",urinary:"泌尿器",injury:"ケガ",medicine_prevention:"お薬・予防",other:"その他"};
+const answerLabels={chief_complaint:"一番気になること",since_when:"いつ頃から",appetite:"食欲",energy:"元気",vomiting:"嘔吐",diarrhea:"下痢",free_text:"その他",vomit_count:"嘔吐回数",stool:"便の状態",ingestion:"誤食の可能性",itch:"かゆみ",skin_area:"皮膚の場所",skin_detail:"皮膚症状",urine_out:"尿の状態",urine_freq:"排尿回数",hematuria:"血尿",cough:"咳",nasal:"鼻水",breathing:"呼吸の様子",eye_side:"眼・左右",eye_discharge:"目やに・涙",ear_side:"耳・左右",ear_itch:"耳をかく・頭を振る",bleeding:"出血",lameness:"歩き方",injury_detail:"ケガの状況",vaccine_name:"ワクチン希望",vaccine_reaction:"接種後反応",checkup_concern:"健診で気になること",med_item:"薬・予防の希望",med_remaining:"残りの量"};
+function setStatus(msg,type=""){const el=$("status");el.className=`status ${type}`.trim();el.textContent=msg}
+function adminCode(){return $("adminCode").value.trim()||sessionStorage.getItem(ADMIN_KEY)||""}
+function fmt(value){if(!value)return"";const d=new Date(value);return Number.isNaN(d.getTime())?String(value):new Intl.DateTimeFormat("ja-JP",{month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit"}).format(d)}
+async function apiGet(){
+  const status=$("statusFilter").value;const u=new URL(API_BASE+(IS_DEMO?"/api/demo/questionnaires":"/api/admin/questionnaires"));u.searchParams.set("clinic_code",CLINIC_CODE);u.searchParams.set("limit","100");if(status)u.searchParams.set("status",status);if(IS_DEMO)u.searchParams.set("demo","ready");
+  const headers={Accept:"application/json"};if(!IS_DEMO)headers["X-DPRO-Admin-Code"]=adminCode();
+  const r=await fetch(u,{cache:"no-store",headers});const d=await r.json().catch(()=>({}));if(!r.ok||d.ok===false)throw new Error(d.message||d.error||`API ${r.status}`);return d
+}
+async function markReviewed(id){
+  const url=API_BASE+(IS_DEMO?"/api/demo/questionnaires/review":"/api/admin/questionnaires/review");const headers={"Content-Type":"application/json",Accept:"application/json"};if(!IS_DEMO)headers["X-DPRO-Admin-Code"]=adminCode();
+  const r=await fetch(url,{method:"POST",headers,body:JSON.stringify({clinic_code:CLINIC_CODE,id,demo:IS_DEMO?"ready":"",staff_name:IS_DEMO?"営業DEMO":"院内スタッフ"})});const d=await r.json().catch(()=>({}));if(!r.ok||d.ok===false)throw new Error(d.message||d.error||`API ${r.status}`);return d
+}
+function cleanAnswers(row){const a=row?.answers&&typeof row.answers==="object"&&!Array.isArray(row.answers)?row.answers:{};const out=[];Object.entries(a).forEach(([k,v])=>{if(["images","image_count","pet_name","guardian_name"].includes(k))return;if(v===null||v===undefined||String(v).trim()==="")return;out.push([answerLabels[k]||k,String(v)])});return out}
+function render(items=[]){
+  const root=$("cards");root.innerHTML="";if(!items.length){root.innerHTML='<div class="empty">該当するWEB問診はありません。</div>';return}
+  items.forEach(row=>{const a=row.answers||{},bc=row.branch_context||{};const pet=a.pet_name||bc.pet_name||row.pet_id||"ペット";const guardian=a.guardian_name||bc.guardian_name||"";const cat=labels[row.questionnaire_type]||row.questionnaire_type||"問診";const answers=cleanAnswers(row);const images=Array.isArray(row.images)?row.images:[];const reviewed=row.status==="reviewed";
+    const card=document.createElement("article");card.className="card";card.innerHTML=`<div class="cardHead"><div><div class="petName">${esc(pet)}｜${esc(cat)}</div><div class="meta">${guardian?`飼い主：${esc(guardian)}｜`:""}${esc(fmt(row.submitted_at||row.created_at))}｜${esc(row.source||"")}</div></div><span class="badge ${reviewed?"reviewed":""}">${reviewed?"確認済み":"未確認"}</span></div><div class="cardBody"><div class="summary"><div class="kv"><small>いつ頃から</small><strong>${esc(row.since_when||a.since_when||"未入力")}</strong></div><div class="kv"><small>食欲</small><strong>${esc(row.appetite||a.appetite||"未選択")}</strong></div><div class="kv"><small>元気</small><strong>${esc(row.energy||a.energy||"未選択")}</strong></div></div><div class="complaint"><strong>一番気になること</strong><br>${esc(a.chief_complaint||row.free_text||"未入力")}</div><div class="answers">${answers.map(([k,v])=>`<div class="answer"><b>${esc(k)}</b>${esc(v)}</div>`).join("")}</div>${images.length?`<div class="images">${images.map((img,i)=>img.signed_url?`<a href="${esc(img.signed_url)}" target="_blank" rel="noopener"><img src="${esc(img.signed_url)}" alt="症状画像${i+1}"></a>`:`<div class="answer"><b>症状画像${i+1}</b>表示URLを作成できませんでした</div>`).join("")}</div>`:""}<div class="cardActions">${reviewed?"":`<button class="btn" data-review="${esc(row.id)}" type="button">確認済みにする</button>`}</div></div>`;
+    card.querySelectorAll("[data-review]").forEach(btn=>btn.addEventListener("click",async()=>{btn.disabled=true;try{await markReviewed(btn.dataset.review);setStatus("確認済みに更新しました。","ok");await load()}catch(e){setStatus(e.message||"更新できませんでした。","warn");btn.disabled=false}}));root.appendChild(card)
+  })
+}
+async function load(){
+  if(!IS_DEMO&&!adminCode())return setStatus("本番医院では管理コードを入力してください。","warn");if(!IS_DEMO)sessionStorage.setItem(ADMIN_KEY,adminCode());setStatus("WEB問診を読み込んでいます…");
+  try{const d=await apiGet();render(d.items||[]);setStatus(`${IS_DEMO?"営業DEMO":"院内"}｜WEB問診 ${d.count||0}件を表示しています。症状画像は短時間の署名URLです。`,"ok")}catch(e){render([]);setStatus(e.message||"読み込みに失敗しました。","warn")}
+}
+$("loadBtn").addEventListener("click",load);$("refreshBtn").addEventListener("click",load);$("statusFilter").addEventListener("change",load);
+if(IS_DEMO){$("adminField").classList.add("hidden");setStatus("営業DEMO｜管理コード不要｜DEMO医院の問診だけ表示します。","ok")}else{try{$("adminCode").value=sessionStorage.getItem(ADMIN_KEY)||""}catch{}}
+load();
+})();
+</script>
+</body>
+</html>

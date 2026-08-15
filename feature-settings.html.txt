@@ -26,7 +26,7 @@ h1{margin:8px 0 6px;font-size:clamp(28px,4vw,42px)}.hero p{margin:0;color:rgba(2
 </head>
 <body>
 <main class="page">
-<section class="hero"><div style="font-weight:900;font-size:12px;opacity:.9">ANIMARY-COUNTER-V1.1-2-R4｜保存完了UI修正</div><h1>病院ごとの機能ON / OFF</h1><p>使わない機能は患者導線・院内運用から外すための中央設定です。WEB問診はさらにカテゴリ単位でON/OFFできます。</p></section>
+<section class="hero"><div style="font-weight:900;font-size:12px;opacity:.9">ANIMARY-COUNTER-V1.1-5｜WEB問診画像・院内確認</div><h1>病院ごとの機能ON / OFF</h1><p>使わない機能は患者導線・院内運用から外すための中央設定です。WEB問診はさらにカテゴリ単位でON/OFFできます。</p></section>
 
 <section class="toolbar">
   <div class="row">
@@ -35,6 +35,7 @@ h1{margin:8px 0 6px;font-size:clamp(28px,4vw,42px)}.hero p{margin:0;color:rgba(2
     <button class="btn secondary" id="loadBtn" type="button">設定を読み込む</button>
     <button class="btn secondary" id="applyPresetBtn" type="button">プリセット反映</button>
     <button class="btn secondary" id="resetDemoBtn" type="button" style="display:none">DEMO設定を標準に戻す</button>
+    <a class="btn secondary" id="questionnaireAdminLink" href="./questionnaire-admin.html" style="text-decoration:none">院内問診一覧</a>
   </div>
   <div id="status" class="status warn">設定モードを確認しています。</div>
 </section>
@@ -73,7 +74,7 @@ const MODULE_DEFAULTS={general:true,vaccine:true,health_check:true,skin:true,dig
 const GROUPS=[
  {title:"飼い主・診察券",note:"LINE入口とペット診察券",items:[["pet_card","ペット診察券","LINE上のペット診察券を使用"],["multi_pet_card","複数ペット切替","同一飼い主の複数ペットを切替"]]},
  {title:"当日受付",note:"順番受付の大スイッチ＋個別受付",items:[["reception_queue","当日順番受付","当日受付機能全体"],["reception_general","通常診察受付","通常診察・再診・相談"],["reception_medicine_prevention","お薬・予防受付","薬・フード・予防薬・ワクチン"],["reception_care","ケア処置受付","爪切り・耳掃除など"]]},
- {title:"WEB問診 V1.1",note:"病院ごとの大スイッチ＋カテゴリ小スイッチ",items:[["previsit_questionnaire","来院前WEB問診","独立WEB問診を使用","ready"],["questionnaire_branching","条件分岐問診","症状カテゴリに応じて追加質問","ready"],["questionnaire_images","症状画像添付","患部・便・嘔吐物などの画像","next"],["questionnaire_consent","電子同意","同意文・氏名・日時を保存","next"]]},
+ {title:"WEB問診 V1.1",note:"病院ごとの大スイッチ＋カテゴリ小スイッチ",items:[["previsit_questionnaire","来院前WEB問診","独立WEB問診を使用","ready"],["questionnaire_branching","条件分岐問診","症状カテゴリに応じて追加質問","ready"],["questionnaire_images","症状画像添付","患部・便・嘔吐物などの画像（最大3枚）","ready"],["questionnaire_consent","電子同意","同意文・氏名・日時を保存","next"]]},
  {title:"日時予約",note:"30分予約と獣医師選択",items:[["exact_appointment","日時指定予約","30分単位の日時指定予約"],["doctor_selection","獣医師選択","予約時の獣医師指名・選択"]]},
  {title:"来院・待ち状況",note:"院内受付と混雑確認",items:[["qr_checkin","QR来院受付","受付PC / iPadでQR受付"],["congestion_view","混雑目安","LINEから現在の待ち状況を表示"]]},
  {title:"LINE・フォロー",note:"呼び出しと診察後フォロー",items:[["line_call","LINE呼び出し","順番・受付からLINE連絡"],["post_visit_followup","診察後フォロー","診察後メッセージ・フォロー"],["prevention_recall","予防リコール","予防時期の案内"],["revisit_recall","再診リコール","再診予定の案内"]]},
@@ -179,6 +180,7 @@ async function resetDemo(){
  setStatus("DEMO設定を標準状態に戻しました。このブラウザ内のDEMO設定だけを消去しました。","ok");setLastSaved(null);showSavedFeedback("DEMO設定を標準に戻しました","ブラウザ内の保存設定を消去しました");
 }
 $("loadBtn").addEventListener("click",load);$("applyPresetBtn").addEventListener("click",applyPreset);$("saveBtn").addEventListener("click",save);$("resetDemoBtn").addEventListener("click",resetDemo);
+{ const q=new URL("./questionnaire-admin.html",location.href);q.searchParams.set("clinic_code",CLINIC_CODE);if(IS_DEMO)q.searchParams.set("demo","ready");$("questionnaireAdminLink").href=q.toString(); }
 if(IS_DEMO){
  $("adminField").style.display="none";$("resetDemoBtn").style.display="inline-flex";$("loadBtn").textContent="DEMO設定を再読み込み";
  const saveTarget=$("saveTargetText");if(saveTarget)saveTarget.textContent="保存先：このブラウザのDEMO設定（本番DBには保存しません）";
