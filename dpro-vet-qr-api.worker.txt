@@ -96,9 +96,9 @@ const TABLES = {
 };
 
 const DEFAULT_CLINIC_CODE = "dpro_vet_demo";
-const WORKER_VERSION = "ANIMARY-COUNTER-V1.1-4-R1-QUESTIONNAIRE-SEND-FIX-20260815";
+const WORKER_VERSION = "ANIMARY-COUNTER-V1.1-4-R2-DIRECT-SIGNED-UPLOAD-20260815";
 const FEATURE_SWITCH_VERSION = "DPRO-VET-FEATURE-SWITCH-V1.1";
-const WEB_QUESTIONNAIRE_VERSION = "DPRO-VET-WEB-QUESTIONNAIRE-V1.1.4-R1";
+const WEB_QUESTIONNAIRE_VERSION = "DPRO-VET-WEB-QUESTIONNAIRE-V1.1.4-R2";
 const EXACT_APPOINTMENT_GUARD_VERSION = "VET-APPOINTMENT-1-R2";
 const LINE_CALL_FEATURE_VERSION = "VET-LINE-CALL-1";
 const DOCTOR_SLOT_FEATURE_VERSION = "VET-DOCTOR-SLOT-1";
@@ -314,6 +314,7 @@ function memberIdentityProtectedPath(path) {
     "/api/public/line-link-complete","/api/member/line-link-complete-v2",
     "/api/member/pet-card","/api/member/pet-cards",
     "/api/member/questionnaire/create",
+    "/api/member/questionnaire/image-upload-url",
     "/api/member/exact-appointments","/api/member/exact-appointments/create",
     "/api/member/exact-appointments/change","/api/member/exact-appointments/cancel",
     "/api/member/queue/create","/api/member/waiting/create","/api/member/waiting-entry/create",
@@ -563,6 +564,7 @@ export default {
           questionnaire_image_max_count: QUESTIONNAIRE_IMAGE_MAX_COUNT,
           questionnaire_image_allowed_mime_types: QUESTIONNAIRE_IMAGE_ALLOWED_MIME_TYPES,
           questionnaire_image_storage_mode: "private_signed_url",
+          questionnaire_image_upload_mode: "browser_direct_signed_upload",
           exact_appointment_guard_version: EXACT_APPOINTMENT_GUARD_VERSION,
           line_call_feature_version: LINE_CALL_FEATURE_VERSION,
           doctor_slot_feature_version: DOCTOR_SLOT_FEATURE_VERSION,
@@ -726,6 +728,10 @@ export default {
 
       if (path === "/api/member/line-link/complete" && request.method === "POST") {
         return handleMemberLineLinkComplete(request, env);
+      }
+
+      if (path === "/api/member/questionnaire/image-upload-url" && request.method === "POST") {
+        return handleQuestionnaireImageUploadUrl(request, env);
       }
 
       if (path === "/api/member/questionnaire/create" && request.method === "POST") {
@@ -2885,6 +2891,106 @@ function parseQuestionnaireImagePayload(input = {}, index = 0) {
   return { mimeType, bytes, size: bytes.length, safeFileName, ext };
 }
 
+async function createPrivateStorageSignedUploadUrl(env, bucketName, storagePath) {
+  const path = cleanString(storagePath);
+  if (!path) throw new Error("症状画像の保存先を作成できませんでした。");
+  const baseUrl = getSupabaseBaseUrl(env);
+  const serviceKey = getSupabaseServiceKey(env);
+  const url = `${baseUrl}/storage/v1/object/upload/sign/${bucketName}/${encodeStoragePath(path)}`;
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      apikey: serviceKey,
+      Authorization: `Bearer ${serviceKey}`,
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      "x-upsert": "false"
+    },
+    body: "{}"
+  });
+  const text = await response.text();
+  let data = {};
+  if (text) { try { data = JSON.parse(text); } catch { data = {}; } }
+  if (!response.ok) throw new Error(data?.message || data?.error || text || "症状画像アップロードURLを作成できませんでした。");
+  const returned = cleanString(data?.url || data?.signedURL || data?.signedUrl || "");
+  if (!returned) throw new Error("症状画像アップロードURLの応答が不正です。");
+  const uploadUrl = /^https?:\/\//i.test(returned)
+    ? returned
+    : `${baseUrl}/storage/v1${returned.startsWith("/") ? returned : `/${returned}`}`;
+  let token = cleanString(data?.token || "");
+  if (!token) { try { token = new URL(uploadUrl).searchParams.get("token") || ""; } catch {} }
+  return { upload_url: uploadUrl, token, storage_path: path, expires_in: 7200 };
+}
+
+function normalizeDirectQuestionnaireImageMeta(input = {}, clinicCode = "", petId = "", index = 0) {
+  const storagePath = cleanString(input.storage_path || input.path || "");
+  if (!storagePath) return null;
+  const clinicSegment = sanitizeStoragePathSegment(clinicCode, DEFAULT_CLINIC_CODE);
+  const petSegment = sanitizeStoragePathSegment(petId, "pet");
+  const expectedPrefix = `${clinicSegment}/${petSegment}/`;
+  if (!storagePath.startsWith(expectedPrefix) || storagePath.includes("..")) {
+    throw new Error(`症状画像${index + 1}の保存先を確認できませんでした。`);
+  }
+  const mimeType = cleanString(input.mime_type || input.content_type || "").toLowerCase();
+  if (!QUESTIONNAIRE_IMAGE_ALLOWED_MIME_TYPES.includes(mimeType)) {
+    throw new Error(`症状画像${index + 1}は JPEG / PNG / WebP のみ登録できます。`);
+  }
+  const size = Math.max(0, Number(input.size || 0));
+  if (!size || size > QUESTIONNAIRE_IMAGE_MAX_BYTES) {
+    throw new Error(`症状画像${index + 1}のサイズを確認できませんでした。`);
+  }
+  const fileName = sanitizeStoragePathSegment(input.file_name || input.filename || `symptom-${index + 1}.${extensionFromMimeType(mimeType)}`);
+  return { storage_path: storagePath, file_name: fileName, mime_type: mimeType, size, private: true, upload_mode: "signed_direct" };
+}
+
+async function handleQuestionnaireImageUploadUrl(request, env) {
+  try {
+    const body = await readJson(request);
+    const clinicCode = getRequestedClinicCode(request, body);
+    const featureState = await getClinicFeatureState(env, clinicCode);
+    const demoMarker = cleanString(body.demo || getParam(request, "demo", "")).toLowerCase();
+    const demoOverrideAllowed = isDemoClinicCodeForAudit(env, clinicCode) && ["ready", "true", "1"].includes(demoMarker);
+    let effectiveFeatureFlags = featureState.feature_flags;
+    if (demoOverrideAllowed && body.demo_feature_flags && typeof body.demo_feature_flags === "object" && !Array.isArray(body.demo_feature_flags)) {
+      effectiveFeatureFlags = normalizeFeatureFlags({ ...featureState.feature_flags, ...body.demo_feature_flags });
+    }
+    if (effectiveFeatureFlags.previsit_questionnaire !== true || effectiveFeatureFlags.questionnaire_images !== true) {
+      return featureDisabledResponse("questionnaire_images", "この動物病院ではWEB問診の症状画像添付を使用していません。");
+    }
+    const petId = cleanString(body.pet_id);
+    if (!petId) return errorResponse("問診対象のペットを選択してください。", 400);
+    const mimeType = cleanString(body.mime_type || body.content_type || "").toLowerCase();
+    if (!QUESTIONNAIRE_IMAGE_ALLOWED_MIME_TYPES.includes(mimeType)) {
+      return errorResponse("症状画像は JPEG / PNG / WebP のみ登録できます。", 400);
+    }
+    const size = Math.max(0, Number(body.size || 0));
+    if (!size || size > QUESTIONNAIRE_IMAGE_MAX_BYTES) {
+      return errorResponse("症状画像は1枚800KB以下にしてください。", 400);
+    }
+    const ext = extensionFromMimeType(mimeType);
+    const clinicSegment = sanitizeStoragePathSegment(clinicCode, DEFAULT_CLINIC_CODE);
+    const petSegment = sanitizeStoragePathSegment(petId, "pet");
+    const randomPart = `${Date.now()}-${crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2)}`;
+    const storagePath = `${clinicSegment}/${petSegment}/draft/${sanitizeStoragePathSegment(randomPart)}.${ext}`;
+    const signed = await createPrivateStorageSignedUploadUrl(env, QUESTIONNAIRE_IMAGE_BUCKET, storagePath);
+    return jsonResponse({
+      ok: true,
+      ...signed,
+      file_name: sanitizeStoragePathSegment(body.file_name || body.filename || `symptom.${ext}`),
+      mime_type: mimeType,
+      size,
+      private: true,
+      upload_mode: "browser_direct_signed_upload",
+      web_questionnaire_version: WEB_QUESTIONNAIRE_VERSION
+    });
+  } catch (error) {
+    return errorResponse(error?.message || "症状画像アップロードURLを作成できませんでした。", 400, {
+      route: "questionnaire_image_upload_url",
+      upload_mode: "browser_direct_signed_upload"
+    });
+  }
+}
+
 async function createPrivateStorageSignedUrl(env, bucketName, storagePath, expiresIn = QUESTIONNAIRE_IMAGE_SIGNED_URL_SECONDS) {
   const path = cleanString(storagePath);
   if (!path) return null;
@@ -3640,8 +3746,13 @@ async function handleQuestionnaireCreate(request, env) {
   }
 
   let parsedImages = [];
+  let directImageMeta = [];
   try {
-    parsedImages = requestedImages.map((image, index) => parseQuestionnaireImagePayload(image, index));
+    requestedImages.forEach((image, index) => {
+      const direct = normalizeDirectQuestionnaireImageMeta(image, clinicCode, petId, index);
+      if (direct) directImageMeta.push(direct);
+      else parsedImages.push(parseQuestionnaireImagePayload(image, index));
+    });
   } catch (error) {
     return errorResponse(error?.message || "症状画像を確認できませんでした。", 400, {
       max_count: QUESTIONNAIRE_IMAGE_MAX_COUNT,
@@ -3660,8 +3771,8 @@ async function handleQuestionnaireCreate(request, env) {
     : {};
 
   const nowIso = new Date().toISOString();
-  answers.image_count = parsedImages.length;
-  answers.images = [];
+  answers.image_count = directImageMeta.length + parsedImages.length;
+  answers.images = [...directImageMeta];
   answers.pet_name = cleanString(body.pet_name || answers.pet_name || "");
   answers.guardian_name = cleanString(body.guardian_name || answers.guardian_name || "");
   branchContext.pet_name = cleanString(body.pet_name || branchContext.pet_name || "");
@@ -3669,8 +3780,8 @@ async function handleQuestionnaireCreate(request, env) {
 
   const payload = {
     clinic_id: clinic.id,
-    guardian_id: guardianId || null,
-    pet_id: petId || null,
+    guardian_id: (isDemoClinicCodeForAudit(env, clinicCode) && guardianId && !isUuidLike(guardianId)) ? null : (guardianId || null),
+    pet_id: (isDemoClinicCodeForAudit(env, clinicCode) && petId && !isUuidLike(petId)) ? null : (petId || null),
     visit_date: nullIfEmpty(body.visit_date),
     visit_time: normalizeTime(body.visit_time),
     symptoms: body.symptoms && typeof body.symptoms === "object" ? body.symptoms : {},
@@ -3695,14 +3806,17 @@ async function handleQuestionnaireCreate(request, env) {
   };
 
   let questionnaire = null;
-  let imageMeta = [];
+  let imageMeta = [...directImageMeta];
   try {
     const inserted = await insertRows(env, TABLES.questionnaires, payload);
     questionnaire = inserted?.[0] || inserted;
     if (!questionnaire?.id) throw new Error("問診IDを発行できませんでした。");
 
     if (parsedImages.length) {
-      imageMeta = await uploadQuestionnaireImages(env, clinicCode, petId, questionnaire.id, parsedImages);
+      const legacyUploaded = await uploadQuestionnaireImages(env, clinicCode, petId, questionnaire.id, parsedImages);
+      imageMeta = [...directImageMeta, ...legacyUploaded];
+    }
+    if (imageMeta.length) {
       const updatedAnswers = { ...answers, images: imageMeta, image_count: imageMeta.length };
       const updatedRows = await updateRows(env, TABLES.questionnaires, { id: `eq.${questionnaire.id}`, clinic_id: `eq.${clinic.id}` }, {
         answers: updatedAnswers,
@@ -3742,7 +3856,8 @@ async function handleQuestionnaireCreate(request, env) {
     feature_switch_version: FEATURE_SWITCH_VERSION,
     web_questionnaire_version: WEB_QUESTIONNAIRE_VERSION,
     branching_used: branchingUsed,
-    demo_feature_override_applied: demoOverrideAllowed
+    demo_feature_override_applied: demoOverrideAllowed,
+    questionnaire_image_upload_mode: imageMeta.length ? "browser_direct_signed_upload" : "none"
   });
 }
 

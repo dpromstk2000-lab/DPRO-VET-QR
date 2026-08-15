@@ -66,7 +66,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--main);box-shadow:0 0 
 <body>
 <main class="page">
   <section class="hero">
-    <small>ANIMARY-COUNTER-V1.1-4-R1｜WEB問診・画像送信安定化</small>
+    <small>ANIMARY-COUNTER-V1.1-4-R2｜WEB問診・直接署名アップロード</small>
     <h1>来院前WEB問診</h1>
     <p>来院前に症状や相談内容を入力しておくと、受付・診察時の確認を短くできます。病院が使用する問診カテゴリだけ表示されます。</p>
   </section>
@@ -142,7 +142,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--main);box-shadow:0 0 
           <span id="imageCount" class="imageCount">0 / 3枚</span>
         </div>
         <div id="imageGrid" class="imageGrid"></div>
-        <div class="imageHint">1枚800KB以下に自動調整します。画像は非公開Storageへ保存し、院内側だけ短時間URLで確認します。</div>
+        <div class="imageHint">1枚800KB以下に自動調整します。画像はWorkerを経由せずPRIVATE Storageへ直接送信し、院内側だけ短時間URLで確認します。</div>
       </section>
 
       <label class="choice" style="margin-top:14px">
@@ -170,7 +170,7 @@ const DEMO_CODE=CONFIG?.demo?.clinicCode||"dpro_vet_demo";
 const IS_DEMO=CLINIC_CODE===DEMO_CODE;
 const LINE_USER_ID=IS_DEMO ? (params.get("line_user_id")||CONFIG?.demo?.lineUserId||"demo_line_link_001") : "";
 const API_BASE=String(CONFIG?.api?.baseUrl||CONFIG.API_BASE_URL||"https://dpro-vet-qr-api.dpromstk2000.workers.dev").replace(/\/$/,"");
-const QUESTIONNAIRE_VERSION="DPRO-VET-WEB-QUESTIONNAIRE-V1.1.4-R1";
+const QUESTIONNAIRE_VERSION="DPRO-VET-WEB-QUESTIONNAIRE-V1.1.4-R2";
 const IMAGE_TARGET_BYTES=420000;
 const IMAGE_HARD_MAX_BYTES=800000;
 const CATEGORIES=[
@@ -364,6 +364,35 @@ async function onImageFiles(files){
   catch(e){setStatus(e.message||"画像を準備できませんでした。","ng")}
   $("imageInput").value="";
 }
+async function dataUrlToBlob(dataUrl){
+  const r=await fetch(dataUrl);return await r.blob()
+}
+async function uploadPreparedImages(petId){
+  if(!state.features?.flags?.questionnaire_images||!state.images.length)return [];
+  const uploaded=[];
+  for(let i=0;i<state.images.length;i+=1){
+    const item=state.images[i];
+    setStatus(`症状画像を送信しています… ${i+1} / ${state.images.length}`,"info");
+    const grant=await apiPost("/api/member/questionnaire/image-upload-url",{
+      pet_id:petId,file_name:item.file_name,mime_type:item.mime_type,size:item.size,
+      demo_feature_flags:IS_DEMO?{...(state.features?.flags||{})}:undefined
+    });
+    if(!grant?.upload_url||!grant?.storage_path)throw new Error("画像アップロードURLを取得できませんでした。");
+    const blob=await dataUrlToBlob(item.data_url);
+    let r;
+    try{
+      r=await fetch(grant.upload_url,{method:"PUT",headers:{"Content-Type":item.mime_type,"cache-control":"max-age=3600","x-upsert":"false"},body:blob});
+    }catch(e){
+      throw new Error(`症状画像${i+1}をPRIVATE Storageへ送信できませんでした。`)
+    }
+    if(!r.ok){
+      const text=await r.text().catch(()=>"");
+      throw new Error(`症状画像${i+1}の保存に失敗しました（Storage ${r.status}${text?`：${text.slice(0,120)}`:""}）。`)
+    }
+    uploaded.push({storage_path:grant.storage_path,file_name:item.file_name,mime_type:item.mime_type,size:item.size,private:true,upload_mode:"signed_direct"})
+  }
+  return uploaded
+}
 function collectBranchAnswers(){
   const ids=["b_vomit_count","b_stool","b_ingestion","b_itch","b_skin_area","b_skin_detail","b_urine_out","b_urine_freq","b_hematuria","b_cough","b_nasal","b_breathing","b_eye_side","b_eye_discharge","b_ear_side","b_ear_itch","b_bleeding","b_lameness","b_injury_detail","b_vaccine_name","b_vaccine_reaction","b_checkup_concern","b_med_item","b_med_remaining"];
   const out={};ids.forEach(id=>{const el=$(id);if(el&&String(el.value||"").trim())out[id.replace(/^b_/,"")]=String(el.value).trim()});return out
@@ -382,6 +411,8 @@ async function submit(){
   };
   $("submitBtn").disabled=true;setStatus("問診を送信しています…","info");
   try{
+    const uploadedImages=await uploadPreparedImages(petId);
+    setStatus("問診内容を保存しています…","info");
     const d=await apiPost("/api/member/questionnaire/create",{
       guardian_id:guardianId,pet_id:petId,visit_date:params.get("visit_date")||"",
       visit_time:params.get("visit_time")||"",questionnaire_type:state.category,category:state.category,
@@ -391,7 +422,7 @@ async function submit(){
       since_when:f("sinceWhen"),free_text:f("freeText"),emergency_confirmed:true,answers,
       branch_context:{category:state.category,pet_species:cardValue(state.pet,"species")||cardValue(state.pet,"species_label")||"",pet_name:cardValue(state.pet,"pet_name")||cardValue(state.pet,"name")||"",guardian_name:cardValue(state.pet,"guardian_name")||state.guardian?.guardian_name||state.guardian?.name||""},
       pet_name:cardValue(state.pet,"pet_name")||cardValue(state.pet,"name")||"",guardian_name:cardValue(state.pet,"guardian_name")||state.guardian?.guardian_name||state.guardian?.name||"",
-      images:state.features?.flags?.questionnaire_images?state.images.map(x=>({data_url:x.data_url,mime_type:x.mime_type,file_name:x.file_name})):[],
+      images:uploadedImages,
       branching_used:Boolean(state.features?.flags?.questionnaire_branching),questionnaire_version:QUESTIONNAIRE_VERSION,
       demo_feature_flags:IS_DEMO?{...(state.features?.flags||{})}:undefined,
       demo_questionnaire_modules:IS_DEMO?{...(state.features?.questionnaire_modules||{})}:undefined,
