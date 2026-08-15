@@ -96,7 +96,7 @@ const TABLES = {
 };
 
 const DEFAULT_CLINIC_CODE = "dpro_vet_demo";
-const WORKER_VERSION = "ANIMARY-COUNTER-V1.1-4-R2-DIRECT-SIGNED-UPLOAD-20260815";
+const WORKER_VERSION = "ANIMARY-COUNTER-V1.1-4-R3-CLINIC-SCHEMA-FIX-20260815";
 const FEATURE_SWITCH_VERSION = "DPRO-VET-FEATURE-SWITCH-V1.1";
 const WEB_QUESTIONNAIRE_VERSION = "DPRO-VET-WEB-QUESTIONNAIRE-V1.1.4-R2";
 const EXACT_APPOINTMENT_GUARD_VERSION = "VET-APPOINTMENT-1-R2";
@@ -1856,7 +1856,7 @@ async function getClinicSettings(env, clinicId) {
   // 既存の appointment-options 等が clinic_id で呼んでも壊れないよう、
   // clinic_id → clinic_code に変換してから新しい医院設定を読む。
   const clinic = await selectSingle(env, TABLES.clinics, {
-    select: "id,clinic_code,clinic_name,name,phone,address",
+    select: "*",
     id: `eq.${clinicId}`
   });
 
