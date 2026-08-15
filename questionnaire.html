@@ -65,7 +65,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--main);box-shadow:0 0 
 <body>
 <main class="page">
   <section class="hero">
-    <small>ANIMARY-COUNTER-V1.1-2｜WEB問診</small>
+    <small>ANIMARY-COUNTER-V1.1-2-R1｜WEB問診</small>
     <h1>来院前WEB問診</h1>
     <p>来院前に症状や相談内容を入力しておくと、受付・診察時の確認を短くできます。病院が使用する問診カテゴリだけ表示されます。</p>
   </section>
@@ -196,12 +196,35 @@ function normalizeCards(data){
   if(data.item&&(data.item.pet_id||data.item.card_no))return [data.item];
   return [];
 }
+function buildDemoCards(){
+  return {
+    guardian:{guardian_id:"demo_guardian_step40",id:"demo_guardian_step40",guardian_name:"本番確認 テスト",line_user_id:"demo_line_link_001",line_link_status:"linked"},
+    cards:[
+      {card_id:"demo_card_check",card_no:"VET-000005",card_token:"card_c175a6751639e545e8050e89bccda8705b0962cbc5c7cd8b",qr_token:"card_c175a6751639e545e8050e89bccda8705b0962cbc5c7cd8b",guardian_id:"demo_guardian_step40",guardian_name:"本番確認 テスト",pet_id:"demo_pet_check",pet_name:"チェックちゃん",species:"dog",species_label:"犬",breed:"トイプードル",multi_pet_demo:true},
+      {card_id:"demo_card_cocoa",card_no:"VET-DEMO-COCOA",card_token:"card_demo_cocoa_vet_step40",qr_token:"card_demo_cocoa_vet_step40",guardian_id:"demo_guardian_step40",guardian_name:"本番確認 テスト",pet_id:"demo_pet_cocoa",pet_name:"ココアちゃん",species:"cat",species_label:"猫",breed:"ミックス",multi_pet_demo:true},
+      {card_id:"demo_card_hana",card_no:"VET-DEMO-HANA",card_token:"card_demo_hana_vet_step40",qr_token:"card_demo_hana_vet_step40",guardian_id:"demo_guardian_step40",guardian_name:"本番確認 テスト",pet_id:"demo_pet_hana",pet_name:"ハナちゃん",species:"dog",species_label:"犬",breed:"柴犬",multi_pet_demo:true},
+      {card_id:"demo_card_momo",card_no:"VET-DEMO-MOMO",card_token:"card_demo_momo_vet_step40",qr_token:"card_demo_momo_vet_step40",guardian_id:"demo_guardian_step40",guardian_name:"本番確認 テスト",pet_id:"demo_pet_momo",pet_name:"モモちゃん",species:"dog",species_label:"犬",breed:"チワワ",multi_pet_demo:true}
+    ]
+  };
+}
+function applyDemoCards(reason="demo_fallback"){
+  const data=buildDemoCards();
+  state.guardian=data.guardian;
+  state.cards=data.cards;
+  state.demoFallbackReason=reason;
+}
 async function loadCards(){
-  let data;
-  try{data=await apiGet("/api/member/pet-cards",{line_user_id:LINE_USER_ID})}
-  catch(e){data=await apiGet("/api/public/my-cards",{line_user_id:LINE_USER_ID})}
-  state.guardian=data.guardian||data.owner||data.item?.guardian||null;
-  state.cards=normalizeCards(data);
+  let data=null;
+  try{
+    try{data=await apiGet("/api/member/pet-cards",{line_user_id:LINE_USER_ID})}
+    catch(e){data=await apiGet("/api/public/my-cards",{line_user_id:LINE_USER_ID})}
+    state.guardian=data.guardian||data.owner||data.item?.guardian||null;
+    state.cards=normalizeCards(data);
+    if(!state.cards.length&&IS_DEMO)applyDemoCards("empty_api_result");
+  }catch(e){
+    if(IS_DEMO)applyDemoCards("api_error");
+    else throw e;
+  }
   if(!state.cards.length)throw new Error("LINE連携済みのペット診察券が見つかりません。");
   const requested=params.get("pet_id");
   state.pet=state.cards.find(c=>String(c.pet_id||c.pet?.id||"")===String(requested||""))||state.cards[0];
