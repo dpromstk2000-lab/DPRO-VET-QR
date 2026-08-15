@@ -20,12 +20,13 @@ h1{margin:8px 0 6px;font-size:clamp(28px,4vw,42px)}.hero p{margin:0;color:rgba(2
 .tag{display:inline-flex;margin-left:6px;border-radius:999px;padding:2px 7px;font-size:10px;font-weight:900;background:#edf2ef;color:#52635a}.tag.ready{background:var(--blueSoft);color:var(--blue)}.tag.next{background:var(--amberSoft);color:var(--amber)}
 .moduleBox{margin-top:14px;border:1px solid #cfe4d6;background:#f8fcf9;border-radius:22px;padding:16px}.moduleGrid{display:grid;grid-template-columns:1fr 1fr;gap:0 16px}.moduleBox h2{margin:0;font-size:19px}.moduleBox>p{margin:4px 0 8px;color:var(--muted);font-size:12px}
 .savebar{position:sticky;bottom:10px;margin-top:14px;background:rgba(255,255,255,.95);backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:20px;padding:12px;box-shadow:var(--shadow);display:flex;justify-content:space-between;gap:10px;align-items:center}.mini{font-size:12px;color:var(--muted)}
+.saveToast{position:fixed;z-index:9999;top:18px;left:50%;transform:translate(-50%,-18px);width:min(560px,calc(100% - 28px));padding:16px 18px;border-radius:18px;background:#176a51;color:#fff;box-shadow:0 18px 48px rgba(23,106,81,.28);font-weight:950;text-align:center;opacity:0;pointer-events:none;transition:.22s}.saveToast.show{opacity:1;transform:translate(-50%,0)}.saveToast small{display:block;margin-top:3px;font-size:12px;font-weight:750;opacity:.9}.saveMeta{margin-top:4px;font-size:12px;color:var(--muted);font-weight:850}.btn.saved{background:#176a51;box-shadow:0 0 0 5px rgba(23,106,81,.12)}
 @media(max-width:780px){.grid,.moduleGrid{grid-template-columns:1fr}.savebar{align-items:stretch;flex-direction:column}.savebar .btn{width:100%}}
 </style>
 </head>
 <body>
 <main class="page">
-<section class="hero"><div style="font-weight:900;font-size:12px;opacity:.9">ANIMARY-COUNTER-V1.1-2-R2｜DEMO認証不要</div><h1>病院ごとの機能ON / OFF</h1><p>使わない機能は患者導線・院内運用から外すための中央設定です。WEB問診はさらにカテゴリ単位でON/OFFできます。</p></section>
+<section class="hero"><div style="font-weight:900;font-size:12px;opacity:.9">ANIMARY-COUNTER-V1.1-2-R3｜保存完了UI</div><h1>病院ごとの機能ON / OFF</h1><p>使わない機能は患者導線・院内運用から外すための中央設定です。WEB問診はさらにカテゴリ単位でON/OFFできます。</p></section>
 
 <section class="toolbar">
   <div class="row">
@@ -47,10 +48,11 @@ h1{margin:8px 0 6px;font-size:clamp(28px,4vw,42px)}.hero p{margin:0;color:rgba(2
 </section>
 
 <section class="savebar">
-  <div><strong id="changedText">未読込</strong><div class="mini" id="saveTargetText">保存先：vet_clinic_settings.feature_flags / questionnaire_modules</div></div>
+  <div><strong id="changedText">未読込</strong><div class="mini">保存先：vet_clinic_settings.feature_flags / questionnaire_modules</div></div>
   <button class="btn" id="saveBtn" type="button" disabled>機能設定を保存</button>
 </section>
 </main>
+<div id="saveToast" class="saveToast" role="status" aria-live="polite"><span id="saveToastMain">保存しました ✓</span><small id="saveToastSub"></small></div>
 <script>
 (()=>{
 "use strict";
@@ -84,6 +86,20 @@ const $=id=>document.getElementById(id);
 function adminCode(){return $("adminCode").value.trim()||sessionStorage.getItem(ADMIN_KEY)||localStorage.getItem(ADMIN_KEY)||""}
 function headers(){return {"Content-Type":"application/json","Accept":"application/json","X-DPRO-Admin-Code":adminCode()}}
 function setStatus(msg,type=""){const el=$("status");el.className=`status ${type}`.trim();el.textContent=msg}
+function formatSavedTime(value=new Date()){
+ const d=value instanceof Date?value:new Date(value);if(Number.isNaN(d.getTime()))return "";
+ return new Intl.DateTimeFormat("ja-JP",{hour:"2-digit",minute:"2-digit",second:"2-digit"}).format(d)
+}
+let toastTimer=null;
+function showSavedFeedback(message="保存しました",detail=""){
+ const toast=$("saveToast");$("saveToastMain").textContent=`✓ ${message}`;$("saveToastSub").textContent=detail;
+ toast.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove("show"),3200);
+ const btn=$("saveBtn");btn.textContent="保存しました ✓";btn.classList.add("saved");
+ setTimeout(()=>{btn.textContent="機能設定を保存";btn.classList.remove("saved")},2200)
+}
+function setLastSaved(value,scope=""){
+ const t=formatSavedTime(value);$("lastSavedText").textContent=t?`最終保存：${t}${scope?`｜${scope}`:""}`:"まだ保存していません"
+}
 function normalize(src,defs){const out={...defs};if(src&&typeof src==="object")Object.keys(out).forEach(k=>{if(Object.prototype.hasOwnProperty.call(src,k))out[k]=src[k]===true});return out}
 function render(){
  const root=$("groups");root.innerHTML="";
@@ -111,6 +127,7 @@ async function load(){
    current={flags:normalize(fs.flags,DEFAULTS),modules:normalize(fs.questionnaire_modules,MODULE_DEFAULTS)};
    original={flags:{...current.flags},modules:{...current.modules}};$("preset").value=fs.preset||"standard";loaded=true;render();
    setStatus(`営業DEMO｜${fs.demo_override_applied?"このブラウザの保存設定":"標準設定"}｜本番データには影響しません。`,"ok");
+   const ov=FEATURES.readDemoOverride(CLINIC_CODE);if(ov?.saved_at)setLastSaved(ov.saved_at,"このブラウザ");else setLastSaved(null);
   }catch(e){setStatus(e.message||"DEMO設定の読込に失敗しました。","ng")}
   return;
  }
@@ -132,7 +149,7 @@ function applyPreset(){
 async function save(){
  if(!loaded)return;
  const payload={clinic_code:CLINIC_CODE,feature_preset:$("preset").value,feature_flags:current.flags,questionnaire_modules:current.modules,staff_name:"feature-settings.html"};
- $("saveBtn").disabled=true;setStatus(IS_DEMO?"DEMO設定をこのブラウザに保存しています…":"保存中です…");
+ $("saveBtn").disabled=true;$("saveBtn").textContent="保存中…";setStatus(IS_DEMO?"DEMO設定をこのブラウザに保存しています…":"保存中です…");
  if(IS_DEMO){
   try{
    const ok=FEATURES.saveDemoOverride(payload,CLINIC_CODE);if(!ok)throw new Error("ブラウザへのDEMO設定保存に失敗しました。");
@@ -140,24 +157,25 @@ async function save(){
    current={flags:normalize(fs.flags,DEFAULTS),modules:normalize(fs.questionnaire_modules,MODULE_DEFAULTS)};
    original={flags:{...current.flags},modules:{...current.modules}};$("preset").value=fs.preset||$("preset").value;render();
    setStatus("DEMO設定を保存しました。このブラウザ内だけに反映され、本番医院・Supabase設定には影響しません。","ok");
-  }catch(e){setStatus(e.message||"DEMO設定の保存に失敗しました。","ng");$("saveBtn").disabled=false}
+   const ov=FEATURES.readDemoOverride(CLINIC_CODE);setLastSaved(ov?.saved_at||new Date(),"このブラウザ");showSavedFeedback("DEMO設定を保存しました","このブラウザ内だけに保存済み・本番DBには影響しません");
+  }catch(e){setStatus(e.message||"DEMO設定の保存に失敗しました。","ng");$("saveBtn").disabled=false;$("saveBtn").textContent="機能設定を保存"}
   return;
  }
  const code=adminCode();if(!code){setStatus("本番医院の管理コードがありません。","ng");$("saveBtn").disabled=false;return}
  try{const r=await fetch(`${API_BASE}/api/admin/settings`,{method:"POST",headers:headers(),body:JSON.stringify(payload)});const d=await r.json().catch(()=>({}));if(!r.ok||d.ok===false)throw new Error(d.message||d.error||`API ${r.status}`);
   current={flags:normalize(d?.settings?.feature_flags,DEFAULTS),modules:normalize(d?.settings?.questionnaire_modules,MODULE_DEFAULTS)};
-  original={flags:{...current.flags},modules:{...current.modules}};render();setStatus("本番医院設定を保存しました。OFFにした機能は対応画面・APIで使用しない設定になります。","ok")
- }catch(e){setStatus(e.message||"保存に失敗しました。","ng");$("saveBtn").disabled=false}
+  original={flags:{...current.flags},modules:{...current.modules}};render();setStatus("本番医院設定を保存しました。OFFにした機能は対応画面・APIで使用しない設定になります。","ok");setLastSaved(new Date(),"本番医院設定");showSavedFeedback("本番医院設定を保存しました","設定反映済み")
+ }catch(e){setStatus(e.message||"保存に失敗しました。","ng");$("saveBtn").disabled=false;$("saveBtn").textContent="機能設定を保存"}
 }
 async function resetDemo(){
  if(!IS_DEMO)return;
  FEATURES.clearDemoOverride(CLINIC_CODE);
  await load();
- setStatus("DEMO設定を標準状態に戻しました。このブラウザ内のDEMO設定だけを消去しました。","ok");
+ setStatus("DEMO設定を標準状態に戻しました。このブラウザ内のDEMO設定だけを消去しました。","ok");setLastSaved(null);showSavedFeedback("DEMO設定を標準に戻しました","ブラウザ内の保存設定を消去しました");
 }
 $("loadBtn").addEventListener("click",load);$("applyPresetBtn").addEventListener("click",applyPreset);$("saveBtn").addEventListener("click",save);$("resetDemoBtn").addEventListener("click",resetDemo);
 if(IS_DEMO){
- $("adminField").style.display="none";$("resetDemoBtn").style.display="inline-flex";$("loadBtn").textContent="DEMO設定を再読み込み";$("saveTargetText").textContent="保存先：このブラウザのDEMO設定（本番DBには保存しません）";
+ $("adminField").style.display="none";$("resetDemoBtn").style.display="inline-flex";$("loadBtn").textContent="DEMO設定を再読み込み";
  setStatus("営業DEMOモード｜管理コード不要｜このブラウザだけに保存します。","ok");
 }else{
  try{$("adminCode").value=sessionStorage.getItem(ADMIN_KEY)||localStorage.getItem(ADMIN_KEY)||""}catch{}
