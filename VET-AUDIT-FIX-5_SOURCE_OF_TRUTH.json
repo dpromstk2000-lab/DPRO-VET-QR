@@ -1,0 +1,30 @@
+{
+  "audit": "VET-AUDIT-FIX-5",
+  "date": "2026-08-15",
+  "status": "PASS",
+  "runtime_logic_change": false,
+  "worker_deploy_required": false,
+  "supabase_sql_required": false,
+  "workers": {
+    "dpro-vet-qr-api": {
+      "version": "FINAL-VET-AUDIT-1-R1-SECURITY-20260807",
+      "canonical_file": "dpro-vet-qr-api.worker.js",
+      "text_copy": "dpro-vet-qr-api.worker.txt",
+      "canonical_sha256": "ec61a3318d719dc9bad2db73dbb44d116012da616bf6d9690e72fde6b05c6de9",
+      "captured_raw_sha256": "458d8f08fed653d9b18c299c1e58f3375b3da9258f1e4e7ec472fd0c91e2545b",
+      "line_count": 12703,
+      "api_route_count": 248,
+      "named_function_count": 404
+    },
+    "dpro-vet-migration-api": {
+      "version": "VET-MIGRATION-3-OWNER-INTEGRATION-COMPLETED-CANCEL-GUARD-20260720",
+      "canonical_file": "dpro-vet-migration-api.worker.js",
+      "text_copy": "dpro-vet-migration-api.worker.txt",
+      "canonical_sha256": "fd898c66498316c26f066b44b57e18b574b5b83dd033ec99dbd57a3f9ccbacb7",
+      "captured_raw_sha256": "349d7f3ac836d7895992d2ca68046bad613d6b064bc2cc6438d56e0688580e6a",
+      "line_count": 1024,
+      "api_route_count": 11,
+      "named_function_count": 59
+    }
+  }
+}

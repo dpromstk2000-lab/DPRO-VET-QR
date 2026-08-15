@@ -1,0 +1,64 @@
+VET-AUDIT-FIX-5 SOURCE OF TRUTH
+DPRO PET CARE LINE
+Date: 2026-08-15
+
+STATUS: COMPLETE / PASS
+SCOPE: Worker/API source-of-truth cleanup only
+RUNTIME LOGIC CHANGE: NONE
+WORKER DEPLOY REQUIRED: NO
+SUPABASE SQL REQUIRED: NO
+GITHUB PURPOSE: current deployed Worker source archive / canonical reference
+
+[CANONICAL WORKERS]
+1) dpro-vet-qr-api
+   version: FINAL-VET-AUDIT-1-R1-SECURITY-20260807
+   canonical: dpro-vet-qr-api.worker.js
+   canonical sha256 (LF): ec61a3318d719dc9bad2db73dbb44d116012da616bf6d9690e72fde6b05c6de9
+   current captured raw sha256: 458d8f08fed653d9b18c299c1e58f3375b3da9258f1e4e7ec472fd0c91e2545b
+   API route count: 248
+   role: normal DPRO PET CARE LINE API
+
+2) dpro-vet-migration-api
+   version: VET-MIGRATION-3-OWNER-INTEGRATION-COMPLETED-CANCEL-GUARD-20260720
+   canonical: dpro-vet-migration-api.worker.js
+   canonical sha256 (LF): fd898c66498316c26f066b44b57e18b574b5b83dd033ec99dbd57a3f9ccbacb7
+   current captured raw sha256: 349d7f3ac836d7895992d2ca68046bad613d6b064bc2cc6438d56e0688580e6a
+   API route count: 11
+   role: existing-system migration only
+
+[SEPARATION RULE]
+- dpro-vet-qr-api and dpro-vet-migration-api are separate Cloudflare Workers.
+- Never deploy the migration Worker code to dpro-vet-qr-api.
+- Never deploy the normal API Worker code to dpro-vet-migration-api.
+- Migration API owns /api/migration/* only (plus /api/health).
+- Normal API is the product runtime API and is not replaced by migration tooling.
+
+[LINE ENDING NORMALIZATION]
+The code captured from Cloudflare used CRLF. Canonical GitHub copies in this package use LF.
+After CRLF -> LF normalization, dpro-vet-qr-api is identical to FINAL-VET-AUDIT-1-R1-WORKER.zip.
+After CRLF -> LF normalization, dpro-vet-migration-api is identical to the known VET-MIGRATION-3 source.
+No executable logic was changed.
+
+[MIGRATION HEADER NOTE]
+The first comment block in the current migration Worker still mentions an older R4 version.
+The executable runtime source of truth is:
+  const VERSION = "VET-MIGRATION-3-OWNER-INTEGRATION-COMPLETED-CANCEL-GUARD-20260720";
+This FIX-5 package intentionally does not edit the deployed Worker just to change a comment.
+
+[DEPRECATED / DO NOT USE AS CURRENT SOURCE]
+- older STEP VET-34C / VET-PHOTO Worker files
+- early VET-APPOINTMENT Worker that was shorter than the then-current Worker
+- migration R1/R2/R3/R4 intermediate Worker variants
+- any historical file whose runtime version does not match the canonical versions above
+
+[FILES]
+- dpro-vet-qr-api.worker.js
+- dpro-vet-qr-api.worker.txt
+- dpro-vet-migration-api.worker.js
+- dpro-vet-migration-api.worker.txt
+- VET-AUDIT-FIX-5_SOURCE_OF_TRUTH.txt
+- VET-AUDIT-FIX-5_API_ROUTE_INVENTORY.txt
+
+[IMPORTANT]
+This package is for GitHub source-of-truth archival. Uploading these files to GitHub does NOT deploy Cloudflare Worker code.
+No current Cloudflare Worker needs to be replaced for FIX-5.
