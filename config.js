@@ -1,7 +1,13 @@
 /* =========================================================
- FINAL VET-AUDIT-1-R2
+ VET-AUDIT-FIX-1
  DPRO PET CARE LINE / config.js
- 本番LIFF本人確認 共通版
+ 構成整理・config統一版
+
+ 方針:
+ - 現行GitHub main に存在する画面だけを canonical screen として登録
+ - 旧設計の URL キーは削除せず、安全な現行画面へ互換エイリアス化
+ - access.html は VET-AUDIT-FIX-2 で正式公開画面を作成するまで rich-menu.html へ退避
+ - 本番LIFF本人確認ロジックは FINAL VET-AUDIT-1-R2 を維持し、挙動変更しない
 ========================================================= */
 (function () {
   "use strict";
@@ -11,14 +17,18 @@
   const DEMO_CLINIC_CODE = "dpro_vet_demo";
   const LIFF_SDK_URL = "https://static.line-scdn.net/liff/edge/2/sdk.js";
   const LIFF_AUTH_VERSION = "FINAL-VET-AUDIT-1-R2";
+  const AUDIT_FIX_VERSION = "VET-AUDIT-FIX-1-20260815";
+
+  const page = (name) => `${SITE_BASE_URL}/${name}`;
 
   const CONFIG = {
-    version: "final-vet-audit-1-r2-production-liff",
+    version: "vet-audit-fix-1-config-unified-20260815",
+    auditFixVersion: AUDIT_FIX_VERSION,
     project: {
       repoName: "DPRO-VET-QR",
       serviceId: "dpro-pet-care-line",
       serviceName: "DPRO PET CARE LINE",
-      serviceDescription: "LINE公式で使える、ペット診察券・予防フォローシステム",
+      serviceDescription: "LINE公式で使える、ペット診察券・受付・予防フォローシステム",
       industry: "animal_hospital",
       mode: "demo"
     },
@@ -33,34 +43,116 @@
       closedDaysNote: "水曜午後・日曜・祝日",
       timezone: "Asia/Tokyo"
     },
+
+    /* ---------------------------------------------------------
+       画面構成の正式レジストリ
+       status:
+       - active   : 現在の正式画面
+       - demo     : 営業/開発デモ用
+       - staff    : 医院スタッフ/管理者用
+       - pending  : 次STEPで正式化予定
+       - legacy   : 旧設計互換。直接リンク先として使わない
+    --------------------------------------------------------- */
+    screens: {
+      public: {
+        member:       { path:"member.html",       status:"active", role:"飼い主LINE診察券" },
+        richMenu:     { path:"rich-menu.html",    status:"active", role:"飼い主LINE入口" },
+        waiting:      { path:"waiting.html",      status:"active", role:"当日順番受付・問診・お薬予防受付" },
+        appointment:  { path:"appointment.html",  status:"active", role:"30分単位日時指定予約" },
+        register:     { path:"register.html",     status:"active", role:"飼い主初回登録" },
+        link:         { path:"link.html",         status:"active", role:"LINE連携" },
+        queueStatus:  { path:"queue-status.html", status:"active", role:"受付状況確認" }
+      },
+      staff: {
+        owner:               { path:"owner.html",                status:"staff", role:"オーナー運用" },
+        admin:               { path:"admin.html",                status:"staff", role:"医院設定" },
+        adminQueue:          { path:"admin-queue.html",          status:"staff", role:"受付ルール設定" },
+        appointmentAdmin:    { path:"appointment-admin.html",    status:"staff", role:"日時指定予約管理" },
+        appointmentCalendar: { path:"appointment-calendar.html", status:"staff", role:"予約カレンダー" },
+        doctor:              { path:"doctor.html",               status:"staff", role:"獣医師画面" },
+        scanIpad:            { path:"scan-ipad.html",            status:"staff", role:"受付iPad" },
+        scanPc:              { path:"scan-pc.html",              status:"staff", role:"受付PC" },
+        lineSetup:           { path:"line-setup.html",           status:"staff", role:"受付登録・LINE連携" },
+        patients:            { path:"patients.html",             status:"staff", role:"飼い主・ペット管理" },
+        lineCallAdmin:       { path:"line-call-admin.html",      status:"staff", role:"LINE呼び出し" },
+        recallAdmin:         { path:"recall-admin.html",         status:"staff", role:"予防・再診リコール" },
+        lineUnlinkedFollow:  { path:"line-unlinked-follow.html", status:"staff", role:"LINE未連携フォロー" },
+        todayBoard:          { path:"today-board.html",          status:"staff", role:"本日統合ボード" },
+        ownerData:           { path:"owner-data.html",           status:"staff", role:"データ管理・乗り換え" },
+        importPatients:      { path:"import-patients.html",      status:"staff", role:"患者取込" },
+        migration:           { path:"migration.html",            status:"staff", role:"移行補助" },
+        productionCheck:     { path:"production-check.html",     status:"staff", role:"本番前安全チェック" }
+      },
+      demo: {
+        index:          { path:"index.html",           status:"demo", role:"営業操作デモ入口" },
+        demoGuide:      { path:"demo-guide.html",      status:"demo", role:"営業デモ案内" },
+        demoQr:         { path:"demo-qr.html",         status:"demo", role:"デモQR一覧" },
+        operations:     { path:"operations.html",      status:"demo", role:"運用確認" },
+        operationGuide: { path:"operation-guide.html", status:"demo", role:"運用ガイド" },
+        systemCheck:    { path:"system-check.html",    status:"demo", role:"営業・開発システム確認" },
+        debug:          { path:"debug.html",           status:"demo", role:"開発デバッグ" }
+      },
+      pending: {
+        access: {
+          plannedPath:"access.html",
+          status:"pending",
+          nextStep:"VET-AUDIT-FIX-2",
+          role:"飼い主向け診療時間・アクセス",
+          temporaryFallback:"rich-menu.html"
+        }
+      },
+      legacy: {
+        questionnaire:   { oldPath:"questionnaire.html", replacement:"waiting.html", reason:"問診は受付フロー内へ統合済み" },
+        prevention:      { oldPath:"prevention.html", replacement:"member.html", reason:"予防予定は診察券・受付導線へ統合" },
+        lineDemo:        { oldPath:"line-demo.html", replacement:"index.html", reason:"営業デモ入口をindexへ統一" },
+        richMenuPreview: { oldPath:"rich-menu-preview.html", replacement:"rich-menu.html", reason:"正式リッチメニュー画面へ統一" }
+      }
+    },
+
     urls: {
-      siteBaseUrl: SITE_BASE_URL, apiBaseUrl: API_BASE_URL,
-      index:`${SITE_BASE_URL}/index.html`,
-      member:`${SITE_BASE_URL}/member.html`,
-      owner:`${SITE_BASE_URL}/owner.html`,
-      admin:`${SITE_BASE_URL}/admin.html`,
-      adminQueue:`${SITE_BASE_URL}/admin-queue.html`,
-      appointment:`${SITE_BASE_URL}/appointment.html`,
-      appointmentAdmin:`${SITE_BASE_URL}/appointment-admin.html`,
-      appointmentCalendar:`${SITE_BASE_URL}/appointment-calendar.html`,
-      waiting:`${SITE_BASE_URL}/waiting.html`,
-      richMenu:`${SITE_BASE_URL}/rich-menu.html`,
-      doctor:`${SITE_BASE_URL}/doctor.html`,
-      scanIpad:`${SITE_BASE_URL}/scan-ipad.html`,
-      scanPc:`${SITE_BASE_URL}/scan-pc.html`,
-      systemCheck:`${SITE_BASE_URL}/system-check.html`,
-      demoGuide:`${SITE_BASE_URL}/demo-guide.html`,
-      operations:`${SITE_BASE_URL}/operations.html`,
-      todayBoard:`${SITE_BASE_URL}/today-board.html`,
-      lineCallAdmin:`${SITE_BASE_URL}/line-call-admin.html`,
-      recallAdmin:`${SITE_BASE_URL}/recall-admin.html`,
-      lineUnlinkedFollow:`${SITE_BASE_URL}/line-unlinked-follow.html`,
-      queueStatus:`${SITE_BASE_URL}/queue-status.html`,
-      lineDemo:`${SITE_BASE_URL}/line-demo.html`,
-      richMenuPreview:`${SITE_BASE_URL}/rich-menu-preview.html`,
-      questionnaire:`${SITE_BASE_URL}/questionnaire.html`,
-      prevention:`${SITE_BASE_URL}/prevention.html`,
-      access:`${SITE_BASE_URL}/access.html`
+      siteBaseUrl: SITE_BASE_URL,
+      apiBaseUrl: API_BASE_URL,
+      index: page("index.html"),
+      member: page("member.html"),
+      owner: page("owner.html"),
+      admin: page("admin.html"),
+      adminQueue: page("admin-queue.html"),
+      appointment: page("appointment.html"),
+      appointmentAdmin: page("appointment-admin.html"),
+      appointmentCalendar: page("appointment-calendar.html"),
+      waiting: page("waiting.html"),
+      richMenu: page("rich-menu.html"),
+      register: page("register.html"),
+      link: page("link.html"),
+      doctor: page("doctor.html"),
+      scanIpad: page("scan-ipad.html"),
+      scanPc: page("scan-pc.html"),
+      lineSetup: page("line-setup.html"),
+      patients: page("patients.html"),
+      systemCheck: page("system-check.html"),
+      productionCheck: page("production-check.html"),
+      demoGuide: page("demo-guide.html"),
+      demoQr: page("demo-qr.html"),
+      operations: page("operations.html"),
+      operationGuide: page("operation-guide.html"),
+      debug: page("debug.html"),
+      todayBoard: page("today-board.html"),
+      lineCallAdmin: page("line-call-admin.html"),
+      recallAdmin: page("recall-admin.html"),
+      lineUnlinkedFollow: page("line-unlinked-follow.html"),
+      queueStatus: page("queue-status.html"),
+      ownerData: page("owner-data.html"),
+      importPatients: page("import-patients.html"),
+      migration: page("migration.html"),
+
+      /* 旧キー互換。存在しないHTMLへは飛ばさない。 */
+      lineDemo: page("index.html"),
+      richMenuPreview: page("rich-menu.html"),
+      questionnaire: page("waiting.html"),
+      prevention: page("member.html"),
+
+      /* VET-AUDIT-FIX-2 までは404/管理画面誤遷移を避ける。 */
+      access: page("rich-menu.html")
     },
     api: {
       baseUrl: API_BASE_URL,
@@ -166,18 +258,29 @@
       warning:"管理コードはGitHubに保存しない。Cloudflare Worker Secretのみ。ブラウザ保存はlocalStorage/sessionStorageのみ。"
     },
     richMenu: {
-      title:"DPRO PET CARE LINE リッチメニュー",layout:"6分割",
+      title:"DPRO PET CARE LINE リッチメニュー",
+      layout:"6分割",
+      sourceOfTruth:"rich-menu.html",
+      questionnairePolicy:"来院前問診は単独ページにせず、受付フロー内へ統合する。",
+      accessPolicy:"VET-AUDIT-FIX-2で飼い主向けaccess.htmlを正式化する。FIX-1ではrich-menu.htmlへ安全退避。",
       buttons:[
-        {id:"pet-card",label:"ペット診察券",description:"飼い主LINEから複数ペットの診察券を表示",url:`${SITE_BASE_URL}/member.html`},
-        {id:"reservation",label:"予約・受付",description:"順番受付・優先受付・日時指定予約への導線",url:`${SITE_BASE_URL}/member.html`},
-        {id:"questionnaire",label:"来院前問診",description:"来院前の症状確認フォーム",url:`${SITE_BASE_URL}/questionnaire.html`},
-        {id:"prevention",label:"予防予定",description:"ワクチン・フィラリア・健診の確認",url:`${SITE_BASE_URL}/prevention.html`},
-        {id:"news",label:"お知らせ",description:"休診日・予防シーズン案内",url:`${SITE_BASE_URL}/index.html`},
-        {id:"access",label:"診療時間・アクセス",description:"病院情報",url:`${SITE_BASE_URL}/access.html`}
+        {id:"pet-card",label:"ペット診察券",description:"複数ペットの診察券・予防予定",url:page("member.html")},
+        {id:"today-queue",label:"今日の順番受付",description:"問診を入力して受付番号を取得",url:`${page("waiting.html")}?mode=today_queue`},
+        {id:"priority-reservation",label:"優先受付予約",description:"後日の午前・午後の優先受付",url:`${page("waiting.html")}?mode=priority_reservation`},
+        {id:"medicine-prevention",label:"お薬・予防受付",description:"薬・フード・予防薬・ワクチン受付",url:`${page("waiting.html")}?mode=medicine_prevention`},
+        {id:"congestion",label:"混雑目安",description:"通常診察・お薬予防・ケア処置の目安",url:`${page("waiting.html")}?mode=today_queue#congestion`},
+        {id:"access",label:"診療時間・アクセス",description:"FIX-2で公開画面を正式化",url:page("rich-menu.html"),status:"pending"}
       ]
     },
     labels:{owner:"飼い主",pet:"ペット",petCard:"ペット診察券",multiPetCard:"多頭飼いペット診察券",clinic:"動物病院",doctor:"獣医師",checkin:"受付",prevention:"予防予定",followup:"再診フォロー",lineLink:"LINE連携"},
-    safety:{databasePrefix:"vet_",dentalTablesTouched:false,dentalWorkerTouched:false,finalAuditVersion:"FINAL-VET-AUDIT-1-R2",note:"DPRO PET CARE LINE専用。歯科版 dental_qr_ 系には触れない。"}
+    safety:{
+      databasePrefix:"vet_",
+      dentalTablesTouched:false,
+      dentalWorkerTouched:false,
+      finalAuditVersion:"FINAL-VET-AUDIT-1-R2",
+      configStructureVersion:AUDIT_FIX_VERSION,
+      note:"DPRO PET CARE LINE専用。歯科版 dental_qr_ 系には触れない。LIFF本人確認ロジックはFIX-1で変更しない。"
+    }
   };
 
   CONFIG.SITE_BASE_URL = SITE_BASE_URL;
