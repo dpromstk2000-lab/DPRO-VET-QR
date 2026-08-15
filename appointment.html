@@ -125,7 +125,7 @@
   const DEMO_CLINIC_CODE = CONFIG?.demo?.clinicCode || CONFIG?.DEMO_CLINIC_CODE || "dpro_vet_demo";
   const IS_DEMO_CLINIC = CLINIC_CODE === DEMO_CLINIC_CODE;
   const INCOMING_LINE_USER_ID = params.get("line_user_id") || params.get("lineUserId") || params.get("uid") || "";
-  const LINE_USER_ID = IS_DEMO_CLINIC ? (INCOMING_LINE_USER_ID || CONFIG?.demo?.lineUserId || "demo_line_link_001") : "";
+  const LINE_USER_ID = IS_DEMO_CLINIC ? INCOMING_LINE_USER_ID : "";
   const DEMO = IS_DEMO_CLINIC && ["ready","true","1"].includes(String(params.get("demo") || "").toLowerCase());
   const VERSION = "vet-audit-fix-4";
 
