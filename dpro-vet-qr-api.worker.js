@@ -96,9 +96,10 @@ const TABLES = {
 };
 
 const DEFAULT_CLINIC_CODE = "dpro_vet_demo";
-const WORKER_VERSION = "ANIMARY-COUNTER-V1.1-4-R3-CLINIC-SCHEMA-FIX-20260815";
+const WORKER_VERSION = "ANIMARY-COUNTER-V1.1-6-QUESTIONNAIRE-VISIT-LINK-20260815";
 const FEATURE_SWITCH_VERSION = "DPRO-VET-FEATURE-SWITCH-V1.1";
-const WEB_QUESTIONNAIRE_VERSION = "DPRO-VET-WEB-QUESTIONNAIRE-V1.1.4-R2";
+const WEB_QUESTIONNAIRE_VERSION = "DPRO-VET-WEB-QUESTIONNAIRE-V1.1.6";
+const QUESTIONNAIRE_VISIT_LINK_VERSION = "DPRO-VET-QUESTIONNAIRE-VISIT-LINK-V1.1";
 const EXACT_APPOINTMENT_GUARD_VERSION = "VET-APPOINTMENT-1-R2";
 const LINE_CALL_FEATURE_VERSION = "VET-LINE-CALL-1";
 const DOCTOR_SLOT_FEATURE_VERSION = "VET-DOCTOR-SLOT-1";
@@ -565,6 +566,10 @@ export default {
           questionnaire_image_allowed_mime_types: QUESTIONNAIRE_IMAGE_ALLOWED_MIME_TYPES,
           questionnaire_image_storage_mode: "private_signed_url",
           questionnaire_image_upload_mode: "browser_direct_signed_upload",
+          questionnaire_visit_link_version: QUESTIONNAIRE_VISIT_LINK_VERSION,
+          questionnaire_auto_link_mode: "pet_context_safe",
+          questionnaire_queue_enrichment: true,
+          questionnaire_appointment_enrichment: true,
           exact_appointment_guard_version: EXACT_APPOINTMENT_GUARD_VERSION,
           line_call_feature_version: LINE_CALL_FEATURE_VERSION,
           doctor_slot_feature_version: DOCTOR_SLOT_FEATURE_VERSION,
@@ -3700,6 +3705,214 @@ async function handleMemberLineLinkComplete(request, env) {
   });
 }
 
+
+// =========================================================
+// ANIMARY-COUNTER-V1.1-6: WEB問診 → 受付 / 日時予約 自動紐付け
+// =========================================================
+const QUESTIONNAIRE_TYPE_LABELS = Object.freeze({
+  general:"体調不良", vaccine:"ワクチン", health_check:"健康診断", skin:"皮膚",
+  digestive:"消化器", respiratory:"呼吸器", eye:"眼", ear:"耳", urinary:"泌尿器",
+  injury:"ケガ", medicine_prevention:"お薬・予防", other:"その他"
+});
+
+function questionnaireAnswers(row = {}) {
+  return row?.answers && typeof row.answers === "object" && !Array.isArray(row.answers) ? row.answers : {};
+}
+function questionnaireBranchContext(row = {}) {
+  return row?.branch_context && typeof row.branch_context === "object" && !Array.isArray(row.branch_context) ? row.branch_context : {};
+}
+function questionnairePetName(row = {}) {
+  const a=questionnaireAnswers(row), b=questionnaireBranchContext(row);
+  return cleanString(a.pet_name || b.pet_name || row.pet_name || "");
+}
+function questionnaireGuardianName(row = {}) {
+  const a=questionnaireAnswers(row), b=questionnaireBranchContext(row);
+  return cleanString(a.guardian_name || b.guardian_name || row.guardian_name || "");
+}
+function questionnaireChiefComplaint(row = {}) {
+  const a=questionnaireAnswers(row);
+  const symptoms=row?.symptoms && typeof row.symptoms === "object" && !Array.isArray(row.symptoms) ? row.symptoms : {};
+  return cleanString(
+    a.chief_complaint || a.main_concern || a.concern || symptoms.chief_complaint ||
+    row.free_text || a.free_text || ""
+  );
+}
+function questionnaireSubmittedMs(row = {}) {
+  const raw=cleanString(row.submitted_at || row.created_at || row.updated_at || "");
+  const ms=raw ? new Date(raw).getTime() : NaN;
+  return Number.isFinite(ms) ? ms : 0;
+}
+function questionnaireImageCount(row = {}) {
+  const a=questionnaireAnswers(row);
+  const n=Number(a.image_count || (Array.isArray(a.images) ? a.images.length : 0) || 0);
+  return Number.isFinite(n) && n > 0 ? Math.floor(n) : 0;
+}
+function questionnaireSummaryText(row = {}) {
+  const type=cleanString(row.questionnaire_type || "general").toLowerCase();
+  const label=QUESTIONNAIRE_TYPE_LABELS[type] || type || "WEB問診";
+  const concern=questionnaireChiefComplaint(row);
+  const detail=[];
+  if (row.since_when) detail.push(`いつ頃:${cleanString(row.since_when)}`);
+  if (row.appetite) detail.push(`食欲:${cleanString(row.appetite)}`);
+  if (row.energy) detail.push(`元気:${cleanString(row.energy)}`);
+  if (row.vomiting) detail.push(`嘔吐:${cleanString(row.vomiting)}`);
+  if (row.diarrhea) detail.push(`下痢:${cleanString(row.diarrhea)}`);
+  const images=questionnaireImageCount(row);
+  const parts=[label, concern, ...detail.slice(0,2), images ? `画像${images}枚` : ""].filter(Boolean);
+  return parts.join("｜") || "WEB問診あり";
+}
+function questionnaireContextFromRow(row = {}) {
+  if (!row?.id) return {};
+  return {
+    questionnaire_id: row.id,
+    questionnaire_type: row.questionnaire_type || "general",
+    questionnaire_summary: questionnaireSummaryText(row),
+    questionnaire_image_count: questionnaireImageCount(row),
+    questionnaire_status: row.status || "submitted",
+    questionnaire_submitted_at: row.submitted_at || row.created_at || null,
+    questionnaire_emergency_confirmed: row.emergency_confirmed === true,
+    questionnaire_branching_used: row.branching_used === true,
+    questionnaire_waiting_entry_id: row.waiting_entry_id || null,
+    questionnaire_appointment_id: row.appointment_id || null,
+    questionnaire_visit_link_version: QUESTIONNAIRE_VISIT_LINK_VERSION
+  };
+}
+function questionnaireVisitDateMatches(row = {}, targetDate = "", fallbackHours = 72) {
+  const qDate=cleanString(row.visit_date);
+  const tDate=cleanString(targetDate);
+  if (qDate && tDate) return qDate === tDate;
+  const ms=questionnaireSubmittedMs(row);
+  if (!ms) return false;
+  const age=Date.now()-ms;
+  return age >= -5*60*1000 && age <= Math.max(1,Number(fallbackHours||72))*60*60*1000;
+}
+async function resolveQuestionnaireDbContext(env, clinic, clinicCode, body = {}) {
+  const rawPetId=cleanString(body.pet_id);
+  const rawGuardianId=cleanString(body.guardian_id);
+  const petName=cleanString(body.pet_name || body.answers?.pet_name || body.branch_context?.pet_name || "");
+  let pet=null;
+  if (isUuidLike(rawPetId)) {
+    pet=await selectSingle(env,TABLES.pets,{select:"*",clinic_id:`eq.${clinic.id}`,id:`eq.${rawPetId}`}).catch(()=>null);
+  }
+  if (!pet && isDemoClinicCodeForAudit(env,clinicCode) && petName) {
+    const rows=await selectRows(env,TABLES.pets,{select:"*",clinic_id:`eq.${clinic.id}`,pet_name:`eq.${petName}`,status:"eq.active",order:"created_at.asc",limit:2}).catch(()=>[]);
+    if (rows.length===1) pet=rows[0];
+  }
+  if (!pet && !isDemoClinicCodeForAudit(env,clinicCode)) {
+    throw new Error("問診対象のペット情報を確認できません。LINE診察券から開き直してください。");
+  }
+  const petId=pet?.id || (isUuidLike(rawPetId) ? rawPetId : null);
+  const guardianId=pet?.guardian_id || (isUuidLike(rawGuardianId) ? rawGuardianId : null);
+  return { pet, pet_id:petId, guardian_id:guardianId, pet_name:pet?.pet_name || petName };
+}
+async function recentQuestionnairesForClinic(env, clinicId, limit = 400) {
+  return selectRows(env,TABLES.questionnaires,{
+    select:"*", clinic_id:`eq.${clinicId}`, order:"submitted_at.desc.nullslast,created_at.desc", limit:Math.min(Math.max(Number(limit||400),1),500)
+  }).catch(()=>[]);
+}
+function pickQuestionnaireForTarget(rows = [], opts = {}) {
+  const targetId=cleanString(opts.target_id);
+  const linkField=opts.link_field;
+  const petId=cleanString(opts.pet_id);
+  const petName=cleanString(opts.pet_name);
+  const targetDate=cleanString(opts.target_date);
+  const clinicIsDemo=opts.demo === true;
+  const candidates=rows.filter(q=>{
+    if (!q?.id) return false;
+    const linked=cleanString(q[linkField]);
+    if (linked && linked !== targetId) return false;
+    const exactPet=petId && cleanString(q.pet_id)===petId;
+    const demoName=clinicIsDemo && petName && !q.pet_id && questionnairePetName(q)===petName;
+    if (!exactPet && !demoName) return false;
+    return questionnaireVisitDateMatches(q,targetDate,72);
+  }).sort((a,b)=>questionnaireSubmittedMs(b)-questionnaireSubmittedMs(a));
+  return candidates[0] || null;
+}
+async function linkQuestionnaireToVisitTarget(env, clinic, questionnaire, field, targetId, actorName = "問診自動紐付け") {
+  if (!questionnaire?.id || !targetId) return {ok:true,linked:false,skipped:true,reason:"missing_context"};
+  const current=cleanString(questionnaire[field]);
+  if (current && current !== targetId) return {ok:true,linked:false,skipped:true,reason:"already_linked_other",questionnaire_id:questionnaire.id};
+  if (current === targetId) return {ok:true,linked:true,skipped:true,reason:"already_linked",questionnaire_id:questionnaire.id};
+  const updated=await updateRows(env,TABLES.questionnaires,{id:`eq.${questionnaire.id}`,clinic_id:`eq.${clinic.id}`},{[field]:targetId,updated_at:new Date().toISOString()});
+  await logOperation(env,clinic.id,"system",actorName,"web_questionnaire_visit_auto_link","questionnaire",questionnaire.id,{field,target_id:targetId,feature_version:QUESTIONNAIRE_VISIT_LINK_VERSION});
+  return {ok:true,linked:true,skipped:false,questionnaire_id:questionnaire.id,row:updated?.[0]||questionnaire};
+}
+async function linkRecentQuestionnaireToWaitingEntry(env, clinic, opts = {}) {
+  const waitingEntryId=cleanString(opts.waiting_entry_id);
+  if (!waitingEntryId) return {ok:true,linked:false,skipped:true,reason:"waiting_entry_id_missing"};
+  try {
+    const rows=await recentQuestionnairesForClinic(env,clinic.id,300);
+    const q=pickQuestionnaireForTarget(rows,{target_id:waitingEntryId,link_field:"waiting_entry_id",pet_id:opts.pet_id,pet_name:opts.pet_name,target_date:opts.target_date,demo:isDemoClinicCodeForAudit(env,clinic.clinic_code)});
+    if (!q) return {ok:true,linked:false,skipped:true,reason:"questionnaire_not_found"};
+    return await linkQuestionnaireToVisitTarget(env,clinic,q,"waiting_entry_id",waitingEntryId,opts.actor_name||"受付連動");
+  } catch(error) { return {ok:false,linked:false,skipped:false,reason:"link_failed",error:error?.message||String(error)}; }
+}
+async function linkRecentQuestionnaireToAppointment(env, clinic, opts = {}) {
+  const appointmentId=cleanString(opts.appointment_id);
+  if (!appointmentId) return {ok:true,linked:false,skipped:true,reason:"appointment_id_missing"};
+  try {
+    const rows=await recentQuestionnairesForClinic(env,clinic.id,300);
+    const q=pickQuestionnaireForTarget(rows,{target_id:appointmentId,link_field:"appointment_id",pet_id:opts.pet_id,pet_name:opts.pet_name,target_date:opts.appointment_date,demo:isDemoClinicCodeForAudit(env,clinic.clinic_code)});
+    if (!q) return {ok:true,linked:false,skipped:true,reason:"questionnaire_not_found"};
+    return await linkQuestionnaireToVisitTarget(env,clinic,q,"appointment_id",appointmentId,opts.actor_name||"予約連動");
+  } catch(error) { return {ok:false,linked:false,skipped:false,reason:"link_failed",error:error?.message||String(error)}; }
+}
+async function autoLinkSubmittedQuestionnaire(env, clinic, questionnaire, context = {}) {
+  if (!questionnaire?.id || !context.pet_id) return {ok:true,waiting:null,appointment:null,skipped:true,reason:"pet_context_missing"};
+  let waiting=null,appointment=null;
+  const today=todayJST();
+  try {
+    const active=await findActiveSameDayQueueEntry(env,clinic.id,context.pet_id,today);
+    const waitingId=cleanString(active?.waiting_entry_id || active?.id);
+    if (waitingId) waiting=await linkQuestionnaireToVisitTarget(env,clinic,questionnaire,"waiting_entry_id",waitingId,"WEB問診送信時自動紐付け");
+  } catch(error) { waiting={ok:false,error:error?.message||String(error)}; }
+  try {
+    let target=null;
+    const explicit=cleanString(questionnaire.appointment_id);
+    if (explicit) {
+      target=await selectSingle(env,TABLES.exactAppointments,{select:"*",clinic_id:`eq.${clinic.id}`,id:`eq.${explicit}`,pet_id:`eq.${context.pet_id}`}).catch(()=>null);
+    }
+    if (!target) {
+      const rows=await selectRows(env,TABLES.exactAppointments,{select:"*",clinic_id:`eq.${clinic.id}`,pet_id:`eq.${context.pet_id}`,order:"appointment_date.asc,start_time.asc",limit:20}).catch(()=>[]);
+      const visitDate=cleanString(questionnaire.visit_date);
+      const eligible=rows.filter(a=>["scheduled","confirmed","checked_in"].includes(cleanString(a.status)) && compareDateText(cleanString(a.appointment_date),today)>=0 && (!visitDate || cleanString(a.appointment_date)===visitDate));
+      if (eligible.length===1) target=eligible[0];
+      else if (visitDate) target=eligible.find(a=>cleanString(a.appointment_date)===visitDate)||null;
+    }
+    if (target) appointment=await linkQuestionnaireToVisitTarget(env,clinic,questionnaire,"appointment_id",target.id,"WEB問診送信時予約自動紐付け");
+  } catch(error) { appointment={ok:false,error:error?.message||String(error)}; }
+  return {ok:true,waiting,appointment,feature_version:QUESTIONNAIRE_VISIT_LINK_VERSION};
+}
+async function attachWebQuestionnaireContextToRows(env, clinic, rows = [], mode = "queue") {
+  if (!rows.length) return rows;
+  const questionnaires=await recentQuestionnairesForClinic(env,clinic.id,500);
+  const byWaiting=new Map(), byAppointment=new Map(), byPet=new Map(), byDemoName=new Map();
+  for (const q of questionnaires) {
+    if (q.waiting_entry_id && !byWaiting.has(cleanString(q.waiting_entry_id))) byWaiting.set(cleanString(q.waiting_entry_id),q);
+    if (q.appointment_id && !byAppointment.has(cleanString(q.appointment_id))) byAppointment.set(cleanString(q.appointment_id),q);
+    if (q.pet_id && !byPet.has(cleanString(q.pet_id))) byPet.set(cleanString(q.pet_id),q);
+    const pn=questionnairePetName(q); if (pn && !byDemoName.has(pn)) byDemoName.set(pn,q);
+  }
+  const demo=isDemoClinicCodeForAudit(env,clinic.clinic_code);
+  return rows.map(row=>{
+    const directId=mode==="appointment" ? cleanString(row.id) : cleanString(row.waiting_entry_id||row.id);
+    let q=mode==="appointment" ? byAppointment.get(directId) : byWaiting.get(directId);
+    if (!q) {
+      const petId=cleanString(row.pet_id);
+      const targetDate=mode==="appointment" ? cleanString(row.appointment_date) : cleanString(row.target_date);
+      const candidate=petId ? byPet.get(petId) : null;
+      const linkField=mode==="appointment" ? "appointment_id" : "waiting_entry_id";
+      if (candidate && (!candidate[linkField] || cleanString(candidate[linkField])===directId) && questionnaireVisitDateMatches(candidate,targetDate,72)) q=candidate;
+      if (!q && demo) {
+        const pn=cleanString(row.pet_name||row.pet_name_snapshot||"");
+        const demoQ=pn ? byDemoName.get(pn) : null;
+        if (demoQ && (!demoQ[linkField] || cleanString(demoQ[linkField])===directId) && questionnaireVisitDateMatches(demoQ,targetDate,72)) q=demoQ;
+      }
+    }
+    return q ? {...row,...questionnaireContextFromRow(q),has_web_questionnaire:true} : {...row,has_web_questionnaire:false};
+  });
+}
+
 async function handleQuestionnaireCreate(request, env) {
   const body = await readJson(request);
   const clinicCode = getRequestedClinicCode(request, body);
@@ -3727,6 +3940,9 @@ async function handleQuestionnaireCreate(request, env) {
   const guardianId = cleanString(body.guardian_id);
   const petId = cleanString(body.pet_id);
   if (!petId) return errorResponse("問診対象のペットを選択してください。", 400);
+  let dbContext;
+  try { dbContext = await resolveQuestionnaireDbContext(env, clinic, clinicCode, body); }
+  catch (error) { return errorResponse(error?.message || "問診対象のペット情報を確認できません。", 400); }
 
   const questionnaireType = cleanString(body.questionnaire_type || body.category || "general").toLowerCase();
   const modules = effectiveQuestionnaireModules;
@@ -3773,15 +3989,17 @@ async function handleQuestionnaireCreate(request, env) {
   const nowIso = new Date().toISOString();
   answers.image_count = directImageMeta.length + parsedImages.length;
   answers.images = [...directImageMeta];
-  answers.pet_name = cleanString(body.pet_name || answers.pet_name || "");
+  answers.pet_name = cleanString(body.pet_name || answers.pet_name || dbContext?.pet_name || "");
   answers.guardian_name = cleanString(body.guardian_name || answers.guardian_name || "");
+  answers.pet_ref = petId;
+  answers.guardian_ref = guardianId || null;
   branchContext.pet_name = cleanString(body.pet_name || branchContext.pet_name || "");
   branchContext.guardian_name = cleanString(body.guardian_name || branchContext.guardian_name || "");
 
   const payload = {
     clinic_id: clinic.id,
-    guardian_id: (isDemoClinicCodeForAudit(env, clinicCode) && guardianId && !isUuidLike(guardianId)) ? null : (guardianId || null),
-    pet_id: (isDemoClinicCodeForAudit(env, clinicCode) && petId && !isUuidLike(petId)) ? null : (petId || null),
+    guardian_id: dbContext?.guardian_id || null,
+    pet_id: dbContext?.pet_id || null,
     visit_date: nullIfEmpty(body.visit_date),
     visit_time: normalizeTime(body.visit_time),
     symptoms: body.symptoms && typeof body.symptoms === "object" ? body.symptoms : {},
@@ -3795,8 +4013,8 @@ async function handleQuestionnaireCreate(request, env) {
     status: "submitted",
     questionnaire_type: questionnaireType,
     source: cleanString(body.source || "line"),
-    appointment_id: nullIfEmpty(body.appointment_id),
-    waiting_entry_id: nullIfEmpty(body.waiting_entry_id),
+    appointment_id: isUuidLike(body.appointment_id) ? cleanString(body.appointment_id) : null,
+    waiting_entry_id: isUuidLike(body.waiting_entry_id) ? cleanString(body.waiting_entry_id) : null,
     answers,
     branch_context: branchContext,
     branching_used: branchingUsed,
@@ -3837,6 +4055,16 @@ async function handleQuestionnaireCreate(request, env) {
     });
   }
 
+  const visitLink = await autoLinkSubmittedQuestionnaire(env, clinic, questionnaire, {
+    pet_id: dbContext?.pet_id || null,
+    guardian_id: dbContext?.guardian_id || null,
+    pet_name: dbContext?.pet_name || answers.pet_name || ""
+  });
+  if (visitLink?.waiting?.row || visitLink?.appointment?.row) {
+    const latestRows = await selectRows(env, TABLES.questionnaires, { select:"*", id:`eq.${questionnaire.id}`, clinic_id:`eq.${clinic.id}`, limit:1 }).catch(()=>[]);
+    questionnaire = latestRows[0] || questionnaire;
+  }
+
   await logOperation(env, clinic.id, "guardian", cleanString(body.actor_name) || "飼い主LINE",
     "web_questionnaire_submit", "questionnaire", questionnaire?.id || null, {
       pet_id: petId,
@@ -3857,7 +4085,9 @@ async function handleQuestionnaireCreate(request, env) {
     web_questionnaire_version: WEB_QUESTIONNAIRE_VERSION,
     branching_used: branchingUsed,
     demo_feature_override_applied: demoOverrideAllowed,
-    questionnaire_image_upload_mode: imageMeta.length ? "browser_direct_signed_upload" : "none"
+    questionnaire_image_upload_mode: imageMeta.length ? "browser_direct_signed_upload" : "none",
+    visit_link: visitLink,
+    questionnaire_visit_link_version: QUESTIONNAIRE_VISIT_LINK_VERSION
   });
 }
 
@@ -4529,7 +4759,15 @@ async function handleQueueEntriesGet(request, env) {
     request_category: requestCategory,
     limit
   });
-  const items = await attachPetPhotoFieldsToRows(env, clinic.id, itemsRaw);
+  const photoItems = await attachPetPhotoFieldsToRows(env, clinic.id, itemsRaw);
+  const questionnaireItems = await attachWebQuestionnaireContextToRows(env, clinic, photoItems, "queue");
+  const items = questionnaireItems.map((row) => row.has_web_questionnaire ? {
+    ...row,
+    purpose_raw: row.purpose || null,
+    purpose: [cleanString(row.purpose || row.visit_purpose || "通常診療"), "WEB問診あり"].filter(Boolean).join("｜"),
+    symptoms_summary_raw: row.symptoms_summary || null,
+    symptoms_summary: row.questionnaire_summary || row.symptoms_summary || null
+  } : row);
 
   const summaryRows = await getQueueSummaryRows(env, clinic.id, date, dayPart);
 
@@ -5067,7 +5305,7 @@ async function handleQueueEntryCreate(request, env) {
   if (existingActiveEntry) {
     const existingWaitingEntryId = cleanString(existingActiveEntry.waiting_entry_id || existingActiveEntry.id);
     if (existingWaitingEntryId) {
-      await linkUniqueSameDayExactAppointmentToQueue(
+      const existingExactLink = await linkUniqueSameDayExactAppointmentToQueue(
         env,
         clinic,
         petId,
@@ -5075,6 +5313,16 @@ async function handleQueueEntryCreate(request, env) {
         existingWaitingEntryId,
         cleanString(body.actor_name || body.staff_name) || "受付PC"
       );
+      await linkRecentQuestionnaireToWaitingEntry(env, clinic, {
+        waiting_entry_id: existingWaitingEntryId, pet_id: petId, pet_name: existingActiveEntry.pet_name || demoPetNameFromQueueBody(body),
+        target_date: targetDate, actor_name: cleanString(body.actor_name || body.staff_name) || "受付PC"
+      });
+      if (existingExactLink?.appointment_id) {
+        await linkRecentQuestionnaireToAppointment(env, clinic, {
+          appointment_id: existingExactLink.appointment_id, pet_id: petId, pet_name: existingActiveEntry.pet_name || demoPetNameFromQueueBody(body),
+          appointment_date: targetDate, actor_name: cleanString(body.actor_name || body.staff_name) || "受付PC"
+        });
+      }
     }
     return buildDuplicateQueueResponse(env, clinic, existingActiveEntry, targetDate, existingActiveEntry.day_part || dayPart, body);
   }
@@ -5145,6 +5393,16 @@ async function handleQueueEntryCreate(request, env) {
       )
     : { ok: true, linked: false, skipped: true, reason: "waiting_entry_id_missing" };
 
+  const questionnaireWaitingLink = waitingEntryId ? await linkRecentQuestionnaireToWaitingEntry(env, clinic, {
+    waiting_entry_id: waitingEntryId, pet_id: petId, pet_name: detail?.pet_name || demoPetNameFromQueueBody(body),
+    target_date: targetDate, actor_name: cleanString(body.actor_name || body.staff_name) || "受付PC"
+  }) : {ok:true,linked:false,skipped:true,reason:"waiting_entry_id_missing"};
+  const questionnaireAppointmentLink = exactAppointmentLink?.appointment_id ? await linkRecentQuestionnaireToAppointment(env, clinic, {
+    appointment_id: exactAppointmentLink.appointment_id, pet_id: petId, pet_name: detail?.pet_name || demoPetNameFromQueueBody(body),
+    appointment_date: targetDate, actor_name: cleanString(body.actor_name || body.staff_name) || "受付PC"
+  }) : {ok:true,linked:false,skipped:true,reason:"appointment_not_linked"};
+  const questionnaireLink = { waiting: questionnaireWaitingLink, appointment: questionnaireAppointmentLink };
+
   const summaryRows = await getQueueSummaryRows(env, clinic.id, targetDate, dayPart);
   await logOperation(env, clinic.id, "member", cleanString(body.actor_name) || "飼い主", "queue_entry_create", "waiting_entry", waitingEntryId, { entryKind, requestCategory, targetDate, dayPart });
 
@@ -5160,6 +5418,8 @@ async function handleQueueEntryCreate(request, env) {
     entry: detail,
     queue_number: detail?.queue_number || safeNumberRow?.queue_number || created?.queue_number || safeQueueNumber,
     exact_appointment_link: exactAppointmentLink,
+    questionnaire_link: questionnaireLink,
+    questionnaire_visit_link_version: QUESTIONNAIRE_VISIT_LINK_VERSION,
     summary: summaryRows[0] || buildEmptyQueueSummary(clinic, targetDate, dayPart)
   });
 }
@@ -12311,7 +12571,7 @@ async function enrichExactAppointments(env, rows, settings = null) {
   }
   const serviceMap = new Map(services.map((row) => [row.id, row]));
   const doctorMap = new Map(doctors.map((row) => [row.id, row]));
-  return rows.map((row) => {
+  const baseRows = rows.map((row) => {
     const service = serviceMap.get(row.service_type_id) || null;
     const doctor = doctorMap.get(row.doctor_id) || null;
     const publicSettings = settings ? exactAppointmentPublicSettings(settings) : null;
@@ -12327,6 +12587,10 @@ async function enrichExactAppointments(env, rows, settings = null) {
       can_member_cancel: Boolean(publicSettings?.allow_member_cancel && ["scheduled", "confirmed"].includes(row.status) && exactAppointmentDeadlineOk(row, publicSettings.cancel_deadline_hours))
     };
   });
+  if (!baseRows.length) return baseRows;
+  const clinicId=cleanString(baseRows[0]?.clinic_id);
+  const clinic=clinicId ? await selectSingle(env,TABLES.clinics,{select:"*",id:`eq.${clinicId}`}).catch(()=>null) : null;
+  return clinic ? attachWebQuestionnaireContextToRows(env,clinic,baseRows,"appointment") : baseRows;
 }
 
 async function findExactAppointmentForMember(env, clinic, request, body, settings) {
@@ -12692,11 +12956,14 @@ async function createExactAppointmentCore(request, env, body, adminMode = false)
     doctor_name: appointment?.doctor_name_snapshot || null,
     source
   });
+  const questionnaireLink = appointment?.id ? await linkRecentQuestionnaireToAppointment(env, clinic, {
+    appointment_id: appointment.id, pet_id: pet.id, pet_name: pet.pet_name || "", appointment_date: dateText, actor_name: actorName
+  }) : {ok:true,linked:false,skipped:true,reason:"appointment_id_missing"};
   const enriched = await enrichExactAppointments(env, [appointment], settings);
   const notification = appointment?.id
     ? await autoNotifyExactAppointmentAction(env, clinic, appointment.id, "created", actorName)
     : { ok: false, skipped: true, reason: "appointment_id_missing" };
-  return { clinic, settings, appointment: enriched[0], booking_token: bookingToken, notification };
+  return { clinic, settings, appointment: enriched[0], booking_token: bookingToken, notification, questionnaire_link: questionnaireLink, questionnaire_visit_link_version: QUESTIONNAIRE_VISIT_LINK_VERSION };
 }
 
 async function handleMemberExactAppointmentCreate(request, env) {
@@ -12908,7 +13175,13 @@ async function handleAdminExactAppointmentList(request, env) {
   };
   if (status) query.status = `eq.${normalizeExactAppointmentStatus(status)}`;
   const rows = await selectRows(env, TABLES.exactAppointments, query);
-  return jsonResponse({ ok: true, worker_version: WORKER_VERSION, clinic, settings, from, to, appointments: await enrichExactAppointments(env, rows, settings) });
+  const enriched = await enrichExactAppointments(env, rows, settings);
+  const appointments = enriched.map((row) => row.has_web_questionnaire ? {
+    ...row,
+    service_name_raw: row.service_name,
+    service_name: `${row.service_name || "日時指定予約"}｜WEB問診あり`
+  } : row);
+  return jsonResponse({ ok: true, worker_version: WORKER_VERSION, clinic, settings, from, to, appointments, questionnaire_visit_link_version: QUESTIONNAIRE_VISIT_LINK_VERSION });
 }
 
 async function handleAdminExactAppointmentCreate(request, env) {
@@ -13046,6 +13319,13 @@ async function handleAdminExactAppointmentCheckIn(request, env) {
           });
         } catch {}
       }
+      const questionnaireWaitingLink = await linkRecentQuestionnaireToWaitingEntry(env, clinic, {
+        waiting_entry_id: current.waiting_entry_id, pet_id: current.pet_id, pet_name: current.pet_name_snapshot || linked.pet_name || "", target_date: today, actor_name: actorName
+      });
+      const questionnaireAppointmentLink = await linkRecentQuestionnaireToAppointment(env, clinic, {
+        appointment_id: current.id, pet_id: current.pet_id, pet_name: current.pet_name_snapshot || linked.pet_name || "", appointment_date: current.appointment_date, actor_name: actorName
+      });
+      const questionnaireLink = { waiting: questionnaireWaitingLink, appointment: questionnaireAppointmentLink };
       const settings = await getExactAppointmentSettings(env, clinic, { createIfMissing: true });
       const latest = await selectSingle(env, TABLES.exactAppointments, {
         select: "*", clinic_id: `eq.${clinic.id}`, id: `eq.${appointmentId}`
@@ -13057,7 +13337,9 @@ async function handleAdminExactAppointmentCheckIn(request, env) {
         duplicate: true,
         message: "この予約はすでに来院受付済みです。",
         appointment: (await enrichExactAppointments(env, [latest], settings))[0],
-        waiting_entry: linked
+        waiting_entry: linked,
+        questionnaire_link: questionnaireLink,
+        questionnaire_visit_link_version: QUESTIONNAIRE_VISIT_LINK_VERSION
       });
     }
   }
@@ -13113,6 +13395,12 @@ async function handleAdminExactAppointmentCheckIn(request, env) {
     queue_linked_at: new Date().toISOString()
   });
 
+  const questionnaireWaitingLink = await linkRecentQuestionnaireToWaitingEntry(env, clinic, {
+    waiting_entry_id: waitingEntryId, pet_id: current.pet_id, pet_name: current.pet_name_snapshot || pet.pet_name || "", target_date: today, actor_name: actorName
+  });
+  const questionnaireAppointmentLink = await linkRecentQuestionnaireToAppointment(env, clinic, {
+    appointment_id: current.id, pet_id: current.pet_id, pet_name: current.pet_name_snapshot || pet.pet_name || "", appointment_date: current.appointment_date, actor_name: actorName
+  });
   const latest = await selectSingle(env, TABLES.exactAppointments, { select: "*", clinic_id: `eq.${clinic.id}`, id: `eq.${current.id}` });
   const waitingEntry = await selectSingle(env, TABLES.waitingEntriesDetailView, { select: "*", waiting_entry_id: `eq.${waitingEntryId}` });
   const settings = await getExactAppointmentSettings(env, clinic, { createIfMissing: true });
@@ -13133,7 +13421,9 @@ async function handleAdminExactAppointmentCheckIn(request, env) {
     message: created?.duplicate ? "既存の本日受付へ日時指定予約を紐付け、来院受付にしました。" : "日時指定予約を本日の順番受付へ追加し、来院受付にしました。",
     appointment: (await enrichExactAppointments(env, [latest], settings))[0],
     waiting_entry: waitingEntry,
-    queue_result: created
+    queue_result: created,
+    questionnaire_link: { waiting: questionnaireWaitingLink, appointment: questionnaireAppointmentLink },
+    questionnaire_visit_link_version: QUESTIONNAIRE_VISIT_LINK_VERSION
   });
 }
 
