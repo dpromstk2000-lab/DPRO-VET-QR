@@ -6,6 +6,7 @@
 <meta name="theme-color" content="#243b35">
 <title>DPRO PET CARE LINE｜機能ON/OFF設定 V1.1</title>
 <script src="./config.js"></script>
+<script src="./feature-switch.js"></script>
 <style>
 :root{--bg:#f4f7f3;--card:#fff;--ink:#1f2a24;--muted:#68746d;--line:#dbe5dc;--main:#2f6f5e;--soft:#edf7f2;--amber:#8a621f;--amberSoft:#fff6de;--red:#a73c3c;--redSoft:#fff0ef;--blue:#2d68a6;--blueSoft:#edf5ff;--shadow:0 18px 44px rgba(35,64,50,.12)}
 *{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#f9fcfa,#f4f7f3);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Yu Gothic",Meiryo,sans-serif;line-height:1.65}
@@ -24,16 +25,17 @@ h1{margin:8px 0 6px;font-size:clamp(28px,4vw,42px)}.hero p{margin:0;color:rgba(2
 </head>
 <body>
 <main class="page">
-<section class="hero"><div style="font-weight:900;font-size:12px;opacity:.9">ANIMARY-COUNTER-V1.1-2</div><h1>病院ごとの機能ON / OFF</h1><p>使わない機能は患者導線・院内運用から外すための中央設定です。WEB問診はさらにカテゴリ単位でON/OFFできます。</p></section>
+<section class="hero"><div style="font-weight:900;font-size:12px;opacity:.9">ANIMARY-COUNTER-V1.1-2-R2｜DEMO認証不要</div><h1>病院ごとの機能ON / OFF</h1><p>使わない機能は患者導線・院内運用から外すための中央設定です。WEB問診はさらにカテゴリ単位でON/OFFできます。</p></section>
 
 <section class="toolbar">
   <div class="row">
-    <div class="field"><label>管理コード</label><input id="adminCode" type="password" placeholder="Cloudflare Worker Secret ADMIN_TOKEN"></div>
+    <div class="field" id="adminField"><label>管理コード</label><input id="adminCode" type="password" placeholder="本番医院のみ入力"></div>
     <div class="field"><label>プリセット</label><select id="preset"><option value="simple">シンプル</option><option value="standard" selected>標準</option><option value="full">フル</option><option value="custom">カスタム</option></select></div>
     <button class="btn secondary" id="loadBtn" type="button">設定を読み込む</button>
     <button class="btn secondary" id="applyPresetBtn" type="button">プリセット反映</button>
+    <button class="btn secondary" id="resetDemoBtn" type="button" style="display:none">DEMO設定を標準に戻す</button>
   </div>
-  <div id="status" class="status warn">管理コードを入力して設定を読み込んでください。</div>
+  <div id="status" class="status warn">設定モードを確認しています。</div>
 </section>
 
 <section id="groups" class="grid"></section>
@@ -45,7 +47,7 @@ h1{margin:8px 0 6px;font-size:clamp(28px,4vw,42px)}.hero p{margin:0;color:rgba(2
 </section>
 
 <section class="savebar">
-  <div><strong id="changedText">未読込</strong><div class="mini">保存先：vet_clinic_settings.feature_flags / questionnaire_modules</div></div>
+  <div><strong id="changedText">未読込</strong><div class="mini" id="saveTargetText">保存先：vet_clinic_settings.feature_flags / questionnaire_modules</div></div>
   <button class="btn" id="saveBtn" type="button" disabled>機能設定を保存</button>
 </section>
 </main>
@@ -55,6 +57,9 @@ h1{margin:8px 0 6px;font-size:clamp(28px,4vw,42px)}.hero p{margin:0;color:rgba(2
 const CONFIG=window.DPRO_VET_CONFIG||window.DPRO_CONFIG||{};
 const params=new URLSearchParams(location.search);
 const CLINIC_CODE=params.get("clinic_code")||CONFIG?.clinic?.clinicCode||"dpro_vet_demo";
+const DEMO_CODE=CONFIG?.demo?.clinicCode||CONFIG.DEMO_CLINIC_CODE||"dpro_vet_demo";
+const IS_DEMO=CLINIC_CODE===DEMO_CODE;
+const FEATURES=window.DPRO_VET_FEATURES;
 const API_BASE=String(CONFIG?.api?.baseUrl||CONFIG.API_BASE_URL||"https://dpro-vet-qr-api.dpromstk2000.workers.dev").replace(/\/$/,"");
 const ADMIN_KEY="dpro_vet_admin_code";
 const DEFAULTS={pet_card:true,multi_pet_card:true,reception_queue:true,reception_general:true,reception_medicine_prevention:true,reception_care:true,previsit_questionnaire:true,questionnaire_branching:false,questionnaire_images:false,questionnaire_consent:false,exact_appointment:true,doctor_selection:true,qr_checkin:true,congestion_view:true,line_call:true,post_visit_followup:true,prevention_recall:true,revisit_recall:true,multi_pet_booking:false,vaccine_interval_control:false,cancel_waitlist:false,hp_sync:false};
@@ -99,11 +104,21 @@ function renderModules(){
 function renderModulesState(){const enabled=current.flags.previsit_questionnaire===true;document.querySelectorAll("[data-module-key]").forEach(el=>{el.disabled=!enabled})}
 function updateChanged(){const changed=JSON.stringify(original)!==JSON.stringify(current);$("saveBtn").disabled=!loaded||!changed;$("changedText").textContent=!loaded?"未読込":changed?"変更があります":"保存済み設定と同じです"}
 async function load(){
- const code=adminCode();if(!code)return setStatus("管理コードを入力してください。","ng");sessionStorage.setItem(ADMIN_KEY,code);
- const u=new URL(`${API_BASE}/api/admin/settings`);u.searchParams.set("clinic_code",CLINIC_CODE);setStatus("設定を読み込んでいます…");
+ if(IS_DEMO){
+  setStatus("営業DEMO設定を読み込んでいます…");
+  try{
+   const fs=await FEATURES.load({force:true});
+   current={flags:normalize(fs.flags,DEFAULTS),modules:normalize(fs.questionnaire_modules,MODULE_DEFAULTS)};
+   original={flags:{...current.flags},modules:{...current.modules}};$("preset").value=fs.preset||"standard";loaded=true;render();
+   setStatus(`営業DEMO｜${fs.demo_override_applied?"このブラウザの保存設定":"標準設定"}｜本番データには影響しません。`,"ok");
+  }catch(e){setStatus(e.message||"DEMO設定の読込に失敗しました。","ng")}
+  return;
+ }
+ const code=adminCode();if(!code)return setStatus("本番医院の管理コードを入力してください。","ng");sessionStorage.setItem(ADMIN_KEY,code);
+ const u=new URL(`${API_BASE}/api/admin/settings`);u.searchParams.set("clinic_code",CLINIC_CODE);setStatus("本番医院設定を読み込んでいます…");
  try{const r=await fetch(u,{headers:headers(),cache:"no-store"});const d=await r.json().catch(()=>({}));if(!r.ok||d.ok===false)throw new Error(d.message||d.error||`API ${r.status}`);
   current={flags:normalize(d?.settings?.feature_flags,DEFAULTS),modules:normalize(d?.settings?.questionnaire_modules,MODULE_DEFAULTS)};
-  original={flags:{...current.flags},modules:{...current.modules}};$("preset").value=d?.settings?.feature_preset||"standard";loaded=true;render();setStatus(`読込OK｜${CLINIC_CODE}｜${d?.settings?.web_questionnaire_version||"feature switch"}`,"ok")
+  original={flags:{...current.flags},modules:{...current.modules}};$("preset").value=d?.settings?.feature_preset||"standard";loaded=true;render();setStatus(`本番設定 読込OK｜${CLINIC_CODE}｜${d?.settings?.web_questionnaire_version||"feature switch"}`,"ok")
  }catch(e){setStatus(e.message||"読込に失敗しました。","ng")}
 }
 function applyPreset(){
@@ -115,17 +130,40 @@ function applyPreset(){
  render();setStatus(`${name} プリセットを画面へ反映しました。まだ保存していません。`,"warn")
 }
 async function save(){
- if(!loaded)return;const code=adminCode();if(!code)return setStatus("管理コードがありません。","ng");
+ if(!loaded)return;
  const payload={clinic_code:CLINIC_CODE,feature_preset:$("preset").value,feature_flags:current.flags,questionnaire_modules:current.modules,staff_name:"feature-settings.html"};
- $("saveBtn").disabled=true;setStatus("保存中です…");
+ $("saveBtn").disabled=true;setStatus(IS_DEMO?"DEMO設定をこのブラウザに保存しています…":"保存中です…");
+ if(IS_DEMO){
+  try{
+   const ok=FEATURES.saveDemoOverride(payload,CLINIC_CODE);if(!ok)throw new Error("ブラウザへのDEMO設定保存に失敗しました。");
+   const fs=await FEATURES.load({force:true});
+   current={flags:normalize(fs.flags,DEFAULTS),modules:normalize(fs.questionnaire_modules,MODULE_DEFAULTS)};
+   original={flags:{...current.flags},modules:{...current.modules}};$("preset").value=fs.preset||$("preset").value;render();
+   setStatus("DEMO設定を保存しました。このブラウザ内だけに反映され、本番医院・Supabase設定には影響しません。","ok");
+  }catch(e){setStatus(e.message||"DEMO設定の保存に失敗しました。","ng");$("saveBtn").disabled=false}
+  return;
+ }
+ const code=adminCode();if(!code){setStatus("本番医院の管理コードがありません。","ng");$("saveBtn").disabled=false;return}
  try{const r=await fetch(`${API_BASE}/api/admin/settings`,{method:"POST",headers:headers(),body:JSON.stringify(payload)});const d=await r.json().catch(()=>({}));if(!r.ok||d.ok===false)throw new Error(d.message||d.error||`API ${r.status}`);
   current={flags:normalize(d?.settings?.feature_flags,DEFAULTS),modules:normalize(d?.settings?.questionnaire_modules,MODULE_DEFAULTS)};
-  original={flags:{...current.flags},modules:{...current.modules}};render();setStatus("保存しました。OFFにした機能は対応画面・APIで使用しない設定になります。","ok")
+  original={flags:{...current.flags},modules:{...current.modules}};render();setStatus("本番医院設定を保存しました。OFFにした機能は対応画面・APIで使用しない設定になります。","ok")
  }catch(e){setStatus(e.message||"保存に失敗しました。","ng");$("saveBtn").disabled=false}
 }
-$("loadBtn").addEventListener("click",load);$("applyPresetBtn").addEventListener("click",applyPreset);$("saveBtn").addEventListener("click",save);
-try{$("adminCode").value=sessionStorage.getItem(ADMIN_KEY)||localStorage.getItem(ADMIN_KEY)||""}catch{}
+async function resetDemo(){
+ if(!IS_DEMO)return;
+ FEATURES.clearDemoOverride(CLINIC_CODE);
+ await load();
+ setStatus("DEMO設定を標準状態に戻しました。このブラウザ内のDEMO設定だけを消去しました。","ok");
+}
+$("loadBtn").addEventListener("click",load);$("applyPresetBtn").addEventListener("click",applyPreset);$("saveBtn").addEventListener("click",save);$("resetDemoBtn").addEventListener("click",resetDemo);
+if(IS_DEMO){
+ $("adminField").style.display="none";$("resetDemoBtn").style.display="inline-flex";$("loadBtn").textContent="DEMO設定を再読み込み";$("saveTargetText").textContent="保存先：このブラウザのDEMO設定（本番DBには保存しません）";
+ setStatus("営業DEMOモード｜管理コード不要｜このブラウザだけに保存します。","ok");
+}else{
+ try{$("adminCode").value=sessionStorage.getItem(ADMIN_KEY)||localStorage.getItem(ADMIN_KEY)||""}catch{}
+}
 render();
+if(IS_DEMO)load();
 })();
 </script>
 </body>

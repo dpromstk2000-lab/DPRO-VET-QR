@@ -1,12 +1,12 @@
 /* =========================================================
  DPRO PET CARE LINE V1.1
  Hospital Feature Switch client helper
- Version: DPRO-VET-FEATURE-SWITCH-V1.1.2
+ Version: DPRO-VET-FEATURE-SWITCH-V1.1.3-DEMO-LOCAL
 ========================================================= */
 (function(){
   "use strict";
 
-  const VERSION = "DPRO-VET-FEATURE-SWITCH-V1.1.2";
+  const VERSION = "DPRO-VET-FEATURE-SWITCH-V1.1.3-DEMO-LOCAL";
   const DEFAULTS = Object.freeze({
     pet_card:true,
     multi_pet_card:true,
@@ -55,7 +55,8 @@
     flags:{...DEFAULTS},
     questionnaireModules:{...QUESTIONNAIRE_MODULE_DEFAULTS},
     raw:null,
-    error:null
+    error:null,
+    demoOverrideApplied:false
   };
 
   const clean = (v)=>String(v ?? "").trim();
@@ -72,6 +73,72 @@
 
   function getApiBase(){
     return clean(CONFIG?.api?.baseUrl || CONFIG.API_BASE_URL || CONFIG?.urls?.apiBaseUrl || "https://dpro-vet-qr-api.dpromstk2000.workers.dev").replace(/\/$/,"");
+  }
+
+  function getDemoClinicCode(){
+    return clean(CONFIG?.demo?.clinicCode || CONFIG.DEMO_CLINIC_CODE || "dpro_vet_demo");
+  }
+
+  function isDemoClinicCode(clinicCode=getClinicCode()){
+    return clean(clinicCode) === getDemoClinicCode();
+  }
+
+  function demoStorageKey(clinicCode=getClinicCode()){
+    return `dpro_vet_demo_feature_settings:${clean(clinicCode) || getDemoClinicCode()}`;
+  }
+
+  function readDemoOverride(clinicCode=getClinicCode()){
+    if (!isDemoClinicCode(clinicCode)) return null;
+    try {
+      const raw = localStorage.getItem(demoStorageKey(clinicCode));
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : null;
+    } catch {
+      return null;
+    }
+  }
+
+  function saveDemoOverride(payload={},clinicCode=getClinicCode()){
+    if (!isDemoClinicCode(clinicCode)) return false;
+    const normalized = {
+      version:VERSION,
+      clinic_code:clean(clinicCode),
+      feature_preset:clean(payload.feature_preset || payload.preset || "custom") || "custom",
+      feature_flags:normalize(payload.feature_flags || payload.flags,DEFAULTS),
+      questionnaire_modules:normalize(payload.questionnaire_modules || payload.modules,QUESTIONNAIRE_MODULE_DEFAULTS),
+      saved_at:new Date().toISOString(),
+      storage_scope:"browser_only"
+    };
+    try {
+      localStorage.setItem(demoStorageKey(clinicCode),JSON.stringify(normalized));
+      state.loaded=false;
+      state.demoOverrideApplied=true;
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  function clearDemoOverride(clinicCode=getClinicCode()){
+    if (!isDemoClinicCode(clinicCode)) return false;
+    try {
+      localStorage.removeItem(demoStorageKey(clinicCode));
+      state.loaded=false;
+      state.demoOverrideApplied=false;
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  function applyDemoOverride(clinicCode){
+    const override = readDemoOverride(clinicCode);
+    state.demoOverrideApplied = Boolean(override);
+    if (!override) return;
+    state.preset = clean(override.feature_preset || override.preset) || state.preset || "custom";
+    state.flags = normalize(override.feature_flags || override.flags,DEFAULTS);
+    state.questionnaireModules = normalize(override.questionnaire_modules || override.modules,QUESTIONNAIRE_MODULE_DEFAULTS);
   }
 
   function normalize(input, defaults){
@@ -103,6 +170,7 @@
       state.questionnaireModules = normalize(settings.questionnaire_modules,QUESTIONNAIRE_MODULE_DEFAULTS);
       state.raw = data;
       state.error = null;
+      applyDemoOverride(clinicCode);
       state.loaded = true;
       return snapshot();
     })().catch((error)=>{
@@ -112,6 +180,7 @@
       state.questionnaireModules = {...QUESTIONNAIRE_MODULE_DEFAULTS};
       state.raw = null;
       state.error = error;
+      applyDemoOverride(state.clinicCode);
       state.loaded = true;
       console.warn("DPRO feature settings fallback to defaults:",error);
       return snapshot();
@@ -170,6 +239,9 @@
       preset:state.preset,
       flags:{...state.flags},
       questionnaire_modules:{...state.questionnaireModules},
+      demo_mode:isDemoClinicCode(state.clinicCode || getClinicCode()),
+      demo_override_applied:state.demoOverrideApplied,
+      demo_storage_scope:isDemoClinicCode(state.clinicCode || getClinicCode()) ? "browser_only" : "none",
       error:state.error ? String(state.error.message || state.error) : "",
       raw:state.raw
     };
@@ -184,6 +256,10 @@
     isQuestionnaireModuleEnabled,
     applyDom,
     requireFeature,
+    isDemoClinicCode,
+    readDemoOverride,
+    saveDemoOverride,
+    clearDemoOverride,
     getState:snapshot
   };
 })();
