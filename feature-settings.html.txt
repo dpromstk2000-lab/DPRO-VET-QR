@@ -26,7 +26,7 @@ h1{margin:8px 0 6px;font-size:clamp(28px,4vw,42px)}.hero p{margin:0;color:rgba(2
 </head>
 <body>
 <main class="page">
-<section class="hero"><div style="font-weight:900;font-size:12px;opacity:.9">ANIMARY-COUNTER-V1.1-2-R3｜保存完了UI</div><h1>病院ごとの機能ON / OFF</h1><p>使わない機能は患者導線・院内運用から外すための中央設定です。WEB問診はさらにカテゴリ単位でON/OFFできます。</p></section>
+<section class="hero"><div style="font-weight:900;font-size:12px;opacity:.9">ANIMARY-COUNTER-V1.1-2-R4｜保存完了UI修正</div><h1>病院ごとの機能ON / OFF</h1><p>使わない機能は患者導線・院内運用から外すための中央設定です。WEB問診はさらにカテゴリ単位でON/OFFできます。</p></section>
 
 <section class="toolbar">
   <div class="row">
@@ -48,7 +48,11 @@ h1{margin:8px 0 6px;font-size:clamp(28px,4vw,42px)}.hero p{margin:0;color:rgba(2
 </section>
 
 <section class="savebar">
-  <div><strong id="changedText">未読込</strong><div class="mini">保存先：vet_clinic_settings.feature_flags / questionnaire_modules</div></div>
+  <div>
+    <strong id="changedText">未読込</strong>
+    <div class="mini" id="saveTargetText">保存先：vet_clinic_settings.feature_flags / questionnaire_modules</div>
+    <div class="saveMeta" id="lastSavedText">まだ保存していません</div>
+  </div>
   <button class="btn" id="saveBtn" type="button" disabled>機能設定を保存</button>
 </section>
 </main>
@@ -98,7 +102,8 @@ function showSavedFeedback(message="保存しました",detail=""){
  setTimeout(()=>{btn.textContent="機能設定を保存";btn.classList.remove("saved")},2200)
 }
 function setLastSaved(value,scope=""){
- const t=formatSavedTime(value);$("lastSavedText").textContent=t?`最終保存：${t}${scope?`｜${scope}`:""}`:"まだ保存していません"
+ const el=$("lastSavedText");if(!el)return;
+ const t=formatSavedTime(value);el.textContent=t?`最終保存：${t}${scope?`｜${scope}`:""}`:"まだ保存していません"
 }
 function normalize(src,defs){const out={...defs};if(src&&typeof src==="object")Object.keys(out).forEach(k=>{if(Object.prototype.hasOwnProperty.call(src,k))out[k]=src[k]===true});return out}
 function render(){
@@ -176,6 +181,7 @@ async function resetDemo(){
 $("loadBtn").addEventListener("click",load);$("applyPresetBtn").addEventListener("click",applyPreset);$("saveBtn").addEventListener("click",save);$("resetDemoBtn").addEventListener("click",resetDemo);
 if(IS_DEMO){
  $("adminField").style.display="none";$("resetDemoBtn").style.display="inline-flex";$("loadBtn").textContent="DEMO設定を再読み込み";
+ const saveTarget=$("saveTargetText");if(saveTarget)saveTarget.textContent="保存先：このブラウザのDEMO設定（本番DBには保存しません）";
  setStatus("営業DEMOモード｜管理コード不要｜このブラウザだけに保存します。","ok");
 }else{
  try{$("adminCode").value=sessionStorage.getItem(ADMIN_KEY)||localStorage.getItem(ADMIN_KEY)||""}catch{}
