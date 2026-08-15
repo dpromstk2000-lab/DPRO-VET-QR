@@ -7,34 +7,47 @@
 <title>DPRO PET CARE LINE｜機能ON/OFF設定 V1.1</title>
 <script src="./config.js"></script>
 <style>
-:root{--bg:#f4f7f3;--card:#fff;--ink:#1f2a24;--muted:#68746d;--line:#dbe5dc;--main:#2f6f5e;--soft:#edf7f2;--amber:#8a621f;--amberSoft:#fff6de;--red:#a73c3c;--redSoft:#fff0ef;--shadow:0 18px 44px rgba(35,64,50,.12)}
-*{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#f9fcfa,#f4f7f3);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Yu Gothic",Meiryo,sans-serif;line-height:1.65}button,input,select{font:inherit}.page{width:min(1120px,calc(100% - 28px));margin:auto;padding:18px 0 50px}.hero{border-radius:28px;padding:24px;background:linear-gradient(135deg,#243b35,#2f6f5e);color:#fff;box-shadow:var(--shadow)}h1{margin:8px 0 6px;font-size:clamp(28px,4vw,42px)}.hero p{margin:0;color:rgba(255,255,255,.88)}.toolbar,.panel{margin-top:14px;background:var(--card);border:1px solid var(--line);border-radius:22px;padding:16px;box-shadow:var(--shadow)}.row{display:flex;flex-wrap:wrap;gap:10px;align-items:end}.field{flex:1 1 220px}.field label{display:block;color:var(--muted);font-size:12px;font-weight:900;margin-bottom:5px}.field input,.field select{width:100%;min-height:46px;border:1px solid #cddbd2;border-radius:14px;padding:10px 12px;background:#fff}.btn{border:0;border-radius:999px;min-height:46px;padding:10px 16px;background:var(--main);color:#fff;font-weight:950;cursor:pointer}.btn.secondary{background:#fff;color:var(--main);border:1px solid #cddbd2}.btn.warn{background:var(--amber)}.btn:disabled{opacity:.45;cursor:not-allowed}.status{margin-top:10px;border-radius:15px;padding:10px 12px;background:var(--soft);font-size:13px;font-weight:850}.status.warn{background:var(--amberSoft);color:#6d501b}.status.ng{background:var(--redSoft);color:var(--red)}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}.group{background:#fff;border:1px solid var(--line);border-radius:22px;padding:16px;box-shadow:0 10px 24px rgba(35,64,50,.06)}.group h2{margin:0 0 5px;font-size:19px}.group>p{margin:0 0 12px;color:var(--muted);font-size:12px}.switchRow{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;border-top:1px solid #edf1ee;padding:12px 0}.switchRow:first-of-type{border-top:0}.switchTitle{font-weight:950}.switchNote{color:var(--muted);font-size:12px;margin-top:2px}.switch{position:relative;width:56px;height:32px;display:inline-block}.switch input{opacity:0;width:0;height:0}.slider{position:absolute;inset:0;border-radius:999px;background:#cbd5cf;transition:.18s;cursor:pointer}.slider:before{content:"";position:absolute;width:24px;height:24px;left:4px;top:4px;border-radius:50%;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.18);transition:.18s}.switch input:checked + .slider{background:var(--main)}.switch input:checked + .slider:before{transform:translateX(24px)}.switch input:disabled + .slider{opacity:.4;cursor:not-allowed}.tag{display:inline-flex;margin-left:6px;border-radius:999px;padding:2px 7px;font-size:10px;font-weight:900;background:#edf2ef;color:#52635a}.tag.next{background:var(--amberSoft);color:var(--amber)}.savebar{position:sticky;bottom:10px;margin-top:14px;background:rgba(255,255,255,.95);backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:20px;padding:12px;box-shadow:var(--shadow);display:flex;justify-content:space-between;gap:10px;align-items:center}.mini{font-size:12px;color:var(--muted)}@media(max-width:780px){.grid{grid-template-columns:1fr}.savebar{align-items:stretch;flex-direction:column}.savebar .btn{width:100%}}
+:root{--bg:#f4f7f3;--card:#fff;--ink:#1f2a24;--muted:#68746d;--line:#dbe5dc;--main:#2f6f5e;--soft:#edf7f2;--amber:#8a621f;--amberSoft:#fff6de;--red:#a73c3c;--redSoft:#fff0ef;--blue:#2d68a6;--blueSoft:#edf5ff;--shadow:0 18px 44px rgba(35,64,50,.12)}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#f9fcfa,#f4f7f3);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Yu Gothic",Meiryo,sans-serif;line-height:1.65}
+button,input,select{font:inherit}.page{width:min(1160px,calc(100% - 28px));margin:auto;padding:18px 0 50px}.hero{border-radius:28px;padding:24px;background:linear-gradient(135deg,#243b35,#2f6f5e);color:#fff;box-shadow:var(--shadow)}
+h1{margin:8px 0 6px;font-size:clamp(28px,4vw,42px)}.hero p{margin:0;color:rgba(255,255,255,.88)}.toolbar,.panel{margin-top:14px;background:var(--card);border:1px solid var(--line);border-radius:22px;padding:16px;box-shadow:var(--shadow)}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:end}.field{flex:1 1 220px}.field label{display:block;color:var(--muted);font-size:12px;font-weight:900;margin-bottom:5px}.field input,.field select{width:100%;min-height:46px;border:1px solid #cddbd2;border-radius:14px;padding:10px 12px;background:#fff}
+.btn{border:0;border-radius:999px;min-height:46px;padding:10px 16px;background:var(--main);color:#fff;font-weight:950;cursor:pointer}.btn.secondary{background:#fff;color:var(--main);border:1px solid #cddbd2}.btn:disabled{opacity:.45;cursor:not-allowed}
+.status{margin-top:10px;border-radius:15px;padding:10px 12px;background:var(--soft);font-size:13px;font-weight:850}.status.warn{background:var(--amberSoft);color:#6d501b}.status.ng{background:var(--redSoft);color:var(--red)}.status.ok{background:var(--soft);color:#176a51}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}.group{background:#fff;border:1px solid var(--line);border-radius:22px;padding:16px;box-shadow:0 10px 24px rgba(35,64,50,.06)}.group h2{margin:0 0 5px;font-size:19px}.group>p{margin:0 0 12px;color:var(--muted);font-size:12px}
+.switchRow{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;border-top:1px solid #edf1ee;padding:12px 0}.switchRow:first-of-type{border-top:0}.switchTitle{font-weight:950}.switchNote{color:var(--muted);font-size:12px;margin-top:2px}.switch{position:relative;width:56px;height:32px;display:inline-block}.switch input{opacity:0;width:0;height:0}.slider{position:absolute;inset:0;border-radius:999px;background:#cbd5cf;transition:.18s;cursor:pointer}.slider:before{content:"";position:absolute;width:24px;height:24px;left:4px;top:4px;border-radius:50%;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.18);transition:.18s}.switch input:checked + .slider{background:var(--main)}.switch input:checked + .slider:before{transform:translateX(24px)}
+.tag{display:inline-flex;margin-left:6px;border-radius:999px;padding:2px 7px;font-size:10px;font-weight:900;background:#edf2ef;color:#52635a}.tag.ready{background:var(--blueSoft);color:var(--blue)}.tag.next{background:var(--amberSoft);color:var(--amber)}
+.moduleBox{margin-top:14px;border:1px solid #cfe4d6;background:#f8fcf9;border-radius:22px;padding:16px}.moduleGrid{display:grid;grid-template-columns:1fr 1fr;gap:0 16px}.moduleBox h2{margin:0;font-size:19px}.moduleBox>p{margin:4px 0 8px;color:var(--muted);font-size:12px}
+.savebar{position:sticky;bottom:10px;margin-top:14px;background:rgba(255,255,255,.95);backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:20px;padding:12px;box-shadow:var(--shadow);display:flex;justify-content:space-between;gap:10px;align-items:center}.mini{font-size:12px;color:var(--muted)}
+@media(max-width:780px){.grid,.moduleGrid{grid-template-columns:1fr}.savebar{align-items:stretch;flex-direction:column}.savebar .btn{width:100%}}
 </style>
 </head>
 <body>
 <main class="page">
-  <section class="hero">
-    <div style="font-weight:900;font-size:12px;opacity:.9">ANIMARY-COUNTER-V1.1-1</div>
-    <h1>病院ごとの機能ON / OFF</h1>
-    <p>使わない機能は患者画面・LINE導線・院内画面から消すための中央設定です。既存V1.0機能は初期値ON、新機能は実装完了までは初期値OFFです。</p>
-  </section>
+<section class="hero"><div style="font-weight:900;font-size:12px;opacity:.9">ANIMARY-COUNTER-V1.1-2</div><h1>病院ごとの機能ON / OFF</h1><p>使わない機能は患者導線・院内運用から外すための中央設定です。WEB問診はさらにカテゴリ単位でON/OFFできます。</p></section>
 
-  <section class="toolbar">
-    <div class="row">
-      <div class="field"><label>管理コード</label><input id="adminCode" type="password" placeholder="Cloudflare Worker Secret ADMIN_TOKEN"></div>
-      <div class="field"><label>プリセット</label><select id="preset"><option value="simple">シンプル</option><option value="standard" selected>標準</option><option value="full">フル</option><option value="custom">カスタム</option></select></div>
-      <button class="btn secondary" id="loadBtn" type="button">設定を読み込む</button>
-      <button class="btn secondary" id="applyPresetBtn" type="button">プリセット反映</button>
-    </div>
-    <div id="status" class="status warn">管理コードを入力して設定を読み込んでください。</div>
-  </section>
+<section class="toolbar">
+  <div class="row">
+    <div class="field"><label>管理コード</label><input id="adminCode" type="password" placeholder="Cloudflare Worker Secret ADMIN_TOKEN"></div>
+    <div class="field"><label>プリセット</label><select id="preset"><option value="simple">シンプル</option><option value="standard" selected>標準</option><option value="full">フル</option><option value="custom">カスタム</option></select></div>
+    <button class="btn secondary" id="loadBtn" type="button">設定を読み込む</button>
+    <button class="btn secondary" id="applyPresetBtn" type="button">プリセット反映</button>
+  </div>
+  <div id="status" class="status warn">管理コードを入力して設定を読み込んでください。</div>
+</section>
 
-  <section id="groups" class="grid"></section>
+<section id="groups" class="grid"></section>
 
-  <section class="savebar">
-    <div><strong id="changedText">未読込</strong><div class="mini">保存先：vet_clinic_settings.feature_flags</div></div>
-    <button class="btn" id="saveBtn" type="button" disabled>機能設定を保存</button>
-  </section>
+<section class="moduleBox">
+  <h2>WEB問診のカテゴリ小スイッチ</h2>
+  <p>WEB問診がONのとき、病院で使う問診カテゴリだけを表示します。</p>
+  <div id="moduleGroups" class="moduleGrid"></div>
+</section>
+
+<section class="savebar">
+  <div><strong id="changedText">未読込</strong><div class="mini">保存先：vet_clinic_settings.feature_flags / questionnaire_modules</div></div>
+  <button class="btn" id="saveBtn" type="button" disabled>機能設定を保存</button>
+</section>
 </main>
 <script>
 (()=>{
@@ -45,55 +58,74 @@ const CLINIC_CODE=params.get("clinic_code")||CONFIG?.clinic?.clinicCode||"dpro_v
 const API_BASE=String(CONFIG?.api?.baseUrl||CONFIG.API_BASE_URL||"https://dpro-vet-qr-api.dpromstk2000.workers.dev").replace(/\/$/,"");
 const ADMIN_KEY="dpro_vet_admin_code";
 const DEFAULTS={pet_card:true,multi_pet_card:true,reception_queue:true,reception_general:true,reception_medicine_prevention:true,reception_care:true,previsit_questionnaire:true,questionnaire_branching:false,questionnaire_images:false,questionnaire_consent:false,exact_appointment:true,doctor_selection:true,qr_checkin:true,congestion_view:true,line_call:true,post_visit_followup:true,prevention_recall:true,revisit_recall:true,multi_pet_booking:false,vaccine_interval_control:false,cancel_waitlist:false,hp_sync:false};
+const MODULE_DEFAULTS={general:true,vaccine:true,health_check:true,skin:true,digestive:true,respiratory:true,eye:true,ear:true,urinary:true,injury:true,medicine_prevention:true,other:true};
 const GROUPS=[
- {title:"飼い主・診察券",note:"LINE入口とペット診察券",items:[
-  ["pet_card","ペット診察券","LINE上のペット診察券を使用"],
-  ["multi_pet_card","複数ペット切替","同一飼い主の複数ペットを切替"]]},
- {title:"当日受付",note:"順番受付の大スイッチ＋個別受付",items:[
-  ["reception_queue","当日順番受付","当日受付機能全体"],
-  ["reception_general","通常診察受付","通常診察・再診・相談"],
-  ["reception_medicine_prevention","お薬・予防受付","薬・フード・予防薬・ワクチン"],
-  ["reception_care","ケア処置受付","爪切り・耳掃除など"]]},
- {title:"WEB問診 V1.1",note:"Animary対抗の最優先強化",items:[
-  ["previsit_questionnaire","来院前問診","既存の受付内問診"],
-  ["questionnaire_branching","条件分岐問診","症状・動物種に応じて質問変更","next"],
-  ["questionnaire_images","症状画像添付","患部・便・嘔吐物などの画像","next"],
-  ["questionnaire_consent","電子同意","同意文・氏名・日時を保存","next"]]},
- {title:"日時予約",note:"30分予約と獣医師選択",items:[
-  ["exact_appointment","日時指定予約","30分単位の日時指定予約"],
-  ["doctor_selection","獣医師選択","予約時の獣医師指名・選択"]]},
- {title:"来院・待ち状況",note:"院内受付と混雑確認",items:[
-  ["qr_checkin","QR来院受付","受付PC / iPadでQR受付"],
-  ["congestion_view","混雑目安","LINEから現在の待ち状況を表示"]]},
- {title:"LINE・フォロー",note:"呼び出しと診察後フォロー",items:[
-  ["line_call","LINE呼び出し","順番・受付からLINE連絡"],
-  ["post_visit_followup","診察後フォロー","診察後メッセージ・フォロー"],
-  ["prevention_recall","予防リコール","予防時期の案内"],
-  ["revisit_recall","再診リコール","再診予定の案内"]]},
- {title:"次期強化",note:"V1.2 / V1.3以降。先にスイッチ枠を確保",items:[
-  ["multi_pet_booking","多頭同時予約","V1.2予定","next"],
-  ["vaccine_interval_control","ワクチン間隔制御","V1.3予定","next"],
-  ["cancel_waitlist","キャンセル待ち","追加候補","next"],
-  ["hp_sync","HP＋LINE中央情報連携","差別化候補","next"]]}
+ {title:"飼い主・診察券",note:"LINE入口とペット診察券",items:[["pet_card","ペット診察券","LINE上のペット診察券を使用"],["multi_pet_card","複数ペット切替","同一飼い主の複数ペットを切替"]]},
+ {title:"当日受付",note:"順番受付の大スイッチ＋個別受付",items:[["reception_queue","当日順番受付","当日受付機能全体"],["reception_general","通常診察受付","通常診察・再診・相談"],["reception_medicine_prevention","お薬・予防受付","薬・フード・予防薬・ワクチン"],["reception_care","ケア処置受付","爪切り・耳掃除など"]]},
+ {title:"WEB問診 V1.1",note:"病院ごとの大スイッチ＋カテゴリ小スイッチ",items:[["previsit_questionnaire","来院前WEB問診","独立WEB問診を使用","ready"],["questionnaire_branching","条件分岐問診","症状カテゴリに応じて追加質問","ready"],["questionnaire_images","症状画像添付","患部・便・嘔吐物などの画像","next"],["questionnaire_consent","電子同意","同意文・氏名・日時を保存","next"]]},
+ {title:"日時予約",note:"30分予約と獣医師選択",items:[["exact_appointment","日時指定予約","30分単位の日時指定予約"],["doctor_selection","獣医師選択","予約時の獣医師指名・選択"]]},
+ {title:"来院・待ち状況",note:"院内受付と混雑確認",items:[["qr_checkin","QR来院受付","受付PC / iPadでQR受付"],["congestion_view","混雑目安","LINEから現在の待ち状況を表示"]]},
+ {title:"LINE・フォロー",note:"呼び出しと診察後フォロー",items:[["line_call","LINE呼び出し","順番・受付からLINE連絡"],["post_visit_followup","診察後フォロー","診察後メッセージ・フォロー"],["prevention_recall","予防リコール","予防時期の案内"],["revisit_recall","再診リコール","再診予定の案内"]]},
+ {title:"次期強化",note:"V1.2 / V1.3以降。先にスイッチ枠を確保",items:[["multi_pet_booking","多頭同時予約","V1.2予定","next"],["vaccine_interval_control","ワクチン間隔制御","V1.3予定","next"],["cancel_waitlist","キャンセル待ち","追加候補","next"],["hp_sync","HP＋LINE中央情報連携","差別化候補","next"]]}
 ];
+const MODULES=[["general","体調不良"],["vaccine","ワクチン"],["health_check","健康診断"],["skin","皮膚"],["digestive","消化器"],["respiratory","呼吸器"],["eye","眼"],["ear","耳"],["urinary","泌尿器"],["injury","ケガ"],["medicine_prevention","お薬・予防"],["other","その他"]];
 const PRESETS={
  simple:{pet_card:true,multi_pet_card:true,reception_queue:true,reception_general:true,reception_medicine_prevention:false,reception_care:false,previsit_questionnaire:false,questionnaire_branching:false,questionnaire_images:false,questionnaire_consent:false,exact_appointment:false,doctor_selection:false,qr_checkin:true,congestion_view:false,line_call:true,post_visit_followup:false,prevention_recall:false,revisit_recall:false,multi_pet_booking:false,vaccine_interval_control:false,cancel_waitlist:false,hp_sync:false},
  standard:{...DEFAULTS},
- full:{...DEFAULTS,questionnaire_branching:false,questionnaire_images:false,questionnaire_consent:false,multi_pet_booking:false,vaccine_interval_control:false,cancel_waitlist:false,hp_sync:false}
+ full:{...DEFAULTS,questionnaire_branching:true,questionnaire_images:false,questionnaire_consent:false,multi_pet_booking:false,vaccine_interval_control:false,cancel_waitlist:false,hp_sync:false}
 };
-let original={...DEFAULTS};let current={...DEFAULTS};let loaded=false;
-const $=(id)=>document.getElementById(id);
+let original={flags:{...DEFAULTS},modules:{...MODULE_DEFAULTS}};let current={flags:{...DEFAULTS},modules:{...MODULE_DEFAULTS}};let loaded=false;
+const $=id=>document.getElementById(id);
 function adminCode(){return $("adminCode").value.trim()||sessionStorage.getItem(ADMIN_KEY)||localStorage.getItem(ADMIN_KEY)||""}
 function headers(){return {"Content-Type":"application/json","Accept":"application/json","X-DPRO-Admin-Code":adminCode()}}
 function setStatus(msg,type=""){const el=$("status");el.className=`status ${type}`.trim();el.textContent=msg}
-function render(){const root=$("groups");root.innerHTML="";GROUPS.forEach(g=>{const sec=document.createElement("section");sec.className="group";sec.innerHTML=`<h2>${g.title}</h2><p>${g.note}</p>`;g.items.forEach(([key,title,note,tag])=>{const row=document.createElement("div");row.className="switchRow";row.innerHTML=`<div><div class="switchTitle">${title}${tag?`<span class="tag ${tag}">準備中</span>`:""}</div><div class="switchNote">${note}</div></div><label class="switch"><input type="checkbox" data-key="${key}" ${current[key]?"checked":""}><span class="slider"></span></label>`;row.querySelector("input").addEventListener("change",e=>{current[key]=e.target.checked;$("preset").value="custom";updateChanged()});sec.appendChild(row)});root.appendChild(sec)});updateChanged()}
+function normalize(src,defs){const out={...defs};if(src&&typeof src==="object")Object.keys(out).forEach(k=>{if(Object.prototype.hasOwnProperty.call(src,k))out[k]=src[k]===true});return out}
+function render(){
+ const root=$("groups");root.innerHTML="";
+ GROUPS.forEach(g=>{const sec=document.createElement("section");sec.className="group";sec.innerHTML=`<h2>${g.title}</h2><p>${g.note}</p>`;
+  g.items.forEach(([key,title,note,tag])=>{const row=document.createElement("div");row.className="switchRow";const tagHtml=tag?`<span class="tag ${tag}">${tag==="ready"?"実装済":"準備中"}</span>`:"";
+   row.innerHTML=`<div><div class="switchTitle">${title}${tagHtml}</div><div class="switchNote">${note}</div></div><label class="switch"><input type="checkbox" data-key="${key}" ${current.flags[key]?"checked":""}><span class="slider"></span></label>`;
+   row.querySelector("input").addEventListener("change",e=>{current.flags[key]=e.target.checked;$("preset").value="custom";updateChanged();renderModulesState()});sec.appendChild(row)});
+  root.appendChild(sec)});
+ renderModules();updateChanged()
+}
+function renderModules(){
+ const root=$("moduleGroups");root.innerHTML="";
+ MODULES.forEach(([key,label])=>{const row=document.createElement("div");row.className="switchRow";
+  row.innerHTML=`<div><div class="switchTitle">${label}</div><div class="switchNote">このカテゴリをWEB問診に表示</div></div><label class="switch"><input type="checkbox" data-module-key="${key}" ${current.modules[key]?"checked":""}><span class="slider"></span></label>`;
+  row.querySelector("input").addEventListener("change",e=>{current.modules[key]=e.target.checked;$("preset").value="custom";updateChanged()});root.appendChild(row)});
+ renderModulesState()
+}
+function renderModulesState(){const enabled=current.flags.previsit_questionnaire===true;document.querySelectorAll("[data-module-key]").forEach(el=>{el.disabled=!enabled})}
 function updateChanged(){const changed=JSON.stringify(original)!==JSON.stringify(current);$("saveBtn").disabled=!loaded||!changed;$("changedText").textContent=!loaded?"未読込":changed?"変更があります":"保存済み設定と同じです"}
-function normalize(src){const out={...DEFAULTS};if(src&&typeof src==="object")Object.keys(out).forEach(k=>{if(Object.prototype.hasOwnProperty.call(src,k))out[k]=src[k]===true});return out}
-async function load(){const code=adminCode();if(!code)return setStatus("管理コードを入力してください。","ng");sessionStorage.setItem(ADMIN_KEY,code);const u=new URL(`${API_BASE}/api/admin/settings`);u.searchParams.set("clinic_code",CLINIC_CODE);setStatus("設定を読み込んでいます…");try{const r=await fetch(u,{headers:headers(),cache:"no-store"});const d=await r.json().catch(()=>({}));if(!r.ok||d.ok===false)throw new Error(d.message||d.error||`API ${r.status}`);current=normalize(d?.settings?.feature_flags);original={...current};$("preset").value=d?.settings?.feature_preset||"standard";loaded=true;render();setStatus(`読込OK｜${CLINIC_CODE}｜${d?.settings?.feature_switch_version||"feature switch"}`)}catch(e){setStatus(e.message||"読込に失敗しました。","ng")}}
-function applyPreset(){const name=$("preset").value;if(name==="custom")return;current={...(PRESETS[name]||DEFAULTS)};render();setStatus(`${name} プリセットを画面に反映しました。保存すると確定します。`,"warn")}
-async function save(){if(!loaded)return;const code=adminCode();if(!code)return setStatus("管理コードを入力してください。","ng");$("saveBtn").disabled=true;setStatus("保存中…");try{const r=await fetch(`${API_BASE}/api/admin/settings`,{method:"POST",headers:headers(),body:JSON.stringify({clinic_code:CLINIC_CODE,feature_preset:$("preset").value,feature_flags:current,staff_name:"feature-settings.html"})});const d=await r.json().catch(()=>({}));if(!r.ok||d.ok===false)throw new Error(d.message||d.error||`API ${r.status}`);current=normalize(d?.settings?.feature_flags||current);original={...current};loaded=true;render();setStatus("機能設定を保存しました。各画面はFeature Switch連携済みのものからこの設定に従います。") }catch(e){setStatus(e.message||"保存に失敗しました。","ng");updateChanged()}}
-$("loadBtn").addEventListener("click",load);$("applyPresetBtn").addEventListener("click",applyPreset);$("saveBtn").addEventListener("click",save);$("preset").addEventListener("change",()=>{if($("preset").value!=="custom")setStatus("プリセットを選択しました。「プリセット反映」を押すとスイッチが変わります。","warn")});
-try{$("adminCode").value=sessionStorage.getItem(ADMIN_KEY)||localStorage.getItem(ADMIN_KEY)||""}catch{}render();if(adminCode())load();
+async function load(){
+ const code=adminCode();if(!code)return setStatus("管理コードを入力してください。","ng");sessionStorage.setItem(ADMIN_KEY,code);
+ const u=new URL(`${API_BASE}/api/admin/settings`);u.searchParams.set("clinic_code",CLINIC_CODE);setStatus("設定を読み込んでいます…");
+ try{const r=await fetch(u,{headers:headers(),cache:"no-store"});const d=await r.json().catch(()=>({}));if(!r.ok||d.ok===false)throw new Error(d.message||d.error||`API ${r.status}`);
+  current={flags:normalize(d?.settings?.feature_flags,DEFAULTS),modules:normalize(d?.settings?.questionnaire_modules,MODULE_DEFAULTS)};
+  original={flags:{...current.flags},modules:{...current.modules}};$("preset").value=d?.settings?.feature_preset||"standard";loaded=true;render();setStatus(`読込OK｜${CLINIC_CODE}｜${d?.settings?.web_questionnaire_version||"feature switch"}`,"ok")
+ }catch(e){setStatus(e.message||"読込に失敗しました。","ng")}
+}
+function applyPreset(){
+ const name=$("preset").value;if(name==="custom")return;
+ current.flags={...DEFAULTS,...PRESETS[name]};
+ if(name==="simple")current.modules={...MODULE_DEFAULTS};
+ if(name==="standard")current.modules={...MODULE_DEFAULTS};
+ if(name==="full")current.modules={...MODULE_DEFAULTS};
+ render();setStatus(`${name} プリセットを画面へ反映しました。まだ保存していません。`,"warn")
+}
+async function save(){
+ if(!loaded)return;const code=adminCode();if(!code)return setStatus("管理コードがありません。","ng");
+ const payload={clinic_code:CLINIC_CODE,feature_preset:$("preset").value,feature_flags:current.flags,questionnaire_modules:current.modules,staff_name:"feature-settings.html"};
+ $("saveBtn").disabled=true;setStatus("保存中です…");
+ try{const r=await fetch(`${API_BASE}/api/admin/settings`,{method:"POST",headers:headers(),body:JSON.stringify(payload)});const d=await r.json().catch(()=>({}));if(!r.ok||d.ok===false)throw new Error(d.message||d.error||`API ${r.status}`);
+  current={flags:normalize(d?.settings?.feature_flags,DEFAULTS),modules:normalize(d?.settings?.questionnaire_modules,MODULE_DEFAULTS)};
+  original={flags:{...current.flags},modules:{...current.modules}};render();setStatus("保存しました。OFFにした機能は対応画面・APIで使用しない設定になります。","ok")
+ }catch(e){setStatus(e.message||"保存に失敗しました。","ng");$("saveBtn").disabled=false}
+}
+$("loadBtn").addEventListener("click",load);$("applyPresetBtn").addEventListener("click",applyPreset);$("saveBtn").addEventListener("click",save);
+try{$("adminCode").value=sessionStorage.getItem(ADMIN_KEY)||localStorage.getItem(ADMIN_KEY)||""}catch{}
+render();
 })();
 </script>
 </body>

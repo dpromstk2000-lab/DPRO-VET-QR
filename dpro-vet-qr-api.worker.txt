@@ -96,7 +96,9 @@ const TABLES = {
 };
 
 const DEFAULT_CLINIC_CODE = "dpro_vet_demo";
-const WORKER_VERSION = "FINAL-VET-AUDIT-1-R1-SECURITY-20260807";
+const WORKER_VERSION = "ANIMARY-COUNTER-V1.1-2-WEB-QUESTIONNAIRE-20260815";
+const FEATURE_SWITCH_VERSION = "DPRO-VET-FEATURE-SWITCH-V1.1";
+const WEB_QUESTIONNAIRE_VERSION = "DPRO-VET-WEB-QUESTIONNAIRE-V1.1";
 const EXACT_APPOINTMENT_GUARD_VERSION = "VET-APPOINTMENT-1-R2";
 const LINE_CALL_FEATURE_VERSION = "VET-LINE-CALL-1";
 const DOCTOR_SLOT_FEATURE_VERSION = "VET-DOCTOR-SLOT-1";
@@ -112,6 +114,109 @@ const LINE_BOT_INFO_ENDPOINT = "https://api.line.me/v2/bot/info";
 const SERVICE_NAME = "DPRO PET CARE LINE";
 const SERVICE_ID = "dpro-vet-qr-api";
 const DEMO_OPERATION_CONFIRM_TEXT = "DEMO動物病院だけ実行";
+
+// =========================================================
+// DPRO PET CARE LINE V1.1 / hospital feature switches
+// - Existing V1.0 functions default ON to preserve current behavior.
+// - New V1.1+ functions default OFF until the corresponding feature is released.
+// =========================================================
+const DEFAULT_FEATURE_FLAGS = Object.freeze({
+  pet_card: true,
+  multi_pet_card: true,
+  reception_queue: true,
+  reception_general: true,
+  reception_medicine_prevention: true,
+  reception_care: true,
+  previsit_questionnaire: true,
+  questionnaire_branching: false,
+  questionnaire_images: false,
+  questionnaire_consent: false,
+  exact_appointment: true,
+  doctor_selection: true,
+  qr_checkin: true,
+  congestion_view: true,
+  line_call: true,
+  post_visit_followup: true,
+  prevention_recall: true,
+  revisit_recall: true,
+  multi_pet_booking: false,
+  vaccine_interval_control: false,
+  cancel_waitlist: false,
+  hp_sync: false
+});
+
+const FEATURE_FLAG_KEYS = Object.freeze(Object.keys(DEFAULT_FEATURE_FLAGS));
+
+function normalizeFeatureFlags(input = {}) {
+  let source = input;
+  if (typeof source === "string") {
+    try { source = JSON.parse(source); } catch { source = {}; }
+  }
+  if (!source || Array.isArray(source) || typeof source !== "object") source = {};
+  const out = { ...DEFAULT_FEATURE_FLAGS };
+  FEATURE_FLAG_KEYS.forEach((key) => {
+    if (Object.prototype.hasOwnProperty.call(source, key)) {
+      out[key] = toBool(source[key], DEFAULT_FEATURE_FLAGS[key]);
+    }
+  });
+  return out;
+}
+
+function normalizeFeaturePreset(value) {
+  const preset = cleanString(value || "standard").toLowerCase();
+  return ["simple", "standard", "full", "custom"].includes(preset) ? preset : "custom";
+}
+
+const DEFAULT_QUESTIONNAIRE_MODULES = Object.freeze({
+  general: true,
+  vaccine: true,
+  health_check: true,
+  skin: true,
+  digestive: true,
+  respiratory: true,
+  eye: true,
+  ear: true,
+  urinary: true,
+  injury: true,
+  medicine_prevention: true,
+  other: true
+});
+
+function normalizeQuestionnaireModules(input = {}) {
+  let source = input;
+  if (typeof source === "string") {
+    try { source = JSON.parse(source); } catch { source = {}; }
+  }
+  if (!source || Array.isArray(source) || typeof source !== "object") source = {};
+  const out = { ...DEFAULT_QUESTIONNAIRE_MODULES };
+  Object.keys(out).forEach((key) => {
+    if (Object.prototype.hasOwnProperty.call(source, key)) {
+      out[key] = toBool(source[key], DEFAULT_QUESTIONNAIRE_MODULES[key]);
+    }
+  });
+  return out;
+}
+
+async function getClinicFeatureState(env, clinicCode) {
+  const clinic = await getClinicByCode(env, clinicCode);
+  const settings = await getClinicSettings(env, clinic.id);
+  return {
+    clinic,
+    settings,
+    feature_preset: normalizeFeaturePreset(settings?.feature_preset || "standard"),
+    feature_flags: normalizeFeatureFlags(settings?.feature_flags),
+    questionnaire_modules: normalizeQuestionnaireModules(settings?.questionnaire_modules)
+  };
+}
+
+function featureDisabledResponse(key, message) {
+  return errorResponse(message || "この機能は現在この動物病院では使用していません。", 403, {
+    code: "feature_disabled",
+    feature_key: key,
+    feature_switch_version: FEATURE_SWITCH_VERSION
+  });
+}
+
 
 // STEP VET-PHOTO-1B: ペット写真アイコン用設定
 const PET_PHOTO_BUCKET = "vet-pet-photos";
@@ -321,7 +426,12 @@ function normalizeClinicSettingsForPublic(settings = {}) {
     afternoon_last_accept_time: settings.afternoon_last_accept_time || "",
     max_morning_queue: Number(settings.max_morning_queue || 0),
     max_afternoon_queue: Number(settings.max_afternoon_queue || 0),
-    status: settings.status || ""
+    status: settings.status || "",
+    feature_switch_version: FEATURE_SWITCH_VERSION,
+    feature_preset: normalizeFeaturePreset(settings.feature_preset || "standard"),
+    feature_flags: normalizeFeatureFlags(settings.feature_flags),
+    questionnaire_modules: normalizeQuestionnaireModules(settings.questionnaire_modules),
+    web_questionnaire_version: WEB_QUESTIONNAIRE_VERSION
   };
 }
 
@@ -428,6 +538,8 @@ export default {
           service_name: SERVICE_NAME,
           message: "DPRO PET CARE LINE VET API is running.",
           version: WORKER_VERSION,
+          feature_switch_version: FEATURE_SWITCH_VERSION,
+          web_questionnaire_version: WEB_QUESTIONNAIRE_VERSION,
           default_clinic_code: getDemoClinicCode(env),
           pet_photo_bucket: PET_PHOTO_BUCKET,
           pet_photo_max_bytes: PET_PHOTO_MAX_BYTES,
@@ -1940,7 +2052,9 @@ function getClinicSettingDefaults(clinicCode, clinic = {}) {
     queue_mode: "walkin",
     max_morning_queue: 30,
     max_afternoon_queue: 30,
-    status: "demo"
+    status: "demo",
+    feature_preset: "standard",
+    feature_flags: normalizeFeatureFlags({})
   };
 }
 
@@ -3271,11 +3385,36 @@ async function handleMemberLineLinkComplete(request, env) {
 async function handleQuestionnaireCreate(request, env) {
   const body = await readJson(request);
   const clinicCode = getRequestedClinicCode(request, body);
-  const clinic = await getClinicByCode(env, clinicCode);
+  const featureState = await getClinicFeatureState(env, clinicCode);
+  const clinic = featureState.clinic;
+
+  if (featureState.feature_flags.previsit_questionnaire !== true) {
+    return featureDisabledResponse("previsit_questionnaire", "この動物病院ではWEB問診を使用していません。");
+  }
 
   const guardianId = cleanString(body.guardian_id);
   const petId = cleanString(body.pet_id);
+  if (!petId) return errorResponse("問診対象のペットを選択してください。", 400);
 
+  const questionnaireType = cleanString(body.questionnaire_type || body.category || "general").toLowerCase();
+  const modules = featureState.questionnaire_modules;
+  if (!Object.prototype.hasOwnProperty.call(modules, questionnaireType)) {
+    return errorResponse("問診カテゴリが正しくありません。", 400);
+  }
+  if (modules[questionnaireType] !== true) {
+    return featureDisabledResponse(`questionnaire_module:${questionnaireType}`, "この問診カテゴリは病院設定で使用しない設定になっています。");
+  }
+
+  const requestedBranching = toBool(body.branching_used, false);
+  const branchingUsed = requestedBranching && featureState.feature_flags.questionnaire_branching === true;
+  const answers = body.answers && typeof body.answers === "object" && !Array.isArray(body.answers)
+    ? body.answers
+    : {};
+  const branchContext = branchingUsed && body.branch_context && typeof body.branch_context === "object" && !Array.isArray(body.branch_context)
+    ? body.branch_context
+    : {};
+
+  const nowIso = new Date().toISOString();
   const payload = {
     clinic_id: clinic.id,
     guardian_id: guardianId || null,
@@ -3290,11 +3429,40 @@ async function handleQuestionnaireCreate(request, env) {
     since_when: nullIfEmpty(body.since_when),
     free_text: nullIfEmpty(body.free_text || body.memo),
     emergency_confirmed: toBool(body.emergency_confirmed, false),
-    status: "submitted"
+    status: "submitted",
+    questionnaire_type: questionnaireType,
+    source: cleanString(body.source || "line"),
+    appointment_id: nullIfEmpty(body.appointment_id),
+    waiting_entry_id: nullIfEmpty(body.waiting_entry_id),
+    answers,
+    branch_context: branchContext,
+    branching_used: branchingUsed,
+    questionnaire_version: WEB_QUESTIONNAIRE_VERSION,
+    submitted_at: nowIso,
+    updated_at: nowIso
   };
 
   const inserted = await insertRows(env, TABLES.questionnaires, payload);
-  return jsonResponse({ ok: true, message: "来院前問診を送信しました。", questionnaire: inserted?.[0] || inserted });
+  const questionnaire = inserted?.[0] || inserted;
+
+  await logOperation(env, clinic.id, "guardian", cleanString(body.actor_name) || "飼い主LINE",
+    "web_questionnaire_submit", "questionnaire", questionnaire?.id || null, {
+      pet_id: petId,
+      questionnaire_type: questionnaireType,
+      branching_used: branchingUsed,
+      appointment_id: payload.appointment_id,
+      waiting_entry_id: payload.waiting_entry_id,
+      questionnaire_version: WEB_QUESTIONNAIRE_VERSION
+    });
+
+  return jsonResponse({
+    ok: true,
+    message: "来院前WEB問診を送信しました。",
+    questionnaire,
+    feature_switch_version: FEATURE_SWITCH_VERSION,
+    web_questionnaire_version: WEB_QUESTIONNAIRE_VERSION,
+    branching_used: branchingUsed
+  });
 }
 
 
@@ -4477,6 +4645,20 @@ async function handleQueueEntryCreate(request, env) {
   const requestCategory = normalizeQueueRequestCategory(body.request_category || body.category);
   const targetDate = normalizeQueueDate(body.target_date || body.date || todayJST());
   const dayPart = normalizeQueueDayPart(body.day_part || body.session, entryKind === "priority_reservation" ? "morning" : "morning");
+
+  const queueFeatureState = await getClinicFeatureState(env, clinicCode);
+  if (queueFeatureState.feature_flags.reception_queue !== true) {
+    return featureDisabledResponse("reception_queue", "この動物病院では当日順番受付を使用していません。");
+  }
+  const queueFeatureByKind = {
+    today_queue: "reception_general",
+    medicine_prevention: "reception_medicine_prevention",
+    care_consult: "reception_care"
+  };
+  const queueFeatureKey = queueFeatureByKind[entryKind] || "";
+  if (queueFeatureKey && queueFeatureState.feature_flags[queueFeatureKey] !== true) {
+    return featureDisabledResponse(queueFeatureKey, "この受付種別は病院設定で使用しない設定になっています。");
+  }
 
   // STEP VET-36E-R2:
   // 同じペットが同じ日に、完了・取消以外の受付をすでに持っている場合は、
@@ -7250,7 +7432,20 @@ async function handleSettingsGet(request, env) {
   const settings = await getClinicSettings(env, clinic.id);
   const regular_hours = await getRegularHours(env, clinic.id);
   const special_days = await getSpecialDays(env, clinic.id, todayJST(), addMonths(todayJST(), 3));
-  return jsonResponse({ ok: true, clinic, settings, regular_hours, special_days });
+  return jsonResponse({
+    ok: true,
+    clinic,
+    settings: {
+      ...(settings || {}),
+      feature_switch_version: FEATURE_SWITCH_VERSION,
+      feature_preset: normalizeFeaturePreset(settings?.feature_preset || "standard"),
+      feature_flags: normalizeFeatureFlags(settings?.feature_flags),
+      questionnaire_modules: normalizeQuestionnaireModules(settings?.questionnaire_modules),
+      web_questionnaire_version: WEB_QUESTIONNAIRE_VERSION
+    },
+    regular_hours,
+    special_days
+  });
 }
 
 async function handleSettingsSave(request, env) {
@@ -7300,6 +7495,16 @@ async function handleSettingsSave(request, env) {
     if (body[key] !== undefined) settingsPayload[key] = body[key];
   });
 
+  if (body.feature_preset !== undefined) {
+    settingsPayload.feature_preset = normalizeFeaturePreset(body.feature_preset);
+  }
+  if (body.feature_flags !== undefined) {
+    settingsPayload.feature_flags = normalizeFeatureFlags(body.feature_flags);
+  }
+  if (body.questionnaire_modules !== undefined) {
+    settingsPayload.questionnaire_modules = normalizeQuestionnaireModules(body.questionnaire_modules);
+  }
+
   let updatedSettings = await getClinicSettings(env, clinic.id);
   if (Object.keys(settingsPayload).length) {
     const rows = await updateRows(env, TABLES.clinicSettings, { clinic_id: `eq.${clinic.id}` }, settingsPayload);
@@ -7311,13 +7516,25 @@ async function handleSettingsSave(request, env) {
     await upsertRows(env, TABLES.regularHours, regularPayload, "clinic_id,day_of_week");
   }
 
-  await logOperation(env, clinic.id, "owner", cleanString(body.staff_name) || "管理者", "settings_save", "clinic", clinic.id, {});
+  await logOperation(env, clinic.id, "owner", cleanString(body.staff_name) || "管理者", "settings_save", "clinic", clinic.id, {
+    feature_switch_version: FEATURE_SWITCH_VERSION,
+    feature_preset: updatedSettings?.feature_preset || "standard",
+    feature_flags_changed: body.feature_flags !== undefined,
+    questionnaire_modules_changed: body.questionnaire_modules !== undefined
+  });
 
   return jsonResponse({
     ok: true,
     message: "設定を保存しました。",
     clinic: updatedClinic,
-    settings: updatedSettings,
+    settings: {
+      ...(updatedSettings || {}),
+      feature_switch_version: FEATURE_SWITCH_VERSION,
+      feature_preset: normalizeFeaturePreset(updatedSettings?.feature_preset || "standard"),
+      feature_flags: normalizeFeatureFlags(updatedSettings?.feature_flags),
+      questionnaire_modules: normalizeQuestionnaireModules(updatedSettings?.questionnaire_modules),
+      web_questionnaire_version: WEB_QUESTIONNAIRE_VERSION
+    },
     regular_hours: await getRegularHours(env, clinic.id)
   });
 }
@@ -11923,7 +12140,22 @@ async function autoNotifyExactAppointmentAction(env, clinic, appointmentId, acti
 
 async function handleExactAppointmentPublicSettings(request, env) {
   const clinicCode = getParam(request, "clinic_code", DEFAULT_CLINIC_CODE);
-  const clinic = await getClinicByCode(env, clinicCode);
+  const featureState = await getClinicFeatureState(env, clinicCode);
+  const clinic = featureState.clinic;
+  if (featureState.feature_flags.exact_appointment !== true) {
+    const settings = await getExactAppointmentSettings(env, clinic);
+    return jsonResponse({
+      ok: true,
+      worker_version: WORKER_VERSION,
+      clinic,
+      settings: { ...exactAppointmentPublicSettings(settings), exact_time_booking_enabled: false, doctor_booking_enabled: false },
+      services: [],
+      doctors: [],
+      feature_disabled: true,
+      feature_key: "exact_appointment",
+      reason: "日時指定予約は病院設定でOFFです。"
+    });
+  }
   const [settings, services, doctors] = await Promise.all([
     getExactAppointmentSettings(env, clinic),
     getExactAppointmentServices(env, clinic.id, true),
@@ -11936,7 +12168,7 @@ async function handleExactAppointmentPublicSettings(request, env) {
     clinic,
     settings: exactAppointmentPublicSettings(settings),
     services: services.map((row) => normalizeExactAppointmentService(row, settings)),
-    doctors: settings.doctor_booking_enabled === true ? doctors : [],
+    doctors: settings.doctor_booking_enabled === true && featureState.feature_flags.doctor_selection === true ? doctors : [],
     ...range
   });
 }
@@ -11944,8 +12176,12 @@ async function handleExactAppointmentPublicSettings(request, env) {
 
 async function handleExactAppointmentPublicDoctors(request, env) {
   const clinicCode = getParam(request, "clinic_code", DEFAULT_CLINIC_CODE);
-  const clinic = await getClinicByCode(env, clinicCode);
+  const featureState = await getClinicFeatureState(env, clinicCode);
+  const clinic = featureState.clinic;
   const settings = await getExactAppointmentSettings(env, clinic);
+  if (featureState.feature_flags.exact_appointment !== true || featureState.feature_flags.doctor_selection !== true) {
+    return jsonResponse({ ok: true, worker_version: WORKER_VERSION, clinic, settings: { ...exactAppointmentPublicSettings(settings), doctor_booking_enabled: false }, doctors: [], feature_disabled: true });
+  }
   const doctors = settings.doctor_booking_enabled === true ? await enrichExactAppointmentDoctors(env, clinic.id) : [];
   const serviceId = cleanString(getParam(request, "service_id", ""));
   const filtered = serviceId ? doctors.filter((d) => !d.service_ids.length || d.service_ids.includes(serviceId)) : doctors;
@@ -11956,8 +12192,12 @@ async function handleExactAppointmentAvailability(request, env) {
   const clinicCode = getParam(request, "clinic_code", DEFAULT_CLINIC_CODE);
   const dateText = cleanString(getParam(request, "date", ""));
   if (!dateText) return errorResponse("予約日を指定してください。", 400);
-  const clinic = await getClinicByCode(env, clinicCode);
+  const featureState = await getClinicFeatureState(env, clinicCode);
+  const clinic = featureState.clinic;
   const settings = await getExactAppointmentSettings(env, clinic);
+  if (featureState.feature_flags.exact_appointment !== true) {
+    return jsonResponse({ ok: true, available: false, clinic, settings: { ...exactAppointmentPublicSettings(settings), exact_time_booking_enabled: false }, date: dateText, reason: "日時指定予約は病院設定でOFFです。", slots: [], feature_disabled: true });
+  }
   if (settings.exact_time_booking_enabled !== true || settings.status === "inactive") {
     return jsonResponse({ ok: true, available: false, clinic, settings: exactAppointmentPublicSettings(settings), date: dateText, reason: "日時指定予約は現在受け付けていません。", slots: [] });
   }
@@ -11975,7 +12215,9 @@ async function handleExactAppointmentAvailability(request, env) {
 
 async function createExactAppointmentCore(request, env, body, adminMode = false) {
   const clinicCode = getRequestedClinicCode(request, body);
-  const clinic = await getClinicByCode(env, clinicCode);
+  const featureState = await getClinicFeatureState(env, clinicCode);
+  const clinic = featureState.clinic;
+  if (featureState.feature_flags.exact_appointment !== true) throw new Error("日時指定予約は病院設定でOFFです。");
   const settings = await getExactAppointmentSettings(env, clinic, { createIfMissing: adminMode });
   if (settings.exact_time_booking_enabled !== true || settings.status === "inactive") throw new Error("日時指定予約は現在受け付けていません。");
 
@@ -11999,8 +12241,12 @@ async function createExactAppointmentCore(request, env, body, adminMode = false)
   if (!dateText || !startTime) throw new Error("予約日と開始時刻を選択してください。");
   parseDateText(dateText);
 
-  const requestedDoctorId = cleanString(body.doctor_id || "");
-  const doctorSettings = exactDoctorPublicSettings(settings);
+  const doctorSelectionEnabled = featureState.feature_flags.doctor_selection === true;
+  const requestedDoctorId = doctorSelectionEnabled ? cleanString(body.doctor_id || "") : "";
+  const doctorSettingsRaw = exactDoctorPublicSettings(settings);
+  const doctorSettings = doctorSelectionEnabled
+    ? doctorSettingsRaw
+    : { ...doctorSettingsRaw, doctor_booking_enabled: false, doctor_selection_mode: "disabled", auto_assign_doctor: false };
   if (doctorSettings.doctor_booking_enabled && doctorSettings.doctor_selection_mode === "required" && !requestedDoctorId) {
     throw new Error("担当獣医師を選択してください。");
   }
@@ -12065,8 +12311,12 @@ async function handleMemberExactAppointmentCreate(request, env) {
 
 async function handleMemberExactAppointmentList(request, env) {
   const clinicCode = getParam(request, "clinic_code", DEFAULT_CLINIC_CODE);
-  const clinic = await getClinicByCode(env, clinicCode);
+  const featureState = await getClinicFeatureState(env, clinicCode);
+  const clinic = featureState.clinic;
   const settings = await getExactAppointmentSettings(env, clinic);
+  if (featureState.feature_flags.exact_appointment !== true) {
+    return jsonResponse({ ok: true, clinic, settings: { ...exactAppointmentPublicSettings(settings), exact_time_booking_enabled: false }, appointments: [], feature_disabled: true, message: "日時指定予約は病院設定でOFFです。" });
+  }
   const member = await resolveExactAppointmentMember(env, clinic, request, {});
   if (!member.guardian) return jsonResponse({ ok: true, clinic, settings: exactAppointmentPublicSettings(settings), appointments: [], message: "LINE連携済みの飼い主情報が見つかりません。" });
   const includeHistory = toBool(getParam(request, "include_history", "false"), false);

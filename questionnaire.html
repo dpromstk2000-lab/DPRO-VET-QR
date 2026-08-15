@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#2f6f5e">
+<title>DPRO PET CARE LINE｜WEB問診 V1.1</title>
+<script src="./config.js"></script>
+<script src="./feature-switch.js"></script>
+<style>
+:root{
+  --bg:#f4f7f3;--card:#fff;--ink:#1f2a24;--muted:#68746d;--line:#dbe5dc;
+  --main:#2f6f5e;--main2:#4f9078;--soft:#edf7f2;--blue:#2d68a6;--blueSoft:#edf5ff;
+  --amber:#8a621f;--amberSoft:#fff6de;--red:#a73c3c;--redSoft:#fff0ef;
+  --shadow:0 18px 44px rgba(35,64,50,.10);--radius:24px
+}
+*{box-sizing:border-box}
+body{margin:0;background:linear-gradient(180deg,#f9fcfa,#f3f7f4);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Yu Gothic",Meiryo,sans-serif;line-height:1.65}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.page{width:min(980px,calc(100% - 24px));margin:auto;padding:14px 0 46px}
+.hero{border-radius:30px;padding:24px;background:linear-gradient(135deg,#243b35,#2f6f5e);color:#fff;box-shadow:var(--shadow)}
+.hero small{font-weight:900;opacity:.9;letter-spacing:.05em}
+.hero h1{margin:8px 0 7px;font-size:clamp(30px,5vw,46px);line-height:1.1}
+.hero p{margin:0;color:rgba(255,255,255,.88);font-weight:750}
+.panel{margin-top:14px;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+.head{padding:16px 18px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#fff,#fbfdfb)}
+.head h2{margin:0;font-size:21px}
+.head p{margin:3px 0 0;color:var(--muted);font-size:12px;font-weight:800}
+.body{padding:16px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.full{grid-column:1/-1}
+label{display:block;margin-bottom:6px;color:#536158;font-size:12px;font-weight:950}
+input,select,textarea{width:100%;min-height:48px;border:1px solid #cddbd2;border-radius:15px;padding:11px 12px;background:#fff;color:var(--ink);outline:none}
+textarea{min-height:104px;resize:vertical}
+input:focus,select:focus,textarea:focus{border-color:var(--main);box-shadow:0 0 0 4px rgba(47,111,94,.11)}
+.petList{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.pet{border:1px solid var(--line);border-radius:18px;background:#fff;padding:13px;text-align:left}
+.pet.active{border-color:var(--main);background:var(--soft);box-shadow:0 0 0 3px rgba(47,111,94,.08)}
+.pet strong{display:block;font-size:17px}.pet span{display:block;color:var(--muted);font-size:12px;margin-top:3px}
+.chips{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.chip{border:1px solid var(--line);border-radius:16px;background:#fff;padding:12px;font-weight:900;text-align:center;min-height:56px}
+.chip.active{background:var(--main);border-color:var(--main);color:#fff}
+.branch{margin-top:12px;border:1px solid #d9e6de;background:#fbfdfb;border-radius:18px;padding:14px}
+.branch h3{margin:0 0 10px;font-size:16px}
+.row{display:flex;gap:9px;flex-wrap:wrap}
+.choice{display:flex;gap:9px;align-items:flex-start;border:1px solid var(--line);border-radius:15px;padding:10px 11px;background:#fff;flex:1 1 180px}
+.choice input{width:auto;min-height:auto;margin-top:4px}
+.notice{margin-top:12px;border-radius:16px;padding:11px 12px;border:1px solid var(--line);font-size:13px;font-weight:850;background:#fff}
+.notice.ok{background:var(--soft);color:#176a51;border-color:#c9e7d8}
+.notice.warn{background:var(--amberSoft);color:#6d501b;border-color:#edd89e}
+.notice.ng{background:var(--redSoft);color:var(--red);border-color:#efc5c2}
+.notice.info{background:var(--blueSoft);color:var(--blue);border-color:#cadff3}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.btn{appearance:none;border:none;border-radius:999px;min-height:48px;padding:12px 18px;background:var(--main);color:#fff;font-weight:950;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
+.btn.secondary{background:#fff;color:var(--main);border:1px solid #cddbd2}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.hidden{display:none!important}
+.small{font-size:12px;color:var(--muted);font-weight:800}
+.emergency{border:1px solid #efc5c2;background:var(--redSoft);border-radius:18px;padding:13px;color:#7d3030;font-size:13px}
+@media(max-width:700px){.grid,.petList,.chips{grid-template-columns:1fr}.hero{border-radius:24px}.panel{border-radius:21px}}
+</style>
+</head>
+<body>
+<main class="page">
+  <section class="hero">
+    <small>ANIMARY-COUNTER-V1.1-2｜WEB問診</small>
+    <h1>来院前WEB問診</h1>
+    <p>来院前に症状や相談内容を入力しておくと、受付・診察時の確認を短くできます。病院が使用する問診カテゴリだけ表示されます。</p>
+  </section>
+
+  <section class="panel">
+    <div class="head"><h2>1. ペットを選択</h2><p>LINE連携済みの診察券から選びます。</p></div>
+    <div class="body">
+      <div id="petList" class="petList"><div class="notice info">診察券を読み込んでいます。</div></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="head"><h2>2. 問診の種類</h2><p>病院設定でOFFのカテゴリは表示されません。</p></div>
+    <div class="body">
+      <div id="categoryList" class="chips"></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="head"><h2>3. 基本問診</h2><p>分かる範囲で入力してください。緊急時はWEB入力より病院への連絡を優先してください。</p></div>
+    <div class="body">
+      <div class="emergency">
+        呼吸が非常に苦しそう、意識がない・けいれんが続く、大量出血など緊急性が高い状態では、この画面の入力を待たず動物病院へ直接連絡してください。
+      </div>
+
+      <div class="grid" style="margin-top:14px">
+        <div class="full">
+          <label for="chiefComplaint">一番気になること</label>
+          <textarea id="chiefComplaint" placeholder="例：昨日から吐いている、耳をかゆがる、ワクチン相談 など"></textarea>
+        </div>
+        <div>
+          <label for="sinceWhen">いつ頃から</label>
+          <input id="sinceWhen" type="text" placeholder="例：昨日の夜から">
+        </div>
+        <div>
+          <label for="appetite">食欲</label>
+          <select id="appetite">
+            <option value="">未選択</option><option>いつも通り</option><option>少し低下</option><option>ほとんど食べない</option><option>全く食べない</option>
+          </select>
+        </div>
+        <div>
+          <label for="energy">元気</label>
+          <select id="energy">
+            <option value="">未選択</option><option>いつも通り</option><option>少し低下</option><option>かなり低下</option><option>ぐったりしている</option>
+          </select>
+        </div>
+        <div>
+          <label for="vomiting">嘔吐</label>
+          <select id="vomiting">
+            <option value="">未選択</option><option>なし</option><option>あり</option>
+          </select>
+        </div>
+        <div>
+          <label for="diarrhea">下痢</label>
+          <select id="diarrhea">
+            <option value="">未選択</option><option>なし</option><option>あり</option>
+          </select>
+        </div>
+        <div class="full">
+          <label for="freeText">その他、病院に伝えておきたいこと</label>
+          <textarea id="freeText" placeholder="薬、既往歴、食べたもの、気になる行動など"></textarea>
+        </div>
+      </div>
+
+      <div id="branchingArea" class="branch hidden"></div>
+
+      <label class="choice" style="margin-top:14px">
+        <input id="emergencyConfirmed" type="checkbox">
+        <span><strong>緊急時の案内を確認しました</strong><br><span class="small">緊急性が高い場合はWEB問診を待たず病院へ連絡します。</span></span>
+      </label>
+
+      <div id="status" class="notice info">読込中です。</div>
+      <div class="actions">
+        <button id="submitBtn" class="btn" type="button" disabled>問診を送信</button>
+        <a id="backBtn" class="btn secondary" href="./member.html">診察券へ戻る</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+(()=>{
+"use strict";
+const CONFIG=window.DPRO_VET_CONFIG||window.DPRO_CONFIG||window.APP_CONFIG||{};
+const FEATURES=window.DPRO_VET_FEATURES;
+const params=new URLSearchParams(location.search);
+const CLINIC_CODE=params.get("clinic_code")||CONFIG?.clinic?.clinicCode||"dpro_vet_demo";
+const DEMO_CODE=CONFIG?.demo?.clinicCode||"dpro_vet_demo";
+const IS_DEMO=CLINIC_CODE===DEMO_CODE;
+const LINE_USER_ID=IS_DEMO ? (params.get("line_user_id")||CONFIG?.demo?.lineUserId||"demo_line_link_001") : "";
+const API_BASE=String(CONFIG?.api?.baseUrl||CONFIG.API_BASE_URL||"https://dpro-vet-qr-api.dpromstk2000.workers.dev").replace(/\/$/,"");
+const QUESTIONNAIRE_VERSION="DPRO-VET-WEB-QUESTIONNAIRE-V1.1";
+const CATEGORIES=[
+  ["general","体調不良"],
+  ["vaccine","ワクチン"],
+  ["health_check","健康診断"],
+  ["skin","皮膚"],
+  ["digestive","消化器"],
+  ["respiratory","呼吸器"],
+  ["eye","眼"],
+  ["ear","耳"],
+  ["urinary","泌尿器"],
+  ["injury","ケガ"],
+  ["medicine_prevention","お薬・予防"],
+  ["other","その他"]
+];
+const state={guardian:null,cards:[],pet:null,category:"general",features:null};
+
+const $=id=>document.getElementById(id);
+const esc=v=>String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
+function setStatus(msg,type="info"){const el=$("status");el.className=`notice ${type}`;el.textContent=msg}
+function buildUrl(file,extra={}){const u=new URL(file,location.href);u.searchParams.set("clinic_code",CLINIC_CODE);if(IS_DEMO&&LINE_USER_ID)u.searchParams.set("line_user_id",LINE_USER_ID);Object.entries(extra).forEach(([k,v])=>{if(v!==undefined&&v!==null&&String(v)!=="")u.searchParams.set(k,String(v))});return u.toString()}
+function updateBack(){const r=params.get("return_url");$("backBtn").href=r?new URL(r,location.href).toString():buildUrl("./member.html")}
+async function apiGet(path,query={}){
+  const u=new URL(API_BASE+path);u.searchParams.set("clinic_code",CLINIC_CODE);
+  Object.entries(query).forEach(([k,v])=>{if(v!==undefined&&v!==null&&String(v)!=="")u.searchParams.set(k,String(v))});
+  const r=await fetch(u,{method:"GET",cache:"no-store",headers:{Accept:"application/json"}});
+  const d=await r.json().catch(()=>({}));if(!r.ok||d.ok===false)throw new Error(d.message||d.error||`API ${r.status}`);return d
+}
+async function apiPost(path,body={}){
+  const r=await fetch(API_BASE+path,{method:"POST",cache:"no-store",headers:{"Content-Type":"application/json","Accept":"application/json"},body:JSON.stringify({clinic_code:CLINIC_CODE,...body})});
+  const d=await r.json().catch(()=>({}));if(!r.ok||d.ok===false)throw new Error(d.message||d.error||`API ${r.status}`);return d
+}
+function normalizeCards(data){
+  if(Array.isArray(data.cards))return data.cards;
+  if(Array.isArray(data.items))return data.items;
+  if(data.card)return [data.card];
+  if(data.item&&(data.item.pet_id||data.item.card_no))return [data.item];
+  return [];
+}
+async function loadCards(){
+  let data;
+  try{data=await apiGet("/api/member/pet-cards",{line_user_id:LINE_USER_ID})}
+  catch(e){data=await apiGet("/api/public/my-cards",{line_user_id:LINE_USER_ID})}
+  state.guardian=data.guardian||data.owner||data.item?.guardian||null;
+  state.cards=normalizeCards(data);
+  if(!state.cards.length)throw new Error("LINE連携済みのペット診察券が見つかりません。");
+  const requested=params.get("pet_id");
+  state.pet=state.cards.find(c=>String(c.pet_id||c.pet?.id||"")===String(requested||""))||state.cards[0];
+  renderPets();
+}
+function renderPets(){
+  const root=$("petList");root.innerHTML="";
+  state.cards.forEach(card=>{
+    const b=document.createElement("button");b.type="button";b.className="pet"+(card===state.pet?" active":"");
+    const name=card.pet_name||card.pet?.pet_name||card.name||"ペット";
+    const species=card.species_label||card.species||card.animal_type||"";
+    const breed=card.breed||"";
+    b.innerHTML=`<strong>${esc(name)}</strong><span>${esc(species)}${breed?" / "+esc(breed):""}</span>`;
+    b.addEventListener("click",()=>{state.pet=card;renderPets()});root.appendChild(b)
+  })
+}
+function renderCategories(){
+  const root=$("categoryList");root.innerHTML="";
+  const modules=state.features?.questionnaire_modules||{};
+  const enabled=CATEGORIES.filter(([key])=>modules[key]!==false);
+  if(!enabled.length){root.innerHTML='<div class="notice ng">この病院では利用できる問診カテゴリがありません。</div>';return}
+  if(!enabled.some(([k])=>k===state.category))state.category=enabled[0][0];
+  enabled.forEach(([key,label])=>{
+    const b=document.createElement("button");b.type="button";b.className="chip"+(state.category===key?" active":"");b.textContent=label;
+    b.addEventListener("click",()=>{state.category=key;renderCategories();renderBranching()});root.appendChild(b)
+  })
+}
+function f(id){return $(id)?.value?.trim?.()||""}
+function radio(name){return document.querySelector(`input[name="${name}"]:checked`)?.value||""}
+function renderBranching(){
+  const root=$("branchingArea");
+  if(!state.features?.flags?.questionnaire_branching){root.classList.add("hidden");root.innerHTML="";return}
+  const c=state.category;
+  const templates={
+    digestive:`<h3>消化器の追加質問</h3><div class="grid">
+      <div><label>嘔吐の回数</label><select id="b_vomit_count"><option value="">未選択</option><option>1回</option><option>2〜3回</option><option>4回以上</option></select></div>
+      <div><label>便の状態</label><select id="b_stool"><option value="">未選択</option><option>通常</option><option>軟便</option><option>水様便</option><option>血が混じる</option></select></div>
+      <div class="full"><label>誤食の可能性</label><select id="b_ingestion"><option value="">未選択</option><option>なし</option><option>あるかもしれない</option><option>あり</option></select></div></div>`,
+    skin:`<h3>皮膚の追加質問</h3><div class="grid">
+      <div><label>かゆみ</label><select id="b_itch"><option value="">未選択</option><option>なし</option><option>少し</option><option>強い</option></select></div>
+      <div><label>主な場所</label><input id="b_skin_area" placeholder="耳、足先、お腹など"></div>
+      <div class="full"><label>赤み・脱毛・湿疹など</label><textarea id="b_skin_detail"></textarea></div></div>`,
+    urinary:`<h3>泌尿器の追加質問</h3><div class="grid">
+      <div><label>尿は出ていますか</label><select id="b_urine_out"><option value="">未選択</option><option>出ている</option><option>少量</option><option>ほとんど出ない</option></select></div>
+      <div><label>回数</label><select id="b_urine_freq"><option value="">未選択</option><option>いつも通り</option><option>増えた</option><option>減った</option></select></div>
+      <div class="full"><label>血尿</label><select id="b_hematuria"><option value="">未選択</option><option>なし</option><option>あり</option><option>不明</option></select></div></div>`,
+    respiratory:`<h3>呼吸器の追加質問</h3><div class="grid">
+      <div><label>咳</label><select id="b_cough"><option value="">未選択</option><option>なし</option><option>時々</option><option>頻繁</option></select></div>
+      <div><label>鼻水</label><select id="b_nasal"><option value="">未選択</option><option>なし</option><option>透明</option><option>色がついている</option></select></div>
+      <div class="full"><label>呼吸の様子</label><select id="b_breathing"><option value="">未選択</option><option>いつも通り</option><option>少し苦しそう</option><option>かなり苦しそう</option></select></div></div>`,
+    eye:`<h3>眼の追加質問</h3><div class="grid">
+      <div><label>左右</label><select id="b_eye_side"><option value="">未選択</option><option>右</option><option>左</option><option>両方</option></select></div>
+      <div><label>目やに・涙</label><select id="b_eye_discharge"><option value="">未選択</option><option>なし</option><option>少し</option><option>多い</option></select></div></div>`,
+    ear:`<h3>耳の追加質問</h3><div class="grid">
+      <div><label>左右</label><select id="b_ear_side"><option value="">未選択</option><option>右</option><option>左</option><option>両方</option></select></div>
+      <div><label>耳をかく・頭を振る</label><select id="b_ear_itch"><option value="">未選択</option><option>なし</option><option>あり</option></select></div></div>`,
+    injury:`<h3>ケガの追加質問</h3><div class="grid">
+      <div><label>出血</label><select id="b_bleeding"><option value="">未選択</option><option>なし</option><option>少量</option><option>多い</option></select></div>
+      <div><label>歩き方</label><select id="b_lameness"><option value="">未選択</option><option>普通</option><option>かばう</option><option>足を着けない</option></select></div>
+      <div class="full"><label>ケガした状況</label><textarea id="b_injury_detail"></textarea></div></div>`,
+    vaccine:`<h3>ワクチンの追加質問</h3><div class="grid">
+      <div><label>希望内容</label><input id="b_vaccine_name" placeholder="混合ワクチン、狂犬病など"></div>
+      <div><label>過去の接種後反応</label><select id="b_vaccine_reaction"><option value="">未選択</option><option>なし</option><option>あり</option><option>不明</option></select></div></div>`,
+    health_check:`<h3>健康診断の追加質問</h3><div class="grid"><div class="full"><label>特に気になること</label><textarea id="b_checkup_concern"></textarea></div></div>`,
+    medicine_prevention:`<h3>お薬・予防の追加質問</h3><div class="grid"><div><label>希望内容</label><input id="b_med_item" placeholder="いつもの薬、予防薬、フードなど"></div><div><label>残りの量</label><input id="b_med_remaining" placeholder="例：3日分"></div></div>`
+  };
+  root.innerHTML=templates[c]||`<h3>追加質問</h3><div class="small">このカテゴリは基本問診で受付します。</div>`;
+  root.classList.remove("hidden");
+}
+function collectBranchAnswers(){
+  const ids=["b_vomit_count","b_stool","b_ingestion","b_itch","b_skin_area","b_skin_detail","b_urine_out","b_urine_freq","b_hematuria","b_cough","b_nasal","b_breathing","b_eye_side","b_eye_discharge","b_ear_side","b_ear_itch","b_bleeding","b_lameness","b_injury_detail","b_vaccine_name","b_vaccine_reaction","b_checkup_concern","b_med_item","b_med_remaining"];
+  const out={};ids.forEach(id=>{const el=$(id);if(el&&String(el.value||"").trim())out[id.replace(/^b_/,"")]=String(el.value).trim()});return out
+}
+function cardValue(card,key){return card?.[key]??card?.pet?.[key]??""}
+async function submit(){
+  if(!state.pet)return setStatus("ペットを選択してください。","ng");
+  if(!$("emergencyConfirmed").checked)return setStatus("緊急時の案内を確認してチェックしてください。","warn");
+  const petId=cardValue(state.pet,"pet_id")||state.pet?.pet?.id||"";
+  const guardianId=cardValue(state.pet,"guardian_id")||state.guardian?.guardian_id||state.guardian?.id||"";
+  if(!petId)return setStatus("ペットIDを確認できません。","ng");
+  const branchAnswers=collectBranchAnswers();
+  const answers={
+    chief_complaint:f("chiefComplaint"),since_when:f("sinceWhen"),appetite:f("appetite"),energy:f("energy"),
+    vomiting:f("vomiting"),diarrhea:f("diarrhea"),free_text:f("freeText"),...branchAnswers
+  };
+  $("submitBtn").disabled=true;setStatus("問診を送信しています…","info");
+  try{
+    const d=await apiPost("/api/member/questionnaire/create",{
+      guardian_id:guardianId,pet_id:petId,visit_date:params.get("visit_date")||"",
+      visit_time:params.get("visit_time")||"",questionnaire_type:state.category,category:state.category,
+      source:params.get("source")||"line",appointment_id:params.get("appointment_id")||"",
+      waiting_entry_id:params.get("waiting_entry_id")||"",symptoms:{category:state.category,chief_complaint:f("chiefComplaint")},
+      appetite:f("appetite"),energy:f("energy"),vomiting:f("vomiting"),diarrhea:f("diarrhea"),
+      since_when:f("sinceWhen"),free_text:f("freeText"),emergency_confirmed:true,answers,
+      branch_context:{category:state.category,pet_species:cardValue(state.pet,"species")||cardValue(state.pet,"species_label")||""},
+      branching_used:Boolean(state.features?.flags?.questionnaire_branching),questionnaire_version:QUESTIONNAIRE_VERSION,
+      actor_name:"飼い主LINE"
+    });
+    setStatus(d.message||"問診を送信しました。","ok");
+    $("submitBtn").textContent="送信済み";
+    const r=params.get("return_url");
+    if(r)setTimeout(()=>{location.href=new URL(r,location.href).toString()},1000);
+  }catch(e){setStatus(e.message||"送信に失敗しました。","ng");$("submitBtn").disabled=false}
+}
+async function init(){
+  updateBack();
+  try{
+    const fs=await FEATURES.load({force:true});state.features=fs;
+    if(!fs.flags.previsit_questionnaire){setStatus("この動物病院ではWEB問診を使用していません。","warn");$("submitBtn").disabled=true;return}
+    await loadCards();renderCategories();renderBranching();$("submitBtn").disabled=false;
+    setStatus(`入力できます｜${fs.flags.questionnaire_branching?"条件分岐ON":"基本問診"}｜${fs.preset}`,"ok");
+  }catch(e){setStatus(e.message||"読み込みに失敗しました。","ng")}
+}
+$("submitBtn").addEventListener("click",submit);
+init();
+})();
+</script>
+</body>
+</html>
