@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-<title>DPRO PET CARE LINE｜LINE入口 VET-AUDIT-FIX-2</title>
+<meta name="theme-color" content="#10392d" />
+<title>DPRO PET CARE LINE｜LINE入口 VET-AUDIT-FIX-3</title>
 <script src="./config.js"></script>
 <style>
 :root{--bg:#f4f1ea;--card:#fff;--ink:#22302c;--muted:#6f7b75;--line:#d9d2c4;--main:#1f8f65;--main-dark:#223b34;--green-soft:#e8f7ef;--shadow:0 18px 50px rgba(21,54,44,.12)}
@@ -13,17 +14,70 @@
 </head>
 <body>
 <main class="page">
-<header class="topbar"><div class="brand"><div class="logo">LINE</div><div><small>お客さまスマホ｜LINEリッチメニュー想定</small><strong>DPRO PET CARE LINE</strong></div></div><nav class="actions"><a class="pill" href="./index.html">管理トップ</a><a class="pill" href="./system-check.html">確認</a></nav></header>
-<section class="hero"><div class="heroMain"><span class="badge">VET-AUDIT-FIX-2｜公開導線更新</span><h1>飼い主さんは、<br>迷わず3秒で選べる。</h1><p>ペット診察券、今日の順番受付、優先受付予約、お薬・予防受付、混雑目安、診療時間・アクセス。必要な入口だけに絞ります。</p></div><div class="side"><strong>設計方針</strong><p>来院前問診は単独メニューにせず、順番受付・優先受付・お薬予防受付の中に含めます。</p><div class="note">FIX-2で「診療時間・アクセス」を管理画面から分離し、飼い主向け公開画面へ正式接続しました。</div></div></section>
-<section class="menuGrid">
-<a class="menuCard" href="./member.html?demo=true&v=vet-audit-fix-2"><div class="icon">🐾</div><div><h3>ペット診察券</h3><p>ペットごとのQR診察券、予防予定、病院情報を確認します。</p></div></a>
-<a class="menuCard" href="./waiting.html?demo=true&mode=today_queue&v=vet-audit-fix-2"><div class="icon">🎫</div><div><h3>今日の順番受付</h3><p>今日診てもらいたい時に、問診を入力して受付番号を取ります。</p></div></a>
-<a class="menuCard" href="./waiting.html?demo=true&mode=priority_reservation&v=vet-audit-fix-2"><div class="icon">🌅</div><div><h3>優先受付予約</h3><p>後日の午前・午後の優先受付枠を希望できます。</p></div></a>
-<a class="menuCard" href="./waiting.html?demo=true&mode=medicine_prevention&v=vet-audit-fix-2"><div class="icon">💊</div><div><h3>お薬・予防受付</h3><p>お薬、フード、予防薬、ワクチンなどを通常診察と分けて受付します。</p></div></a>
-<a class="menuCard" href="./waiting.html?demo=true&mode=today_queue&v=vet-audit-fix-2#congestion"><div class="icon">🚦</div><div><h3>混雑目安</h3><p>通常診察・お薬予防・ケア処置を分けて、やさしい混雑目安を表示します。</p></div></a>
-<a class="menuCard" href="./access.html?demo=true&v=vet-audit-fix-2"><div class="icon">📍</div><div><h3>診療時間・アクセス</h3><p>本日の受付状況、診療時間、休診日、住所、電話、Googleマップを確認します。</p></div></a>
+<header class="topbar">
+  <div class="brand"><div class="logo">LINE</div><div><small>お客さまスマホ｜LINEリッチメニュー想定</small><strong>DPRO PET CARE LINE</strong></div></div>
+  <nav class="actions"><a class="pill" id="demoTopLink" href="./index.html">管理トップ</a><a class="pill" id="checkLink" href="./system-check.html">確認</a></nav>
+</header>
+<section class="hero">
+  <div class="heroMain"><span class="badge">VET-AUDIT-FIX-3｜6導線確定</span><h1>飼い主さんは、<br>迷わず3秒で選べる。</h1><p>ペット診察券、今日の順番受付、日時指定予約、お薬・予防受付、混雑目安、診療時間・アクセス。実装済みの正式入口だけに統一します。</p></div>
+  <div class="side"><strong>設計方針</strong><p>来院前問診は単独メニューにせず、今日の順番受付・お薬予防受付の中に含めます。</p><div class="note">FIX-3で未実装導線を外し、日時指定予約と混雑目安を実装済みの正式画面へ接続しました。</div></div>
 </section>
-<div class="footer">本番ではこの6つをLINE公式リッチメニューに設定します。VET-AUDIT-FIX-2</div>
+<section class="menuGrid">
+  <a class="menuCard" data-route-id="pet-card" href="./member.html"><div class="icon">🐾</div><div><h3>ペット診察券</h3><p>ペットごとのQR診察券、予防予定、病院情報を確認します。</p></div></a>
+  <a class="menuCard" data-route-id="today-queue" href="./waiting.html?mode=today_queue"><div class="icon">🎫</div><div><h3>今日の順番受付</h3><p>今日診てもらいたい時に、問診を入力して受付番号を取ります。</p></div></a>
+  <a class="menuCard" data-route-id="exact-appointment" href="./appointment.html"><div class="icon">📅</div><div><h3>日時指定予約</h3><p>病院が設定した診療内容を、空いている30分単位の時間から予約します。</p></div></a>
+  <a class="menuCard" data-route-id="medicine-prevention" href="./waiting.html?mode=medicine_prevention"><div class="icon">💊</div><div><h3>お薬・予防受付</h3><p>お薬、フード、予防薬、ワクチンなどを通常診察と分けて受付します。</p></div></a>
+  <a class="menuCard" data-route-id="congestion" href="./queue-status.html"><div class="icon">🚦</div><div><h3>混雑目安</h3><p>現在の受付件数、診察待ち、現在の診察番号を確認します。</p></div></a>
+  <a class="menuCard" data-route-id="access" href="./access.html"><div class="icon">📍</div><div><h3>診療時間・アクセス</h3><p>本日の受付状況、診療時間、休診日、住所、電話、Googleマップを確認します。</p></div></a>
+</section>
+<div class="footer" id="routeFooter">LINE公式リッチメニュー正式6導線｜VET-AUDIT-FIX-3</div>
 </main>
+<script>
+(() => {
+  "use strict";
+  const CONFIG = window.DPRO_VET_CONFIG || window.DPRO_CONFIG || window.APP_CONFIG || {};
+  const params = new URLSearchParams(location.search);
+  const CLINIC_CODE = params.get("clinic_code") || CONFIG?.clinic?.clinicCode || "dpro_vet_demo";
+  const DEMO_CLINIC_CODE = CONFIG?.demo?.clinicCode || CONFIG?.DEMO_CLINIC_CODE || "dpro_vet_demo";
+  const demoParam = String(params.get("demo") || "").toLowerCase();
+  const DEMO = CLINIC_CODE === DEMO_CLINIC_CODE && (
+    ["ready","true","1"].includes(demoParam) ||
+    (CONFIG?.demo?.enabled === true && CONFIG?.project?.mode === "demo")
+  );
+  const DEMO_LINE_USER_ID = CONFIG?.demo?.lineUserId || "demo_line_link_001";
+  const incomingLineUserId = params.get("line_user_id") || params.get("lineUserId") || params.get("uid") || "";
+  const LINE_USER_ID = DEMO ? (incomingLineUserId || DEMO_LINE_USER_ID) : "";
+  const LIFF_ID = params.get("liff_id") || "";
+  const VERSION = "vet-audit-fix-3";
+
+  function buildRoute(item){
+    const target = new URL(item.path || item.url || "./index.html", location.href);
+    Object.entries(item.query || {}).forEach(([key,value]) => {
+      if (value !== undefined && value !== null && String(value) !== "") target.searchParams.set(key, String(value));
+    });
+    target.searchParams.set("clinic_code", CLINIC_CODE);
+    target.searchParams.set("v", VERSION);
+    if (DEMO) target.searchParams.set("demo", "ready");
+    if (LIFF_ID) target.searchParams.set("liff_id", LIFF_ID);
+    if (item.requiresIdentity && LINE_USER_ID) target.searchParams.set("line_user_id", LINE_USER_ID);
+    return target.toString();
+  }
+
+  function applyRoutes(){
+    const buttons = Array.isArray(CONFIG?.richMenu?.buttons) ? CONFIG.richMenu.buttons : [];
+    buttons.forEach((item) => {
+      const anchor = document.querySelector(`[data-route-id="${item.id}"]`);
+      if (anchor) anchor.href = buildRoute(item);
+    });
+
+    const common = {path:"index.html",query:{},requiresIdentity:false};
+    document.getElementById("demoTopLink").href = buildRoute(common);
+    document.getElementById("checkLink").href = buildRoute({...common,path:"system-check.html"});
+    document.getElementById("routeFooter").textContent = `LINE公式リッチメニュー正式${buttons.length || 6}導線｜VET-AUDIT-FIX-3`;
+  }
+
+  applyRoutes();
+})();
+</script>
 </body>
 </html>

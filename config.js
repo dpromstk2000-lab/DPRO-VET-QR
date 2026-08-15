@@ -1,12 +1,15 @@
 /* =========================================================
- VET-AUDIT-FIX-2
+ VET-AUDIT-FIX-3
  DPRO PET CARE LINE / config.js
- 飼い主向け診療時間・アクセス正式化版
+ LINEリッチメニュー6導線正式固定版
 
  方針:
  - 現行GitHub main に存在する画面だけを canonical screen として登録
  - 旧設計の URL キーは削除せず、安全な現行画面へ互換エイリアス化
- - access.html を飼い主向け正式公開画面として登録し、rich-menu.html から直接導線化
+ - LINEリッチメニュー6導線を現行実装へ正式固定
+ - 未実装の旧予約導線を正式導線から除外
+ - 混雑目安は queue-status.html、日時指定予約は appointment.html へ統一
+ - DEMO標準 line_user_id を demo_line_link_001 へ統一
  - 本番LIFF本人確認ロジックは FINAL VET-AUDIT-1-R2 を維持し、挙動変更しない
 ========================================================= */
 (function () {
@@ -17,12 +20,12 @@
   const DEMO_CLINIC_CODE = "dpro_vet_demo";
   const LIFF_SDK_URL = "https://static.line-scdn.net/liff/edge/2/sdk.js";
   const LIFF_AUTH_VERSION = "FINAL-VET-AUDIT-1-R2";
-  const AUDIT_FIX_VERSION = "VET-AUDIT-FIX-2-20260815";
+  const AUDIT_FIX_VERSION = "VET-AUDIT-FIX-3-20260815";
 
   const page = (name) => `${SITE_BASE_URL}/${name}`;
 
   const CONFIG = {
-    version: "vet-audit-fix-2-access-public-20260815",
+    version: "vet-audit-fix-3-rich-menu-fixed-20260815",
     auditFixVersion: AUDIT_FIX_VERSION,
     project: {
       repoName: "DPRO-VET-QR",
@@ -144,7 +147,7 @@
       questionnaire: page("waiting.html"),
       prevention: page("member.html"),
 
-      /* VET-AUDIT-FIX-2 で正式公開画面化。 */
+      /* VET-AUDIT-FIX-2 で正式公開画面化。FIX-3でも維持。 */
       access: page("access.html")
     },
     api: {
@@ -238,7 +241,7 @@
     },
     demo: {
       enabled:true, clinicCode:DEMO_CLINIC_CODE, guardianNo:"G-0001",
-      lineUserId:"demo_line_tanaka_misaki",
+      lineUserId:"demo_line_link_001",
       sampleTokens:{coco:"vet_demo_coco_qr_token",momo:"vet_demo_momo_qr_token",hana:"vet_demo_hana_qr_token",mugi:"vet_demo_mugi_qr_token"},
       resetConfirmText:"DEMO動物病院だけ実行",
       resetNote:"DEMOリセットはWorker側でPOST + 管理コード + 確認文言必須。"
@@ -253,16 +256,19 @@
     richMenu: {
       title:"DPRO PET CARE LINE リッチメニュー",
       layout:"6分割",
-      sourceOfTruth:"rich-menu.html",
+      sourceOfTruth:"config.js / richMenu.buttons",
+      routeVersion:"VET-AUDIT-FIX-3",
       questionnairePolicy:"来院前問診は単独ページにせず、受付フロー内へ統合する。",
-      accessPolicy:"VET-AUDIT-FIX-2で飼い主向けaccess.htmlを正式公開画面として固定。",
+      accessPolicy:"診療時間・アクセスは access.html を正式公開画面として固定。",
+      appointmentPolicy:"未実装の旧予約導線は正式メニューから除外し、30分単位の日時指定予約は appointment.html へ統一。",
+      congestionPolicy:"混雑目安は queue-status.html を正式公開画面として使用。",
       buttons:[
-        {id:"pet-card",label:"ペット診察券",description:"複数ペットの診察券・予防予定",url:page("member.html")},
-        {id:"today-queue",label:"今日の順番受付",description:"問診を入力して受付番号を取得",url:`${page("waiting.html")}?mode=today_queue`},
-        {id:"priority-reservation",label:"優先受付予約",description:"後日の午前・午後の優先受付",url:`${page("waiting.html")}?mode=priority_reservation`},
-        {id:"medicine-prevention",label:"お薬・予防受付",description:"薬・フード・予防薬・ワクチン受付",url:`${page("waiting.html")}?mode=medicine_prevention`},
-        {id:"congestion",label:"混雑目安",description:"通常診察・お薬予防・ケア処置の目安",url:`${page("waiting.html")}?mode=today_queue#congestion`},
-        {id:"access",label:"診療時間・アクセス",description:"診療時間・休診日・住所・電話・Googleマップ",url:page("access.html"),status:"active"}
+        {id:"pet-card",label:"ペット診察券",description:"複数ペットの診察券・予防予定",path:"member.html",requiresIdentity:true,url:page("member.html")},
+        {id:"today-queue",label:"今日の順番受付",description:"問診を入力して受付番号を取得",path:"waiting.html",query:{mode:"today_queue"},requiresIdentity:true,url:`${page("waiting.html")}?mode=today_queue`},
+        {id:"exact-appointment",label:"日時指定予約",description:"病院が設定した診療内容を30分単位で予約",path:"appointment.html",requiresIdentity:true,url:page("appointment.html")},
+        {id:"medicine-prevention",label:"お薬・予防受付",description:"薬・フード・予防薬・ワクチン受付",path:"waiting.html",query:{mode:"medicine_prevention"},requiresIdentity:true,url:`${page("waiting.html")}?mode=medicine_prevention`},
+        {id:"congestion",label:"混雑目安",description:"現在の受付件数・診察待ち・診察番号を確認",path:"queue-status.html",requiresIdentity:false,url:page("queue-status.html")},
+        {id:"access",label:"診療時間・アクセス",description:"診療時間・休診日・住所・電話・Googleマップ",path:"access.html",requiresIdentity:false,url:page("access.html"),status:"active"}
       ]
     },
     labels:{owner:"飼い主",pet:"ペット",petCard:"ペット診察券",multiPetCard:"多頭飼いペット診察券",clinic:"動物病院",doctor:"獣医師",checkin:"受付",prevention:"予防予定",followup:"再診フォロー",lineLink:"LINE連携"},
@@ -272,7 +278,7 @@
       dentalWorkerTouched:false,
       finalAuditVersion:"FINAL-VET-AUDIT-1-R2",
       configStructureVersion:AUDIT_FIX_VERSION,
-      note:"DPRO PET CARE LINE専用。歯科版 dental_qr_ 系には触れない。FIX-2は公開access画面と導線のみ正式化し、LIFF本人確認ロジックは変更しない。"
+      note:"DPRO PET CARE LINE専用。歯科版 dental_qr_ 系には触れない。FIX-3はリッチメニュー導線・DEMO導線・waiting mode反映のみ整理し、Worker・SQL・LIFF本人確認ロジックは変更しない。"
     }
   };
 

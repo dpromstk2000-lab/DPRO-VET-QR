@@ -411,7 +411,7 @@
       .queueNo{width:76px;height:76px;border-radius:24px;font-size:30px}
       .calendarMini{grid-template-columns:1fr}
     }
-  
+
     /* STEP VET-55R-2：飼い主側受付登録・DEMO遷移修正 */
     .demoPetSelector{
       display:flex;
@@ -455,7 +455,7 @@
 <body>
   <main class="page">
     <section class="hero">
-      <span class="badge">STEP VET-APPOINTMENT-1｜今日の順番受付</span>
+      <span class="badge">VET-AUDIT-FIX-3｜今日の順番受付</span>
       <h1>今日の来院受付</h1>
       <p class="lead">
         診察券を確認して、今日の受付番号を発行します。
@@ -1130,6 +1130,21 @@
       if (state.selectedEntryKind === "care_consult") $("purpose").value = "ケア処置相談";
     }
 
+    // VET-AUDIT-FIX-3:
+    // LINEリッチメニューから渡された正式modeを受付種別へ反映する。
+    function applyRequestedMode(){
+      const mode = String(urlParams.get("mode") || "today_queue").trim();
+      const modeToButton = {
+        today_queue: "choiceGeneral",
+        medicine_prevention: "choiceMedicine",
+        care_consult: "choiceCare"
+      };
+      const buttonId = modeToButton[mode] || "choiceGeneral";
+      const button = $(buttonId);
+      if (button) selectChoice(button);
+
+    }
+
     function getCardInfo(){
       const card = state.selectedCard || {};
       const guardian = state.guardian || {};
@@ -1311,7 +1326,7 @@
         ]);
 
         $("dayPart").value = defaultDayPart();
-        if (!$("purpose").value) $("purpose").value = "通常診察";
+        if (!$("purpose").value) applyRequestedMode();
         updateReceptionButtons();
         setNotice("submitStatus", "ok", "内容を確認して「この内容で受付する」を押してください。");
         renderDebug({ clinicData, cardData, exactBookingData });
@@ -1334,6 +1349,7 @@
     function init(){
       updateLinks();
       bindEvents();
+      applyRequestedMode();
       loadAll();
     }
 
