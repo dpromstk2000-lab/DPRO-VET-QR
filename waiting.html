@@ -455,7 +455,7 @@
 <body>
   <main class="page">
     <section class="hero">
-      <span class="badge">VET-AUDIT-FIX-3｜今日の順番受付</span>
+      <span class="badge">VET-AUDIT-FIX-4｜今日の順番受付</span>
       <h1>今日の来院受付</h1>
       <p class="lead">
         診察券を確認して、今日の受付番号を発行します。
@@ -605,15 +605,20 @@
       CONFIG?.clinic?.clinicCode ||
       "dpro_vet_demo";
 
-    const LINE_USER_ID =
+    const DEMO_CLINIC_CODE = CONFIG?.demo?.clinicCode || CONFIG.DEMO_CLINIC_CODE || "dpro_vet_demo";
+    const IS_DEMO_CLINIC = CLINIC_CODE === DEMO_CLINIC_CODE;
+    const INCOMING_LINE_USER_ID =
       urlParams.get("line_user_id") ||
       urlParams.get("lineUserId") ||
       urlParams.get("uid") ||
-      "demo_line_link_001";
+      "";
+    const LINE_USER_ID = IS_DEMO_CLINIC
+      ? (INCOMING_LINE_USER_ID || CONFIG?.demo?.lineUserId || "demo_line_link_001")
+      : "";
 
     const IS_DEMO_READY =
-      CLINIC_CODE === "dpro_vet_demo" &&
-      LINE_USER_ID === "demo_line_link_001" &&
+      IS_DEMO_CLINIC &&
+      LINE_USER_ID === (CONFIG?.demo?.lineUserId || "demo_line_link_001") &&
       (
         urlParams.get("demo") === "ready" ||
         urlParams.get("demo") === "true" ||

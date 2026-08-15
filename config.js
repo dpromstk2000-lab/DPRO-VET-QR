@@ -1,16 +1,15 @@
 /* =========================================================
- VET-AUDIT-FIX-3
+ VET-AUDIT-FIX-4
  DPRO PET CARE LINE / config.js
- LINEリッチメニュー6導線正式固定版
+ 本番LINE本人確認境界 固定版
 
  方針:
- - 現行GitHub main に存在する画面だけを canonical screen として登録
- - 旧設計の URL キーは削除せず、安全な現行画面へ互換エイリアス化
- - LINEリッチメニュー6導線を現行実装へ正式固定
- - 未実装の旧予約導線を正式導線から除外
- - 混雑目安は queue-status.html、日時指定予約は appointment.html へ統一
- - DEMO標準 line_user_id を demo_line_link_001 へ統一
- - 本番LIFF本人確認ロジックは FINAL VET-AUDIT-1-R2 を維持し、挙動変更しない
+ - FIX-3で確定したLINEリッチメニュー6導線を維持
+ - 本番clinicの保護APIはLIFF ID Tokenを必須とする
+ - URL / JSON body の line_user_id・guardian_id は本人証明として信用しない
+ - X-Line-ID-Token をWorkerへ送り、Workerが検証したLINE subを本人IDの唯一の基準とする
+ - DEMO clinic(dpro_vet_demo)は従来の営業デモ動作を維持
+ - Worker / SQL / LIFF認証プロトコル FINAL VET-AUDIT-1-R2 は変更しない
 ========================================================= */
 (function () {
   "use strict";
@@ -20,12 +19,12 @@
   const DEMO_CLINIC_CODE = "dpro_vet_demo";
   const LIFF_SDK_URL = "https://static.line-scdn.net/liff/edge/2/sdk.js";
   const LIFF_AUTH_VERSION = "FINAL-VET-AUDIT-1-R2";
-  const AUDIT_FIX_VERSION = "VET-AUDIT-FIX-3-20260815";
+  const AUDIT_FIX_VERSION = "VET-AUDIT-FIX-4-20260815";
 
   const page = (name) => `${SITE_BASE_URL}/${name}`;
 
   const CONFIG = {
-    version: "vet-audit-fix-3-rich-menu-fixed-20260815",
+    version: "vet-audit-fix-4-production-line-identity-20260815",
     auditFixVersion: AUDIT_FIX_VERSION,
     project: {
       repoName: "DPRO-VET-QR",
@@ -257,7 +256,7 @@
       title:"DPRO PET CARE LINE リッチメニュー",
       layout:"6分割",
       sourceOfTruth:"config.js / richMenu.buttons",
-      routeVersion:"VET-AUDIT-FIX-3",
+      routeVersion:"VET-AUDIT-FIX-4",
       questionnairePolicy:"来院前問診は単独ページにせず、受付フロー内へ統合する。",
       accessPolicy:"診療時間・アクセスは access.html を正式公開画面として固定。",
       appointmentPolicy:"未実装の旧予約導線は正式メニューから除外し、30分単位の日時指定予約は appointment.html へ統一。",
@@ -278,7 +277,7 @@
       dentalWorkerTouched:false,
       finalAuditVersion:"FINAL-VET-AUDIT-1-R2",
       configStructureVersion:AUDIT_FIX_VERSION,
-      note:"DPRO PET CARE LINE専用。歯科版 dental_qr_ 系には触れない。FIX-3はリッチメニュー導線・DEMO導線・waiting mode反映のみ整理し、Worker・SQL・LIFF本人確認ロジックは変更しない。"
+      note:"DPRO PET CARE LINE専用。歯科版 dental_qr_ 系には触れない。FIX-4は本番LINE本人確認境界を固定し、URL/bodyのidentity値を本人証明として送らない。Worker・SQL・FINAL VET-AUDIT-1-R2認証プロトコルは変更しない。"
     }
   };
 
@@ -396,11 +395,62 @@
   function isProtectedMemberRequest(url) {
     return Boolean(url && PROTECTED_MEMBER_PATHS.has((url.pathname.replace(/\/+$/,"") || "/")));
   }
+  const PROTECTED_IDENTITY_FIELDS = ["line_user_id","lineUserId","uid","guardian_id"];
+
   function sanitizeProtectedIdentityQuery(url) {
     const next = new URL(url.toString());
-    ["line_user_id","lineUserId","uid","guardian_id"].forEach(k=>next.searchParams.delete(k));
+    PROTECTED_IDENTITY_FIELDS.forEach((key)=>next.searchParams.delete(key));
     return next;
   }
+
+  function sanitizeProtectedIdentityBody(body) {
+    if (body === undefined || body === null) return body;
+    if (typeof body === "string") {
+      try {
+        const parsed = JSON.parse(body);
+        if (!parsed || Array.isArray(parsed) || typeof parsed !== "object") return body;
+        const next = {...parsed};
+        PROTECTED_IDENTITY_FIELDS.forEach((key)=>delete next[key]);
+        return JSON.stringify(next);
+      } catch {
+        return body;
+      }
+    }
+    if (typeof URLSearchParams !== "undefined" && body instanceof URLSearchParams) {
+      const next = new URLSearchParams(body);
+      PROTECTED_IDENTITY_FIELDS.forEach((key)=>next.delete(key));
+      return next;
+    }
+    return body;
+  }
+
+  // VET-AUDIT-FIX-4:
+  // 非DEMOの公開画面ではURL上の本人識別ヒントをページ本体が読む前に除去する。
+  // 本人確定はLIFF ID TokenをWorkerで検証したsubのみを正とする。
+  function sanitizeProductionIdentityLocation() {
+    try {
+      const current = new URL(location.href);
+      const currentClinicCode = clean(current.searchParams.get("clinic_code")) || clean(CONFIG.clinic.clinicCode);
+      if (isDemoClinicCode(currentClinicCode)) return false;
+
+      let changed = false;
+      PROTECTED_IDENTITY_FIELDS.forEach((key) => {
+        if (current.searchParams.has(key)) {
+          current.searchParams.delete(key);
+          changed = true;
+        }
+      });
+
+      if (changed && typeof history !== "undefined" && typeof history.replaceState === "function") {
+        history.replaceState(history.state, "", current.toString());
+      }
+      return changed;
+    } catch {
+      return false;
+    }
+  }
+
+  sanitizeProductionIdentityLocation();
   function loadLiffSdk() {
     if (window.liff) return Promise.resolve(window.liff);
     if (liffSdkPromise) return liffSdkPromise;
@@ -451,10 +501,17 @@
 
     const idToken = await getVerifiedLineIdToken();
     const headers = new Headers((init&&init.headers)||(input&&typeof input!=="string"&&input.headers)||{});
+    // 本番ではクライアント側のidentityヒントを本人証明として送らない。
+    // 本人IDはX-Line-ID-TokenをWorkerが検証して得たsubだけを採用する。
+    headers.delete("X-Line-User-Id");
+    headers.delete("X-Guardian-Id");
     headers.set(CONFIG.liff.idTokenHeaderName||"X-Line-ID-Token",idToken);
     headers.set("X-DPRO-LIFF-Auth-Version",LIFF_AUTH_VERSION);
     const safeUrl = sanitizeProtectedIdentityQuery(originalUrl);
     const nextInit = {...(init||{}),headers};
+    if (Object.prototype.hasOwnProperty.call(nextInit,"body")) {
+      nextInit.body = sanitizeProtectedIdentityBody(nextInit.body);
+    }
 
     if (input && typeof input !== "string" && !(input instanceof URL)) {
       return nativeFetch(new Request(safeUrl.toString(),input),nextInit);

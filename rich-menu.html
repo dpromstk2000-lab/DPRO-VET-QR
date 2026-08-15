@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
 <meta name="theme-color" content="#10392d" />
-<title>DPRO PET CARE LINE｜LINE入口 VET-AUDIT-FIX-3</title>
+<title>DPRO PET CARE LINE｜LINE入口 VET-AUDIT-FIX-4</title>
 <script src="./config.js"></script>
 <style>
 :root{--bg:#f4f1ea;--card:#fff;--ink:#22302c;--muted:#6f7b75;--line:#d9d2c4;--main:#1f8f65;--main-dark:#223b34;--green-soft:#e8f7ef;--shadow:0 18px 50px rgba(21,54,44,.12)}
@@ -19,8 +19,8 @@
   <nav class="actions"><a class="pill" id="demoTopLink" href="./index.html">管理トップ</a><a class="pill" id="checkLink" href="./system-check.html">確認</a></nav>
 </header>
 <section class="hero">
-  <div class="heroMain"><span class="badge">VET-AUDIT-FIX-3｜6導線確定</span><h1>飼い主さんは、<br>迷わず3秒で選べる。</h1><p>ペット診察券、今日の順番受付、日時指定予約、お薬・予防受付、混雑目安、診療時間・アクセス。実装済みの正式入口だけに統一します。</p></div>
-  <div class="side"><strong>設計方針</strong><p>来院前問診は単独メニューにせず、今日の順番受付・お薬予防受付の中に含めます。</p><div class="note">FIX-3で未実装導線を外し、日時指定予約と混雑目安を実装済みの正式画面へ接続しました。</div></div>
+  <div class="heroMain"><span class="badge">VET-AUDIT-FIX-4｜6導線＋本人確認境界</span><h1>飼い主さんは、<br>迷わず3秒で選べる。</h1><p>ペット診察券、今日の順番受付、日時指定予約、お薬・予防受付、混雑目安、診療時間・アクセス。実装済みの正式入口だけに統一します。</p></div>
+  <div class="side"><strong>設計方針</strong><p>来院前問診は単独メニューにせず、今日の順番受付・お薬予防受付の中に含めます。</p><div class="note">FIX-3で6導線を確定し、FIX-4で本番LINE本人確認の境界を固定しました。</div></div>
 </section>
 <section class="menuGrid">
   <a class="menuCard" data-route-id="pet-card" href="./member.html"><div class="icon">🐾</div><div><h3>ペット診察券</h3><p>ペットごとのQR診察券、予防予定、病院情報を確認します。</p></div></a>
@@ -30,7 +30,7 @@
   <a class="menuCard" data-route-id="congestion" href="./queue-status.html"><div class="icon">🚦</div><div><h3>混雑目安</h3><p>現在の受付件数、診察待ち、現在の診察番号を確認します。</p></div></a>
   <a class="menuCard" data-route-id="access" href="./access.html"><div class="icon">📍</div><div><h3>診療時間・アクセス</h3><p>本日の受付状況、診療時間、休診日、住所、電話、Googleマップを確認します。</p></div></a>
 </section>
-<div class="footer" id="routeFooter">LINE公式リッチメニュー正式6導線｜VET-AUDIT-FIX-3</div>
+<div class="footer" id="routeFooter">LINE公式リッチメニュー正式6導線｜VET-AUDIT-FIX-4</div>
 </main>
 <script>
 (() => {
@@ -48,7 +48,7 @@
   const incomingLineUserId = params.get("line_user_id") || params.get("lineUserId") || params.get("uid") || "";
   const LINE_USER_ID = DEMO ? (incomingLineUserId || DEMO_LINE_USER_ID) : "";
   const LIFF_ID = params.get("liff_id") || "";
-  const VERSION = "vet-audit-fix-3";
+  const VERSION = "vet-audit-fix-4";
 
   function buildRoute(item){
     const target = new URL(item.path || item.url || "./index.html", location.href);
@@ -73,7 +73,7 @@
     const common = {path:"index.html",query:{},requiresIdentity:false};
     document.getElementById("demoTopLink").href = buildRoute(common);
     document.getElementById("checkLink").href = buildRoute({...common,path:"system-check.html"});
-    document.getElementById("routeFooter").textContent = `LINE公式リッチメニュー正式${buttons.length || 6}導線｜VET-AUDIT-FIX-3`;
+    document.getElementById("routeFooter").textContent = `LINE公式リッチメニュー正式${buttons.length || 6}導線｜VET-AUDIT-FIX-4`;
   }
 
   applyRoutes();

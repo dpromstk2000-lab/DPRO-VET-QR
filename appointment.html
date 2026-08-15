@@ -120,9 +120,12 @@
   const API_BASE = String(CONFIG?.api?.baseUrl || CONFIG?.urls?.apiBaseUrl || "https://dpro-vet-qr-api.dpromstk2000.workers.dev").replace(/\/$/, "");
   const params = new URLSearchParams(location.search);
   const CLINIC_CODE = params.get("clinic_code") || CONFIG?.clinic?.clinicCode || "dpro_vet_demo";
-  const LINE_USER_ID = params.get("line_user_id") || params.get("lineUserId") || params.get("uid") || CONFIG?.demo?.lineUserId || "";
-  const DEMO = CLINIC_CODE === "dpro_vet_demo" && ["ready","true","1"].includes(String(params.get("demo") || "").toLowerCase());
-  const VERSION = "step-vet-appointment-1-r2";
+  const DEMO_CLINIC_CODE = CONFIG?.demo?.clinicCode || CONFIG?.DEMO_CLINIC_CODE || "dpro_vet_demo";
+  const IS_DEMO_CLINIC = CLINIC_CODE === DEMO_CLINIC_CODE;
+  const INCOMING_LINE_USER_ID = params.get("line_user_id") || params.get("lineUserId") || params.get("uid") || "";
+  const LINE_USER_ID = IS_DEMO_CLINIC ? (INCOMING_LINE_USER_ID || CONFIG?.demo?.lineUserId || "demo_line_link_001") : "";
+  const DEMO = IS_DEMO_CLINIC && ["ready","true","1"].includes(String(params.get("demo") || "").toLowerCase());
+  const VERSION = "vet-audit-fix-4";
 
   const state = { clinic:null, settings:null, services:[], doctors:[], guardian:null, cards:[], appointments:[], pet:null, service:null, doctorId:"", date:"", time:"", editing:null };
   const $ = (id) => document.getElementById(id);
