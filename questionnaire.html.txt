@@ -66,7 +66,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--main);box-shadow:0 0 
 <body>
 <main class="page">
   <section class="hero">
-    <small>ANIMARY-COUNTER-V1.1-4｜WEB問診・症状画像</small>
+    <small>ANIMARY-COUNTER-V1.1-4-R1｜WEB問診・画像送信安定化</small>
     <h1>来院前WEB問診</h1>
     <p>来院前に症状や相談内容を入力しておくと、受付・診察時の確認を短くできます。病院が使用する問診カテゴリだけ表示されます。</p>
   </section>
@@ -170,7 +170,9 @@ const DEMO_CODE=CONFIG?.demo?.clinicCode||"dpro_vet_demo";
 const IS_DEMO=CLINIC_CODE===DEMO_CODE;
 const LINE_USER_ID=IS_DEMO ? (params.get("line_user_id")||CONFIG?.demo?.lineUserId||"demo_line_link_001") : "";
 const API_BASE=String(CONFIG?.api?.baseUrl||CONFIG.API_BASE_URL||"https://dpro-vet-qr-api.dpromstk2000.workers.dev").replace(/\/$/,"");
-const QUESTIONNAIRE_VERSION="DPRO-VET-WEB-QUESTIONNAIRE-V1.1.4";
+const QUESTIONNAIRE_VERSION="DPRO-VET-WEB-QUESTIONNAIRE-V1.1.4-R1";
+const IMAGE_TARGET_BYTES=420000;
+const IMAGE_HARD_MAX_BYTES=800000;
 const CATEGORIES=[
   ["general","体調不良"],
   ["vaccine","ワクチン"],
@@ -199,8 +201,25 @@ async function apiGet(path,query={}){
   const d=await r.json().catch(()=>({}));if(!r.ok||d.ok===false)throw new Error(d.message||d.error||`API ${r.status}`);return d
 }
 async function apiPost(path,body={}){
-  const r=await fetch(API_BASE+path,{method:"POST",cache:"no-store",headers:{"Content-Type":"application/json","Accept":"application/json"},body:JSON.stringify({clinic_code:CLINIC_CODE,...body})});
-  const d=await r.json().catch(()=>({}));if(!r.ok||d.ok===false)throw new Error(d.message||d.error||`API ${r.status}`);return d
+  const u=new URL(API_BASE+path);
+  u.searchParams.set("clinic_code",CLINIC_CODE);
+  if(IS_DEMO)u.searchParams.set("demo","ready");
+  const payload={clinic_code:CLINIC_CODE,...body};
+  if(IS_DEMO)payload.demo="ready";
+  let r;
+  try{
+    r=await fetch(u.toString(),{method:"POST",cache:"no-store",headers:{"Content-Type":"application/json","Accept":"application/json"},body:JSON.stringify(payload)});
+  }catch(e){
+    const msg=String(e?.message||e||"");
+    if(/failed to fetch|networkerror|network request failed/i.test(msg)){
+      throw new Error("画像付き問診の通信に失敗しました。Workerへ到達する前後で接続が切れた可能性があります。修正版ではDEMO認証の二重JSON読込を避けています。");
+    }
+    throw e;
+  }
+  const text=await r.text();let d={};
+  if(text){try{d=JSON.parse(text)}catch{d={message:`API ${r.status}：応答をJSONとして読めませんでした。`}}
+  }
+  if(!r.ok||d.ok===false)throw new Error(d.message||d.error||`API ${r.status}`);return d
 }
 function normalizeCards(data){
   if(Array.isArray(data.cards))return data.cards;
@@ -327,13 +346,13 @@ function decodedBase64Bytes(dataUrl){const comma=String(dataUrl).indexOf(",");if
 async function normalizeImageFile(file){
   const allowed=["image/jpeg","image/png","image/webp"];if(!allowed.includes(file.type))throw new Error("JPEG / PNG / WebP の画像を選択してください。");
   const source=await fileToDataUrl(file);
-  if(file.size<=760000)return {data_url:source,mime_type:file.type,file_name:file.name,size:file.size};
-  const img=await loadImage(source);const maxSide=1600;const scale=Math.min(1,maxSide/Math.max(img.naturalWidth||img.width,img.naturalHeight||img.height));
+  if(file.size<=IMAGE_TARGET_BYTES)return {data_url:source,mime_type:file.type,file_name:file.name,size:file.size};
+  const img=await loadImage(source);const maxSide=1280;const scale=Math.min(1,maxSide/Math.max(img.naturalWidth||img.width,img.naturalHeight||img.height));
   const canvas=document.createElement("canvas");canvas.width=Math.max(1,Math.round((img.naturalWidth||img.width)*scale));canvas.height=Math.max(1,Math.round((img.naturalHeight||img.height)*scale));
   const ctx=canvas.getContext("2d",{alpha:false});ctx.drawImage(img,0,0,canvas.width,canvas.height);
-  let quality=.82,data=canvasToDataUrl(canvas,quality),bytes=decodedBase64Bytes(data);
-  while(bytes>760000&&quality>.42){quality-=.08;data=canvasToDataUrl(canvas,quality);bytes=decodedBase64Bytes(data)}
-  if(bytes>800000)throw new Error(`${file.name} を800KB以下に調整できませんでした。別の画像を選択してください。`);
+  let quality=.80,data=canvasToDataUrl(canvas,quality),bytes=decodedBase64Bytes(data);
+  while(bytes>IMAGE_TARGET_BYTES&&quality>.36){quality-=.07;data=canvasToDataUrl(canvas,quality);bytes=decodedBase64Bytes(data)}
+  if(bytes>IMAGE_HARD_MAX_BYTES)throw new Error(`${file.name} を800KB以下に調整できませんでした。別の画像を選択してください。`);
   const name=String(file.name||"symptom.jpg").replace(/\.[^.]+$/,"-")+"compressed.jpg";
   return {data_url:data,mime_type:"image/jpeg",file_name:name,size:bytes}
 }
@@ -374,6 +393,8 @@ async function submit(){
       pet_name:cardValue(state.pet,"pet_name")||cardValue(state.pet,"name")||"",guardian_name:cardValue(state.pet,"guardian_name")||state.guardian?.guardian_name||state.guardian?.name||"",
       images:state.features?.flags?.questionnaire_images?state.images.map(x=>({data_url:x.data_url,mime_type:x.mime_type,file_name:x.file_name})):[],
       branching_used:Boolean(state.features?.flags?.questionnaire_branching),questionnaire_version:QUESTIONNAIRE_VERSION,
+      demo_feature_flags:IS_DEMO?{...(state.features?.flags||{})}:undefined,
+      demo_questionnaire_modules:IS_DEMO?{...(state.features?.questionnaire_modules||{})}:undefined,
       actor_name:"飼い主LINE"
     });
     setStatus(d.message||"問診を送信しました。","ok");

@@ -96,9 +96,9 @@ const TABLES = {
 };
 
 const DEFAULT_CLINIC_CODE = "dpro_vet_demo";
-const WORKER_VERSION = "ANIMARY-COUNTER-V1.1-4-QUESTIONNAIRE-IMAGES-ADMIN-20260815";
+const WORKER_VERSION = "ANIMARY-COUNTER-V1.1-4-R1-QUESTIONNAIRE-SEND-FIX-20260815";
 const FEATURE_SWITCH_VERSION = "DPRO-VET-FEATURE-SWITCH-V1.1";
-const WEB_QUESTIONNAIRE_VERSION = "DPRO-VET-WEB-QUESTIONNAIRE-V1.1.4";
+const WEB_QUESTIONNAIRE_VERSION = "DPRO-VET-WEB-QUESTIONNAIRE-V1.1.4-R1";
 const EXACT_APPOINTMENT_GUARD_VERSION = "VET-APPOINTMENT-1-R2";
 const LINE_CALL_FEATURE_VERSION = "VET-LINE-CALL-1";
 const DOCTOR_SLOT_FEATURE_VERSION = "VET-DOCTOR-SLOT-1";
@@ -337,6 +337,13 @@ function requestHasCardCredential(path, body = {}, request = null) {
 
 async function enforceProductionMemberIdentity(request, env, path) {
   if (!memberIdentityProtectedPath(path)) return {ok:true, request, protected:false};
+
+  // V1.1-4-R1: DEMOの画像付き問診では巨大JSONを認証判定のためだけに二重読込しない。
+  // clinic_code をURLに明示したDEMOだけを先に安全に判定する。本番clinicには影響しない。
+  const queryClinicCode = cleanString(getParam(request, "clinic_code", ""));
+  if (queryClinicCode && isDemoClinicCodeForAudit(env, queryClinicCode)) {
+    return {ok:true, request, protected:true, demo_bypass:true, clinic_code:queryClinicCode, demo_fast_path:true};
+  }
 
   const body = request.method === "GET" || request.method === "HEAD" ? {} : await readJson(request);
   const clinicCode = getRequestedClinicCode(request, body);
@@ -3593,7 +3600,21 @@ async function handleQuestionnaireCreate(request, env) {
   const featureState = await getClinicFeatureState(env, clinicCode);
   const clinic = featureState.clinic;
 
-  if (featureState.feature_flags.previsit_questionnaire !== true) {
+  // V1.1-4-R1: 営業DEMOはFeature SwitchをブラウザlocalStorageへ保存するため、
+  // DEMOに限り画面から送られたスイッチ状態を今回の問診送信だけに適用する。
+  // 本番clinicではクライアント指定を一切採用せず、Supabase設定だけを正とする。
+  const demoMarker = cleanString(body.demo || getParam(request, "demo", "")).toLowerCase();
+  const demoOverrideAllowed = isDemoClinicCodeForAudit(env, clinicCode) && ["ready", "true", "1"].includes(demoMarker);
+  let effectiveFeatureFlags = featureState.feature_flags;
+  let effectiveQuestionnaireModules = featureState.questionnaire_modules;
+  if (demoOverrideAllowed && body.demo_feature_flags && typeof body.demo_feature_flags === "object" && !Array.isArray(body.demo_feature_flags)) {
+    effectiveFeatureFlags = normalizeFeatureFlags({ ...featureState.feature_flags, ...body.demo_feature_flags });
+  }
+  if (demoOverrideAllowed && body.demo_questionnaire_modules && typeof body.demo_questionnaire_modules === "object" && !Array.isArray(body.demo_questionnaire_modules)) {
+    effectiveQuestionnaireModules = normalizeQuestionnaireModules({ ...featureState.questionnaire_modules, ...body.demo_questionnaire_modules });
+  }
+
+  if (effectiveFeatureFlags.previsit_questionnaire !== true) {
     return featureDisabledResponse("previsit_questionnaire", "この動物病院ではWEB問診を使用していません。");
   }
 
@@ -3602,7 +3623,7 @@ async function handleQuestionnaireCreate(request, env) {
   if (!petId) return errorResponse("問診対象のペットを選択してください。", 400);
 
   const questionnaireType = cleanString(body.questionnaire_type || body.category || "general").toLowerCase();
-  const modules = featureState.questionnaire_modules;
+  const modules = effectiveQuestionnaireModules;
   if (!Object.prototype.hasOwnProperty.call(modules, questionnaireType)) {
     return errorResponse("問診カテゴリが正しくありません。", 400);
   }
@@ -3614,7 +3635,7 @@ async function handleQuestionnaireCreate(request, env) {
   if (requestedImages.length > QUESTIONNAIRE_IMAGE_MAX_COUNT) {
     return errorResponse(`症状画像は最大${QUESTIONNAIRE_IMAGE_MAX_COUNT}枚までです。`, 400);
   }
-  if (requestedImages.length && featureState.feature_flags.questionnaire_images !== true) {
+  if (requestedImages.length && effectiveFeatureFlags.questionnaire_images !== true) {
     return featureDisabledResponse("questionnaire_images", "この動物病院ではWEB問診の症状画像添付を使用していません。");
   }
 
@@ -3630,7 +3651,7 @@ async function handleQuestionnaireCreate(request, env) {
   }
 
   const requestedBranching = toBool(body.branching_used, false);
-  const branchingUsed = requestedBranching && featureState.feature_flags.questionnaire_branching === true;
+  const branchingUsed = requestedBranching && effectiveFeatureFlags.questionnaire_branching === true;
   const answers = body.answers && typeof body.answers === "object" && !Array.isArray(body.answers)
     ? { ...body.answers }
     : {};
@@ -3720,7 +3741,8 @@ async function handleQuestionnaireCreate(request, env) {
     image_count: imageMeta.length,
     feature_switch_version: FEATURE_SWITCH_VERSION,
     web_questionnaire_version: WEB_QUESTIONNAIRE_VERSION,
-    branching_used: branchingUsed
+    branching_used: branchingUsed,
+    demo_feature_override_applied: demoOverrideAllowed
   });
 }
 
