@@ -97,7 +97,7 @@ const TABLES = {
 };
 
 const DEFAULT_CLINIC_CODE = "dpro_vet_demo";
-const WORKER_VERSION = "ANIMARY-COUNTER-V1.3-VACCINE-INTERVAL-20260816-INTEGRATED-6";
+const WORKER_VERSION = "ANIMARY-COUNTER-V1.3-VACCINE-INTERVAL-20260816-INTEGRATED-6-R1";
 const INTEGRATED_API_VERSION = "DPRO-PET-CARE-INTEGRATED-V1.0";
 const FEATURE_SWITCH_VERSION = "DPRO-VET-FEATURE-SWITCH-V1.1";
 const WEB_QUESTIONNAIRE_VERSION = "DPRO-VET-WEB-QUESTIONNAIRE-V1.1.6";
@@ -7681,7 +7681,8 @@ async function createReceptionForExistingPetCore(env, clinic, guardian, pet, car
     p_purpose: purpose,
     p_symptoms_summary: memo || purpose,
     p_desired_contact: desiredContact,
-    p_source: "counter",
+    // INTEGRATED-6-R1: 電話は phone、窓口は counter を正式sourceとして保存する。
+    p_source: receptionSource,
     p_questionnaire: questionnaire
   });
 
@@ -8080,8 +8081,8 @@ async function handleExistingPetReceptionCreate(request, env) {
       p_purpose: purpose,
       p_symptoms_summary: memo || purpose,
       p_desired_contact: desiredContact,
-      // INTEGRATED-6: 院内QR/窓口は正式source contractの counter として保存する。
-      p_source: "counter",
+      // INTEGRATED-6-R1: 電話は phone、窓口は counter を正式sourceとして保存する。
+      p_source: receptionSource,
       p_questionnaire: questionnaire
     });
 
@@ -8291,9 +8292,8 @@ async function handleManualReceptionCreate(request, env) {
       p_purpose: purpose,
       p_symptoms_summary: memo || purposeBase || sourceLabel,
       p_desired_contact: desiredContact,
-      // 既存DBの source 制約に当たりにくいよう、受付PCで既に動作確認済みの qr_reception を使う。
-      // 実際の区分は purpose / questionnaire / guardian.memo に残す。
-      p_source: "counter",
+      // INTEGRATED-6-R1: 電話は phone、窓口は counter を正式sourceとして保存する。
+      p_source: receptionSource,
       p_questionnaire: questionnaire
     });
 

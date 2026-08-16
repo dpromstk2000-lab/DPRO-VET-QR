@@ -66,7 +66,7 @@ input,select{width:100%;border:1px solid #cad9d1;border-radius:11px;padding:10px
 <main class="page">
 <section class="hero">
   <div>
-    <span class="badge">DPRO PET CARE INTEGRATED-6｜WEB・LINE・電話・窓口 共通受付一覧</span>
+    <span class="badge">DPRO PET CARE INTEGRATED-6-R1｜WEB・LINE・電話・窓口 共通受付一覧</span>
     <h1>入口は違っても、<br>受付はひとつ。</h1>
     <p>順番受付と日時指定予約を同じ一覧で確認します。WEB・LINE・電話・窓口を別管理にせず、どこから入った受付かだけsourceで識別します。</p>
     <nav class="heroNav">
@@ -154,12 +154,18 @@ function guardianName(x){return x?.guardian_name||x?.owner_name||x?.customer_nam
 function purpose(x){return x?.purpose||x?.visit_purpose||x?.request_category_label||x?.menu_name||x?.service_name||"通常診療"}
 function sourceOf(x){
   const raw=String(x?.source||x?.reception_source||x?.booking_source||"").trim().toLowerCase();
+  const text=[
+    x?.purpose,x?.symptoms_summary,x?.staff_note,x?.memo,
+    x?.questionnaire?.reception_source_label,
+    x?.questionnaire?.reception_source
+  ].map(v=>String(v||"")).join(" ");
+  // INTEGRATED-6-R1:
+  // 過去にcounter固定で保存された電話受付も、受付内容の明示ラベルを優先して復元する。
+  if(text.includes("電話受付"))return"phone";
+  if(text.includes("窓口受付")||text.includes("QR来院受付"))return"counter";
   const aliases={telephone:"phone",front_desk:"counter",manual_front:"counter",window:"counter",qr:"counter",qr_reception:"counter"};
   if(aliases[raw])return aliases[raw];
   if(["web","line","phone","counter"].includes(raw))return raw;
-  const text=[x?.purpose,x?.symptoms_summary,x?.staff_note,x?.memo].map(v=>String(v||"")).join(" ");
-  if(text.includes("電話受付"))return"phone";
-  if(text.includes("窓口受付")||text.includes("QR来院受付"))return"counter";
   if(/\bweb\b/i.test(text))return"web";
   if(/\bline\b/i.test(text))return"line";
   return"other";
