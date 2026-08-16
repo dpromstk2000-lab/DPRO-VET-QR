@@ -147,16 +147,18 @@ function renderLive(data){
     return;
   }
   $("statusDate").textContent=(t.target_date?dateLabel(t.target_date)+"｜":"")+clinicName;
-  const am=t.can_accept_morning===true;
-  const pm=t.can_accept_afternoon===true;
-  const full=t.is_full_closed===true;
-  $("morningStatus").textContent=am?`${time5(t.morning_open_time||settings.morning_open_time)}〜${time5(t.morning_last_accept_time||settings.morning_last_accept_time)}`:(full?"休診":"受付できません");
-  $("afternoonStatus").textContent=pm?`${time5(t.afternoon_open_time||settings.afternoon_open_time)}〜${time5(t.afternoon_last_accept_time||settings.afternoon_last_accept_time)}`:(full?"休診":"受付できません");
-  $("morningBox").classList.toggle("off",!am);
-  $("afternoonBox").classList.toggle("off",!pm);
+  const am=typeof r.can_accept_morning==="boolean"?r.can_accept_morning:t.can_accept_morning===true;
+  const pm=typeof r.can_accept_afternoon==="boolean"?r.can_accept_afternoon:t.can_accept_afternoon===true;
+  const code=String(r.code||"");
+  const stopped=code==="reception_stopped";
+  const full=code==="closed_today"||t.is_full_closed===true;
+  $("morningStatus").textContent=stopped?"受付停止":am?`${time5(t.morning_open_time||settings.morning_open_time)}〜${time5(t.morning_last_accept_time||settings.morning_last_accept_time)}`:(full?"休診":"受付できません");
+  $("afternoonStatus").textContent=stopped?"受付停止":pm?`${time5(t.afternoon_open_time||settings.afternoon_open_time)}〜${time5(t.afternoon_last_accept_time||settings.afternoon_last_accept_time)}`:(full?"休診":"受付できません");
+  $("morningBox").classList.toggle("off",!am||stopped||full);
+  $("afternoonBox").classList.toggle("off",!pm||stopped||full);
   const label=r.label||t.reception_label||(full?"休診":(am||pm?"受付中":"受付終了"));
   $("statusTag").textContent=label;
-  $("statusTag").className="statusTag"+(full?" closed":(!am||!pm?" warn":""));
+  $("statusTag").className="statusTag"+((full||stopped)?" closed":(!am||!pm?" warn":""));
   $("statusMessage").textContent=r.message||t.display_message||data?.notice?.text||"本日の受付状況をご確認ください。";
   const noticeAllowed=line.notice!==false&&noticeChannel.enabled!==false;
   const noticeText=data?.notice?.text||settings.public_notice||"";

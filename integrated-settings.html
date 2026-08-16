@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#153f34">
+<title>DPRO PET CARE｜HP・LINE共通設定 INTEGRATED-5</title>
+<script src="./config.js"></script>
+<style>
+:root{--bg:#f4f7f4;--card:#fff;--ink:#203029;--muted:#6b7871;--line:#dce7df;--main:#216f59;--main2:#3e9274;--soft:#edf7f2;--blue:#326ca3;--bluebg:#edf5ff;--amber:#8a6515;--amberbg:#fff7df;--red:#a94444;--redbg:#fff0ef;--shadow:0 16px 42px rgba(34,65,52,.1)}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#edf6f1,#fbfcfa 38%,#f3f6f4);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP","Yu Gothic",sans-serif;line-height:1.6}
+button,input,select,textarea{font:inherit}button{cursor:pointer}a{color:inherit}.app{width:min(1240px,calc(100% - 24px));margin:auto;padding:16px 0 54px}
+.hero{position:relative;overflow:hidden;border-radius:30px;padding:26px;background:linear-gradient(135deg,#123d31,#267258);color:#fff;box-shadow:var(--shadow)}.hero:after{content:"SYNC";position:absolute;right:-10px;bottom:-46px;font-size:130px;font-weight:1000;opacity:.06}.heroTop{position:relative;z-index:1;display:flex;justify-content:space-between;gap:18px;align-items:flex-start}.badge{display:inline-flex;padding:6px 10px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.13);border-radius:999px;font-size:12px;font-weight:950}.hero h1{margin:12px 0 6px;font-size:clamp(29px,4vw,46px);line-height:1.1}.hero p{margin:0;color:rgba(255,255,255,.88);font-weight:750}.heroLinks{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}.heroLinks a{display:inline-flex;padding:8px 11px;border-radius:999px;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.24);text-decoration:none;font-size:12px;font-weight:900}
+.auth{margin-top:14px;background:#fff;border:1px solid var(--line);border-radius:22px;padding:14px;box-shadow:var(--shadow);display:grid;gap:10px}.authRow{display:grid;grid-template-columns:1fr auto auto;gap:9px;align-items:end}.authOk{border-color:#c9e7d8;background:linear-gradient(180deg,#fff,#f2faf5)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}.full{grid-column:1/-1}.card{background:var(--card);border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow);overflow:hidden}.head{padding:15px 17px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#fff,#fbfdfb);display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.head h2{margin:0;font-size:20px}.head p{margin:3px 0 0;color:var(--muted);font-size:12px;font-weight:800}.body{padding:16px}.stack{display:grid;gap:11px}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.row3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.row4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}label{display:block;color:var(--muted);font-size:12px;font-weight:950;margin-bottom:5px}input,select,textarea{width:100%;min-height:46px;border:1px solid #cddbd2;border-radius:14px;background:#fff;padding:10px 11px;color:var(--ink);outline:none}textarea{min-height:86px;resize:vertical}input:focus,select:focus,textarea:focus{border-color:var(--main);box-shadow:0 0 0 3px rgba(33,111,89,.1)}
+.btns{display:flex;flex-wrap:wrap;gap:8px}.btn{appearance:none;border:0;border-radius:999px;min-height:43px;padding:9px 14px;background:var(--main);color:#fff;font-weight:950}.btn.secondary{background:#fff;color:var(--main);border:1px solid #cddbd2}.btn.warn{background:var(--amber)}.btn.red{background:var(--red)}.btn.blue{background:var(--blue)}.btn:disabled{opacity:.45;cursor:not-allowed}.mini{font-size:11px;color:var(--muted);font-weight:800}.note{border:1px solid #c9e7d8;background:var(--soft);border-radius:15px;padding:11px;color:#176a51;font-size:12px;font-weight:850}.warnNote{border-color:#ead49a;background:var(--amberbg);color:#6d501b}.dangerNote{border-color:#efc5c5;background:var(--redbg);color:var(--red)}
+.stateBox{border:1px solid #cfe4d6;border-radius:20px;background:linear-gradient(180deg,#fff,#f3faf6);padding:14px}.stateTop{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.stateLabel{display:inline-flex;border-radius:999px;padding:5px 9px;background:var(--soft);color:#176a51;font-weight:950;font-size:12px}.stateLabel.warn{background:var(--amberbg);color:var(--amber)}.stateLabel.red{background:var(--redbg);color:var(--red)}.stateTimes{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.stateTime{border:1px solid var(--line);border-radius:14px;background:#fff;padding:10px}.stateTime small{display:block;color:var(--muted);font-size:11px;font-weight:900}.stateTime b{display:block;margin-top:2px}.stateTime.off{background:#fff5f4;border-color:#efc5c5;color:var(--red)}
+.quick{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:12px}.quick button{min-height:52px;border:1px solid var(--line);border-radius:15px;background:#fff;color:var(--ink);font-weight:950}.quick button:hover{border-color:var(--main);background:var(--soft)}
+.switchGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.switch{display:flex;align-items:flex-start;gap:9px;border:1px solid var(--line);border-radius:15px;background:#fff;padding:10px}.switch input{width:22px;min-height:22px;height:22px;margin:1px 0 0;accent-color:var(--main);flex:0 0 auto}.switch strong{display:block;font-size:13px}.switch span{display:block;color:var(--muted);font-size:11px;font-weight:750;margin-top:2px}.sectionTitle{margin:6px 0 0;font-size:14px;color:var(--main)}
+.specialList{display:grid;gap:8px}.specialItem{border:1px solid var(--line);border-radius:15px;background:#fff;padding:11px;display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.specialItem strong{display:block}.specialItem small{display:block;color:var(--muted);font-weight:800;margin-top:2px}.tag{display:inline-flex;padding:4px 8px;border-radius:999px;background:var(--soft);color:var(--main);font-size:11px;font-weight:950}.debug{margin-top:14px}.debug summary{cursor:pointer;color:var(--muted);font-weight:900}.debug pre{white-space:pre-wrap;word-break:break-word;background:#10251f;color:#d7f3e6;border-radius:15px;padding:12px;max-height:320px;overflow:auto;font-size:11px}.toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,20px);opacity:0;pointer-events:none;background:rgba(26,43,36,.96);color:#fff;border-radius:999px;padding:11px 15px;font-weight:900;box-shadow:0 15px 34px rgba(0,0,0,.2);transition:.2s;z-index:20}.toast.show{opacity:1;transform:translate(-50%,0)}.hidden{display:none!important}
+@media(max-width:900px){.grid{grid-template-columns:1fr}.full{grid-column:auto}.quick{grid-template-columns:1fr 1fr}.switchGrid,.row,.row3,.row4{grid-template-columns:1fr}.heroTop{display:block}.heroLinks{justify-content:flex-start;margin-top:13px}.authRow{grid-template-columns:1fr}.stateTimes{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main class="app">
+<section class="hero">
+  <div class="heroTop">
+    <div><span class="badge">DPRO PET CARE INTEGRATED-5</span><h1>HP・LINE 共通設定</h1><p>DPROで変更した診療状態・お知らせ・機能スイッチを、HPとLINE公式へ同じデータで反映します。</p></div>
+    <nav class="heroLinks"><a id="adminLink" href="./admin.html">管理設定へ</a><a id="queueLink" href="./admin-queue.html">受付設定へ</a><a id="hpLink" target="_blank" rel="noopener">HPを確認</a><a id="lineLink" target="_blank" rel="noopener">LINE入口を確認</a></nav>
+  </div>
+</section>
+
+<section id="authBox" class="auth">
+  <div class="authRow">
+    <div><label for="adminCode">管理コード</label><input id="adminCode" type="password" placeholder="Cloudflare Worker の管理コード"></div>
+    <button id="openBtn" class="btn" type="button">共通設定を開く</button>
+    <button id="clearCodeBtn" class="btn secondary" type="button">保存コード削除</button>
+  </div>
+  <label style="display:flex;gap:8px;align-items:center;margin:0"><input id="saveCode" type="checkbox" style="width:20px;min-height:20px">この端末に管理コードを保存する</label>
+  <div id="authMessage" class="mini">管理コードはGitHubには保存しません。</div>
+</section>
+
+<section id="content" class="grid hidden">
+  <article class="card full">
+    <div class="head"><div><h2>今日の診療・受付状態</h2><p>「通常」は定休日・既存の休診設定に従います。その他は今日だけの特別状態として保存します。</p></div><button id="reloadBtn" class="btn secondary" type="button">再読込</button></div>
+    <div class="body">
+      <div id="stateBox" class="stateBox">
+        <div class="stateTop"><div><strong id="stateClinic">確認中</strong><div id="stateDate" class="mini"></div></div><span id="stateLabel" class="stateLabel">確認中</span></div>
+        <div class="stateTimes"><div id="amBox" class="stateTime"><small>午前</small><b id="amText">確認中</b></div><div id="pmBox" class="stateTime"><small>午後</small><b id="pmText">確認中</b></div></div>
+        <div id="stateMessage" class="note" style="margin-top:9px">共通APIを確認中です。</div>
+      </div>
+      <div class="quick">
+        <button data-today-mode="open" type="button">通常<br><span class="mini">定休日に従う</span></button>
+        <button data-today-mode="closed_today" type="button">本日休診</button>
+        <button data-today-mode="morning_closed" type="button">午前休診</button>
+        <button data-today-mode="afternoon_closed" type="button">午後休診</button>
+        <button data-today-mode="reception_stopped" type="button">受付停止</button>
+      </div>
+      <div class="note warnNote" style="margin-top:10px">今日の状態変更時は、表示の食い違いを防ぐため公開お知らせも実際の状態に合わせて自動更新します。</div>
+    </div>
+  </article>
+
+  <article class="card">
+    <div class="head"><div><h2>公開病院情報</h2><p>HP・LINE共通APIの正本</p></div></div>
+    <div class="body stack">
+      <div class="row"><div><label>病院名</label><input id="clinicName"></div><div><label>表示名</label><input id="displayName"></div></div>
+      <div class="row"><div><label>電話番号</label><input id="phone"></div><div><label>住所</label><input id="address"></div></div>
+      <div><label>LINE公式名</label><input id="officialLineName"></div>
+      <div class="row4"><div><label>午前開始</label><input id="morningOpen" type="time"></div><div><label>午前終了</label><input id="morningClose" type="time"></div><div><label>午前締切</label><input id="morningLast" type="time"></div><div><label>枠</label><select id="timeSlot"><option value="30">30分</option><option value="15">15分</option></select></div></div>
+      <div class="row3"><div><label>午後開始</label><input id="afternoonOpen" type="time"></div><div><label>午後終了</label><input id="afternoonClose" type="time"></div><div><label>午後締切</label><input id="afternoonLast" type="time"></div></div>
+      <div><label>公開お知らせ</label><textarea id="publicNotice"></textarea></div>
+      <div class="btns"><button id="saveMasterBtn" class="btn" type="button">共通病院情報を保存</button></div>
+    </div>
+  </article>
+
+  <article class="card">
+    <div class="head"><div><h2>HP・LINE表示設定</h2><p>公開チャンネルごとの表示ON/OFF</p></div></div>
+    <div class="body stack">
+      <h3 class="sectionTitle">共通・お知らせ</h3>
+      <div class="switchGrid">
+        <label class="switch"><input id="welcomeEnabled" type="checkbox"><span><strong>HP初回オーバーレイ</strong><span>welcome.enabled</span></span></label>
+        <label class="switch"><input id="noticeEnabled" type="checkbox"><span><strong>公開お知らせ</strong><span>notice.enabled</span></span></label>
+        <label class="switch"><input id="lineTodayStatus" type="checkbox"><span><strong>LINE本日状況</strong><span>line.today_status</span></span></label>
+        <label class="switch"><input id="lineNotice" type="checkbox"><span><strong>LINEお知らせ</strong><span>line.notice</span></span></label>
+      </div>
+      <div class="row"><div><label>お知らせタイトル</label><input id="noticeTitle"></div><div><label>重要度</label><select id="noticeLevel"><option value="important">重要</option><option value="normal">通常</option><option value="emergency">緊急</option></select></div></div>
+      <div><label>HPオーバーレイ表示頻度</label><select id="welcomeMode"><option value="every_visit">毎回</option><option value="session_once">セッション1回</option><option value="daily_once">1日1回</option></select></div>
+      <h3 class="sectionTitle">HP表示セクション</h3>
+      <div id="hpSwitches" class="switchGrid"></div>
+      <div class="btns"><button id="saveChannelsBtn" class="btn" type="button">HP・LINE表示設定を保存</button></div>
+    </div>
+  </article>
+
+  <article class="card full">
+    <div class="head"><div><h2>病院別 Feature Switch</h2><p>不要な機能は病院単位でOFF。既存機能は設定値をそのまま保持します。</p></div></div>
+    <div class="body stack"><div id="featureSwitches" class="switchGrid"></div><div class="btns"><button id="saveFeaturesBtn" class="btn" type="button">Feature Switchを保存</button></div></div>
+  </article>
+
+  <article class="card">
+    <div class="head"><div><h2>問診カテゴリ</h2><p>病院で使うカテゴリだけON</p></div></div>
+    <div class="body stack"><div id="questionnaireSwitches" class="switchGrid"></div><div class="btns"><button id="saveQuestionnaireBtn" class="btn" type="button">問診カテゴリを保存</button></div></div>
+  </article>
+
+  <article class="card">
+    <div class="head"><div><h2>臨時休診・特別診療</h2><p>今日〜2か月先。HP・LINE・予約可否へ反映</p></div></div>
+    <div class="body stack">
+      <div class="row"><div><label>日付</label><input id="specialDate" type="date"></div><div><label>区分</label><select id="specialType"><option value="special_closed">休診</option><option value="morning_closed">午前休診</option><option value="afternoon_closed">午後休診</option><option value="special_open">特別診療</option><option value="reception_stopped">受付停止</option></select></div></div>
+      <div><label>タイトル</label><input id="specialTitle" placeholder="例：学会のため午後休診"></div>
+      <div><label>メモ</label><textarea id="specialNote"></textarea></div>
+      <div class="row3"><div><label>午前開始</label><input id="spMorningOpen" type="time"></div><div><label>午前終了</label><input id="spMorningClose" type="time"></div><div><label>午前締切</label><input id="spMorningLast" type="time"></div></div>
+      <div class="row3"><div><label>午後開始</label><input id="spAfternoonOpen" type="time"></div><div><label>午後終了</label><input id="spAfternoonClose" type="time"></div><div><label>午後締切</label><input id="spAfternoonLast" type="time"></div></div>
+      <div class="btns"><button id="saveSpecialBtn" class="btn" type="button">特別日を保存</button></div>
+      <div id="specialList" class="specialList"></div>
+    </div>
+  </article>
+
+  <article class="card full">
+    <div class="head"><div><h2>同期確認</h2><p>保存後にHPとLINEを開いて同じ状態か確認できます。</p></div></div>
+    <div class="body"><div class="btns"><button id="refreshPublicBtn" class="btn blue" type="button">共通APIを再確認</button><a id="hpCheckBtn" class="btn secondary" target="_blank" rel="noopener">HPを開く</a><a id="lineCheckBtn" class="btn secondary" target="_blank" rel="noopener">LINE入口を開く</a></div><details class="debug"><summary>取得JSON</summary><pre id="debugJson"></pre></details></div>
+  </article>
+</section>
+<div id="toast" class="toast"></div>
+</main>
+<script>
+(()=>{
+"use strict";
+const CONFIG=window.DPRO_VET_CONFIG||window.DPRO_CONFIG||window.APP_CONFIG||{};
+const params=new URLSearchParams(location.search);
+const CLINIC=params.get("clinic_code")||CONFIG?.clinic?.clinicCode||"dpro_vet_demo";
+const API=String(CONFIG?.api?.baseUrl||CONFIG?.urls?.apiBaseUrl||CONFIG.API_BASE_URL||"https://dpro-vet-qr-api.dpromstk2000.workers.dev").replace(/\/$/,"");
+const SITE=String(CONFIG?.urls?.siteBaseUrl||"https://dpromstk2000-lab.github.io/DPRO-VET-QR").replace(/\/$/,"");
+const HP="https://dpromstk2000-lab.github.io/DPRO-PET-CARE-HP-DEMO/";
+const ADMIN_KEY="dpro_vet_admin_code";
+const $=id=>document.getElementById(id);
+const state={settings:null,admin:null,specialDays:[],integrated:null};
+const FEATURE_LABELS={pet_card:"ペット診察券",multi_pet_card:"複数ペット診察券",reception_queue:"順番受付",reception_general:"通常診察受付",reception_medicine_prevention:"お薬・予防受付",reception_care:"ケア受付",previsit_questionnaire:"来院前WEB問診",questionnaire_branching:"問診条件分岐",questionnaire_images:"問診画像添付",questionnaire_consent:"問診同意",exact_appointment:"日時指定予約",doctor_selection:"獣医師選択",qr_checkin:"QRチェックイン",congestion_view:"混雑目安",line_call:"LINE呼び出し",post_visit_followup:"診療後フォロー",prevention_recall:"予防リコール",revisit_recall:"再診リコール",multi_pet_booking:"複数ペット予約",vaccine_interval_control:"ワクチン間隔制御",cancel_waitlist:"キャンセル待ち",hp_sync:"HP同期"};
+const QUESTION_LABELS={general:"一般",vaccine:"ワクチン",health_check:"健康診断",skin:"皮膚",digestive:"消化器",respiratory:"呼吸器",eye:"眼",ear:"耳",urinary:"泌尿器",injury:"ケガ",medicine_prevention:"お薬・予防",other:"その他"};
+const HP_LABELS={welcome_overlay:"初回オーバーレイ",today_status:"本日の診療状態",medical_services:"診療案内",first_visit:"初診案内",prevention:"予防案内",health_check:"健康診断",doctors:"獣医師紹介",doctor_schedule:"獣医師予定",trimming:"トリミング",pet_hotel:"ペットホテル",dog_run:"ドッグラン",puppy_class:"パピー教室",news:"お知らせ",faq:"FAQ",access:"アクセス",emergency:"緊急案内",blog:"ブログ",recruitment:"採用",multilingual:"多言語",online_consultation:"オンライン相談"};
+function toast(msg){const el=$("toast");el.textContent=msg;el.classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.remove("show"),2600)}
+function getCode(){return $("adminCode").value.trim()||sessionStorage.getItem(ADMIN_KEY)||localStorage.getItem(ADMIN_KEY)||""}
+function saveCode(){const c=$("adminCode").value.trim();if(!c)return;sessionStorage.setItem(ADMIN_KEY,c);if($("saveCode").checked)localStorage.setItem(ADMIN_KEY,c)}
+function headers(json=true){const h={Accept:"application/json","X-DPRO-Admin-Code":getCode()};if(json)h["Content-Type"]="application/json";return h}
+async function apiGet(path,query={},admin=true){const u=new URL(API+path);Object.entries({clinic_code:CLINIC,...query}).forEach(([k,v])=>{if(v!==undefined&&v!==null&&String(v)!=="")u.searchParams.set(k,String(v))});const r=await fetch(u,{cache:"no-store",headers:admin?headers(false):{Accept:"application/json"}});const d=await r.json().catch(()=>({}));if(!r.ok||d.ok===false)throw new Error(d.message||d.error||`API ${r.status}`);return d}
+async function apiPost(path,body={}){const r=await fetch(API+path,{method:"POST",cache:"no-store",headers:headers(true),body:JSON.stringify({clinic_code:CLINIC,staff_name:"integrated-settings.html",...body})});const d=await r.json().catch(()=>({}));if(!r.ok||d.ok===false)throw new Error(d.message||d.error||`API ${r.status}`);return d}
+function t5(v){return String(v||"").slice(0,5)}
+function today(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}
+function buildLink(path,extra={}){const u=new URL(path,SITE+"/");u.searchParams.set("clinic_code",CLINIC);u.searchParams.set("demo","ready");Object.entries(extra).forEach(([k,v])=>u.searchParams.set(k,String(v)));return u.toString()}
+function setLinks(){const line=buildLink("rich-menu.html",{line_user_id:CONFIG?.demo?.lineUserId||"demo_line_link_001",source:"line"});$("adminLink").href=buildLink("admin.html");$("queueLink").href=buildLink("admin-queue.html");$("hpLink").href=HP;$("lineLink").href=line;$("hpCheckBtn").href=HP;$("lineCheckBtn").href=line}
+function switchHtml(key,label,checked,kind){return `<label class="switch"><input type="checkbox" data-${kind}="${key}" ${checked?"checked":""}><span><strong>${label}</strong><span>${key}</span></span></label>`}
+function renderSettings(data){state.admin=data;state.settings=data.settings||{};state.specialDays=Array.isArray(data.special_days)?data.special_days:[];const s=state.settings;$("clinicName").value=s.clinic_name||"";$("displayName").value=s.display_name||"";$("phone").value=s.phone||"";$("address").value=s.address||"";$("officialLineName").value=s.official_line_name||"";$("morningOpen").value=t5(s.morning_open_time);$("morningClose").value=t5(s.morning_close_time);$("morningLast").value=t5(s.morning_last_accept_time);$("afternoonOpen").value=t5(s.afternoon_open_time);$("afternoonClose").value=t5(s.afternoon_close_time);$("afternoonLast").value=t5(s.afternoon_last_accept_time);$("timeSlot").value=String(s.time_slot_minutes||30);$("publicNotice").value=s.public_notice||"";
+ const pc=s.public_channel_settings||{};const hp=pc.hp||{};const line=pc.line||{};const welcome=pc.welcome||{};const notice=pc.notice||{};$("welcomeEnabled").checked=welcome.enabled!==false;$("noticeEnabled").checked=notice.enabled!==false;$("lineTodayStatus").checked=line.today_status!==false;$("lineNotice").checked=line.notice!==false;$("noticeTitle").value=notice.title||"大切なお知らせ";$("noticeLevel").value=notice.level||"important";$("welcomeMode").value=welcome.show_mode||"every_visit";$("hpSwitches").innerHTML=Object.keys(HP_LABELS).map(k=>switchHtml(k,HP_LABELS[k],hp[k]!==false,"hp")).join("");
+ const flags=s.feature_flags||{};$("featureSwitches").innerHTML=Object.keys(FEATURE_LABELS).map(k=>switchHtml(k,FEATURE_LABELS[k],flags[k]===true,"feature")).join("");const qm=s.questionnaire_modules||{};$("questionnaireSwitches").innerHTML=Object.keys(QUESTION_LABELS).map(k=>switchHtml(k,QUESTION_LABELS[k],qm[k]!==false,"question")).join("");prefillSpecial();renderSpecialList()}
+function prefillSpecial(){const s=state.settings||{};if(!$("specialDate").value)$("specialDate").value=today();$("spMorningOpen").value=t5(s.morning_open_time);$("spMorningClose").value=t5(s.morning_close_time);$("spMorningLast").value=t5(s.morning_last_accept_time);$("spAfternoonOpen").value=t5(s.afternoon_open_time);$("spAfternoonClose").value=t5(s.afternoon_close_time);$("spAfternoonLast").value=t5(s.afternoon_last_accept_time)}
+function renderSpecialList(){const root=$("specialList");if(!state.specialDays.length){root.innerHTML='<div class="note">登録済みの臨時休診・特別診療はありません。</div>';return}root.innerHTML=state.specialDays.map(x=>`<div class="specialItem"><div><strong>${x.target_date||""}｜${x.title||x.day_type||""}</strong><small>${x.day_type||""}${x.note?"｜"+x.note:""}</small></div><button class="btn red" type="button" data-del-date="${x.target_date}" data-del-type="${x.day_type}">削除</button></div>`).join("");root.querySelectorAll("[data-del-date]").forEach(b=>b.addEventListener("click",()=>deleteSpecial(b.dataset.delDate,b.dataset.delType)))}
+function renderIntegrated(x){state.integrated=x;$("debugJson").textContent=JSON.stringify(x,null,2);const t=x.today_status||{};const r=x.reception_state||{};const s=x.settings||{};$("stateClinic").textContent=s.display_name||s.clinic_name||x.clinic?.display_name||"DPROどうぶつ病院";$("stateDate").textContent=x.target_date||"";$("stateLabel").textContent=r.label||t.reception_label||"受付中";$("stateLabel").className="stateLabel"+(["closed_today","reception_stopped"].includes(r.code)?" red":(["morning_closed","afternoon_closed","crowded"].includes(r.code)?" warn":""));const am=typeof r.can_accept_morning==="boolean"?r.can_accept_morning:t.can_accept_morning===true;const pm=typeof r.can_accept_afternoon==="boolean"?r.can_accept_afternoon:t.can_accept_afternoon===true;const stopped=r.code==="reception_stopped";$("amText").textContent=stopped?"受付停止":(am?`${t5(t.morning_open_time||s.morning_open_time)}〜${t5(t.morning_last_accept_time||s.morning_last_accept_time)}`:(r.code==="closed_today"?"休診":"受付できません"));$("pmText").textContent=stopped?"受付停止":(pm?`${t5(t.afternoon_open_time||s.afternoon_open_time)}〜${t5(t.afternoon_last_accept_time||s.afternoon_last_accept_time)}`:(r.code==="closed_today"?"休診":"受付できません"));$("amBox").classList.toggle("off",!am||stopped);$("pmBox").classList.toggle("off",!pm||stopped);$("stateMessage").textContent=r.message||t.display_message||x.notice?.text||""}
+async function loadAll(){const data=await apiGet("/api/admin/clinic-settings",{from:today()});renderSettings(data);const x=await apiGet("/api/public/integrated-state",{},false);renderIntegrated(x);$("content").classList.remove("hidden");$("authBox").classList.add("authOk");$("authMessage").textContent="✅ 管理コード認証済み｜共通設定を読込済み"}
+function collectMaster(){return{clinic_name:$("clinicName").value.trim(),display_name:$("displayName").value.trim(),phone:$("phone").value.trim(),address:$("address").value.trim(),official_line_name:$("officialLineName").value.trim(),morning_open_time:$("morningOpen").value,morning_close_time:$("morningClose").value,morning_last_accept_time:$("morningLast").value,afternoon_open_time:$("afternoonOpen").value,afternoon_close_time:$("afternoonClose").value,afternoon_last_accept_time:$("afternoonLast").value,time_slot_minutes:Number($("timeSlot").value),public_notice:$("publicNotice").value.trim()}}
+async function saveMaster(){await apiPost("/api/admin/clinic-settings/save",collectMaster());toast("共通病院情報を保存しました。");await loadAll()}
+function collectPc(){const current=state.settings?.public_channel_settings||{};const hp={...(current.hp||{})};document.querySelectorAll("[data-hp]").forEach(el=>hp[el.dataset.hp]=el.checked);return{...current,hp,line:{...(current.line||{}),today_status:$("lineTodayStatus").checked,notice:$("lineNotice").checked},welcome:{...(current.welcome||{}),enabled:$("welcomeEnabled").checked,show_mode:$("welcomeMode").value},notice:{...(current.notice||{}),enabled:$("noticeEnabled").checked,title:$("noticeTitle").value.trim()||"大切なお知らせ",level:$("noticeLevel").value}}}
+async function saveChannels(){await apiPost("/api/admin/clinic-settings/save",{public_channel_settings:collectPc()});toast("HP・LINE表示設定を保存しました。");await loadAll()}
+async function saveFeatures(){const flags={...(state.settings?.feature_flags||{})};document.querySelectorAll("[data-feature]").forEach(el=>flags[el.dataset.feature]=el.checked);await apiPost("/api/admin/clinic-settings/save",{feature_preset:"custom",feature_flags:flags});toast("Feature Switchを保存しました。");await loadAll()}
+async function saveQuestionnaire(){const modules={...(state.settings?.questionnaire_modules||{})};document.querySelectorAll("[data-question]").forEach(el=>modules[el.dataset.question]=el.checked);await apiPost("/api/admin/clinic-settings/save",{questionnaire_modules:modules});toast("問診カテゴリを保存しました。");await loadAll()}
+async function saveSpecial(){const type=$("specialType").value;const payload={target_date:$("specialDate").value,day_type:type,title:$("specialTitle").value.trim()||({special_closed:"臨時休診",morning_closed:"午前休診",afternoon_closed:"午後休診",special_open:"特別診療",reception_stopped:"受付停止"}[type]||"特別日"),note:$("specialNote").value.trim(),morning_open_time:$("spMorningOpen").value,morning_close_time:$("spMorningClose").value,morning_last_accept_time:$("spMorningLast").value,afternoon_open_time:$("spAfternoonOpen").value,afternoon_close_time:$("spAfternoonClose").value,afternoon_last_accept_time:$("spAfternoonLast").value};await apiPost("/api/admin/clinic-special-days/save",payload);toast("特別日を保存しました。");await loadAll()}
+async function deleteSpecial(date,type,silent=false){await apiPost("/api/admin/clinic-special-days/delete",{target_date:date,day_type:type});if(!silent)toast("特別日を削除しました。")}
+async function clearTodaySpecials(){const rows=(state.specialDays||[]).filter(x=>x.target_date===today());for(const x of rows){await deleteSpecial(x.target_date,x.day_type,true)}}
+function noticeForState(x){const r=x?.reception_state||{};const code=r.code||"open";if(code==="closed_today")return"本日は休診です。緊急時はお電話でご相談ください。";if(code==="morning_closed")return"本日は午前休診です。午後受付は可能です。";if(code==="afternoon_closed")return"本日は午後休診です。午前受付は可能です。";if(code==="reception_stopped")return"本日の受付は停止しています。診療時間・日時指定予約については病院へご確認ください。";if(code==="crowded")return"現在混雑しています。待ち状況をご確認のうえご来院ください。";return"本日は通常受付中です。診察券QRまたはLINEから受付できます。"}
+async function setTodayMode(mode){document.querySelectorAll("[data-today-mode]").forEach(b=>b.disabled=true);try{await clearTodaySpecials();await apiPost("/api/admin/clinic-settings/save",{reception_status:"open"});if(mode!=="open"){const map={closed_today:"special_closed",morning_closed:"morning_closed",afternoon_closed:"afternoon_closed",reception_stopped:"reception_stopped"};const type=map[mode];if(type)await apiPost("/api/admin/clinic-special-days/save",{target_date:today(),day_type:type,title:{closed_today:"本日休診",morning_closed:"午前休診",afternoon_closed:"午後休診",reception_stopped:"受付停止"}[mode],note:"INTEGRATED-5 共通設定から変更"})}await loadAll();const text=noticeForState(state.integrated);await apiPost("/api/admin/clinic-settings/save",{public_notice:text});toast("今日の状態と公開お知らせを更新しました。");await loadAll()}catch(e){toast(e.message||"状態変更に失敗しました。")}finally{document.querySelectorAll("[data-today-mode]").forEach(b=>b.disabled=false)}}
+async function publicRefresh(){const x=await apiGet("/api/public/integrated-state",{},false);renderIntegrated(x);toast("共通APIを再確認しました。")}
+async function openSettings(){try{saveCode();await loadAll()}catch(e){$("authMessage").textContent="❌ "+(e.message||"管理コードを確認してください。");toast(e.message||"読み込みに失敗しました。")}}
+$("openBtn").addEventListener("click",openSettings);$("clearCodeBtn").addEventListener("click",()=>{sessionStorage.removeItem(ADMIN_KEY);localStorage.removeItem(ADMIN_KEY);$("adminCode").value="";$("content").classList.add("hidden");$("authMessage").textContent="保存コードを削除しました。"});$("reloadBtn").addEventListener("click",loadAll);$("saveMasterBtn").addEventListener("click",saveMaster);$("saveChannelsBtn").addEventListener("click",saveChannels);$("saveFeaturesBtn").addEventListener("click",saveFeatures);$("saveQuestionnaireBtn").addEventListener("click",saveQuestionnaire);$("saveSpecialBtn").addEventListener("click",saveSpecial);$("refreshPublicBtn").addEventListener("click",publicRefresh);document.querySelectorAll("[data-today-mode]").forEach(b=>b.addEventListener("click",()=>setTodayMode(b.dataset.todayMode)));
+setLinks();const stored=sessionStorage.getItem(ADMIN_KEY)||localStorage.getItem(ADMIN_KEY)||"";if(stored){$("adminCode").value=stored;$("saveCode").checked=Boolean(localStorage.getItem(ADMIN_KEY));openSettings()}
+})();
+</script>
+</body>
+</html>
