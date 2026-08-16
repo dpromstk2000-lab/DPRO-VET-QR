@@ -985,6 +985,8 @@
         DEFAULT_CLINIC_CODE;
 
       const demoClinicCode = CONFIG?.demo?.clinicCode || DEFAULT_CLINIC_CODE;
+      const bookingSourceRaw = clean(url.searchParams.get("booking_source")) || clean(url.searchParams.get("source")) || "line";
+      const bookingSource = ["line", "web"].includes(bookingSourceRaw.toLowerCase()) ? bookingSourceRaw.toLowerCase() : "line";
       const isDemoMode =
         url.searchParams.get("demo") === "ready" ||
         url.searchParams.get("demo") === "true" ||
@@ -1150,12 +1152,12 @@
       }
 
       function setupStaticLinks() {
-        setHref("waitingLink", buildPageUrl("waiting.html", { mode:"today_queue", v:"step-vet-52-5f", line_user_id: state.lineUserId || (isStep40DemoReady() ? DEMO_LINE_USER_ID : ""), demo: isStep40DemoReady() ? "ready" : "" }));
-        setHref("richMenuLink", buildPageUrl("rich-menu.html"));
-        setHref("registerLinkTop", buildPageUrl("register.html"));
-        setHref("registerLink", buildPageUrl("register.html"));
-        setHref("richMenuLinkUnreg", buildPageUrl("rich-menu.html"));
-        setHref("registerLinkError", buildPageUrl("register.html"));
+        setHref("waitingLink", buildPageUrl("waiting.html", { mode:"today_queue", v:"step-vet-52-5f", line_user_id: state.lineUserId || (isStep40DemoReady() ? DEMO_LINE_USER_ID : ""), source: bookingSource, demo: isStep40DemoReady() ? "ready" : "" }));
+        setHref("richMenuLink", buildPageUrl("rich-menu.html", { source: bookingSource }));
+        setHref("registerLinkTop", buildPageUrl("register.html", { source: bookingSource }));
+        setHref("registerLink", buildPageUrl("register.html", { source: bookingSource }));
+        setHref("richMenuLinkUnreg", buildPageUrl("rich-menu.html", { source: bookingSource }));
+        setHref("registerLinkError", buildPageUrl("register.html", { source: bookingSource }));
       }
 
       async function load() {
@@ -1878,12 +1880,13 @@
           line_user_id: state.lineUserId || (demoReady ? DEMO_LINE_USER_ID : ""),
           demo: demoReady ? "ready" : "",
           pet_id: card.pet_id || "",
-          card_token: card.card_token || card.qr_token || ""
+          card_token: card.card_token || card.qr_token || "",
+          source: bookingSource
         };
         setHref("todayQueueLink", buildPageUrl("waiting.html", { ...base, mode:"today_queue", v:"step-vet-52-5f" }));
         setHref("previsitLink", buildPageUrl("waiting.html", { ...base, mode:"previsit", v:"step-vet-52-5f" }));
         setHref("medicineLink", buildPageUrl("waiting.html", { ...base, mode:"medicine_prevention", v:"step-vet-52-5f" }));
-        setHref("addPetLink", buildPageUrl("register.html", { add_pet:"true", line_user_id: base.line_user_id, demo: base.demo }));
+        setHref("addPetLink", buildPageUrl("register.html", { add_pet:"true", line_user_id: base.line_user_id, source: bookingSource, demo: base.demo }));
         setHref("waitingLink", buildPageUrl("waiting.html", { ...base, mode:"today_queue", v:"step-vet-52-5f" }));
         renderClinicStatus();
       }

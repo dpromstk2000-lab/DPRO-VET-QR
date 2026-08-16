@@ -47,11 +47,13 @@ const DEMO_LINE_USER_ID=CONFIG?.demo?.lineUserId||"demo_line_link_001";
 const incomingLineUserId=params.get("line_user_id")||params.get("lineUserId")||params.get("uid")||"";
 const LINE_USER_ID=DEMO?(incomingLineUserId||DEMO_LINE_USER_ID):"";
 const LIFF_ID=params.get("liff_id")||"";
-const VERSION="animary-counter-v1.1-2";
+const BOOKING_SOURCE_RAW=String(params.get("booking_source")||params.get("source")||"line").trim().toLowerCase();
+const BOOKING_SOURCE=["line","web"].includes(BOOKING_SOURCE_RAW)?BOOKING_SOURCE_RAW:"line";
+const VERSION="animary-counter-v1.1-2-integrated3";
 function buildRoute(item){
  const target=new URL(item.path||item.url||"./index.html",location.href);
  Object.entries(item.query||{}).forEach(([k,v])=>{if(v!==undefined&&v!==null&&String(v)!=="")target.searchParams.set(k,String(v))});
- target.searchParams.set("clinic_code",CLINIC_CODE);target.searchParams.set("v",VERSION);
+ target.searchParams.set("clinic_code",CLINIC_CODE);target.searchParams.set("v",VERSION);target.searchParams.set("source",BOOKING_SOURCE);
  if(DEMO)target.searchParams.set("demo","ready");if(LIFF_ID)target.searchParams.set("liff_id",LIFF_ID);
  if(item.requiresIdentity&&LINE_USER_ID)target.searchParams.set("line_user_id",LINE_USER_ID);return target.toString()
 }
@@ -65,6 +67,7 @@ buttons.forEach(item=>{
     const q=new URL("questionnaire.html",location.href);
     q.searchParams.set("clinic_code",CLINIC_CODE);
     q.searchParams.set("source",item.id);
+    q.searchParams.set("booking_source",BOOKING_SOURCE);
     q.searchParams.set("return_url",href);
     if(DEMO)q.searchParams.set("demo","ready");
     if(LINE_USER_ID)q.searchParams.set("line_user_id",LINE_USER_ID);

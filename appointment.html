@@ -134,7 +134,10 @@
   const INCOMING_LINE_USER_ID = params.get("line_user_id") || params.get("lineUserId") || params.get("uid") || "";
   const LINE_USER_ID = IS_DEMO_CLINIC ? INCOMING_LINE_USER_ID : "";
   const DEMO = IS_DEMO_CLINIC && ["ready","true","1"].includes(String(params.get("demo") || "").toLowerCase());
-  const VERSION = "v1.3-vaccine-interval";
+  const BOOKING_SOURCE_RAW = String(params.get("source") || "line").trim().toLowerCase();
+  const BOOKING_SOURCE = ["line", "web"].includes(BOOKING_SOURCE_RAW) ? BOOKING_SOURCE_RAW : "line";
+  const BOOKING_SOURCE_LABEL = BOOKING_SOURCE === "web" ? "WEB" : "LINE";
+  const VERSION = "v1.3-vaccine-interval-integrated3";
 
   const state = { clinic:null, settings:null, services:[], doctors:[], guardian:null, cards:[], appointments:[], pet:null, service:null, doctorId:"", date:"", time:"", editing:null, features:null, vaccineOptions:[], vaccineRuleId:"", preventionScheduleId:"", vaccineEvaluation:null };
   const $ = (id) => document.getElementById(id);
@@ -145,6 +148,7 @@
     url.searchParams.set("clinic_code", CLINIC_CODE);
     if (LINE_USER_ID) url.searchParams.set("line_user_id", LINE_USER_ID);
     if (DEMO) url.searchParams.set("demo", "ready");
+    url.searchParams.set("source", BOOKING_SOURCE);
     url.searchParams.set("v", VERSION);
     return url.toString();
   }
@@ -315,10 +319,10 @@
 
   async function submitBooking(){
     hideNotice("submitNotice");$("submitButton").disabled=true;
-    const payload={pet_id:state.pet.pet_id,service_id:state.service.id,doctor_id:state.doctorId||null,appointment_date:state.date,start_time:state.time,request_note:$("requestNote").value.trim(),vaccine_interval_rule_id:state.vaccineRuleId||null,prevention_schedule_id:state.preventionScheduleId||null};
+    const payload={pet_id:state.pet.pet_id,service_id:state.service.id,doctor_id:state.doctorId||null,appointment_date:state.date,start_time:state.time,request_note:$("requestNote").value.trim(),vaccine_interval_rule_id:state.vaccineRuleId||null,prevention_schedule_id:state.preventionScheduleId||null,source:BOOKING_SOURCE};
     try{
       let data;
-      if(state.editing){data=await post("/api/member/exact-appointments/change",{...payload,appointment_id:state.editing.id,booking_token:localStorage.getItem(tokenKey(state.editing.id))||"",reason:"LINE画面から変更"});notice("submitNotice","ok",data.message||"予約を変更しました。");}
+      if(state.editing){data=await post("/api/member/exact-appointments/change",{...payload,appointment_id:state.editing.id,booking_token:localStorage.getItem(tokenKey(state.editing.id))||"",reason:`${BOOKING_SOURCE_LABEL}画面から変更`});notice("submitNotice","ok",data.message||"予約を変更しました。");}
       else{data=await post("/api/member/exact-appointments/create",payload);if(data.appointment?.id&&data.booking_token)localStorage.setItem(tokenKey(data.appointment.id),data.booking_token);notice("submitNotice","ok",data.message||"予約を受け付けました。");}
       state.editing=null;resetSelection(false);await loadAppointments();await loadAvailability();
     }catch(error){notice("submitNotice","ng",error.message);}finally{updateSummary();}

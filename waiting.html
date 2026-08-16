@@ -616,6 +616,10 @@
       ? (INCOMING_LINE_USER_ID || CONFIG?.demo?.lineUserId || "demo_line_link_001")
       : "";
 
+    const BOOKING_SOURCE_RAW = String(urlParams.get("source") || "line").trim().toLowerCase();
+    const BOOKING_SOURCE = ["line", "web"].includes(BOOKING_SOURCE_RAW) ? BOOKING_SOURCE_RAW : "line";
+    const BOOKING_SOURCE_LABEL = BOOKING_SOURCE === "web" ? "WEB" : "LINE";
+
     const IS_DEMO_READY =
       IS_DEMO_CLINIC &&
       LINE_USER_ID === (CONFIG?.demo?.lineUserId || "demo_line_link_001") &&
@@ -800,7 +804,8 @@
     function updateLinks(){
       const common = {
         v:"step-vet-appointment-1",
-        line_user_id: LINE_USER_ID
+        line_user_id: LINE_USER_ID,
+        source: BOOKING_SOURCE
       };
       if (IS_DEMO_READY) common.demo = "ready";
 
@@ -1166,7 +1171,7 @@
     }
 
     function buildSymptomsSummaryForSubmit(){
-      const base = $("symptoms").value || $("purpose").value || "LINE来院受付";
+      const base = $("symptoms").value || $("purpose").value || `${BOOKING_SOURCE_LABEL}来院受付`;
       return oneBeforeNotificationRequested()
         ? `${base}｜1組前通知希望`
         : base;
@@ -1174,7 +1179,7 @@
 
     function buildQuestionnaireForSubmit(){
       return {
-        purpose: $("purpose").value || "LINE来院受付",
+        purpose: $("purpose").value || `${BOOKING_SOURCE_LABEL}来院受付`,
         free_text: $("symptoms").value || "",
         notification_policy: "default_no_auto_notification",
         one_before_notification_requested: oneBeforeNotificationRequested(),
@@ -1224,13 +1229,13 @@
           request_category: state.selectedRequestCategory,
           target_date: todayString(),
           day_part: $("dayPart").value,
-          purpose: $("purpose").value || "LINE来院受付",
+          purpose: $("purpose").value || `${BOOKING_SOURCE_LABEL}来院受付`,
           symptoms_summary: buildSymptomsSummaryForSubmit(),
           questionnaire: buildQuestionnaireForSubmit(),
           desired_contact: "line",
-          source: "line",
-          actor_name: "飼い主LINE",
-          staff_name: "飼い主LINE"
+          source: BOOKING_SOURCE,
+          actor_name: `飼い主${BOOKING_SOURCE_LABEL}`,
+          staff_name: `飼い主${BOOKING_SOURCE_LABEL}`
         }, false);
 
         const duplicate = Boolean(
@@ -1301,8 +1306,8 @@
               </div>
             </div>
             <div class="buttonRow">
-              <a class="btn btnSoft" href="${escapeHtml(buildPageUrl("member.html", { v:"step-vet-appointment-1", line_user_id: LINE_USER_ID, demo: IS_DEMO_READY ? "ready" : "" }))}">診察券へ戻る</a>
-              <a class="btn btnWarn" href="${escapeHtml(buildPageUrl("rich-menu.html", { v:"step-vet-appointment-1", line_user_id: LINE_USER_ID, demo: IS_DEMO_READY ? "ready" : "" }))}">メニューへ戻る</a>
+              <a class="btn btnSoft" href="${escapeHtml(buildPageUrl("member.html", { v:"step-vet-appointment-1", line_user_id: LINE_USER_ID, source: BOOKING_SOURCE, demo: IS_DEMO_READY ? "ready" : "" }))}">診察券へ戻る</a>
+              <a class="btn btnWarn" href="${escapeHtml(buildPageUrl("rich-menu.html", { v:"step-vet-appointment-1", line_user_id: LINE_USER_ID, source: BOOKING_SOURCE, demo: IS_DEMO_READY ? "ready" : "" }))}">メニューへ戻る</a>
             </div>
           </div>
         </div>
