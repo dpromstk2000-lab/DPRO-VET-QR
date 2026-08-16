@@ -96,7 +96,7 @@ const TABLES = {
 };
 
 const DEFAULT_CLINIC_CODE = "dpro_vet_demo";
-const WORKER_VERSION = "ANIMARY-COUNTER-V1.2-R1-20260815";
+const WORKER_VERSION = "ANIMARY-COUNTER-V1.2-R3-FLEX-TIME-20260816";
 const FEATURE_SWITCH_VERSION = "DPRO-VET-FEATURE-SWITCH-V1.1";
 const WEB_QUESTIONNAIRE_VERSION = "DPRO-VET-WEB-QUESTIONNAIRE-V1.1.6";
 const QUESTIONNAIRE_VISIT_LINK_VERSION = "DPRO-VET-QUESTIONNAIRE-VISIT-LINK-V1.1";
@@ -112,6 +112,7 @@ const RECALL_AUTOMATION_VERSION = "VET-RECALL-AUTO-1";
 const FINAL_AUDIT_VERSION = "FINAL-VET-AUDIT-1-R1";
 const V11_FINAL_AUDIT_VERSION = "DPRO-VET-V1.1-FINAL-AUDIT-R1";
 const MULTI_PET_BOOKING_VERSION = "DPRO-VET-MULTI-PET-BOOKING-V1.2";
+const FLEXIBLE_APPOINTMENT_TIME_VERSION = "DPRO-VET-FLEX-TIME-V1.2-R3";
 const APPOINTMENT_REMINDER_RECOMMENDED_CRON = "0 0,1,2 * * *"; // JST 09:00 / 10:00 / 11:00
 const LINE_PUSH_ENDPOINT = "https://api.line.me/v2/bot/message/push";
 const LINE_BOT_INFO_ENDPOINT = "https://api.line.me/v2/bot/info";
@@ -552,12 +553,18 @@ export default {
       });
     }
     if (request.method === "OPTIONS") {
+      // V1.2-R2: Browser preflight が要求したヘッダー名をそのまま許可する。
+      // application/json / LIFF本人確認ヘッダーを使う画面で "Failed to fetch" になる差異を吸収する。
+      const preflightHeaders = {
+        ...CORS_HEADERS,
+        "X-DPRO-Worker-Version": WORKER_VERSION
+      };
+      const requestedHeaders = cleanString(request.headers.get("Access-Control-Request-Headers"));
+      if (requestedHeaders) preflightHeaders["Access-Control-Allow-Headers"] = requestedHeaders;
+      if (originCheck.origin) preflightHeaders["Access-Control-Allow-Origin"] = originCheck.origin;
       return new Response(null, {
         status: 204,
-        headers: {
-          ...CORS_HEADERS,
-          "X-DPRO-Worker-Version": WORKER_VERSION
-        }
+        headers: preflightHeaders
       });
     }
 
@@ -610,6 +617,10 @@ export default {
           multi_pet_booking_feature_switch: "multi_pet_booking",
           multi_pet_booking_single_fallback: true,
           multi_pet_booking_compensating_rollback: true,
+          flexible_appointment_time_version: FLEXIBLE_APPOINTMENT_TIME_VERSION,
+          exact_appointment_start_intervals: [10, 15, 20, 30],
+          exact_appointment_duration_step_minutes: 5,
+          exact_appointment_demo_slot_minutes: 30,
           exact_appointment_guard_version: EXACT_APPOINTMENT_GUARD_VERSION,
           line_call_feature_version: LINE_CALL_FEATURE_VERSION,
           doctor_slot_feature_version: DOCTOR_SLOT_FEATURE_VERSION,
@@ -12171,7 +12182,7 @@ function extractPet(row) {
 
 // =========================================================
 // STEP VET-APPOINTMENT-1
-// 30分単位の日時指定予約
+// 病院別10/15/20/30分開始刻み + 診療内容5分単位の日時指定予約
 // 既存の順番受付・午前午後優先受付とは独立して併用する。
 // =========================================================
 
@@ -12363,11 +12374,13 @@ async function exactDoctorAvailabilityContext(env, clinic, serviceId, dateText, 
 }
 
 function normalizeExactAppointmentService(row, settings = {}) {
-  const duration = Math.max(30, Number(row?.duration_minutes || 30));
+  const rawDuration = Number(row?.duration_minutes || 30);
+  const duration = Number.isFinite(rawDuration) ? Math.max(5, Math.min(240, rawDuration)) : 30;
+  const normalizedDuration = Math.ceil(duration / 5) * 5;
   const capacity = Math.max(1, Number(row?.capacity_per_slot || settings.default_capacity || 1));
   return {
     ...row,
-    duration_minutes: Math.ceil(duration / 30) * 30,
+    duration_minutes: normalizedDuration,
     capacity_per_slot: capacity
   };
 }
@@ -12375,7 +12388,7 @@ function normalizeExactAppointmentService(row, settings = {}) {
 function exactAppointmentPublicSettings(settings) {
   return {
     exact_time_booking_enabled: settings.exact_time_booking_enabled === true && settings.status !== "inactive",
-    slot_minutes: 30,
+    slot_minutes: [10, 15, 20, 30].includes(Number(settings.slot_minutes)) ? Number(settings.slot_minutes) : 30,
     same_day_booking_enabled: settings.same_day_booking_enabled === true,
     min_days_ahead: Number(settings.min_days_ahead || 0),
     max_days_ahead: Number(settings.max_days_ahead || 60),
@@ -12465,7 +12478,14 @@ function validateExactAppointmentSettingsInput(body, current) {
     if (!Number.isInteger(value) || value < min || value > max) throw new Error(`${key}の値が範囲外です。`);
     merged[key] = value;
   });
-  merged.slot_minutes = 30;
+  if (body.slot_minutes !== undefined) {
+    const slotMinutes = Number(body.slot_minutes);
+    if (![10, 15, 20, 30].includes(slotMinutes)) throw new Error("予約開始刻みは10・15・20・30分から選択してください。");
+    merged.slot_minutes = slotMinutes;
+  } else {
+    const currentSlot = Number(merged.slot_minutes || 30);
+    merged.slot_minutes = [10, 15, 20, 30].includes(currentSlot) ? currentSlot : 30;
+  }
   if (Number(merged.max_days_ahead) < Number(merged.min_days_ahead)) {
     throw new Error("予約可能終了日は予約可能開始日以降にしてください。");
   }
@@ -12558,7 +12578,8 @@ async function exactAppointmentAvailability(env, clinic, settings, service, date
   }
 
   const normalizedService = normalizeExactAppointmentService(service, settings);
-  const starts = buildSlotsFromRanges(operating.ranges, 30, normalizedService.duration_minutes);
+  const slotMinutes = [10, 15, 20, 30].includes(Number(settings.slot_minutes)) ? Number(settings.slot_minutes) : 30;
+  const starts = buildSlotsFromRanges(operating.ranges, slotMinutes, normalizedService.duration_minutes);
   const now = nowJstParts();
   const leadMinutes = Math.max(0, Number(settings.booking_lead_minutes || 0));
   const activeStatuses = "in.(scheduled,confirmed,checked_in)";
@@ -12643,7 +12664,7 @@ async function exactAppointmentAvailability(env, clinic, settings, service, date
     ...range,
     ranges: operating.ranges,
     service: normalizedService,
-    slot_minutes: 30,
+    slot_minutes: slotMinutes,
     clinic_capacity: clinicCapacity,
     service_capacity: serviceCapacity,
     doctor_settings: doctorSettings,
@@ -13317,21 +13338,28 @@ async function prepareMultiBookingItems(env, context, rawItems) {
   return { items: prepared, doctorSettings };
 }
 
-async function evaluateMultiBookingStart(env, context, prepared, dateText, candidateStart, mode, excludeByPet = new Map(), excludeAppointmentIds = []) {
+function evaluateMultiBookingStart(prepared, candidateStart, mode, availabilityByPet) {
   const plans = [];
   let cursor = timeToMinutes(candidateStart);
+
   for (const item of prepared.items) {
-    const startTime = mode === "same_time" ? candidateStart : minutesToTime(cursor);
-    const excludeAppointmentId = cleanString(excludeByPet.get(item.pet.id) || item.appointment_id || "");
-    const availability = await exactAppointmentAvailability(env, context.clinic, context.settings, item.service, dateText, {
-      excludeAppointmentId,
-      excludeAppointmentIds,
-      petId: item.pet.id,
-      doctorId: item.doctor_id
-    });
-    const slot = (availability.slots || []).find((s) => s.start_time === startTime);
+    const availability = availabilityByPet.get(item.pet.id);
+    let startTime = candidateStart;
+    if (mode === "consecutive") {
+      const declaredStarts = Array.from(availability?.slotMap?.keys?.() || [])
+        .map((time) => ({ time, minutes: timeToMinutes(time) }))
+        .filter((row) => Number.isFinite(row.minutes) && row.minutes >= cursor)
+        .sort((a, b) => a.minutes - b.minutes);
+      startTime = declaredStarts[0]?.time || minutesToTime(cursor);
+    }
+    const slot = availability?.slotMap?.get(startTime) || null;
     if (!slot || !slot.available) {
-      return { available: false, reason: `${item.pet.pet_name || "ペット"}：${slot?.reason || availability.reason || "予約できません"}`, start_time: candidateStart, items: plans };
+      return {
+        available: false,
+        reason: `${item.pet.pet_name || "ペット"}：${slot?.reason || availability?.reason || "予約できません"}`,
+        start_time: candidateStart,
+        items: plans
+      };
     }
     plans.push({ ...item, start_time: slot.start_time, end_time: slot.end_time, slot, availability });
     if (mode === "consecutive") cursor = timeToMinutes(slot.end_time);
@@ -13368,7 +13396,10 @@ async function evaluateMultiBookingStart(env, context, prepared, dateText, candi
     available: true,
     reason: "",
     start_time: candidateStart,
-    end_time: plans.reduce((latest, p) => timeToMinutes(p.end_time) > timeToMinutes(latest) ? p.end_time : latest, plans[0]?.end_time || candidateStart),
+    end_time: plans.reduce(
+      (latest, p) => timeToMinutes(p.end_time) > timeToMinutes(latest) ? p.end_time : latest,
+      plans[0]?.end_time || candidateStart
+    ),
     items: plans
   };
 }
@@ -13377,20 +13408,49 @@ async function buildMultiBookingAvailability(env, context, body, options = {}) {
   const mode = normalizeMultiBookingMode(body.booking_mode || body.mode);
   const dateText = cleanString(body.appointment_date || body.date);
   if (!dateText) throw new Error("予約日を選択してください。");
+
   const prepared = await prepareMultiBookingItems(env, context, body.items);
-  const first = prepared.items[0];
   const excludeByPet = options.excludeByPet || new Map();
-  const excludeAppointmentIds = Array.isArray(options.excludeAppointmentIds) ? options.excludeAppointmentIds.map((v) => cleanString(v)).filter(Boolean) : [];
-  const firstAvailability = await exactAppointmentAvailability(env, context.clinic, context.settings, first.service, dateText, {
-    excludeAppointmentId: cleanString(excludeByPet.get(first.pet.id) || first.appointment_id || ""),
-    excludeAppointmentIds,
-    petId: first.pet.id,
-    doctorId: first.doctor_id
-  });
+  const excludeAppointmentIds = Array.isArray(options.excludeAppointmentIds)
+    ? options.excludeAppointmentIds.map((v) => cleanString(v)).filter(Boolean)
+    : [];
+
+  // V1.2-R2:
+  // 各候補時刻ごとに exactAppointmentAvailability を再実行すると、
+  // 2頭 × 全候補時刻ぶん Supabase subrequest が増え、Cloudflare の実行上限に
+  // 到達してブラウザ側が "Failed to fetch" になる可能性がある。
+  // ペットごとの空き枠は1回だけ取得し、以降はメモリ上で組み合わせ判定する。
+  const availabilityByPet = new Map();
+  for (const item of prepared.items) {
+    const excludeAppointmentId = cleanString(
+      excludeByPet.get(item.pet.id) || item.appointment_id || ""
+    );
+    const availability = await exactAppointmentAvailability(
+      env,
+      context.clinic,
+      context.settings,
+      item.service,
+      dateText,
+      {
+        excludeAppointmentId,
+        excludeAppointmentIds,
+        petId: item.pet.id,
+        doctorId: item.doctor_id
+      }
+    );
+    availabilityByPet.set(item.pet.id, {
+      ...availability,
+      slotMap: new Map((availability.slots || []).map((slot) => [slot.start_time, slot]))
+    });
+  }
+
+  const first = prepared.items[0];
+  const firstAvailability = availabilityByPet.get(first.pet.id) || { slots: [] };
   const candidateStarts = (firstAvailability.slots || []).map((slot) => slot.start_time);
   const slots = [];
+
   for (const start of candidateStarts) {
-    const evaluated = await evaluateMultiBookingStart(env, context, prepared, dateText, start, mode, excludeByPet, excludeAppointmentIds);
+    const evaluated = evaluateMultiBookingStart(prepared, start, mode, availabilityByPet);
     slots.push({
       start_time: start,
       end_time: evaluated.end_time || "",
@@ -13409,7 +13469,16 @@ async function buildMultiBookingAvailability(env, context, body, options = {}) {
       }))
     });
   }
-  return { mode, date: dateText, prepared, slots, available: slots.some((s) => s.available), min_date: firstAvailability.min_date, max_date: firstAvailability.max_date };
+
+  return {
+    mode,
+    date: dateText,
+    prepared,
+    slots,
+    available: slots.some((s) => s.available),
+    min_date: firstAvailability.min_date,
+    max_date: firstAvailability.max_date
+  };
 }
 
 async function handleMemberMultiExactAppointmentAvailability(request, env) {
@@ -13703,7 +13772,7 @@ async function handleAdminExactAppointmentSettingsSave(request, env) {
   const payload = {
     clinic_id: clinic.id,
     exact_time_booking_enabled: next.exact_time_booking_enabled,
-    slot_minutes: 30,
+    slot_minutes: next.slot_minutes,
     same_day_booking_enabled: next.same_day_booking_enabled,
     min_days_ahead: next.min_days_ahead,
     max_days_ahead: next.max_days_ahead,
@@ -13744,7 +13813,7 @@ async function handleAdminExactAppointmentServiceSave(request, env) {
   const serviceName = cleanString(body.service_name);
   if (!serviceCode || !serviceName) throw new Error("サービスコードと予約内容名を入力してください。");
   const duration = Number(body.duration_minutes || 30);
-  if (!Number.isInteger(duration) || duration < 30 || duration > 240 || duration % 30 !== 0) throw new Error("所要時間は30〜240分の30分単位で指定してください。");
+  if (!Number.isInteger(duration) || duration < 5 || duration > 240 || duration % 5 !== 0) throw new Error("所要時間は5〜240分の5分単位で指定してください。");
   const capacity = Number(body.capacity_per_slot || 1);
   if (!Number.isInteger(capacity) || capacity < 1 || capacity > 20) throw new Error("1枠の受付可能件数は1〜20件で指定してください。");
   const payload = {

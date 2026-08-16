@@ -34,7 +34,7 @@
 <body>
 <main class="page">
   <section class="hero">
-    <span class="badge">STEP VET-DOCTOR-SLOT-1｜獣医師別・30分単位の日時指定予約</span>
+    <span id="appointmentBadge" class="badge">STEP VET-DOCTOR-SLOT-1｜獣医師別・30分単位の日時指定予約</span>
     <h1>日時を選んで<br>診療予約</h1>
     <p class="lead">順番受付を置き換える機能ではありません。ワクチン・健康診断・再診など、病院が時間予約を受け付ける内容だけに利用します。</p>
     <div class="heroNav">
@@ -46,7 +46,7 @@
     <div class="modeStrip">
       <div class="mode"><b>今日の順番受付</b><span>急な症状・通常診療</span></div>
       <div class="mode"><b>午前／午後の優先受付</b><span>診察開始時刻は確約しない</span></div>
-      <div class="mode active"><b>30分単位の日時指定予約</b><span>病院がONにした診療内容のみ</span></div>
+      <div class="mode active"><b id="appointmentSlotLabel">30分単位の日時指定予約</b><span>病院がONにした診療内容のみ</span></div>
     </div>
   </section>
 
@@ -176,6 +176,9 @@
   async function loadSettings(){
     const data=await get("/api/public/exact-appointments/settings");
     state.clinic=data.clinic||null;state.settings=data.settings||{};state.services=data.services||[];state.doctors=data.doctors||[];
+    const slotMinutes=[10,15,20,30].includes(Number(state.settings.slot_minutes))?Number(state.settings.slot_minutes):30;
+    $("appointmentBadge").textContent=`DPRO PET CARE LINE｜獣医師別・${slotMinutes}分刻みの日時指定予約`;
+    $("appointmentSlotLabel").textContent=`${slotMinutes}分刻みの日時指定予約`;
     $("publicNote").textContent=state.settings.public_note||"診療内容や急患対応により、開始時刻が前後する場合があります。";
     const date=$("appointmentDate");date.min=data.min_date||"";date.max=data.max_date||"";
     if(!date.value) date.value=data.min_date||"";state.date=date.value;

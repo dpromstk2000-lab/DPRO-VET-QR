@@ -34,7 +34,7 @@
       <button data-panel="doctors">獣医師・予約枠</button>
       <button data-panel="settings">基本設定</button>
     </nav>
-    <div class="sideFoot">STEP VET-APPOINTMENT-CHECKIN-1<br>日時指定予約 → 来院受付連動</div>
+    <div class="sideFoot">DPRO PET CARE LINE V1.2-R3<br>可変予約刻み・5分単位の所要時間</div>
   </aside>
 
   <main class="main">
@@ -80,13 +80,13 @@
 
     <section id="panel-services" class="panel">
       <div class="card">
-        <div class="cardHead"><div><h3>予約内容の追加・編集</h3><p>所要時間は30分単位、1枠件数は診療体制に合わせて設定します。</p></div><button id="newService" class="btn soft">新規入力</button></div>
+        <div class="cardHead"><div><h3>予約内容の追加・編集</h3><p>所要時間は5分単位（5〜240分）、1枠件数は診療体制に合わせて設定します。</p></div><button id="newService" class="btn soft">新規入力</button></div>
         <div class="grid3">
           <input id="serviceId" type="hidden">
           <div class="field"><label>サービスコード</label><input id="serviceCode" placeholder="例：vaccination"></div>
           <div class="field"><label>表示名</label><input id="serviceName" placeholder="例：ワクチン・予防"></div>
           <div class="field"><label>カテゴリー</label><select id="serviceCategory"><option value="recheck">再診</option><option value="vaccination">ワクチン・予防</option><option value="health_check">健康診断</option><option value="general_exam">一般診療</option><option value="other">その他</option></select></div>
-          <div class="field"><label>所要時間</label><select id="serviceDuration"><option>30</option><option>60</option><option>90</option><option>120</option><option>150</option><option>180</option><option>210</option><option>240</option></select></div>
+          <div class="field"><label>所要時間（5分単位）</label><input id="serviceDuration" type="number" min="5" max="240" step="5" value="30"><small style="display:block;color:var(--muted);margin-top:4px">例：10分／15分／25分／45分</small></div>
           <div class="field"><label>1枠の受付件数</label><input id="serviceCapacity" type="number" min="1" max="20" value="1"></div>
           <div class="field"><label>表示順</label><input id="serviceSort" type="number" min="0" value="10"></div>
           <div class="field full"><label>説明</label><textarea id="serviceDescription"></textarea></div>
@@ -150,6 +150,7 @@
           <label class="check"><input id="setAutoDoctor" type="checkbox"><span><b>おまかせ自動割当</b><span>空いている担当可能な獣医師へ自動割当します。</span></span></label>
           <label class="check"><input id="setMemberDoctorChange" type="checkbox"><span><b>飼い主の獣医師変更を許可</b><span>予約変更時にも担当を選び直せます。</span></span></label>
           <div class="field"><label>獣医師選択</label><select id="setDoctorMode"><option value="off">使用しない</option><option value="optional">おまかせ／指名を選択</option><option value="required">指名必須</option></select></div>
+          <div class="field"><label>予約開始時刻の刻み</label><select id="setSlotMinutes"><option value="10">10分</option><option value="15">15分</option><option value="20">20分</option><option value="30">30分</option></select><small style="display:block;color:var(--muted);margin-top:4px">患者が選ぶ開始時刻の間隔です。診療所要時間とは別設定です。</small></div>
           <div class="field"><label>何日後から予約可能</label><input id="setMinDays" type="number" min="0" max="30"></div>
           <div class="field"><label>何日先まで予約可能</label><input id="setMaxDays" type="number" min="1" max="180"></div>
           <div class="field"><label>受付締切（開始何分前）</label><input id="setLead" type="number" min="0" max="10080"></div>
@@ -215,8 +216,8 @@
     }catch(e){notice("globalNotice","ng",e.message);}
   };
 
-  async function loadSettings(){const d=await get("/api/admin/exact-appointments/settings");state.settings=d.settings;$("clinicName").textContent=d.clinic?.clinic_name||d.clinic?.name||CLINIC;for(const [id,key] of [["setEnabled","exact_time_booking_enabled"],["setSameDay","same_day_booking_enabled"],["setMemberChange","allow_member_change"],["setMemberCancel","allow_member_cancel"],["setDoctorEnabled","doctor_booking_enabled"],["setAutoDoctor","auto_assign_doctor"],["setMemberDoctorChange","allow_member_doctor_change"]])$(id).checked=state.settings[key]===true;$("setDoctorMode").value=state.settings.doctor_selection_mode||"off";for(const [id,key] of [["setMinDays","min_days_ahead"],["setMaxDays","max_days_ahead"],["setLead","booking_lead_minutes"],["setCapacity","default_capacity"],["setChangeHours","change_deadline_hours"],["setCancelHours","cancel_deadline_hours"]])$(id).value=state.settings[key]??"";$("setPublicNote").value=state.settings.public_note||"";$("setOwnerNote").value=state.settings.owner_note||"";const min=addDays(today(),state.settings.same_day_booking_enabled?state.settings.min_days_ahead:Math.max(1,state.settings.min_days_ahead));$("createDate").min=min;$("createDate").max=addDays(today(),state.settings.max_days_ahead);if(!$("createDate").value)$("createDate").value=min;}
-  async function saveSettings(){try{const d=await post("/api/admin/exact-appointments/settings",{exact_time_booking_enabled:$("setEnabled").checked,same_day_booking_enabled:$("setSameDay").checked,allow_member_change:$("setMemberChange").checked,allow_member_cancel:$("setMemberCancel").checked,doctor_booking_enabled:$("setDoctorEnabled").checked,doctor_selection_mode:$("setDoctorMode").value,auto_assign_doctor:$("setAutoDoctor").checked,allow_member_doctor_change:$("setMemberDoctorChange").checked,min_days_ahead:Number($("setMinDays").value),max_days_ahead:Number($("setMaxDays").value),booking_lead_minutes:Number($("setLead").value),default_capacity:Number($("setCapacity").value),change_deadline_hours:Number($("setChangeHours").value),cancel_deadline_hours:Number($("setCancelHours").value),public_note:$("setPublicNote").value,owner_note:$("setOwnerNote").value,staff_name:$("createStaff").value});state.settings=d.settings;notice("settingsNotice","ok",d.message);}catch(e){notice("settingsNotice","ng",e.message);}}
+  async function loadSettings(){const d=await get("/api/admin/exact-appointments/settings");state.settings=d.settings;$("clinicName").textContent=d.clinic?.clinic_name||d.clinic?.name||CLINIC;for(const [id,key] of [["setEnabled","exact_time_booking_enabled"],["setSameDay","same_day_booking_enabled"],["setMemberChange","allow_member_change"],["setMemberCancel","allow_member_cancel"],["setDoctorEnabled","doctor_booking_enabled"],["setAutoDoctor","auto_assign_doctor"],["setMemberDoctorChange","allow_member_doctor_change"]])$(id).checked=state.settings[key]===true;$("setDoctorMode").value=state.settings.doctor_selection_mode||"off";$("setSlotMinutes").value=String([10,15,20,30].includes(Number(state.settings.slot_minutes))?Number(state.settings.slot_minutes):30);for(const [id,key] of [["setMinDays","min_days_ahead"],["setMaxDays","max_days_ahead"],["setLead","booking_lead_minutes"],["setCapacity","default_capacity"],["setChangeHours","change_deadline_hours"],["setCancelHours","cancel_deadline_hours"]])$(id).value=state.settings[key]??"";$("setPublicNote").value=state.settings.public_note||"";$("setOwnerNote").value=state.settings.owner_note||"";const min=addDays(today(),state.settings.same_day_booking_enabled?state.settings.min_days_ahead:Math.max(1,state.settings.min_days_ahead));$("createDate").min=min;$("createDate").max=addDays(today(),state.settings.max_days_ahead);if(!$("createDate").value)$("createDate").value=min;}
+  async function saveSettings(){try{const d=await post("/api/admin/exact-appointments/settings",{exact_time_booking_enabled:$("setEnabled").checked,same_day_booking_enabled:$("setSameDay").checked,allow_member_change:$("setMemberChange").checked,allow_member_cancel:$("setMemberCancel").checked,doctor_booking_enabled:$("setDoctorEnabled").checked,doctor_selection_mode:$("setDoctorMode").value,slot_minutes:Number($("setSlotMinutes").value),auto_assign_doctor:$("setAutoDoctor").checked,allow_member_doctor_change:$("setMemberDoctorChange").checked,min_days_ahead:Number($("setMinDays").value),max_days_ahead:Number($("setMaxDays").value),booking_lead_minutes:Number($("setLead").value),default_capacity:Number($("setCapacity").value),change_deadline_hours:Number($("setChangeHours").value),cancel_deadline_hours:Number($("setCancelHours").value),public_note:$("setPublicNote").value,owner_note:$("setOwnerNote").value,staff_name:$("createStaff").value});state.settings=d.settings;notice("settingsNotice","ok",d.message);}catch(e){notice("settingsNotice","ng",e.message);}}
   $("saveSettings").onclick=saveSettings;
 
   async function loadServices(){const d=await get("/api/admin/exact-appointments/services");state.services=d.services||[];$("createService").innerHTML='<option value="">選択してください</option>'+state.services.filter(x=>x.is_active).map(x=>`<option value="${esc(x.id)}">${esc(x.service_name)}（${x.duration_minutes}分）</option>`).join("");renderServices();renderDoctorServiceChecks();fillCreateDoctors();}
