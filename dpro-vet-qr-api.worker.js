@@ -97,7 +97,8 @@ const TABLES = {
 };
 
 const DEFAULT_CLINIC_CODE = "dpro_vet_demo";
-const WORKER_VERSION = "ANIMARY-COUNTER-V1.3-VACCINE-INTERVAL-20260816";
+const WORKER_VERSION = "ANIMARY-COUNTER-V1.3-VACCINE-INTERVAL-20260816-INTEGRATED-2-R1";
+const INTEGRATED_API_VERSION = "DPRO-PET-CARE-INTEGRATED-V1.0";
 const FEATURE_SWITCH_VERSION = "DPRO-VET-FEATURE-SWITCH-V1.1";
 const WEB_QUESTIONNAIRE_VERSION = "DPRO-VET-WEB-QUESTIONNAIRE-V1.1.6";
 const QUESTIONNAIRE_VISIT_LINK_VERSION = "DPRO-VET-QUESTIONNAIRE-VISIT-LINK-V1.1";
@@ -153,6 +154,97 @@ const DEFAULT_FEATURE_FLAGS = Object.freeze({
 });
 
 const FEATURE_FLAG_KEYS = Object.freeze(Object.keys(DEFAULT_FEATURE_FLAGS));
+
+const DEFAULT_PUBLIC_CHANNEL_SETTINGS = Object.freeze({
+  schema_version: INTEGRATED_API_VERSION,
+  hp: Object.freeze({
+    welcome_overlay: true,
+    today_status: true,
+    medical_services: true,
+    first_visit: true,
+    prevention: true,
+    health_check: true,
+    doctors: true,
+    doctor_schedule: true,
+    trimming: false,
+    pet_hotel: false,
+    dog_run: false,
+    puppy_class: false,
+    news: true,
+    faq: true,
+    access: true,
+    emergency: true,
+    blog: false,
+    recruitment: false,
+    multilingual: false,
+    online_consultation: false
+  }),
+  line: Object.freeze({
+    today_status: true,
+    notice: true
+  }),
+  welcome: Object.freeze({
+    enabled: true,
+    show_mode: "every_visit",
+    label: "TODAY / IMPORTANT"
+  }),
+  notice: Object.freeze({
+    enabled: true,
+    level: "important",
+    title: "大切なお知らせ",
+    link_label: "詳しく見る",
+    link_url: "news.html"
+  })
+});
+
+function normalizeJsonObject(value) {
+  let source = value;
+  if (typeof source === "string") {
+    try { source = JSON.parse(source); } catch { source = {}; }
+  }
+  return source && !Array.isArray(source) && typeof source === "object" ? source : {};
+}
+
+function normalizePublicChannelSettings(input = {}) {
+  const source = normalizeJsonObject(input);
+  const hpSource = normalizeJsonObject(source.hp);
+  const lineSource = normalizeJsonObject(source.line);
+  const welcomeSource = normalizeJsonObject(source.welcome);
+  const noticeSource = normalizeJsonObject(source.notice);
+  const hp = { ...DEFAULT_PUBLIC_CHANNEL_SETTINGS.hp, ...hpSource };
+  const line = { ...DEFAULT_PUBLIC_CHANNEL_SETTINGS.line, ...lineSource };
+  Object.keys(DEFAULT_PUBLIC_CHANNEL_SETTINGS.hp).forEach((key) => {
+    hp[key] = toBool(hp[key], DEFAULT_PUBLIC_CHANNEL_SETTINGS.hp[key]);
+  });
+  Object.keys(DEFAULT_PUBLIC_CHANNEL_SETTINGS.line).forEach((key) => {
+    line[key] = toBool(line[key], DEFAULT_PUBLIC_CHANNEL_SETTINGS.line[key]);
+  });
+  return {
+    ...source,
+    schema_version: cleanString(source.schema_version || INTEGRATED_API_VERSION),
+    hp,
+    line,
+    welcome: {
+      ...DEFAULT_PUBLIC_CHANNEL_SETTINGS.welcome,
+      ...welcomeSource,
+      enabled: toBool(welcomeSource.enabled, DEFAULT_PUBLIC_CHANNEL_SETTINGS.welcome.enabled)
+    },
+    notice: {
+      ...DEFAULT_PUBLIC_CHANNEL_SETTINGS.notice,
+      ...noticeSource,
+      enabled: toBool(noticeSource.enabled, DEFAULT_PUBLIC_CHANNEL_SETTINGS.notice.enabled)
+    }
+  };
+}
+
+function normalizeIntegratedBookingSource(value, fallback = "line", adminMode = false) {
+  const source = cleanString(value || fallback).toLowerCase();
+  const memberAllowed = ["line", "web"];
+  const staffAllowed = ["line", "web", "phone", "counter", "staff", "import"];
+  const allowed = adminMode ? staffAllowed : memberAllowed;
+  if (!allowed.includes(source)) throw new Error("予約・受付登録元が不正です。");
+  return source;
+}
 
 function normalizeFeatureFlags(input = {}) {
   let source = input;
@@ -453,6 +545,24 @@ function normalizeClinicForPublic(clinic) {
 }
 
 
+function normalizeIntegratedClinicForPublic(clinic, settings = {}) {
+  const base = normalizeClinicForPublic(clinic) || {};
+  const publicSettings = normalizeClinicSettingsForPublic(settings);
+  const timeText = (value) => cleanString(value).slice(0, 5);
+  const morning = [timeText(publicSettings.morning_open_time), timeText(publicSettings.morning_close_time)].filter(Boolean).join("〜");
+  const afternoon = [timeText(publicSettings.afternoon_open_time), timeText(publicSettings.afternoon_close_time)].filter(Boolean).join("〜");
+  return {
+    ...base,
+    clinic_name: publicSettings.clinic_name || base.clinic_name || "",
+    display_name: publicSettings.display_name || base.display_name || "",
+    phone: publicSettings.phone || base.phone || "",
+    address: publicSettings.address || base.address || "",
+    timezone: publicSettings.timezone || base.timezone || "Asia/Tokyo",
+    business_hours_note: [morning ? `午前 ${morning}` : "", afternoon ? `午後 ${afternoon}` : ""].filter(Boolean).join(" / ") || base.business_hours_note || "",
+    public_note: publicSettings.public_notice || base.public_note || ""
+  };
+}
+
 function normalizeClinicSettingsForPublic(settings = {}) {
   return {
     clinic_code: settings.clinic_code || "",
@@ -480,6 +590,8 @@ function normalizeClinicSettingsForPublic(settings = {}) {
     feature_preset: normalizeFeaturePreset(settings.feature_preset || "standard"),
     feature_flags: normalizeFeatureFlags(settings.feature_flags),
     questionnaire_modules: normalizeQuestionnaireModules(settings.questionnaire_modules),
+    public_channel_settings: normalizePublicChannelSettings(settings.public_channel_settings),
+    integrated_api_version: INTEGRATED_API_VERSION,
     web_questionnaire_version: WEB_QUESTIONNAIRE_VERSION
   };
 }
@@ -628,6 +740,10 @@ export default {
           vaccine_interval_control_feature_switch: "vaccine_interval_control",
           vaccine_interval_control_default: false,
           vaccine_interval_control_policy: "clinic_configured_no_fixed_medical_judgement",
+          integrated_api_version: INTEGRATED_API_VERSION,
+          integrated_state_api: true,
+          integrated_member_sources: ["line", "web"],
+          integrated_staff_sources: ["line", "web", "phone", "counter", "staff", "import"],
           exact_appointment_start_intervals: [10, 15, 20, 30],
           exact_appointment_duration_step_minutes: 5,
           exact_appointment_demo_slot_minutes: 30,
@@ -698,6 +814,10 @@ export default {
 
       if (path === "/api/public/clinic-settings" && request.method === "GET") {
         return handlePublicClinicSettings(request, env);
+      }
+
+      if (path === "/api/public/integrated-state" && request.method === "GET") {
+        return handlePublicIntegratedState(request, env);
       }
 
       if (path === "/api/public/clinic-calendar" && request.method === "GET") {
@@ -2169,13 +2289,15 @@ function ensureDateWithinClinicSettingRange(dateText) {
 }
 
 function getClinicSettingDefaults(clinicCode, clinic = {}) {
+  const code = clinicCode || DEFAULT_CLINIC_CODE;
+  const demo = code === DEFAULT_CLINIC_CODE;
   return {
-    clinic_code: clinicCode || DEFAULT_CLINIC_CODE,
+    clinic_code: code,
     clinic_name: clinic.clinic_name || clinic.name || "DPROどうぶつ病院",
     display_name: clinic.display_name || clinic.clinic_name || clinic.name || "DPROどうぶつ病院",
     postal_code: clinic.postal_code || "",
-    address: clinic.address || "大分県杵築市サンプル町1-2-3",
-    phone: clinic.phone || "0978-00-0000",
+    address: clinic.address || (demo ? "福岡県福岡市博多区DPRO町1-2-3" : ""),
+    phone: clinic.phone || (demo ? "092-555-0112" : ""),
     official_line_name: clinic.official_line_name || "DPROどうぶつ病院 公式LINE",
     timezone: "Asia/Tokyo",
     reception_status: "open",
@@ -2184,16 +2306,18 @@ function getClinicSettingDefaults(clinicCode, clinic = {}) {
     time_slot_minutes: 30,
     morning_open_time: "09:00",
     morning_close_time: "12:00",
-    afternoon_open_time: "15:00",
-    afternoon_close_time: "18:30",
+    afternoon_open_time: demo ? "16:00" : "15:00",
+    afternoon_close_time: demo ? "19:00" : "18:30",
     morning_last_accept_time: "11:30",
-    afternoon_last_accept_time: "18:00",
+    afternoon_last_accept_time: demo ? "18:30" : "18:00",
     queue_mode: "walkin",
     max_morning_queue: 30,
     max_afternoon_queue: 30,
-    status: "demo",
+    status: demo ? "demo" : "active",
     feature_preset: "standard",
-    feature_flags: normalizeFeatureFlags({})
+    feature_flags: normalizeFeatureFlags({}),
+    questionnaire_modules: normalizeQuestionnaireModules({}),
+    public_channel_settings: normalizePublicChannelSettings({})
   };
 }
 
@@ -2357,6 +2481,31 @@ function buildClinicSettingsUpdateBody(body, currentSettings = {}) {
 
   if (body.max_morning_queue !== undefined) update.max_morning_queue = Math.max(0, Number(body.max_morning_queue || 0));
   if (body.max_afternoon_queue !== undefined) update.max_afternoon_queue = Math.max(0, Number(body.max_afternoon_queue || 0));
+  if (body.feature_preset !== undefined) update.feature_preset = normalizeFeaturePreset(body.feature_preset);
+  if (body.feature_flags !== undefined) {
+    update.feature_flags = normalizeFeatureFlags({
+      ...normalizeFeatureFlags(currentSettings.feature_flags),
+      ...normalizeJsonObject(body.feature_flags)
+    });
+  }
+  if (body.questionnaire_modules !== undefined) {
+    update.questionnaire_modules = normalizeQuestionnaireModules({
+      ...normalizeQuestionnaireModules(currentSettings.questionnaire_modules),
+      ...normalizeJsonObject(body.questionnaire_modules)
+    });
+  }
+  if (body.public_channel_settings !== undefined) {
+    const currentChannels = normalizePublicChannelSettings(currentSettings.public_channel_settings);
+    const incomingChannels = normalizeJsonObject(body.public_channel_settings);
+    update.public_channel_settings = normalizePublicChannelSettings({
+      ...currentChannels,
+      ...incomingChannels,
+      hp: { ...currentChannels.hp, ...normalizeJsonObject(incomingChannels.hp) },
+      line: { ...currentChannels.line, ...normalizeJsonObject(incomingChannels.line) },
+      welcome: { ...currentChannels.welcome, ...normalizeJsonObject(incomingChannels.welcome) },
+      notice: { ...currentChannels.notice, ...normalizeJsonObject(incomingChannels.notice) }
+    });
+  }
   if (body.status !== undefined) {
     const status = cleanString(body.status || "demo");
     if (!["demo", "active", "paused", "archived"].includes(status)) throw new Error("医院ステータスが不正です。");
@@ -2482,6 +2631,138 @@ async function handlePublicClinicTodayStatus(request, env) {
     settings: normalizeClinicSettingsForPublic(settings),
     target_date: date,
     today_status
+  });
+}
+
+function publicQueueSettings(settings = {}) {
+  return {
+    same_day_queue_enabled: settings.same_day_queue_enabled !== false,
+    same_day_morning_start: settings.same_day_morning_start || "",
+    same_day_morning_end: settings.same_day_morning_end || "",
+    same_day_afternoon_start: settings.same_day_afternoon_start || "",
+    same_day_afternoon_end: settings.same_day_afternoon_end || "",
+    same_day_morning_capacity: Number(settings.same_day_morning_capacity || 0),
+    same_day_afternoon_capacity: Number(settings.same_day_afternoon_capacity || 0),
+    priority_reservation_enabled: settings.priority_reservation_enabled === true,
+    medicine_prevention_enabled: settings.medicine_prevention_enabled === true,
+    congestion_public_enabled: settings.congestion_public_enabled !== false,
+    public_note: settings.public_note || ""
+  };
+}
+
+function queuePartClosed(summary) {
+  if (!summary) return false;
+  const level = cleanString(summary.manual_level || summary.display_level || "").toLowerCase();
+  return summary.reception_closed === true || ["reception_closed", "closed", "emergency"].includes(level);
+}
+
+function integratedTodayState(settings, todayStatus, queueSummaries, queueSettings) {
+  const flags = normalizeFeatureFlags(settings.feature_flags);
+  const receptionStatus = cleanString(settings.reception_status || "open");
+  let canMorning = todayStatus ? todayStatus.can_accept_morning !== false : true;
+  let canAfternoon = todayStatus ? todayStatus.can_accept_afternoon !== false : true;
+
+  if (receptionStatus === "closed_today") {
+    canMorning = false;
+    canAfternoon = false;
+  } else if (receptionStatus === "morning_closed") {
+    canMorning = false;
+  } else if (receptionStatus === "afternoon_closed") {
+    canAfternoon = false;
+  }
+
+  const morningSummary = queueSummaries.find((row) => cleanString(row.day_part) === "morning") || null;
+  const afternoonSummary = queueSummaries.find((row) => cleanString(row.day_part) === "afternoon") || null;
+  if (queuePartClosed(morningSummary)) canMorning = false;
+  if (queuePartClosed(afternoonSummary)) canAfternoon = false;
+
+  const queueFeatureEnabled = flags.reception_queue === true && flags.reception_general === true && queueSettings.same_day_queue_enabled !== false;
+  const receptionStopped = receptionStatus === "reception_stopped";
+  const canAcceptQueue = queueFeatureEnabled && !receptionStopped && (canMorning || canAfternoon);
+
+  let code = "open";
+  if (!queueFeatureEnabled) code = "feature_off";
+  else if (receptionStatus === "closed_today" || (canMorning === false && canAfternoon === false)) code = "closed_today";
+  else if (receptionStopped) code = "reception_stopped";
+  else if (!canMorning && canAfternoon) code = "morning_closed";
+  else if (canMorning && !canAfternoon) code = "afternoon_closed";
+  else if (queueSummaries.some((row) => cleanString(row.display_level || row.manual_level).toLowerCase() === "crowded")) code = "crowded";
+
+  const labels = {
+    open: "受付中",
+    crowded: "混雑中",
+    feature_off: "順番受付OFF",
+    closed_today: "本日休診",
+    morning_closed: "午前休診",
+    afternoon_closed: "午後休診",
+    reception_stopped: "受付停止"
+  };
+  const summaryMessage = queueSummaries.find((row) => cleanString(row.manual_message || row.closed_reason || row.display_message)) || null;
+  const message = cleanString(
+    summaryMessage?.manual_message || summaryMessage?.closed_reason ||
+    todayStatus?.display_message || settings.public_notice || summaryMessage?.display_message || ""
+  );
+
+  return {
+    code,
+    label: labels[code] || labels.open,
+    message,
+    reception_status: receptionStatus,
+    can_accept_morning: canMorning,
+    can_accept_afternoon: canAfternoon,
+    can_accept_queue: canAcceptQueue,
+    queue_feature_enabled: queueFeatureEnabled,
+    exact_appointment_feature_enabled: flags.exact_appointment === true,
+    questionnaire_feature_enabled: flags.previsit_questionnaire === true
+  };
+}
+
+async function handlePublicIntegratedState(request, env) {
+  const clinicCode = getParam(request, "clinic_code", DEFAULT_CLINIC_CODE);
+  const date = getParam(request, "date", todayJST());
+  parseDateText(date);
+  const clinic = await getClinicByCode(env, clinicCode);
+  const [settings, calendarRows, queueSettingsRaw, queueSummaries] = await Promise.all([
+    getClinicSettingsByCode(env, clinicCode, clinic),
+    getClinicCalendarByCode(env, clinicCode, date, date),
+    getQueueSettings(env, clinic.id),
+    getQueueSummaryRows(env, clinic.id, date, "all")
+  ]);
+  const publicSettings = normalizeClinicSettingsForPublic(settings);
+  const todayStatus = calendarRows[0] || null;
+  const queueSettings = publicQueueSettings(queueSettingsRaw || {});
+  const state = integratedTodayState(settings, todayStatus, queueSummaries || [], queueSettings);
+  const publicChannels = normalizePublicChannelSettings(settings.public_channel_settings);
+
+  return jsonResponse({
+    ok: true,
+    integrated_api_version: INTEGRATED_API_VERSION,
+    worker_version: WORKER_VERSION,
+    clinic: normalizeIntegratedClinicForPublic(clinic, settings),
+    settings: publicSettings,
+    public_channel_settings: publicChannels,
+    feature_flags: publicSettings.feature_flags,
+    target_date: date,
+    today_status: todayStatus,
+    reception_state: state,
+    queue: {
+      settings: queueSettings,
+      summaries: queueSummaries || []
+    },
+    notice: {
+      text: settings.public_notice || "",
+      channel: publicChannels.notice
+    },
+    source_contract: {
+      member: ["line", "web"],
+      staff: ["line", "web", "phone", "counter", "staff", "import"]
+    },
+    endpoints: {
+      clinic_settings: "/api/public/clinic-settings",
+      today_status: "/api/public/clinic-today-status",
+      queue_summary: "/api/public/queue/summary",
+      exact_appointment_availability: "/api/public/exact-appointments/availability"
+    }
   });
 }
 
@@ -5413,6 +5694,9 @@ async function handleQueueEntryCreate(request, env) {
   const body = await readJson(request);
   const clinicCode = getRequestedClinicCode(request, body);
   const clinic = await getClinicByCode(env, clinicCode);
+  const requestPath = normalizePath(new URL(request.url).pathname);
+  const adminMode = requestPath.startsWith("/api/admin/") || requestPath.startsWith("/api/owner/");
+  const source = normalizeIntegratedBookingSource(body.source, adminMode ? "staff" : "line", adminMode);
 
   let guardianId = sanitizeQueueDbId(body.guardian_id);
   let petId = sanitizeQueueDbId(body.pet_id);
@@ -5535,10 +5819,9 @@ async function handleQueueEntryCreate(request, env) {
     p_symptoms_summary: nullIfEmpty(body.symptoms_summary || body.symptoms),
     p_desired_contact: cleanString(body.desired_contact || "line") || "line",
     p_questionnaire: questionnaire,
-    // STEP VET-52.5F:
-    // DB側のsource CHECK制約に当たりにくくするため、飼い主LINE受付は固定で line を渡す。
-    // 画面・用途の詳細は questionnaire / symptoms_summary / actor_name に残す。
-    p_source: "line"
+    // INTEGRATED-2: LINE / WEB / phone / counter / staff を共通受付へ保持する。
+    // source は本人確認とは独立した流入チャネルで、認証ガードは既存経路のまま維持する。
+    p_source: source
   });
 
   const created = Array.isArray(rpcRows) ? rpcRows[0] : rpcRows;
@@ -5577,11 +5860,14 @@ async function handleQueueEntryCreate(request, env) {
   const questionnaireLink = { waiting: questionnaireWaitingLink, appointment: questionnaireAppointmentLink };
 
   const summaryRows = await getQueueSummaryRows(env, clinic.id, targetDate, dayPart);
-  await logOperation(env, clinic.id, "member", cleanString(body.actor_name) || "飼い主", "queue_entry_create", "waiting_entry", waitingEntryId, { entryKind, requestCategory, targetDate, dayPart });
+  const actorType = adminMode ? "staff" : "member";
+  const actorName = cleanString(body.actor_name || body.staff_name) || (adminMode ? "管理画面" : "飼い主");
+  await logOperation(env, clinic.id, actorType, actorName, "queue_entry_create", "waiting_entry", waitingEntryId, { entryKind, requestCategory, targetDate, dayPart, source });
 
   return jsonResponse({
     ok: true,
     message: created?.message || "受付を登録しました。",
+    source,
     clinic,
     result: {
       ...(created || {}),
@@ -12833,11 +13119,8 @@ function normalizeExactAppointmentStatus(value) {
   return status;
 }
 
-function normalizeExactAppointmentSource(value, fallback = "line") {
-  const source = cleanString(value || fallback);
-  const allowed = ["line", "phone", "counter", "staff", "import"];
-  if (!allowed.includes(source)) throw new Error("予約登録元が不正です。");
-  return source;
+function normalizeExactAppointmentSource(value, fallback = "line", adminMode = false) {
+  return normalizeIntegratedBookingSource(value, fallback, adminMode);
 }
 
 function validateExactAppointmentSettingsInput(body, current) {
@@ -13476,7 +13759,7 @@ async function createExactAppointmentCore(request, env, body, adminMode = false,
   const bookingToken = createToken("vetapt");
   const bookingTokenHash = await sha256Hex(bookingToken);
   const appointmentNo = buildExactAppointmentNo(dateText);
-  const source = normalizeExactAppointmentSource(body.source, adminMode ? "staff" : "line");
+  const source = normalizeExactAppointmentSource(body.source, adminMode ? "staff" : "line", adminMode);
   const actorType = adminMode ? "staff" : "member";
   const actorName = adminMode ? (cleanString(body.staff_name) || "管理画面") : (guardian.guardian_name || "飼い主");
 
@@ -13964,7 +14247,7 @@ async function cancelCreatedAppointmentsForRollback(env, appointments, actorName
   return results;
 }
 
-async function createPreparedMultiExactAppointment(env, context, availability, plan, input) {
+async function createPreparedMultiExactAppointment(env, context, availability, plan, input, source = "line") {
   // V1.2-R4: multi-availability で既に検証済みの clinic/member/pet/service/slot を再利用する。
   // createExactAppointmentCore を頭数分呼ぶと、同じ空き枠計算・獣医師計算・会員解決を
   // 再実行してCloudflare subrequest上限へ近づくため、確定RPCだけを実行する。
@@ -13991,7 +14274,7 @@ async function createPreparedMultiExactAppointment(env, context, availability, p
     p_capacity: Number(service.capacity_per_slot || settings.default_capacity || 1),
     p_appointment_no: appointmentNo,
     p_booking_token_hash: bookingTokenHash,
-    p_source: "line",
+    p_source: source,
     p_guardian_name_snapshot: guardian.guardian_name || "",
     p_pet_name_snapshot: pet.pet_name || "",
     p_phone_snapshot: guardian.phone || "",
@@ -14024,7 +14307,7 @@ async function createPreparedMultiExactAppointment(env, context, availability, p
     service_name: service.service_name,
     doctor_id: appointment.doctor_id || null,
     doctor_name: appointment.doctor_name_snapshot || null,
-    source: "line",
+    source,
     multi_pet_booking: true
   });
   return { appointment, booking_token: bookingToken };
@@ -14045,12 +14328,13 @@ async function handleMemberMultiExactAppointmentCreate(request, env) {
   const groupTokenHash = await sha256Hex(groupToken);
   const created = [];
   const actorName = context.member.guardian.guardian_name || "飼い主";
+  const source = normalizeIntegratedBookingSource(body.source, "line", false);
   try {
     for (let i = 0; i < selected.items.length; i++) {
       const plan = selected.items[i];
       const input = availability.prepared.items.find((item) => item.pet.id === plan.pet_id);
       if (!input) throw new Error("予約対象ペットの検証済み情報が見つかりません。");
-      const result = await createPreparedMultiExactAppointment(env, context, availability, plan, input);
+      const result = await createPreparedMultiExactAppointment(env, context, availability, plan, input, source);
       created.push({ ...result.appointment, booking_group_id: groupId, booking_group_no: groupNo, booking_group_order: i + 1, booking_group_size: selected.items.length, booking_group_mode: availability.mode, booking_token: result.booking_token });
       await updateRows(env, TABLES.exactAppointments, { id: `eq.${result.appointment.id}`, clinic_id: `eq.${context.clinic.id}` }, {
         booking_group_id: groupId,
@@ -14078,11 +14362,12 @@ async function handleMemberMultiExactAppointmentCreate(request, env) {
     }));
     notifications.push(await autoNotifyExactAppointmentAction(env, context.clinic, appointment.id, "created", actorName));
   }
-  await logOperation(env, context.clinic.id, "member", actorName, "multi_exact_appointment_create", "booking_group", groupId, { group_no: groupNo, mode: availability.mode, count: enriched.length, appointment_ids: enriched.map((a) => a.id) });
+  await logOperation(env, context.clinic.id, "member", actorName, "multi_exact_appointment_create", "booking_group", groupId, { group_no: groupNo, mode: availability.mode, count: enriched.length, source, appointment_ids: enriched.map((a) => a.id) });
   return jsonResponse({
     ok: true,
     worker_version: WORKER_VERSION,
     multi_pet_booking_version: MULTI_PET_BOOKING_VERSION,
+    source,
     message: `${enriched.length}頭分の予約をまとめて受け付けました。`,
     clinic: context.clinic,
     booking_group: { id: groupId, group_no: groupNo, mode: availability.mode, size: enriched.length, booking_token: groupToken },
