@@ -96,7 +96,7 @@ const TABLES = {
 };
 
 const DEFAULT_CLINIC_CODE = "dpro_vet_demo";
-const WORKER_VERSION = "ANIMARY-COUNTER-V1.2-R3-FLEX-TIME-20260816";
+const WORKER_VERSION = "ANIMARY-COUNTER-V1.2-R4-MULTI-CREATE-OPT-20260816";
 const FEATURE_SWITCH_VERSION = "DPRO-VET-FEATURE-SWITCH-V1.1";
 const WEB_QUESTIONNAIRE_VERSION = "DPRO-VET-WEB-QUESTIONNAIRE-V1.1.6";
 const QUESTIONNAIRE_VISIT_LINK_VERSION = "DPRO-VET-QUESTIONNAIRE-VISIT-LINK-V1.1";
@@ -617,6 +617,7 @@ export default {
           multi_pet_booking_feature_switch: "multi_pet_booking",
           multi_pet_booking_single_fallback: true,
           multi_pet_booking_compensating_rollback: true,
+          multi_pet_booking_create_optimization_version: "DPRO-VET-MULTI-CREATE-R4",
           flexible_appointment_time_version: FLEXIBLE_APPOINTMENT_TIME_VERSION,
           exact_appointment_start_intervals: [10, 15, 20, 30],
           exact_appointment_duration_step_minutes: 5,
@@ -13529,6 +13530,63 @@ async function cancelCreatedAppointmentsForRollback(env, appointments, actorName
   return results;
 }
 
+async function createPreparedMultiExactAppointment(env, context, availability, plan, input) {
+  // V1.2-R4: multi-availability で既に検証済みの clinic/member/pet/service/slot を再利用する。
+  // createExactAppointmentCore を頭数分呼ぶと、同じ空き枠計算・獣医師計算・会員解決を
+  // 再実行してCloudflare subrequest上限へ近づくため、確定RPCだけを実行する。
+  const clinic = context.clinic;
+  const settings = context.settings;
+  const guardian = context.member.guardian;
+  const pet = input.pet;
+  const service = input.service;
+  const requestedDoctorId = cleanString(input.doctor_id || "");
+  const doctorSettings = availability.prepared.doctorSettings;
+  const bookingToken = createToken("vetapt");
+  const bookingTokenHash = await sha256Hex(bookingToken);
+  const appointmentNo = buildExactAppointmentNo(availability.date);
+  const actorName = guardian.guardian_name || "飼い主";
+
+  const rows = await supabaseRpc(env, "vet_create_exact_appointment_doctor", {
+    p_clinic_id: clinic.id,
+    p_guardian_id: guardian.id,
+    p_pet_id: pet.id,
+    p_service_type_id: service.id,
+    p_appointment_date: availability.date,
+    p_start_time: plan.start_time,
+    p_end_time: plan.end_time,
+    p_capacity: Number(service.capacity_per_slot || settings.default_capacity || 1),
+    p_appointment_no: appointmentNo,
+    p_booking_token_hash: bookingTokenHash,
+    p_source: "line",
+    p_guardian_name_snapshot: guardian.guardian_name || "",
+    p_pet_name_snapshot: pet.pet_name || "",
+    p_phone_snapshot: guardian.phone || "",
+    p_line_user_id: context.member.lineUserId || guardian.line_user_id || null,
+    p_request_note: cleanString(input.request_note || ""),
+    p_internal_note: null,
+    p_actor_type: "member",
+    p_actor_name: actorName,
+    p_is_demo: context.clinicCode === getDemoClinicCode(env),
+    p_doctor_id: requestedDoctorId || null,
+    p_doctor_assignment_source: requestedDoctorId ? "selected" : "unassigned",
+    p_auto_assign_doctor: doctorSettings.auto_assign_doctor === true
+  });
+  const appointment = Array.isArray(rows) ? rows[0] : rows;
+  if (!appointment?.id) throw new Error("予約作成結果を確認できませんでした。");
+
+  await logOperation(env, clinic.id, "member", actorName, "exact_appointment_create", "exact_appointment", appointment.id, {
+    appointment_no: appointmentNo,
+    appointment_date: availability.date,
+    start_time: plan.start_time,
+    service_name: service.service_name,
+    doctor_id: appointment.doctor_id || null,
+    doctor_name: appointment.doctor_name_snapshot || null,
+    source: "line",
+    multi_pet_booking: true
+  });
+  return { appointment, booking_token: bookingToken };
+}
+
 async function handleMemberMultiExactAppointmentCreate(request, env) {
   const body = await readJson(request);
   const context = await resolveMultiBookingContext(request, env, body);
@@ -13548,16 +13606,8 @@ async function handleMemberMultiExactAppointmentCreate(request, env) {
     for (let i = 0; i < selected.items.length; i++) {
       const plan = selected.items[i];
       const input = availability.prepared.items.find((item) => item.pet.id === plan.pet_id);
-      const result = await createExactAppointmentCore(request, env, {
-        ...body,
-        pet_id: plan.pet_id,
-        service_id: plan.service_id,
-        doctor_id: input?.doctor_id || null,
-        appointment_date: availability.date,
-        start_time: plan.start_time,
-        request_note: input?.request_note || "",
-        source: "line"
-      }, false, { suppressNotification: true, suppressQuestionnaireLink: true });
+      if (!input) throw new Error("予約対象ペットの検証済み情報が見つかりません。");
+      const result = await createPreparedMultiExactAppointment(env, context, availability, plan, input);
       created.push({ ...result.appointment, booking_group_id: groupId, booking_group_no: groupNo, booking_group_order: i + 1, booking_group_size: selected.items.length, booking_group_mode: availability.mode, booking_token: result.booking_token });
       await updateRows(env, TABLES.exactAppointments, { id: `eq.${result.appointment.id}`, clinic_id: `eq.${context.clinic.id}` }, {
         booking_group_id: groupId,
