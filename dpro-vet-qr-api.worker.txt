@@ -97,7 +97,8 @@ const TABLES = {
 };
 
 const DEFAULT_CLINIC_CODE = "dpro_vet_demo";
-const WORKER_VERSION = "ANIMARY-COUNTER-V1.3-VACCINE-INTERVAL-20260816-INTEGRATED-6-R1";
+const WORKER_VERSION = "ANIMARY-COUNTER-V1.3-VACCINE-INTERVAL-20260816-INTEGRATED-8";
+const INTEGRATED_DEMO_PREPARE_VERSION = "DPRO-PET-CARE-INTEGRATED-8";
 const INTEGRATED_API_VERSION = "DPRO-PET-CARE-INTEGRATED-V1.0";
 const FEATURE_SWITCH_VERSION = "DPRO-VET-FEATURE-SWITCH-V1.1";
 const WEB_QUESTIONNAIRE_VERSION = "DPRO-VET-WEB-QUESTIONNAIRE-V1.1.6";
@@ -755,6 +756,10 @@ export default {
           integrated_state_api: true,
           integrated_member_sources: ["line", "web"],
           integrated_staff_sources: ["line", "web", "phone", "counter", "staff", "import"],
+          integrated_demo_prepare_version: INTEGRATED_DEMO_PREPARE_VERSION,
+          integrated_demo_prepare_sources: ["web", "line", "phone", "counter"],
+          same_day_pet_duplicate_guard: true,
+          same_day_queue_number_guard: true,
           exact_appointment_start_intervals: [10, 15, 20, 30],
           exact_appointment_duration_step_minutes: 5,
           exact_appointment_demo_slot_minutes: 30,
@@ -11317,6 +11322,8 @@ async function handleProductionReadinessCheck(request, env) {
 const SALES_DEMO_QUEUE_PETS_STEP_52_5U = [
   {
     queue_number: 1,
+    source: "web",
+    source_label: "WEB受付",
     pet_name: "チェックちゃん",
     species: "dog",
     species_label: "犬",
@@ -11329,6 +11336,8 @@ const SALES_DEMO_QUEUE_PETS_STEP_52_5U = [
   },
   {
     queue_number: 2,
+    source: "line",
+    source_label: "LINE受付",
     pet_name: "ココアちゃん",
     species: "dog",
     species_label: "犬",
@@ -11341,6 +11350,8 @@ const SALES_DEMO_QUEUE_PETS_STEP_52_5U = [
   },
   {
     queue_number: 3,
+    source: "phone",
+    source_label: "電話受付",
     pet_name: "ハナちゃん",
     species: "cat",
     species_label: "猫",
@@ -11353,6 +11364,8 @@ const SALES_DEMO_QUEUE_PETS_STEP_52_5U = [
   },
   {
     queue_number: 4,
+    source: "counter",
+    source_label: "窓口受付",
     pet_name: "モモちゃん",
     species: "dog",
     species_label: "犬",
@@ -11415,6 +11428,31 @@ async function getQueueEntriesRangeRowsStep525U(env, clinicId, fromDate, toDate,
   return selectRows(env, TABLES.waitingEntriesDetailView, query).catch(() => []);
 }
 
+function salesDemoEntrySourceStepIntegrated8(item = {}) {
+  const raw = cleanString(item.source || item.reception_source || item.booking_source).toLowerCase();
+  const aliases = { telephone:"phone", front_desk:"counter", manual_front:"counter", window:"counter", qr:"counter", qr_reception:"counter" };
+  const normalized = aliases[raw] || raw;
+  if (["web","line","phone","counter"].includes(normalized)) return normalized;
+  const text = [item.purpose,item.symptoms_summary,item.memo,item.staff_note].map((v)=>cleanString(v)).join(" ");
+  if (text.includes("電話受付")) return "phone";
+  if (text.includes("窓口受付")) return "counter";
+  if (/\bweb\b/i.test(text)) return "web";
+  if (/\bline\b/i.test(text)) return "line";
+  return "other";
+}
+
+function salesDemoIntegratedSourceSummaryStepIntegrated8(entries = []) {
+  const counts = { web:0, line:0, phone:0, counter:0, other:0 };
+  (Array.isArray(entries) ? entries : []).forEach((item) => {
+    const source = salesDemoEntrySourceStepIntegrated8(item);
+    if (Object.prototype.hasOwnProperty.call(counts, source)) counts[source] += 1;
+    else counts.other += 1;
+  });
+  const expected = { web:1, line:1, phone:1, counter:1, other:0 };
+  const ready = Object.keys(expected).every((key) => counts[key] === expected[key]) && (Array.isArray(entries) ? entries.length : 0) === 4;
+  return { counts, expected, ready, version: INTEGRATED_DEMO_PREPARE_VERSION };
+}
+
 async function buildSalesDemoSnapshotStep525U(env, clinic, options = {}) {
   const today = normalizeQueueDate(options.today || todayJST());
   const dateInfo = options.date_info || await findSalesDemoTargetDateStep525U(env, clinic.clinic_code, today);
@@ -11447,6 +11485,9 @@ async function buildSalesDemoSnapshotStep525U(env, clinic, options = {}) {
     ? (dateInfo.calendar.find((row) => row.target_date === today) || null)
     : null;
 
+  const integratedTargetEntries = targetDate === today ? activeToday : (nextBusinessDayEntries.length ? nextBusinessDayEntries : activeTarget);
+  const integratedSourceSummary = salesDemoIntegratedSourceSummaryStepIntegrated8(integratedTargetEntries);
+
   return {
     today,
     target_date: targetDate,
@@ -11459,7 +11500,9 @@ async function buildSalesDemoSnapshotStep525U(env, clinic, options = {}) {
     next_business_day: nextBusinessDate ? { date: nextBusinessDate, entries: nextBusinessDayEntries } : null,
     next_business_day_entries: nextBusinessDayEntries,
     range_entries: rangeEntries,
-    demo_ready: activeToday.length === 4 || nextBusinessDayEntries.length === 4 || (targetDate === today && activeTarget.length === 4)
+    demo_ready: activeToday.length === 4 || nextBusinessDayEntries.length === 4 || (targetDate === today && activeTarget.length === 4),
+    integrated_demo_ready: integratedSourceSummary.ready,
+    integrated_source_summary: integratedSourceSummary
   };
 }
 
@@ -11590,12 +11633,15 @@ async function createSalesDemoQueueEntriesFallbackStep525U(env, clinic, targetDa
         p_purpose: spec.purpose,
         p_symptoms_summary: spec.symptoms_summary || spec.memo || spec.purpose,
         p_desired_contact: "line",
-        p_source: "line",
+        // INTEGRATED-8: 営業前リセット後も WEB / LINE / 電話 / 窓口を1件ずつ保持する。
+        p_source: normalizeIntegratedBookingSource(spec.source || "line", "line", true),
         p_questionnaire: {
           purpose: spec.purpose,
-          free_text: spec.symptoms_summary || spec.memo || spec.purpose,
+          free_text: `${spec.source_label || ""} ${spec.symptoms_summary || spec.memo || spec.purpose}`.trim(),
+          reception_source: spec.source || "line",
+          reception_source_label: spec.source_label || "",
           demo_sales_setup: true,
-          demo_step: "STEP VET-52.5U",
+          demo_step: INTEGRATED_DEMO_PREPARE_VERSION,
           card_no: card?.card_no || null,
           emergency_flag: false
         }
@@ -11658,6 +11704,9 @@ async function handleSalesDemoPrepareStatus(request, env) {
     today: snapshot.today,
     target_date_source: snapshot.target_date_source,
     demo_ready: snapshot.demo_ready,
+    integrated_demo_ready: snapshot.integrated_demo_ready,
+    integrated_source_summary: snapshot.integrated_source_summary,
+    integrated_demo_prepare_version: INTEGRATED_DEMO_PREPARE_VERSION,
     safety,
     demo_prepare: {
       endpoint: "/api/admin/demo/prepare",
@@ -11735,7 +11784,9 @@ async function handleSalesDemoPrepare(request, env) {
       date_info: dateInfo
     });
 
-    if (!snapshot.demo_ready) {
+    // INTEGRATED-8: 旧RPCが4件を作れてもsourceがLINE固定なら統合DEMOとしては未準備。
+    // WEB / LINE / phone / counter が1件ずつになるまで安全なフォールバックへ切り替える。
+    if (!snapshot.demo_ready || !snapshot.integrated_demo_ready) {
       usedFallback = true;
       fallbackResult = await createSalesDemoQueueEntriesFallbackStep525U(env, clinic, targetDate);
       snapshot = await buildSalesDemoSnapshotStep525U(env, clinic, {
@@ -11748,7 +11799,7 @@ async function handleSalesDemoPrepare(request, env) {
     const activeToday = snapshot.active_today || [];
     const nextEntries = snapshot.next_business_day_entries || [];
     const activeTarget = snapshot.active_target || [];
-    const ready = snapshot.demo_ready;
+    const ready = snapshot.demo_ready && snapshot.integrated_demo_ready;
 
     let logStatus = "ok";
     let logError = null;
@@ -11764,6 +11815,8 @@ async function handleSalesDemoPrepare(request, env) {
         {
           source_screen: cleanString(body.source_screen) || "system-check.html",
           source_step: "STEP VET-52.5U",
+          integrated_step: INTEGRATED_DEMO_PREPARE_VERSION,
+          integrated_source_summary: snapshot.integrated_source_summary,
           target_date: targetDate,
           rpc_error_message: rpcErrorMessage || null,
           used_fallback: usedFallback,
@@ -11811,6 +11864,9 @@ async function handleSalesDemoPrepare(request, env) {
         ? "営業デモ準備が完了しました。本日の受付1〜4を作成・確認しました。"
         : `営業デモ準備が完了しました。本日は休診/受付停止のため、次営業日 ${targetDate} に受付1〜4を作成・確認しました。`,
       worker_version: WORKER_VERSION,
+      integrated_demo_prepare_version: INTEGRATED_DEMO_PREPARE_VERSION,
+      integrated_demo_ready: snapshot.integrated_demo_ready,
+      integrated_source_summary: snapshot.integrated_source_summary,
       service: SERVICE_ID,
       service_name: SERVICE_NAME,
       clinic_code: clinicCode,
@@ -11840,7 +11896,7 @@ async function handleSalesDemoPrepare(request, env) {
       safety: safety.safety,
       cors_safe: true,
       next_check_urls: {
-        system_check: "https://dpromstk2000-lab.github.io/DPRO-VET-QR/system-check.html?v=step-vet-52-5u&clinic_code=dpro_vet_demo",
+        system_check: "https://dpromstk2000-lab.github.io/DPRO-VET-QR/integrated-system-check.html?clinic_code=dpro_vet_demo&demo=ready",
         scan_pc: "https://dpromstk2000-lab.github.io/DPRO-VET-QR/scan-pc.html?v=step-vet-52-5u&clinic_code=dpro_vet_demo",
         scan_ipad: "https://dpromstk2000-lab.github.io/DPRO-VET-QR/scan-ipad.html?v=step-vet-52-5u&clinic_code=dpro_vet_demo",
         doctor: "https://dpromstk2000-lab.github.io/DPRO-VET-QR/doctor.html?v=step-vet-52-5u&clinic_code=dpro_vet_demo"

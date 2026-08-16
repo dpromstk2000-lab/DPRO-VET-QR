@@ -159,7 +159,7 @@ async function loadAll(){
  catch(e){n.className='notice ng';n.textContent='確認に失敗しました：'+e.message}
  $('updated').textContent='最終更新：'+new Intl.DateTimeFormat('ja-JP',{timeZone:'Asia/Tokyo',hour:'2-digit',minute:'2-digit',second:'2-digit'}).format(new Date());
 }
-const hp=hpUrl(),line=url('./rich-menu.html',{line_user_id:'demo_line_link_001',source:'line'}),board=url('./today-board.html'),settings=url('./integrated-settings.html'),appointment=url('./appointment.html',{line_user_id:'demo_line_link_001',source:'line'}),check=url('./system-check.html');
+const hp=hpUrl(),line=url('./rich-menu.html',{line_user_id:'demo_line_link_001',source:'line'}),board=url('./today-board.html'),settings=url('./integrated-settings.html'),appointment=url('./appointment.html',{line_user_id:'demo_line_link_001',source:'line'}),check=url('./integrated-system-check.html');
 [['hpLink',hp],['lineLink',line],['boardLink',board],['settingsLink',settings],['appointmentLink',appointment],['checkLink',check],['hpStep',hp],['boardStep1',board],['lineStep',line],['boardStep2',board],['settingsStep',settings],['hpStep2',hp],['lineStep2',line],['appointmentStep',appointment],['settingsStep2',settings]].forEach(([id,href])=>$(id).href=href);
 $('connect').onclick=()=>{const v=$('adminCode').value.trim();if(v&&v!=='••••'){saveAdmin(v);$('adminCode').value='••••'}loadAll()};$('refresh').onclick=loadAll;if(adminCode())$('adminCode').value='••••';loadAll();setInterval(loadAll,30000);
 })();
