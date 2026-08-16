@@ -107,6 +107,7 @@ input{width:100%;border:1px solid #cddbd4;border-radius:11px;background:#fff;pad
       <p>7日前の予防案内、予防予定日、再診予定日を自動リコールの状態と一緒に確認します。</p>
       <div class="heroLinks">
         <a id="lineCallLink" href="./line-call-admin.html">LINE呼び出し管理</a>
+        <a id="vaccineIntervalLink" href="./vaccine-interval-admin.html">ワクチン間隔設定</a>
         <a id="todayBoardLink" href="./today-board.html">本日の統合ボード</a>
         <a id="calendarLink" href="./appointment-calendar.html">週間予約ボード</a>
         <a id="ownerLink" href="./owner.html">オーナー画面</a>
@@ -207,7 +208,7 @@ input{width:100%;border:1px solid #cddbd4;border-radius:11px;background:#fff;pad
     if(DEMO)u.searchParams.set("demo","ready");
     return u.toString();
   }
-  [["lineCallLink","./line-call-admin.html"],["todayBoardLink","./today-board.html"],["calendarLink","./appointment-calendar.html"],["ownerLink","./owner.html"]]
+  [["lineCallLink","./line-call-admin.html"],["vaccineIntervalLink","./vaccine-interval-admin.html"],["todayBoardLink","./today-board.html"],["calendarLink","./appointment-calendar.html"],["ownerLink","./owner.html"]]
     .forEach(([id,file])=>$(id).href=page(file));
 
   async function get(path){

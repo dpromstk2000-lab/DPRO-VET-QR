@@ -62,6 +62,12 @@
       <label style="margin-top:18px">診療内容</label>
       <div id="serviceGrid" class="serviceGrid"><div class="notice info">予約内容を読み込み中です。</div></div>
 
+      <div id="vaccineSection" class="hidden" style="margin-top:18px">
+        <label for="vaccineRuleSelect">ワクチン・予防の種類</label>
+        <select id="vaccineRuleSelect"><option value="">選択してください</option></select>
+        <div id="vaccineIntervalNotice" class="notice info" style="margin-top:8px">病院の接種間隔設定を確認します。</div>
+      </div>
+
       <div id="doctorSection" class="hidden" style="margin-top:18px">
         <label for="appointmentDoctor">担当獣医師</label>
         <select id="appointmentDoctor"><option value="">おまかせ</option></select>
@@ -92,6 +98,7 @@
         <dl>
           <dt>ペット</dt><dd id="sumPet">未選択</dd>
           <dt>診療内容</dt><dd id="sumService">未選択</dd>
+          <dt id="sumVaccineLabel" class="hidden">予防内容</dt><dd id="sumVaccine" class="hidden">未選択</dd>
           <dt>担当獣医師</dt><dd id="sumDoctor">おまかせ</dd>
           <dt>予約日時</dt><dd id="sumDateTime">未選択</dd>
           <dt>所要時間</dt><dd id="sumDuration">未選択</dd>
@@ -127,9 +134,9 @@
   const INCOMING_LINE_USER_ID = params.get("line_user_id") || params.get("lineUserId") || params.get("uid") || "";
   const LINE_USER_ID = IS_DEMO_CLINIC ? INCOMING_LINE_USER_ID : "";
   const DEMO = IS_DEMO_CLINIC && ["ready","true","1"].includes(String(params.get("demo") || "").toLowerCase());
-  const VERSION = "vet-audit-fix-4";
+  const VERSION = "v1.3-vaccine-interval";
 
-  const state = { clinic:null, settings:null, services:[], doctors:[], guardian:null, cards:[], appointments:[], pet:null, service:null, doctorId:"", date:"", time:"", editing:null };
+  const state = { clinic:null, settings:null, services:[], doctors:[], guardian:null, cards:[], appointments:[], pet:null, service:null, doctorId:"", date:"", time:"", editing:null, features:null, vaccineOptions:[], vaccineRuleId:"", preventionScheduleId:"", vaccineEvaluation:null };
   const $ = (id) => document.getElementById(id);
   const esc = (v) => String(v ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
 
@@ -145,9 +152,20 @@
   $("memberLink").href = pageUrl("member.html");
   $("menuLink").href = pageUrl("rich-menu.html");
   $("multiBookingLink").href = pageUrl("appointment-multi.html");
-  Promise.resolve(window.DPRO_VET_FEATURES?.load?.()).then((featureState)=>{
-    if(featureState?.flags?.multi_pet_booking===true) $("multiBookingLink").classList.remove("hidden");
-  }).catch(()=>{});
+  async function loadFeatures(){
+    try{
+      state.features=await window.DPRO_VET_FEATURES?.load?.({force:true})||{flags:{}};
+      if(state.features?.flags?.multi_pet_booking===true) $("multiBookingLink").classList.remove("hidden");
+    }catch(_){state.features={flags:{}};}
+  }
+  function vaccineFeatureOn(){return state.features?.flags?.vaccine_interval_control===true;}
+  function demoFeatureBody(){
+    if(!DEMO)return{};
+    const flags={};
+    if(state.features?.flags?.vaccine_interval_control===true) flags.vaccine_interval_control=true;
+    if(state.features?.flags?.multi_pet_booking===true) flags.multi_pet_booking=true;
+    return Object.keys(flags).length?{demo_feature_flags:flags}:{};
+  }
 
   function apiUrl(path, extra={}){
     const url = new URL(API_BASE + path);
@@ -161,7 +179,7 @@
     return data;
   }
   async function post(path, body={}){
-    const res = await fetch(API_BASE+path,{method:"POST",headers:{"Content-Type":"application/json",Accept:"application/json"},body:JSON.stringify({clinic_code:CLINIC_CODE,line_user_id:LINE_USER_ID,guardian_id:state.guardian?.id||state.guardian?.guardian_id||"",demo:DEMO,...body})});
+    const res = await fetch(API_BASE+path,{method:"POST",headers:{"Content-Type":"application/json",Accept:"application/json"},body:JSON.stringify({clinic_code:CLINIC_CODE,line_user_id:LINE_USER_ID,guardian_id:state.guardian?.id||state.guardian?.guardian_id||"",demo:DEMO,...demoFeatureBody(),...body})});
     const data = await res.json().catch(()=>({}));
     if(!res.ok||data.ok===false) throw new Error(data.message||data.error||`API Error ${res.status}`);
     return data;
@@ -197,15 +215,53 @@
 
   function renderPets(){
     $("petGrid").innerHTML=state.cards.map(card=>`<button class="choice ${state.pet?.pet_id===card.pet_id?"active":""}" type="button" data-pet="${esc(card.pet_id)}"><b>${esc(card.pet_name||"ペット")}</b><span>${esc(card.species_label||card.species||"")} ${esc(card.breed||"")}</span><small>${esc(card.card_no||"")}</small></button>`).join("");
-    document.querySelectorAll("[data-pet]").forEach(btn=>btn.onclick=async()=>{state.pet=state.cards.find(x=>x.pet_id===btn.dataset.pet)||null;renderPets();updateSummary();await loadAvailability(state.editing?.id||"");});
+    document.querySelectorAll("[data-pet]").forEach(btn=>btn.onclick=async()=>{state.pet=state.cards.find(x=>x.pet_id===btn.dataset.pet)||null;state.vaccineRuleId="";state.preventionScheduleId="";state.vaccineEvaluation=null;renderPets();await loadVaccineOptions();updateSummary();await loadAvailability(state.editing?.id||"");});
     updateSummary();
   }
   function renderServices(){
     if(!state.services.length){$("serviceGrid").innerHTML='<div class="notice ng full">予約できる診療内容が設定されていません。</div>';return;}
     if(!state.service) state.service=state.services[0];
     $("serviceGrid").innerHTML=state.services.map(s=>`<button class="choice ${state.service?.id===s.id?"active":""}" type="button" data-service="${esc(s.id)}"><b>${esc(s.service_name)}</b><span>${esc(s.description||"")}</span><small>${Number(s.duration_minutes||30)}分</small></button>`).join("");
-    document.querySelectorAll("[data-service]").forEach(btn=>btn.onclick=async()=>{state.service=state.services.find(x=>x.id===btn.dataset.service)||null;state.time="";state.doctorId="";renderServices();renderDoctors();updateSummary();await loadAvailability();});
+    document.querySelectorAll("[data-service]").forEach(btn=>btn.onclick=async()=>{state.service=state.services.find(x=>x.id===btn.dataset.service)||null;state.time="";state.doctorId="";state.vaccineRuleId="";state.preventionScheduleId="";state.vaccineEvaluation=null;renderServices();renderDoctors();await loadVaccineOptions();updateSummary();await loadAvailability();});
     updateSummary();
+  }
+
+  function isVaccineService(){return String(state.service?.category||"").toLowerCase()==="vaccination";}
+  function selectedVaccineOption(){return state.vaccineOptions.find(x=>x.rule?.id===state.vaccineRuleId)||null;}
+  function vaccineDateLabel(v){return v?dateLabel(v):"未登録";}
+  async function loadVaccineOptions(){
+    const section=$("vaccineSection"),sel=$("vaccineRuleSelect"),msg=$("vaccineIntervalNotice");
+    state.vaccineEvaluation=null;
+    if(!vaccineFeatureOn()||!isVaccineService()||!state.pet){section.classList.add("hidden");state.vaccineOptions=[];state.vaccineRuleId="";state.preventionScheduleId="";return;}
+    section.classList.remove("hidden");msg.className="notice info";msg.textContent="病院の接種間隔設定を確認しています。";
+    try{
+      const d=await post("/api/member/vaccine-interval/options",{pet_id:state.pet.pet_id});
+      state.vaccineOptions=d.options||[];
+      const keep=state.vaccineOptions.find(x=>x.rule?.id===state.vaccineRuleId);
+      if(!keep){state.vaccineRuleId=state.vaccineOptions.length===1?(state.vaccineOptions[0]?.rule?.id||""):"";}
+      const selected=state.vaccineOptions.find(x=>x.rule?.id===state.vaccineRuleId)||null;
+      state.preventionScheduleId=selected?.schedule?.id||"";
+      sel.innerHTML='<option value="">ワクチン・予防の種類を選択</option>'+state.vaccineOptions.map(x=>`<option value="${esc(x.rule?.id||"")}" ${x.rule?.id===state.vaccineRuleId?"selected":""}>${esc(x.rule?.display_name||"予防接種")}</option>`).join("");
+      if(!state.vaccineOptions.length){msg.className="notice info";msg.textContent="接種間隔ルールは未設定です。予約可否は病院へご確認ください。";}
+      else if(selected){msg.className="notice info";msg.textContent=`前回：${vaccineDateLabel(selected.last_done_date)}／推奨次回：${vaccineDateLabel(selected.recommended_date)}。病院設定を基準に確認します。`;}
+      else{msg.className="notice info";msg.textContent="予約するワクチン・予防の種類を選択してください。";}
+    }catch(e){state.vaccineOptions=[];msg.className="notice ng";msg.textContent=e.message;}
+  }
+  async function checkVaccineInterval(){
+    if(!vaccineFeatureOn()||!isVaccineService())return true;
+    const msg=$("vaccineIntervalNotice");
+    if(state.vaccineOptions.length>1&&!state.vaccineRuleId){msg.className="notice ng";msg.textContent="予約するワクチン・予防の種類を選択してください。";state.vaccineEvaluation={allowed:false,result:"selection_required"};return false;}
+    if(!state.date||!state.pet||!state.service)return true;
+    try{
+      const d=await post("/api/member/vaccine-interval/check",{pet_id:state.pet.pet_id,service_id:state.service.id,appointment_date:state.date,vaccine_interval_rule_id:state.vaccineRuleId||null,prevention_schedule_id:state.preventionScheduleId||null});
+      state.vaccineEvaluation=d.evaluation||null;
+      const e=state.vaccineEvaluation||{};
+      if(e.result==="too_early"&&!e.allowed){msg.className="notice ng";msg.textContent=e.message||"病院設定の最短間隔より前です。";return false;}
+      if(e.result==="too_early"&&e.allowed){msg.className="notice info";msg.textContent=e.message||"病院設定の最短間隔より前です。予約前に病院へご確認ください。";return true;}
+      if(["before_recommended","no_history","not_configured"].includes(e.result)){msg.className="notice info";msg.textContent=e.message||"接種時期を病院へご確認ください。";return true;}
+      if(e.applicable){msg.className="notice ok";msg.textContent=e.message||"病院設定の接種間隔チェックに問題ありません。";}
+      return e.allowed!==false;
+    }catch(e){msg.className="notice ng";msg.textContent=e.message;state.vaccineEvaluation={allowed:false,result:"error"};return false;}
   }
 
   function eligibleDoctors(){
@@ -231,6 +287,7 @@
     const area=$("slotGrid");
     state.date=$("appointmentDate").value;state.time="";$("selectedTimeDisplay").value="未選択";updateSummary();
     if(!state.settings?.exact_time_booking_enabled||!state.service||!state.date){area.innerHTML='<div class="notice info full">日付と診療内容を選択してください。</div>';return;}
+    if(!(await checkVaccineInterval())){area.innerHTML='<div class="notice ng full">接種時期の確認が必要です。上の案内をご確認ください。</div>';return;}
     area.innerHTML='<div class="notice info full">空き時間を確認中です。</div>';
     try{
       const data=await get("/api/public/exact-appointments/availability",{date:state.date,service_id:state.service.id,pet_id:state.pet?.pet_id||"",doctor_id:state.doctorId||"",exclude_appointment_id:excludeId});
@@ -243,17 +300,22 @@
   function updateSummary(){
     $("sumPet").textContent=state.pet?.pet_name||"未選択";
     $("sumService").textContent=state.service?.service_name||"未選択";
+    const vaccineSummaryOn=vaccineFeatureOn()&&isVaccineService();
+    $("sumVaccineLabel").classList.toggle("hidden",!vaccineSummaryOn);$("sumVaccine").classList.toggle("hidden",!vaccineSummaryOn);
+    if(vaccineSummaryOn)$("sumVaccine").textContent=selectedVaccineOption()?.rule?.display_name||(state.vaccineOptions.length?"未選択":"病院確認");
     const doc=state.doctors.find(d=>d.id===state.doctorId);$("sumDoctor").textContent=doc?.display_name||doc?.doctor_name||(state.settings?.doctor_booking_enabled?"おまかせ":"指定なし");
     $("sumDateTime").textContent=state.date&&state.time?`${dateLabel(state.date)} ${state.time}`:"未選択";
     $("sumDuration").textContent=state.service?`${Number(state.service.duration_minutes||30)}分`:"未選択";
     $("submitButton").textContent=state.editing?"この内容へ予約を変更":"この内容で予約する";
     const doctorOk=!state.settings?.doctor_booking_enabled||state.settings.doctor_selection_mode!=="required"||Boolean(state.doctorId);
-    $("submitButton").disabled=!(state.settings?.exact_time_booking_enabled&&state.pet&&state.service&&state.date&&state.time&&doctorOk);
+    const vaccineOk=!vaccineFeatureOn()||!isVaccineService()||state.vaccineOptions.length===0||Boolean(state.vaccineRuleId);
+    const intervalOk=state.vaccineEvaluation?.allowed!==false;
+    $("submitButton").disabled=!(state.settings?.exact_time_booking_enabled&&state.pet&&state.service&&state.date&&state.time&&doctorOk&&vaccineOk&&intervalOk);
   }
 
   async function submitBooking(){
     hideNotice("submitNotice");$("submitButton").disabled=true;
-    const payload={pet_id:state.pet.pet_id,service_id:state.service.id,doctor_id:state.doctorId||null,appointment_date:state.date,start_time:state.time,request_note:$("requestNote").value.trim()};
+    const payload={pet_id:state.pet.pet_id,service_id:state.service.id,doctor_id:state.doctorId||null,appointment_date:state.date,start_time:state.time,request_note:$("requestNote").value.trim(),vaccine_interval_rule_id:state.vaccineRuleId||null,prevention_schedule_id:state.preventionScheduleId||null};
     try{
       let data;
       if(state.editing){data=await post("/api/member/exact-appointments/change",{...payload,appointment_id:state.editing.id,booking_token:localStorage.getItem(tokenKey(state.editing.id))||"",reason:"LINE画面から変更"});notice("submitNotice","ok",data.message||"予約を変更しました。");}
@@ -275,24 +337,25 @@
 
   async function startChange(id){
     const item=state.appointments.find(x=>x.id===id);if(!item)return;
-    state.editing=item;state.pet=state.cards.find(x=>x.pet_id===item.pet_id)||state.pet;state.service=state.services.find(x=>x.id===item.service_type_id)||state.service;state.doctorId=item.doctor_id||"";state.date=item.appointment_date;state.time="";
-    $("appointmentDate").value=state.date;$("requestNote").value=item.request_note||"";renderPets();renderServices();renderDoctors();await loadAvailability(item.id);updateSummary();scrollTo({top:$("serviceGrid").getBoundingClientRect().top+scrollY-20,behavior:"smooth"});notice("submitNotice","info","変更後の日付と空き時間を選択してください。");
+    state.editing=item;state.pet=state.cards.find(x=>x.pet_id===item.pet_id)||state.pet;state.service=state.services.find(x=>x.id===item.service_type_id)||state.service;state.doctorId=item.doctor_id||"";state.date=item.appointment_date;state.time="";state.vaccineRuleId=item.vaccine_interval_rule_id||"";state.preventionScheduleId=item.prevention_schedule_id||"";state.vaccineEvaluation=null;
+    $("appointmentDate").value=state.date;$("requestNote").value=item.request_note||"";renderPets();renderServices();renderDoctors();await loadVaccineOptions();await loadAvailability(item.id);updateSummary();scrollTo({top:$("serviceGrid").getBoundingClientRect().top+scrollY-20,behavior:"smooth"});notice("submitNotice","info","変更後の日付と空き時間を選択してください。");
   }
   async function cancelAppointment(id){
     const item=state.appointments.find(x=>x.id===id);if(!item)return;
     const reason=prompt(`${dateLabel(item.appointment_date)} ${timeLabel(item.start_time)}の予約をキャンセルします。理由を入力してください。`,`都合が悪くなったため`);if(reason===null)return;
     try{const data=await post("/api/member/exact-appointments/cancel",{appointment_id:id,booking_token:localStorage.getItem(tokenKey(id))||"",reason});notice("globalNotice","ok",data.message||"予約をキャンセルしました。");await loadAppointments();await loadAvailability();}catch(error){notice("globalNotice","ng",error.message);}
   }
-  function resetSelection(clearPet=true){state.editing=null;state.time="";state.doctorId="";if(clearPet)state.pet=state.cards[0]||null;state.service=state.services[0]||null;$("selectedTimeDisplay").value="未選択";$("requestNote").value="";renderPets();renderServices();renderDoctors();updateSummary();}
+  function resetSelection(clearPet=true){state.editing=null;state.time="";state.doctorId="";state.vaccineRuleId="";state.preventionScheduleId="";state.vaccineEvaluation=null;if(clearPet)state.pet=state.cards[0]||null;state.service=state.services[0]||null;$("selectedTimeDisplay").value="未選択";$("requestNote").value="";renderPets();renderServices();renderDoctors();loadVaccineOptions();updateSummary();}
 
   $("appointmentDoctor").addEventListener("change",async()=>{state.doctorId=$("appointmentDoctor").value||"";state.time="";updateSummary();await loadAvailability(state.editing?.id||"");});
-  $("appointmentDate").addEventListener("change",()=>loadAvailability(state.editing?.id||""));
+  $("vaccineRuleSelect").addEventListener("change",async()=>{state.vaccineRuleId=$("vaccineRuleSelect").value||"";const o=selectedVaccineOption();state.preventionScheduleId=o?.schedule?.id||"";state.vaccineEvaluation=null;state.time="";updateSummary();await loadAvailability(state.editing?.id||"");});
+  $("appointmentDate").addEventListener("change",()=>{state.vaccineEvaluation=null;loadAvailability(state.editing?.id||"");});
   $("submitButton").addEventListener("click",submitBooking);
   $("resetButton").addEventListener("click",()=>{resetSelection();loadAvailability();hideNotice("submitNotice");});
   $("reloadButton").addEventListener("click",loadAppointments);
 
   async function init(){
-    try{await Promise.all([loadSettings(),loadCards()]);await loadAvailability();await loadAppointments();updateSummary();}
+    try{await loadFeatures();await Promise.all([loadSettings(),loadCards()]);await loadVaccineOptions();await loadAvailability();await loadAppointments();updateSummary();}
     catch(error){notice("globalNotice","ng",error.message.includes("relation")?"日時指定予約のデータベース設定がまだ反映されていません。STEP VET-APPOINTMENT-1-R2のSQLを実行してください。":error.message);}
   }
   init();

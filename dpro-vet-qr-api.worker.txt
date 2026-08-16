@@ -55,6 +55,7 @@ const TABLES = {
   visits: "vet_visits",
   checkins: "vet_checkins",
   preventionSchedules: "vet_prevention_schedules",
+  vaccineIntervalRules: "vet_vaccine_interval_rules",
   followups: "vet_followups",
   questionnaires: "vet_questionnaires",
   lineLinkTokens: "vet_line_link_tokens",
@@ -96,7 +97,7 @@ const TABLES = {
 };
 
 const DEFAULT_CLINIC_CODE = "dpro_vet_demo";
-const WORKER_VERSION = "ANIMARY-COUNTER-V1.2-R4-MULTI-CREATE-OPT-20260816";
+const WORKER_VERSION = "ANIMARY-COUNTER-V1.3-VACCINE-INTERVAL-20260816";
 const FEATURE_SWITCH_VERSION = "DPRO-VET-FEATURE-SWITCH-V1.1";
 const WEB_QUESTIONNAIRE_VERSION = "DPRO-VET-WEB-QUESTIONNAIRE-V1.1.6";
 const QUESTIONNAIRE_VISIT_LINK_VERSION = "DPRO-VET-QUESTIONNAIRE-VISIT-LINK-V1.1";
@@ -113,6 +114,7 @@ const FINAL_AUDIT_VERSION = "FINAL-VET-AUDIT-1-R1";
 const V11_FINAL_AUDIT_VERSION = "DPRO-VET-V1.1-FINAL-AUDIT-R1";
 const MULTI_PET_BOOKING_VERSION = "DPRO-VET-MULTI-PET-BOOKING-V1.2";
 const FLEXIBLE_APPOINTMENT_TIME_VERSION = "DPRO-VET-FLEX-TIME-V1.2-R3";
+const VACCINE_INTERVAL_CONTROL_VERSION = "DPRO-VET-VACCINE-INTERVAL-V1.3";
 const APPOINTMENT_REMINDER_RECOMMENDED_CRON = "0 0,1,2 * * *"; // JST 09:00 / 10:00 / 11:00
 const LINE_PUSH_ENDPOINT = "https://api.line.me/v2/bot/message/push";
 const LINE_BOT_INFO_ENDPOINT = "https://api.line.me/v2/bot/info";
@@ -324,6 +326,7 @@ function memberIdentityProtectedPath(path) {
     "/api/member/exact-appointments/change","/api/member/exact-appointments/cancel",
     "/api/member/exact-appointments/multi-availability","/api/member/exact-appointments/multi-create",
     "/api/member/exact-appointments/multi-change","/api/member/exact-appointments/multi-cancel",
+    "/api/member/vaccine-interval/options","/api/member/vaccine-interval/check",
     "/api/member/queue/create","/api/member/waiting/create","/api/member/waiting-entry/create",
     "/api/public/pets/photo/update","/api/member/pets/photo/update",
     "/api/public/pet-photo/update","/api/member/pet-photo/update",
@@ -354,7 +357,9 @@ function memberExistingGuardianRequiredPath(path) {
     "/api/member/exact-appointments/multi-availability",
     "/api/member/exact-appointments/multi-create",
     "/api/member/exact-appointments/multi-change",
-    "/api/member/exact-appointments/multi-cancel"
+    "/api/member/exact-appointments/multi-cancel",
+    "/api/member/vaccine-interval/options",
+    "/api/member/vaccine-interval/check"
   ]).has(path);
 }
 
@@ -619,6 +624,10 @@ export default {
           multi_pet_booking_compensating_rollback: true,
           multi_pet_booking_create_optimization_version: "DPRO-VET-MULTI-CREATE-R4",
           flexible_appointment_time_version: FLEXIBLE_APPOINTMENT_TIME_VERSION,
+          vaccine_interval_control_version: VACCINE_INTERVAL_CONTROL_VERSION,
+          vaccine_interval_control_feature_switch: "vaccine_interval_control",
+          vaccine_interval_control_default: false,
+          vaccine_interval_control_policy: "clinic_configured_no_fixed_medical_judgement",
           exact_appointment_start_intervals: [10, 15, 20, 30],
           exact_appointment_duration_step_minutes: 5,
           exact_appointment_demo_slot_minutes: 30,
@@ -821,6 +830,14 @@ export default {
       }
       if (path === "/api/member/exact-appointments/multi-cancel" && request.method === "POST") {
         return handleMemberMultiExactAppointmentCancel(request, env);
+      }
+
+      // DPRO PET CARE LINE V1.3: ワクチン・予防の接種間隔制御
+      if (path === "/api/member/vaccine-interval/options" && request.method === "POST") {
+        return handleMemberVaccineIntervalOptions(request, env);
+      }
+      if (path === "/api/member/vaccine-interval/check" && request.method === "POST") {
+        return handleMemberVaccineIntervalCheck(request, env);
       }
 
       // STEP VET-15: 飼い主用 順番受付 / 優先受付予約 / お薬・予防受付 / 混雑目安
@@ -1257,6 +1274,9 @@ export default {
       if (path === "/api/admin/prevention-schedules" && request.method === "GET") return handlePreventionSchedules(request, env);
       if (path === "/api/admin/prevention-schedules/create" && request.method === "POST") return handlePreventionCreate(request, env);
       if (path === "/api/admin/prevention-schedules/update" && request.method === "POST") return handlePreventionUpdate(request, env);
+      if (path === "/api/admin/vaccine-interval/rules" && request.method === "GET") return handleAdminVaccineIntervalRules(request, env);
+      if (path === "/api/admin/vaccine-interval/rules/save" && request.method === "POST") return handleAdminVaccineIntervalRuleSave(request, env);
+      if (path === "/api/admin/vaccine-interval/rules/archive" && request.method === "POST") return handleAdminVaccineIntervalRuleArchive(request, env);
       if (path === "/api/admin/followups" && request.method === "GET") return handleFollowupTodos(request, env);
       if (path === "/api/admin/followups/create" && request.method === "POST") return handleFollowupCreate(request, env);
       if (path === "/api/admin/followups/update" && request.method === "POST") return handleFollowupUpdate(request, env);
@@ -8986,7 +9006,8 @@ async function handlePreventionCreate(request, env) {
   const petId = cleanString(body.pet_id);
   if (!guardianId || !petId) return errorResponse("guardian_id と pet_id が必要です。", 400);
 
-  const payload = normalizePreventionPayload(body, clinic.id, guardianId, petId);
+  let payload = normalizePreventionPayload(body, clinic.id, guardianId, petId);
+  payload = await applyVaccineIntervalRuleToPreventionPayload(env, clinic, payload);
   const rows = await insertRows(env, TABLES.preventionSchedules, payload);
   return jsonResponse({ ok: true, message: "予防予定を作成しました。", prevention: rows?.[0] || rows });
 }
@@ -8998,13 +9019,14 @@ async function handlePreventionUpdate(request, env) {
   const id = cleanString(body.prevention_id || body.id);
   if (!id) return errorResponse("prevention_id が必要です。", 400);
 
-  const payload = {};
+  let payload = {};
   [
     "prevention_type",
     "title",
     "due_date",
     "last_done_date",
     "next_due_date",
+    "vaccine_interval_rule_id",
     "status",
     "reminder_level",
     "line_message",
@@ -9012,6 +9034,14 @@ async function handlePreventionUpdate(request, env) {
   ].forEach((key) => {
     if (body[key] !== undefined) payload[key] = body[key] === "" ? null : body[key];
   });
+  const current = await selectSingle(env, TABLES.preventionSchedules, { select: "*", id: `eq.${id}`, clinic_id: `eq.${clinic.id}` });
+  if (!current) return errorResponse("予防予定が見つかりません。", 404);
+  const merged = { ...current, ...payload };
+  const calculated = await applyVaccineIntervalRuleToPreventionPayload(env, clinic, merged);
+  if (body.last_done_date !== undefined || body.vaccine_interval_rule_id !== undefined || body.next_due_date !== undefined || body.due_date !== undefined) {
+    if (body.next_due_date === undefined && calculated.next_due_date !== merged.next_due_date) payload.next_due_date = calculated.next_due_date;
+    if (body.due_date === undefined && calculated.due_date !== merged.due_date) payload.due_date = calculated.due_date;
+  }
 
   const rows = await updateRows(env, TABLES.preventionSchedules, { id: `eq.${id}`, clinic_id: `eq.${clinic.id}` }, payload);
   return jsonResponse({ ok: true, message: "予防予定を更新しました。", prevention: rows?.[0] || rows });
@@ -9027,11 +9057,367 @@ function normalizePreventionPayload(body, clinicId, guardianId, petId) {
     due_date: nullIfEmpty(body.due_date),
     last_done_date: nullIfEmpty(body.last_done_date),
     next_due_date: nullIfEmpty(body.next_due_date),
+    vaccine_interval_rule_id: nullIfEmpty(body.vaccine_interval_rule_id),
     status: cleanString(body.status) || "soon",
     reminder_level: cleanString(body.reminder_level) || "normal",
     line_message: nullIfEmpty(body.line_message),
     memo: nullIfEmpty(body.memo)
   };
+}
+
+
+async function applyVaccineIntervalRuleToPreventionPayload(env, clinic, payload) {
+  const next = { ...payload };
+  const ruleId = cleanString(next.vaccine_interval_rule_id || "");
+  const lastDone = cleanString(next.last_done_date || "");
+  if (!ruleId || !lastDone) return next;
+  const rule = await selectSingle(env, TABLES.vaccineIntervalRules, { select: "*", clinic_id: `eq.${clinic.id}`, id: `eq.${ruleId}`, is_active: "eq.true" });
+  const standardDays = rule?.standard_interval_days === null || rule?.standard_interval_days === undefined ? null : Number(rule.standard_interval_days);
+  if (!rule || !Number.isFinite(standardDays)) return next;
+  const calculated = addDays(lastDone, standardDays);
+  if (!cleanString(next.next_due_date || "")) next.next_due_date = calculated;
+  if (!cleanString(next.due_date || "")) next.due_date = calculated;
+  return next;
+}
+
+// =========================================================
+// DPRO PET CARE LINE V1.3 / ワクチン・予防の接種間隔制御
+// ・間隔値は病院設定。DPRO側で医療判断を決め打ちしない。
+// ・既存 vet_prevention_schedules の接種履歴 / 次回予定日を優先利用する。
+// ・Feature Switch OFF時はV1.2以前の予約挙動を完全維持する。
+// =========================================================
+function vaccineIntervalFeatureEnabled(env, clinicCode, featureState, body = {}) {
+  let flags = featureState?.feature_flags || {};
+  if (isDemoClinicCodeForAudit(env, clinicCode) && body.demo_feature_flags && typeof body.demo_feature_flags === "object" && !Array.isArray(body.demo_feature_flags)) {
+    flags = normalizeFeatureFlags({ ...flags, ...body.demo_feature_flags });
+  }
+  return flags.vaccine_interval_control === true;
+}
+
+function normalizeVaccineRuleSpecies(value) {
+  const text = cleanString(value).toLowerCase();
+  if (["dog", "犬"].includes(text)) return "dog";
+  if (["cat", "猫"].includes(text)) return "cat";
+  if (["all", "すべて", "全て"].includes(text)) return "all";
+  return text || "other";
+}
+
+function petSpeciesKey(pet) {
+  return normalizeVaccineRuleSpecies(pet?.species || pet?.species_label || pet?.animal_type || "other");
+}
+
+function isVaccineAppointmentService(service) {
+  const category = cleanString(service?.category).toLowerCase();
+  return category === "vaccination";
+}
+
+function vaccineIntervalRulePublic(row) {
+  if (!row) return null;
+  return {
+    id: row.id,
+    rule_code: row.rule_code,
+    display_name: row.display_name,
+    prevention_type: row.prevention_type,
+    species: row.species,
+    min_interval_days: row.min_interval_days === null || row.min_interval_days === undefined ? null : Number(row.min_interval_days),
+    standard_interval_days: row.standard_interval_days === null || row.standard_interval_days === undefined ? null : Number(row.standard_interval_days),
+    member_guard_mode: row.member_guard_mode || "warn",
+    recommended_guard_mode: row.recommended_guard_mode || "warn",
+    public_note: row.public_note || "",
+    is_active: row.is_active !== false,
+    sort_order: Number(row.sort_order || 100)
+  };
+}
+
+async function getVaccineIntervalRules(env, clinic, options = {}) {
+  const query = {
+    select: "*",
+    clinic_id: `eq.${clinic.id}`,
+    order: "sort_order.asc,display_name.asc",
+    limit: 200
+  };
+  if (options.activeOnly !== false) query.is_active = "eq.true";
+  const rows = await selectRows(env, TABLES.vaccineIntervalRules, query);
+  const species = normalizeVaccineRuleSpecies(options.species || "all");
+  return rows.filter((row) => {
+    if (!species || species === "all") return true;
+    const target = normalizeVaccineRuleSpecies(row.species || "all");
+    return target === "all" || target === species;
+  });
+}
+
+async function getPetPreventionSchedulesForInterval(env, clinic, petId) {
+  return selectRows(env, TABLES.preventionSchedules, {
+    select: "*",
+    clinic_id: `eq.${clinic.id}`,
+    pet_id: `eq.${petId}`,
+    order: "updated_at.desc,created_at.desc",
+    limit: 200
+  });
+}
+
+function pickScheduleForRule(schedules, rule, requestedScheduleId = "") {
+  const scheduleId = cleanString(requestedScheduleId);
+  if (scheduleId) {
+    const found = schedules.find((row) => cleanString(row.id) === scheduleId);
+    if (!found) throw new Error("選択した予防予定が見つかりません。");
+    const linked = cleanString(found.vaccine_interval_rule_id);
+    if (linked && linked !== cleanString(rule.id)) throw new Error("予防予定と接種間隔ルールの組み合わせが一致しません。");
+    if (!linked && cleanString(found.prevention_type) !== cleanString(rule.prevention_type)) throw new Error("予防予定の種別と接種間隔ルールが一致しません。");
+    return found;
+  }
+  return schedules.find((row) => cleanString(row.vaccine_interval_rule_id) === cleanString(rule.id))
+    || schedules.find((row) => cleanString(row.prevention_type) === cleanString(rule.prevention_type))
+    || null;
+}
+
+function buildVaccineIntervalDates(rule, schedule) {
+  const lastDone = cleanString(schedule?.last_done_date || "");
+  const explicitNext = cleanString(schedule?.next_due_date || schedule?.due_date || "");
+  const minDays = rule?.min_interval_days === null || rule?.min_interval_days === undefined ? null : Number(rule.min_interval_days);
+  const standardDays = rule?.standard_interval_days === null || rule?.standard_interval_days === undefined ? null : Number(rule.standard_interval_days);
+  const earliestDate = lastDone && Number.isFinite(minDays) ? addDays(lastDone, minDays) : "";
+  const calculatedRecommended = lastDone && Number.isFinite(standardDays) ? addDays(lastDone, standardDays) : "";
+  return {
+    last_done_date: lastDone || null,
+    earliest_date: earliestDate || null,
+    recommended_date: explicitNext || calculatedRecommended || null,
+    recommended_source: explicitNext ? "prevention_schedule" : (calculatedRecommended ? "clinic_interval_rule" : "none")
+  };
+}
+
+function vaccineIntervalMessage(result, rule) {
+  const name = cleanString(rule?.display_name) || "予防接種";
+  if (result.result === "too_early") return `${name}は、病院設定の最短間隔より前の日付です。病院へご相談ください。`;
+  if (result.result === "before_recommended") return `${name}は、病院が登録した推奨次回日より前の日付です。予約前に内容をご確認ください。`;
+  if (result.result === "no_history") return `${name}の接種履歴・次回予定日から間隔を自動判定できません。必要に応じて病院へご確認ください。`;
+  if (result.result === "not_configured") return "この病院では接種間隔の具体値が未設定です。予約可否は病院の運用に従います。";
+  return cleanString(rule?.public_note || "");
+}
+
+async function evaluateVaccineIntervalForAppointment(env, context) {
+  const {
+    clinic, clinicCode, featureState, body = {}, pet, service, appointmentDate,
+    adminMode = false
+  } = context;
+  const enabled = vaccineIntervalFeatureEnabled(env, clinicCode, featureState, body);
+  const base = {
+    version: VACCINE_INTERVAL_CONTROL_VERSION,
+    enabled,
+    applicable: false,
+    allowed: true,
+    result: enabled ? "not_applicable" : "disabled",
+    message: "",
+    rule: null,
+    schedule: null,
+    last_done_date: null,
+    earliest_date: null,
+    recommended_date: null,
+    recommended_source: "none",
+    overridden: false
+  };
+  if (!enabled || !isVaccineAppointmentService(service)) return base;
+  base.applicable = true;
+
+  const rules = await getVaccineIntervalRules(env, clinic, { activeOnly: true, species: petSpeciesKey(pet) });
+  if (!rules.length) {
+    return { ...base, result: "not_configured", message: "接種間隔ルールが未設定のため、自動制御は行いません。病院へご確認ください。" };
+  }
+
+  const requestedRuleId = cleanString(body.vaccine_interval_rule_id || body.vaccine_rule_id || "");
+  let rule = requestedRuleId ? rules.find((row) => cleanString(row.id) === requestedRuleId) : null;
+  if (!rule && rules.length === 1) rule = rules[0];
+  if (!rule) {
+    if (adminMode) return { ...base, result: "selection_required", message: "接種間隔ルール未選択（スタッフ判断で受付可能）" };
+    return { ...base, allowed: false, result: "selection_required", message: "予約するワクチン・予防の種類を選択してください。", options_count: rules.length };
+  }
+
+  const schedules = await getPetPreventionSchedulesForInterval(env, clinic, pet.id);
+  const schedule = pickScheduleForRule(schedules, rule, body.prevention_schedule_id || "");
+  const dates = buildVaccineIntervalDates(rule, schedule);
+  const result = {
+    ...base,
+    rule: vaccineIntervalRulePublic(rule),
+    schedule: schedule ? {
+      id: schedule.id,
+      prevention_type: schedule.prevention_type,
+      title: schedule.title || rule.display_name,
+      last_done_date: schedule.last_done_date || null,
+      due_date: schedule.due_date || null,
+      next_due_date: schedule.next_due_date || null,
+      status: schedule.status || ""
+    } : null,
+    ...dates,
+    result: "ok"
+  };
+  const dateText = cleanString(appointmentDate || "");
+  if (!dateText) return result;
+  parseDateText(dateText);
+
+  if (dates.earliest_date && compareDateText(dateText, dates.earliest_date) < 0) {
+    const guardMode = cleanString(rule.member_guard_mode || "warn");
+    if (guardMode === "off") {
+      result.result = "ok";
+      result.allowed = true;
+      result.message = cleanString(rule.public_note || "");
+    } else {
+      result.result = "too_early";
+      result.allowed = adminMode || guardMode !== "block";
+      result.message = vaccineIntervalMessage(result, rule);
+    }
+  } else if (dates.recommended_date && compareDateText(dateText, dates.recommended_date) < 0) {
+    result.result = "before_recommended";
+    result.allowed = true;
+    result.message = cleanString(rule.recommended_guard_mode || "warn") === "off" ? "" : vaccineIntervalMessage(result, rule);
+  } else if (!dates.last_done_date && !dates.recommended_date) {
+    result.result = "no_history";
+    result.allowed = true;
+    result.message = vaccineIntervalMessage(result, rule);
+  } else if (rule.min_interval_days === null && rule.standard_interval_days === null && !dates.recommended_date) {
+    result.result = "not_configured";
+    result.allowed = true;
+    result.message = vaccineIntervalMessage(result, rule);
+  }
+
+  if (adminMode && result.result === "too_early") {
+    result.allowed = true;
+    result.overridden = true;
+    result.result = "staff_override";
+    result.message = "病院スタッフの判断で受付しました。";
+  }
+  return result;
+}
+
+function vaccineIntervalSnapshot(evaluation, body = {}) {
+  if (!evaluation?.applicable || !evaluation?.rule?.id) {
+    return {
+      prevention_schedule_id: null,
+      vaccine_interval_rule_id: null,
+      vaccine_interval_result: evaluation?.result || null,
+      vaccine_interval_note: evaluation?.message || null,
+      vaccine_interval_checked_at: new Date().toISOString(),
+      vaccine_interval_override: evaluation?.overridden === true,
+      vaccine_interval_override_reason: evaluation?.overridden ? (cleanString(body.vaccine_interval_override_reason) || "スタッフ判断") : null
+    };
+  }
+  return {
+    prevention_schedule_id: evaluation.schedule?.id || null,
+    vaccine_interval_rule_id: evaluation.rule.id,
+    vaccine_interval_result: evaluation.result,
+    vaccine_interval_note: evaluation.message || null,
+    vaccine_interval_checked_at: new Date().toISOString(),
+    vaccine_interval_override: evaluation.overridden === true,
+    vaccine_interval_override_reason: evaluation.overridden ? (cleanString(body.vaccine_interval_override_reason) || "スタッフ判断") : null
+  };
+}
+
+async function handleMemberVaccineIntervalOptions(request, env) {
+  const body = await readJson(request);
+  const clinicCode = getRequestedClinicCode(request, body);
+  const featureState = await getClinicFeatureState(env, clinicCode);
+  const clinic = featureState.clinic;
+  const member = await resolveExactAppointmentMember(env, clinic, request, body);
+  if (!member.guardian) throw new Error("LINE連携済みの飼い主情報が見つかりません。");
+  const pet = await resolveExactAppointmentPet(env, clinic, member.guardian, body.pet_id);
+  const enabled = vaccineIntervalFeatureEnabled(env, clinicCode, featureState, body);
+  const rules = await getVaccineIntervalRules(env, clinic, { activeOnly: true, species: petSpeciesKey(pet) });
+  const schedules = await getPetPreventionSchedulesForInterval(env, clinic, pet.id);
+  const options = rules.map((rule) => {
+    const schedule = pickScheduleForRule(schedules, rule, "");
+    const dates = buildVaccineIntervalDates(rule, schedule);
+    return {
+      rule: vaccineIntervalRulePublic(rule),
+      schedule: schedule ? {
+        id: schedule.id,
+        title: schedule.title || rule.display_name,
+        prevention_type: schedule.prevention_type,
+        last_done_date: schedule.last_done_date || null,
+        due_date: schedule.due_date || null,
+        next_due_date: schedule.next_due_date || null,
+        status: schedule.status || ""
+      } : null,
+      ...dates
+    };
+  });
+  return jsonResponse({ ok: true, worker_version: WORKER_VERSION, vaccine_interval_control_version: VACCINE_INTERVAL_CONTROL_VERSION, clinic, enabled, pet: { id: pet.id, pet_name: pet.pet_name || "", species: pet.species || "", species_label: pet.species_label || "" }, options });
+}
+
+async function handleMemberVaccineIntervalCheck(request, env) {
+  const body = await readJson(request);
+  const clinicCode = getRequestedClinicCode(request, body);
+  const featureState = await getClinicFeatureState(env, clinicCode);
+  const clinic = featureState.clinic;
+  const member = await resolveExactAppointmentMember(env, clinic, request, body);
+  if (!member.guardian) throw new Error("LINE連携済みの飼い主情報が見つかりません。");
+  const pet = await resolveExactAppointmentPet(env, clinic, member.guardian, body.pet_id);
+  const service = await getExactAppointmentServiceByInput(env, clinic, body);
+  const evaluation = await evaluateVaccineIntervalForAppointment(env, { clinic, clinicCode, featureState, body, pet, service, appointmentDate: body.appointment_date || body.date, adminMode: false });
+  return jsonResponse({ ok: true, worker_version: WORKER_VERSION, vaccine_interval_control_version: VACCINE_INTERVAL_CONTROL_VERSION, evaluation });
+}
+
+async function handleAdminVaccineIntervalRules(request, env) {
+  const clinicCode = getParam(request, "clinic_code", DEFAULT_CLINIC_CODE);
+  const clinic = await getClinicByCode(env, clinicCode);
+  const rules = await getVaccineIntervalRules(env, clinic, { activeOnly: false, species: "all" });
+  return jsonResponse({ ok: true, worker_version: WORKER_VERSION, vaccine_interval_control_version: VACCINE_INTERVAL_CONTROL_VERSION, clinic, rules });
+}
+
+function normalizeOptionalDays(value, min, max) {
+  if (value === null || value === undefined || String(value).trim() === "") return null;
+  const n = Number(value);
+  if (!Number.isInteger(n) || n < min || n > max) throw new Error(`${min}〜${max}日の範囲で入力してください。`);
+  return n;
+}
+
+async function handleAdminVaccineIntervalRuleSave(request, env) {
+  const body = await readJson(request);
+  const clinicCode = getRequestedClinicCode(request, body);
+  const clinic = await getClinicByCode(env, clinicCode);
+  const id = cleanString(body.id || body.rule_id || "");
+  const ruleCode = cleanString(body.rule_code).toLowerCase().replace(/[^a-z0-9_-]/g, "_");
+  const displayName = cleanString(body.display_name);
+  if (!ruleCode || !displayName) throw new Error("ルールコードと表示名が必要です。");
+  const minDays = normalizeOptionalDays(body.min_interval_days, 0, 3650);
+  const standardDays = normalizeOptionalDays(body.standard_interval_days, 1, 3650);
+  if (minDays !== null && standardDays !== null && standardDays < minDays) throw new Error("標準間隔は最短間隔以上にしてください。");
+  const payload = {
+    clinic_id: clinic.id,
+    rule_code: ruleCode,
+    display_name: displayName,
+    prevention_type: cleanString(body.prevention_type) || "other",
+    species: normalizeVaccineRuleSpecies(body.species || "all"),
+    min_interval_days: minDays,
+    standard_interval_days: standardDays,
+    member_guard_mode: ["off","warn","block"].includes(cleanString(body.member_guard_mode)) ? cleanString(body.member_guard_mode) : "warn",
+    recommended_guard_mode: ["off","warn"].includes(cleanString(body.recommended_guard_mode)) ? cleanString(body.recommended_guard_mode) : "warn",
+    public_note: nullIfEmpty(body.public_note),
+    staff_note: nullIfEmpty(body.staff_note),
+    legal_reference_note: nullIfEmpty(body.legal_reference_note),
+    is_active: body.is_active !== false,
+    sort_order: Number.isFinite(Number(body.sort_order)) ? Math.max(0, Math.floor(Number(body.sort_order))) : 100
+  };
+  let saved;
+  if (id) {
+    const rows = await updateRows(env, TABLES.vaccineIntervalRules, { id: `eq.${id}`, clinic_id: `eq.${clinic.id}` }, payload);
+    saved = rows?.[0] || null;
+  } else {
+    const rows = await insertRows(env, TABLES.vaccineIntervalRules, payload);
+    saved = rows?.[0] || null;
+  }
+  await logOperation(env, clinic.id, "staff", cleanString(body.staff_name) || "管理画面", "vaccine_interval_rule_save", "vaccine_interval_rule", saved?.id || id || null, { rule_code: ruleCode, display_name: displayName });
+  const rules = await getVaccineIntervalRules(env, clinic, { activeOnly: false, species: "all" });
+  return jsonResponse({ ok: true, message: "接種間隔ルールを保存しました。", rule: saved, rules });
+}
+
+async function handleAdminVaccineIntervalRuleArchive(request, env) {
+  const body = await readJson(request);
+  const clinicCode = getRequestedClinicCode(request, body);
+  const clinic = await getClinicByCode(env, clinicCode);
+  const id = cleanString(body.id || body.rule_id || "");
+  if (!id) throw new Error("rule_id が必要です。");
+  const rows = await updateRows(env, TABLES.vaccineIntervalRules, { id: `eq.${id}`, clinic_id: `eq.${clinic.id}` }, { is_active: false });
+  await logOperation(env, clinic.id, "staff", cleanString(body.staff_name) || "管理画面", "vaccine_interval_rule_archive", "vaccine_interval_rule", id, {});
+  return jsonResponse({ ok: true, message: "接種間隔ルールを非表示にしました。", rule: rows?.[0] || null });
 }
 
 async function handleFollowupCreate(request, env) {
@@ -13069,6 +13455,11 @@ async function createExactAppointmentCore(request, env, body, adminMode = false,
   if (!dateText || !startTime) throw new Error("予約日と開始時刻を選択してください。");
   parseDateText(dateText);
 
+  const vaccineIntervalEvaluation = await evaluateVaccineIntervalForAppointment(env, {
+    clinic, clinicCode, featureState, body, pet, service, appointmentDate: dateText, adminMode
+  });
+  if (!vaccineIntervalEvaluation.allowed) throw new Error(vaccineIntervalEvaluation.message || "この日付では予約できません。病院へご相談ください。");
+
   const doctorSelectionEnabled = featureState.feature_flags.doctor_selection === true;
   const requestedDoctorId = doctorSelectionEnabled ? cleanString(body.doctor_id || "") : "";
   const doctorSettingsRaw = exactDoctorPublicSettings(settings);
@@ -13114,7 +13505,15 @@ async function createExactAppointmentCore(request, env, body, adminMode = false,
     p_doctor_assignment_source: requestedDoctorId ? (adminMode ? "staff" : "selected") : "unassigned",
     p_auto_assign_doctor: doctorSettings.auto_assign_doctor === true
   });
-  const appointment = Array.isArray(rows) ? rows[0] : rows;
+  let appointment = Array.isArray(rows) ? rows[0] : rows;
+  if (appointment?.id && vaccineIntervalEvaluation.enabled) {
+    try {
+      await updateRows(env, TABLES.exactAppointments, { id: `eq.${appointment.id}`, clinic_id: `eq.${clinic.id}` }, vaccineIntervalSnapshot(vaccineIntervalEvaluation, body));
+      appointment = await selectSingle(env, TABLES.exactAppointments, { select: "*", id: `eq.${appointment.id}`, clinic_id: `eq.${clinic.id}` }) || appointment;
+    } catch (snapshotError) {
+      await logOperation(env, clinic.id, "system", "V1.3接種間隔", "vaccine_interval_snapshot_failed", "exact_appointment", appointment.id, { error: snapshotError?.message || String(snapshotError) }).catch(() => null);
+    }
+  }
   await logOperation(env, clinic.id, actorType, actorName, "exact_appointment_create", "exact_appointment", appointment?.id || null, {
     appointment_no: appointmentNo,
     appointment_date: dateText,
@@ -13135,7 +13534,7 @@ async function createExactAppointmentCore(request, env, body, adminMode = false,
     : (appointment?.id
         ? await autoNotifyExactAppointmentAction(env, clinic, appointment.id, "created", actorName)
         : { ok: false, skipped: true, reason: "appointment_id_missing" });
-  return { clinic, settings, appointment: enriched[0], booking_token: bookingToken, notification, questionnaire_link: questionnaireLink, questionnaire_visit_link_version: QUESTIONNAIRE_VISIT_LINK_VERSION };
+  return { clinic, settings, appointment: enriched[0], booking_token: bookingToken, notification, questionnaire_link: questionnaireLink, questionnaire_visit_link_version: QUESTIONNAIRE_VISIT_LINK_VERSION, vaccine_interval_evaluation: vaccineIntervalEvaluation };
 }
 
 async function handleMemberExactAppointmentCreate(request, env) {
@@ -13177,7 +13576,8 @@ async function handleMemberExactAppointmentList(request, env) {
 async function handleMemberExactAppointmentChange(request, env) {
   const body = await readJson(request);
   const clinicCode = getRequestedClinicCode(request, body);
-  const clinic = await getClinicByCode(env, clinicCode);
+  const featureState = await getClinicFeatureState(env, clinicCode);
+  const clinic = featureState.clinic;
   const settings = await getExactAppointmentSettings(env, clinic);
   if (settings.allow_member_change !== true) throw new Error("予約変更は病院へ直接ご連絡ください。");
   const found = await findExactAppointmentForMember(env, clinic, request, body, settings);
@@ -13187,6 +13587,11 @@ async function handleMemberExactAppointmentChange(request, env) {
   const dateText = cleanString(body.appointment_date || body.date);
   const startTime = normalizeTime(body.start_time || body.time);
   if (!dateText || !startTime) throw new Error("変更後の日付と時刻を選択してください。");
+  const pet = await selectSingle(env, TABLES.pets, { select: "*", clinic_id: `eq.${clinic.id}`, id: `eq.${found.appointment.pet_id}` });
+  const vaccineIntervalEvaluation = await evaluateVaccineIntervalForAppointment(env, {
+    clinic, clinicCode, featureState, body, pet, service, appointmentDate: dateText, adminMode: false
+  });
+  if (!vaccineIntervalEvaluation.allowed) throw new Error(vaccineIntervalEvaluation.message || "この日付では予約できません。病院へご相談ください。");
   const doctorSettings = exactDoctorPublicSettings(settings);
   let requestedDoctorId = body.doctor_id !== undefined ? cleanString(body.doctor_id || "") : cleanString(found.appointment.doctor_id || "");
   if (doctorSettings.doctor_booking_enabled && doctorSettings.allow_member_doctor_change === false) requestedDoctorId = cleanString(found.appointment.doctor_id || "");
@@ -13210,7 +13615,16 @@ async function handleMemberExactAppointmentChange(request, env) {
     p_doctor_assignment_source: requestedDoctorId ? "selected" : "unassigned",
     p_auto_assign_doctor: doctorSettings.auto_assign_doctor === true
   });
-  const appointment = (await enrichExactAppointments(env, [Array.isArray(rows) ? rows[0] : rows], settings))[0];
+  let changedRow = Array.isArray(rows) ? rows[0] : rows;
+  if (changedRow?.id && vaccineIntervalEvaluation.enabled) {
+    try {
+      await updateRows(env, TABLES.exactAppointments, { id: `eq.${changedRow.id}`, clinic_id: `eq.${clinic.id}` }, vaccineIntervalSnapshot(vaccineIntervalEvaluation, body));
+      changedRow = await selectSingle(env, TABLES.exactAppointments, { select: "*", id: `eq.${changedRow.id}`, clinic_id: `eq.${clinic.id}` }) || changedRow;
+    } catch (snapshotError) {
+      await logOperation(env, clinic.id, "system", "V1.3接種間隔", "vaccine_interval_snapshot_failed", "exact_appointment", changedRow.id, { error: snapshotError?.message || String(snapshotError) }).catch(() => null);
+    }
+  }
+  const appointment = (await enrichExactAppointments(env, [changedRow], settings))[0];
   const notification = appointment?.id
     ? await autoNotifyExactAppointmentAction(env, clinic, appointment.id, "changed", found.member.guardian?.guardian_name || "飼い主")
     : { ok: false, skipped: true, reason: "appointment_id_missing" };
@@ -13269,7 +13683,9 @@ function normalizeMultiBookingItems(input) {
     pet_id: cleanString(item?.pet_id || ""),
     service_id: cleanString(item?.service_id || item?.service_type_id || ""),
     doctor_id: item?.doctor_id === null ? "" : cleanString(item?.doctor_id || ""),
-    request_note: cleanString(item?.request_note || item?.note || "")
+    request_note: cleanString(item?.request_note || item?.note || ""),
+    vaccine_interval_rule_id: cleanString(item?.vaccine_interval_rule_id || item?.vaccine_rule_id || ""),
+    prevention_schedule_id: cleanString(item?.prevention_schedule_id || "")
   }));
   const petIds = items.map((item) => item.pet_id);
   if (petIds.some((id) => !id)) throw new Error("予約するペットをすべて選択してください。");
@@ -13411,6 +13827,16 @@ async function buildMultiBookingAvailability(env, context, body, options = {}) {
   if (!dateText) throw new Error("予約日を選択してください。");
 
   const prepared = await prepareMultiBookingItems(env, context, body.items);
+  for (const item of prepared.items) {
+    const intervalBody = { ...body, ...item, vaccine_interval_rule_id: item.vaccine_interval_rule_id, prevention_schedule_id: item.prevention_schedule_id };
+    item.vaccine_interval_evaluation = await evaluateVaccineIntervalForAppointment(env, {
+      clinic: context.clinic, clinicCode: context.clinicCode, featureState: context.featureState,
+      body: intervalBody, pet: item.pet, service: item.service, appointmentDate: dateText, adminMode: false
+    });
+    if (!item.vaccine_interval_evaluation.allowed) {
+      throw new Error(`${item.pet.pet_name || "ペット"}：${item.vaccine_interval_evaluation.message || "この日付では予約できません。"}`);
+    }
+  }
   const excludeByPet = options.excludeByPet || new Map();
   const excludeAppointmentIds = Array.isArray(options.excludeAppointmentIds)
     ? options.excludeAppointmentIds.map((v) => cleanString(v)).filter(Boolean)
@@ -13466,7 +13892,8 @@ async function buildMultiBookingAvailability(env, context, body, options = {}) {
         start_time: p.start_time,
         end_time: p.end_time,
         available_doctor_count: p.slot?.available_doctor_count || 0,
-        available_doctors: p.slot?.available_doctors || []
+        available_doctors: p.slot?.available_doctors || [],
+        vaccine_interval_evaluation: p.vaccine_interval_evaluation || p.availability?.vaccine_interval_evaluation || prepared.items.find((x) => x.pet.id === p.pet.id)?.vaccine_interval_evaluation || null
       }))
     });
   }
@@ -13520,7 +13947,14 @@ async function cancelCreatedAppointmentsForRollback(env, appointments, actorName
         booking_group_order: null,
         booking_group_size: null,
         booking_group_mode: null,
-        booking_group_created_at: null
+        booking_group_created_at: null,
+        prevention_schedule_id: null,
+        vaccine_interval_rule_id: null,
+        vaccine_interval_result: null,
+        vaccine_interval_note: null,
+        vaccine_interval_checked_at: null,
+        vaccine_interval_override: false,
+        vaccine_interval_override_reason: null
       }).catch(() => []);
       results.push({ id: appointment.id, ok: true, row: Array.isArray(rows) ? rows[0] : rows });
     } catch (error) {
@@ -13571,8 +14005,17 @@ async function createPreparedMultiExactAppointment(env, context, availability, p
     p_doctor_assignment_source: requestedDoctorId ? "selected" : "unassigned",
     p_auto_assign_doctor: doctorSettings.auto_assign_doctor === true
   });
-  const appointment = Array.isArray(rows) ? rows[0] : rows;
+  let appointment = Array.isArray(rows) ? rows[0] : rows;
   if (!appointment?.id) throw new Error("予約作成結果を確認できませんでした。");
+  const intervalEvaluation = input.vaccine_interval_evaluation || null;
+  if (intervalEvaluation?.enabled) {
+    try {
+      await updateRows(env, TABLES.exactAppointments, { id: `eq.${appointment.id}`, clinic_id: `eq.${clinic.id}` }, vaccineIntervalSnapshot(intervalEvaluation, input));
+      appointment = await selectSingle(env, TABLES.exactAppointments, { select: "*", id: `eq.${appointment.id}`, clinic_id: `eq.${clinic.id}` }) || appointment;
+    } catch (snapshotError) {
+      await logOperation(env, clinic.id, "system", "V1.3接種間隔", "vaccine_interval_snapshot_failed", "exact_appointment", appointment.id, { error: snapshotError?.message || String(snapshotError) }).catch(() => null);
+    }
+  }
 
   await logOperation(env, clinic.id, "member", actorName, "exact_appointment_create", "exact_appointment", appointment.id, {
     appointment_no: appointmentNo,
@@ -13706,7 +14149,16 @@ async function handleMemberMultiExactAppointmentChange(request, env) {
         p_doctor_assignment_source: input.doctor_id ? "selected" : "unassigned",
         p_auto_assign_doctor: doctorSettings.auto_assign_doctor === true
       });
-      changed.push({ old, row: Array.isArray(rows) ? rows[0] : rows });
+      let changedRow = Array.isArray(rows) ? rows[0] : rows;
+      if (input.vaccine_interval_evaluation?.enabled && changedRow?.id) {
+        try {
+          await updateRows(env, TABLES.exactAppointments, { id: `eq.${changedRow.id}`, clinic_id: `eq.${context.clinic.id}` }, vaccineIntervalSnapshot(input.vaccine_interval_evaluation, input));
+          changedRow = await selectSingle(env, TABLES.exactAppointments, { select: "*", id: `eq.${changedRow.id}`, clinic_id: `eq.${context.clinic.id}` }) || changedRow;
+        } catch (snapshotError) {
+          await logOperation(env, context.clinic.id, "system", "V1.3接種間隔", "vaccine_interval_snapshot_failed", "exact_appointment", changedRow.id, { error: snapshotError?.message || String(snapshotError) }).catch(() => null);
+        }
+      }
+      changed.push({ old, row: changedRow });
     }
     for (const entry of changed) {
       await updateRows(env, TABLES.exactAppointments, { id: `eq.${entry.old.id}`, clinic_id: `eq.${context.clinic.id}` }, {
@@ -13736,7 +14188,14 @@ async function handleMemberMultiExactAppointmentChange(request, env) {
         });
         await updateRows(env, TABLES.exactAppointments, { id: `eq.${entry.old.id}`, clinic_id: `eq.${context.clinic.id}` }, {
           booking_group_mode: entry.old.booking_group_mode || "consecutive",
-          booking_group_size: entry.old.booking_group_size || activeRows.length
+          booking_group_size: entry.old.booking_group_size || activeRows.length,
+          prevention_schedule_id: entry.old.prevention_schedule_id || null,
+          vaccine_interval_rule_id: entry.old.vaccine_interval_rule_id || null,
+          vaccine_interval_result: entry.old.vaccine_interval_result || null,
+          vaccine_interval_note: entry.old.vaccine_interval_note || null,
+          vaccine_interval_checked_at: entry.old.vaccine_interval_checked_at || null,
+          vaccine_interval_override: entry.old.vaccine_interval_override === true,
+          vaccine_interval_override_reason: entry.old.vaccine_interval_override_reason || null
         }).catch(() => []);
         rollback.push({ id: entry.old.id, ok: true, row: Array.isArray(rows) ? rows[0] : rows });
       } catch (rollbackError) {
