@@ -97,7 +97,7 @@ const TABLES = {
 };
 
 const DEFAULT_CLINIC_CODE = "dpro_vet_demo";
-const WORKER_VERSION = "ANIMARY-COUNTER-V1.3-VACCINE-INTERVAL-20260816-INTEGRATED-5-R2";
+const WORKER_VERSION = "ANIMARY-COUNTER-V1.3-VACCINE-INTERVAL-20260816-INTEGRATED-6";
 const INTEGRATED_API_VERSION = "DPRO-PET-CARE-INTEGRATED-V1.0";
 const FEATURE_SWITCH_VERSION = "DPRO-VET-FEATURE-SWITCH-V1.1";
 const WEB_QUESTIONNAIRE_VERSION = "DPRO-VET-WEB-QUESTIONNAIRE-V1.1.6";
@@ -238,7 +238,18 @@ function normalizePublicChannelSettings(input = {}) {
 }
 
 function normalizeIntegratedBookingSource(value, fallback = "line", adminMode = false) {
-  const source = cleanString(value || fallback).toLowerCase();
+  const raw = cleanString(value || fallback).toLowerCase();
+  // INTEGRATED-6:
+  // 旧受付PC値を正式source contractへ吸収し、今後の保存値を統一する。
+  const aliases = {
+    telephone: "phone",
+    front_desk: "counter",
+    manual_front: "counter",
+    window: "counter",
+    qr: "counter",
+    qr_reception: "counter"
+  };
+  const source = aliases[raw] || raw;
   const memberAllowed = ["line", "web"];
   const staffAllowed = ["line", "web", "phone", "counter", "staff", "import"];
   const allowed = adminMode ? staffAllowed : memberAllowed;
@@ -7422,7 +7433,7 @@ async function handleStaffProxyGuardianPetRegister(request, env) {
     let reception = null;
     if (Boolean(body.create_reception)) {
       reception = await createReceptionForExistingPetCore(env, clinic, guardian, created.pet, created.card_view || created.card, {
-        reception_source: body.reception_source || "front_desk",
+        reception_source: body.reception_source || "counter",
         request_category: body.request_category || "general_exam",
         entry_kind: body.entry_kind || "today_queue",
         target_date: body.target_date || body.date || todayJST(),
@@ -7512,7 +7523,7 @@ async function handleExistingGuardianPetAdd(request, env) {
     let reception = null;
     if (Boolean(body.create_reception)) {
       reception = await createReceptionForExistingPetCore(env, clinic, guardian, created.pet, created.card_view || created.card, {
-        reception_source: body.reception_source || "front_desk",
+        reception_source: body.reception_source || "counter",
         request_category: body.request_category || "general_exam",
         entry_kind: body.entry_kind || "today_queue",
         target_date: body.target_date || body.date || todayJST(),
@@ -7610,8 +7621,8 @@ async function createPetCardForGuardian(env, clinic, guardian, options) {
 }
 
 async function createReceptionForExistingPetCore(env, clinic, guardian, pet, card, options = {}) {
-  const receptionSourceRaw = cleanString(options.reception_source || "front_desk");
-  const receptionSource = receptionSourceRaw === "phone" || receptionSourceRaw === "telephone" ? "phone" : "front_desk";
+  const receptionSourceRaw = cleanString(options.reception_source || "counter");
+  const receptionSource = receptionSourceRaw === "phone" || receptionSourceRaw === "telephone" ? "phone" : "counter";
   const sourceLabel = receptionSource === "phone" ? "電話受付" : "窓口受付";
   const prefix = cleanString(options.source_label_prefix || "スタッフ代理登録");
   const targetDate = normalizeQueueDate(options.target_date || todayJST());
@@ -7670,7 +7681,7 @@ async function createReceptionForExistingPetCore(env, clinic, guardian, pet, car
     p_purpose: purpose,
     p_symptoms_summary: memo || purpose,
     p_desired_contact: desiredContact,
-    p_source: "qr_reception",
+    p_source: "counter",
     p_questionnaire: questionnaire
   });
 
@@ -8014,8 +8025,8 @@ async function handleExistingPetReceptionCreate(request, env) {
     const dayPart = normalizeQueueDayPart(body.day_part || body.session, "morning");
     const entryKind = normalizeQueueEntryKind(body.entry_kind || "today_queue");
     const requestCategory = normalizeQueueRequestCategory(body.request_category || body.category || "general_exam");
-    const receptionSourceRaw = cleanString(body.reception_source || body.source_type || "front_desk");
-    const receptionSource = receptionSourceRaw === "phone" || receptionSourceRaw === "telephone" ? "phone" : "front_desk";
+    const receptionSourceRaw = cleanString(body.reception_source || body.source_type || "counter");
+    const receptionSource = receptionSourceRaw === "phone" || receptionSourceRaw === "telephone" ? "phone" : "counter";
     const visitTime = cleanString(body.visit_time || body.arrival_time || "");
     const memo = cleanString(body.memo || body.staff_note || body.reception_memo || "");
     const staffName = cleanString(body.staff_name || body.actor_name) || "受付PC";
@@ -8069,8 +8080,8 @@ async function handleExistingPetReceptionCreate(request, env) {
       p_purpose: purpose,
       p_symptoms_summary: memo || purpose,
       p_desired_contact: desiredContact,
-      // source制約に当たりにくい既存値を使い、実際の区分はpurpose/questionnaireに残す。
-      p_source: "qr_reception",
+      // INTEGRATED-6: 院内QR/窓口は正式source contractの counter として保存する。
+      p_source: "counter",
       p_questionnaire: questionnaire
     });
 
@@ -8170,8 +8181,8 @@ async function handleManualReceptionCreate(request, env) {
     const clinicCode = getRequestedClinicCode(request, body);
     const clinic = await getClinicByCode(env, clinicCode);
 
-    const receptionSourceRaw = cleanString(body.reception_source || body.source_type || body.manual_source || "front_desk");
-    const receptionSource = receptionSourceRaw === "phone" || receptionSourceRaw === "telephone" ? "phone" : "front_desk";
+    const receptionSourceRaw = cleanString(body.reception_source || body.source_type || body.manual_source || "counter");
+    const receptionSource = receptionSourceRaw === "phone" || receptionSourceRaw === "telephone" ? "phone" : "counter";
 
     const guardianName = cleanString(body.guardian_name || body.owner_name || body.customer_name);
     const phone = cleanString(body.phone || body.tel || body.mobile);
@@ -8282,7 +8293,7 @@ async function handleManualReceptionCreate(request, env) {
       p_desired_contact: desiredContact,
       // 既存DBの source 制約に当たりにくいよう、受付PCで既に動作確認済みの qr_reception を使う。
       // 実際の区分は purpose / questionnaire / guardian.memo に残す。
-      p_source: "qr_reception",
+      p_source: "counter",
       p_questionnaire: questionnaire
     });
 
@@ -14856,7 +14867,7 @@ async function handleAdminExactAppointmentCheckIn(request, env) {
   const memoText = [current.appointment_no ? `予約番号 ${current.appointment_no}` : "", cleanString(current.request_note)].filter(Boolean).join(" / ");
 
   const created = await createReceptionForExistingPetCore(env, clinic, guardian, pet, card, {
-    reception_source: "front_desk",
+    reception_source: "counter",
     source_label_prefix: "日時予約来院",
     target_date: today,
     day_part: dayPart,
