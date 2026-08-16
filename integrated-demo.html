@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#123d31">
+<title>DPRO PET CARE 統合DEMO｜HP × LINE公式 × DPRO</title>
+<script src="./config.js"></script>
+<style>
+:root{--green:#123d31;--green2:#1b7458;--mint:#e8f5ef;--bg:#f4f7f5;--ink:#18312a;--muted:#667a72;--line:#d8e3de;--amber:#8a6113;--amberbg:#fff6dc;--red:#a84444;--redbg:#fff0f0;--blue:#315f91;--bluebg:#eef6ff;--white:#fff;--shadow:0 18px 48px rgba(24,49,42,.10)}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#eef7f2 0,#fbfaf6 34%,#f4f7f5 100%);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP","Yu Gothic",sans-serif;line-height:1.6}button,input{font:inherit}a{text-decoration:none;color:inherit}.wrap{width:min(1440px,calc(100% - 24px));margin:0 auto;padding:16px 0 48px}
+.hero{display:grid;grid-template-columns:1.18fr .82fr;gap:16px;border-radius:30px;padding:28px;background:linear-gradient(135deg,#10372c,#1a7557);color:#fff;box-shadow:var(--shadow);position:relative;overflow:hidden}.hero:after{content:"INTEGRATED";position:absolute;right:-24px;bottom:-46px;font-size:100px;font-weight:1000;opacity:.045}.badge{display:inline-flex;border:1px solid rgba(255,255,255,.24);background:rgba(255,255,255,.12);border-radius:999px;padding:6px 10px;font-size:11px;font-weight:950;letter-spacing:.03em}.hero h1{font-size:clamp(34px,4vw,58px);line-height:1.08;letter-spacing:-.05em;margin:12px 0 10px}.hero p{margin:0;color:rgba(255,255,255,.88);font-weight:780;max-width:840px}.heroRight{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-content:center;position:relative;z-index:1}.metric{border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.10);border-radius:17px;padding:13px}.metric small{display:block;opacity:.82;font-weight:850}.metric b{display:block;font-size:20px;margin-top:3px;word-break:break-word}.metric.good{background:rgba(41,181,112,.16)}.metric.warn{background:rgba(223,164,54,.16)}.metric.bad{background:rgba(212,75,75,.16)}
+.toolbar{display:grid;grid-template-columns:minmax(220px,1fr) auto auto;gap:9px;background:#fff;border:1px solid var(--line);border-radius:17px;padding:11px;margin-top:14px;box-shadow:0 8px 24px rgba(24,49,42,.05)}input{width:100%;border:1px solid #cbd9d2;border-radius:11px;padding:10px 12px}.btn{display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:11px;padding:10px 14px;font-weight:950;cursor:pointer}.btn.main{background:var(--green);color:#fff}.btn.soft{background:var(--mint);color:var(--green)}.btn.line{background:#fff;border:1px solid var(--line);color:var(--ink)}
+.notice{margin-top:10px;border-radius:13px;padding:10px 12px;border:1px solid var(--line);font-size:12px;font-weight:850}.notice.ok{background:#eef9f2;color:#25633f;border-color:#cce6d4}.notice.info{background:var(--bluebg);color:var(--blue);border-color:#cbdff0}.notice.warn{background:var(--amberbg);color:var(--amber);border-color:#edd9a7}.notice.ng{background:var(--redbg);color:var(--red);border-color:#eccccc}
+.section{margin-top:14px;background:#fff;border:1px solid var(--line);border-radius:22px;padding:18px;box-shadow:0 10px 30px rgba(24,49,42,.05)}.head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px}.head h2{margin:0;font-size:22px;letter-spacing:-.02em}.head p{margin:3px 0 0;color:var(--muted);font-size:11px}.pill{display:inline-flex;border-radius:999px;background:var(--mint);color:var(--green);padding:5px 9px;font-size:10px;font-weight:950;white-space:nowrap}
+.gates{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.gate{border:1px solid var(--line);border-radius:16px;padding:13px;background:#fff}.gate small{display:block;color:var(--muted);font-weight:850;font-size:10px}.gate b{display:block;margin-top:2px;font-size:16px}.gate.good{border-color:#bcdcca;background:#f3fbf6}.gate.warn{border-color:#e7d398;background:#fffaf0}.gate.bad{border-color:#ebc2c2;background:#fff5f5}.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;background:#95a39d}.good .dot{background:#28a765}.warn .dot{background:#d59724}.bad .dot{background:#cf5151}
+.launch{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}.launch a{border:1px solid var(--line);border-radius:16px;padding:15px;background:#fff;transition:.15s}.launch a:hover{transform:translateY(-1px);box-shadow:0 10px 22px rgba(24,49,42,.08)}.launch .no{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:10px;background:var(--mint);color:var(--green);font-weight:1000}.launch b{display:block;margin-top:8px;font-size:14px}.launch span{display:block;color:var(--muted);font-size:10px;margin-top:3px}
+.flow{display:grid;gap:10px}.step{display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:12px;align-items:center;border:1px solid var(--line);border-radius:17px;padding:12px;background:#fff}.stepNo{width:48px;height:48px;border-radius:15px;display:grid;place-items:center;background:var(--mint);color:var(--green);font-size:18px;font-weight:1000}.step h3{font-size:15px;margin:0}.step p{font-size:11px;color:var(--muted);font-weight:780;margin:2px 0 0}.stepActions{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}.mini{display:inline-flex;border:1px solid var(--line);background:#fff;border-radius:10px;padding:7px 9px;font-size:10px;font-weight:950}.mini.green{background:var(--mint);color:var(--green);border-color:#c4e0d2}.mini.amber{background:var(--amberbg);color:var(--amber);border-color:#ead59b}
+.sources{display:grid;grid-template-columns:repeat(5,1fr);gap:9px}.sourceCard{border:1px solid var(--line);border-radius:15px;padding:12px}.sourceCard span{font-size:10px;color:var(--muted);font-weight:900}.sourceCard b{display:block;font-size:24px}.sourceCard.web{border-top:4px solid #4c7dc4}.sourceCard.lineS{border-top:4px solid #27aa66}.sourceCard.phone{border-top:4px solid #d49928}.sourceCard.counter{border-top:4px solid #7a64ad}.sourceCard.other{border-top:4px solid #929d98}
+.safety{display:grid;grid-template-columns:1fr 1fr;gap:10px}.safetyBox{border-radius:16px;padding:13px;border:1px solid #ead59b;background:#fffaf0;color:#74530f;font-size:11px;font-weight:820}.safetyBox.ok{border-color:#c4e0d2;background:#f2fbf6;color:#246246}.footer{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;color:var(--muted);font-size:10px;margin-top:13px}
+@media(max-width:1050px){.hero{grid-template-columns:1fr}.launch{grid-template-columns:repeat(3,1fr)}.gates{grid-template-columns:1fr 1fr}.sources{grid-template-columns:repeat(3,1fr)}}@media(max-width:720px){.toolbar{grid-template-columns:1fr}.launch{grid-template-columns:1fr 1fr}.sources{grid-template-columns:1fr 1fr}.safety{grid-template-columns:1fr}.step{grid-template-columns:42px 1fr}.stepActions{grid-column:1/-1;justify-content:flex-start}.heroRight{grid-template-columns:1fr 1fr}}@media(max-width:460px){.wrap{width:min(100% - 14px,1440px);padding-top:7px}.hero{padding:20px 16px;border-radius:22px}.section{padding:14px}.gates,.launch,.sources{grid-template-columns:1fr}.heroRight{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main class="wrap">
+<section class="hero">
+ <div>
+  <span class="badge">DPRO PET CARE INTEGRATED-7｜HP × LINE公式 × DPRO 統合E2E営業DEMO</span>
+  <h1>予約・受付・病院設定が、<br>ひとつのデータで動く。</h1>
+  <p>HPから受付しても、LINE公式から受付しても、病院では同じDPRO受付一覧へ。病院側で診療状態を変えれば、HPとLINEの両方へ同時反映します。</p>
+ </div>
+ <div class="heroRight">
+  <div id="mWorker" class="metric"><small>Worker</small><b>確認中</b></div>
+  <div id="mState" class="metric"><small>本日の状態</small><b>確認中</b></div>
+  <div id="mHp" class="metric"><small>HP同期</small><b>確認中</b></div>
+  <div id="mBooking" class="metric"><small>午後予約</small><b>確認中</b></div>
+ </div>
+</section>
+
+<section class="toolbar">
+ <input id="adminCode" type="password" placeholder="管理コード（共通受付件数の確認に使用）">
+ <button id="connect" class="btn main" type="button">保存して統合確認</button>
+ <button id="refresh" class="btn soft" type="button">最新状態に更新</button>
+</section>
+<div id="notice" class="notice info">公開共通APIを確認しています。管理コードを保存すると、本日のWEB / LINE / 電話 / 窓口件数も同時確認できます。</div>
+
+<section class="section">
+ <div class="head"><div><h2>統合LIVE GATE</h2><p>営業前に見るのはこの4点だけです。すべて同じWorker / Supabaseデータを参照します。</p></div><span id="gateSummary" class="pill">確認中</span></div>
+ <div class="gates">
+  <div id="gApi" class="gate"><small>COMMON API</small><b><span class="dot"></span>確認中</b></div>
+  <div id="gHpLine" class="gate"><small>HP / LINE 同期</small><b><span class="dot"></span>確認中</b></div>
+  <div id="gReception" class="gate"><small>共通受付一覧</small><b><span class="dot"></span>管理コード待ち</b></div>
+  <div id="gBlock" class="gate"><small>予約ブロック</small><b><span class="dot"></span>確認中</b></div>
+ </div>
+</section>
+
+<section class="section">
+ <div class="head"><div><h2>営業DEMO 入口</h2><p>別々のシステムを探さず、この画面から順番に開きます。</p></div><span class="pill">6入口</span></div>
+ <div class="launch">
+  <a id="hpLink" target="_blank"><span class="no">1</span><b>病院HP</b><span>WEB受付・日時予約</span></a>
+  <a id="lineLink" target="_blank"><span class="no">2</span><b>LINE公式</b><span>LINE受付・診察券</span></a>
+  <a id="boardLink" target="_blank"><span class="no">3</span><b>DPRO共通受付</b><span>WEB/LINE/電話/窓口</span></a>
+  <a id="settingsLink" target="_blank"><span class="no">4</span><b>病院共通設定</b><span>HP・LINEへ同時反映</span></a>
+  <a id="appointmentLink" target="_blank"><span class="no">5</span><b>日時指定予約</b><span>予約可否を確認</span></a>
+  <a id="checkLink" target="_blank"><span class="no">6</span><b>システム確認</b><span>営業前チェック</span></a>
+ </div>
+</section>
+
+<section class="section">
+ <div class="head"><div><h2>3〜5分 統合営業デモ台本</h2><p>「機能を説明する」のではなく、「同じデータが動く」ことを順番に見せます。</p></div><span class="pill">INTEGRATED-7</span></div>
+ <div class="flow">
+  <div class="step"><div class="stepNo">1</div><div><h3>HPから受付</h3><p>病院HPの「今日の順番受付」から1件受付。WEB起点であることを見せます。</p></div><div class="stepActions"><a id="hpStep" class="mini green" target="_blank">HPを開く</a></div></div>
+  <div class="step"><div class="stepNo">2</div><div><h3>DPROへ即反映</h3><p>共通受付一覧に同じ受付が入り、sourceが「WEB」になっていることを確認。</p></div><div class="stepActions"><a id="boardStep1" class="mini green" target="_blank">共通受付を見る</a></div></div>
+  <div class="step"><div class="stepNo">3</div><div><h3>LINE公式から受付</h3><p>LINE入口から別ペットを受付。同じ病院データへ登録されます。</p></div><div class="stepActions"><a id="lineStep" class="mini green" target="_blank">LINEを開く</a></div></div>
+  <div class="step"><div class="stepNo">4</div><div><h3>同じDPRO一覧で確認</h3><p>WEBとLINEを別管理せず、1つの受付一覧に並ぶことを見せます。</p></div><div class="stepActions"><a id="boardStep2" class="mini green" target="_blank">共通受付を見る</a></div></div>
+  <div class="step"><div class="stepNo">5</div><div><h3>病院側で診療状態を変更</h3><p>共通設定で「午後休診」などを変更。HP・LINE両方へ同じ状態が反映されます。</p></div><div class="stepActions"><a id="settingsStep" class="mini amber" target="_blank">共通設定を開く</a></div></div>
+  <div class="step"><div class="stepNo">6</div><div><h3>HPとLINEを再確認</h3><p>午後受付不可・お知らせが両方同じ内容になっていることを確認。</p></div><div class="stepActions"><a id="hpStep2" class="mini" target="_blank">HP</a><a id="lineStep2" class="mini" target="_blank">LINE</a></div></div>
+  <div class="step"><div class="stepNo">7</div><div><h3>予約もブロックされることを確認</h3><p>右上の「午後予約」がBLOCKになり、日時指定予約画面でも午後枠を選べないことを見せます。</p></div><div class="stepActions"><a id="appointmentStep" class="mini amber" target="_blank">予約画面を開く</a></div></div>
+  <div class="step"><div class="stepNo">8</div><div><h3>最後に元へ戻す</h3><p>営業用に一時変更した特別診療・休診設定は削除し、通常カレンダーへ戻します。</p></div><div class="stepActions"><a id="settingsStep2" class="mini" target="_blank">共通設定へ戻る</a></div></div>
+ </div>
+</section>
+
+<section class="section">
+ <div class="head"><div><h2>本日の共通受付 source</h2><p>管理コード接続時のみ取得します。入口別にDBを分けず、sourceだけ識別します。</p></div><span id="sourceTotal" class="pill">未接続</span></div>
+ <div class="sources">
+  <div class="sourceCard web"><span>WEB</span><b id="sWeb">-</b></div>
+  <div class="sourceCard lineS"><span>LINE</span><b id="sLine">-</b></div>
+  <div class="sourceCard phone"><span>電話</span><b id="sPhone">-</b></div>
+  <div class="sourceCard counter"><span>窓口</span><b id="sCounter">-</b></div>
+  <div class="sourceCard other"><span>院内・その他</span><b id="sOther">-</b></div>
+ </div>
+</section>
+
+<section class="section">
+ <div class="head"><div><h2>DEMO安全運用</h2><p>統合デモ中も本番境界を越えないための確認事項です。</p></div><span class="pill">SAFE</span></div>
+ <div class="safety">
+  <div class="safetyBox ok">このページは状態確認と各画面への導線だけです。自動でDBを書き換えません。状態変更は必ず「HP・LINE共通設定」画面から行います。</div>
+  <div class="safetyBox">通常カレンダーが元々午後休診の日に切替を実演する場合は、一時的に「特別診療」で開けてから「午後休診」を見せ、最後に特別日を削除してください。</div>
+ </div>
+</section>
+
+<div class="footer"><span id="updated">最終更新：-</span><span>DPRO PET CARE 統合DEMO｜HP × LINE公式 × DPRO共通データ</span></div>
+</main>
+<script>
+(()=>{
+'use strict';
+const CONFIG=window.DPRO_VET_CONFIG||window.DPRO_CONFIG||window.APP_CONFIG||{};
+const p=new URLSearchParams(location.search);
+const API=(CONFIG?.api?.baseUrl||CONFIG?.urls?.apiBaseUrl||'https://dpro-vet-qr-api.dpromstk2000.workers.dev').replace(/\/$/,'');
+const CLINIC=p.get('clinic_code')||CONFIG?.clinic?.clinicCode||'dpro_vet_demo';
+const DEMO=CLINIC==='dpro_vet_demo';
+const $=id=>document.getElementById(id);
+const adminKeys=CONFIG?.admin?.tokenStorageKeys||['dpro_vet_admin_code','DPRO_VET_ADMIN_CODE'];
+let publicState=null;
+function adminCode(){if(typeof CONFIG.getAdminCode==='function')return CONFIG.getAdminCode()||'';for(const k of adminKeys){const v=localStorage.getItem(k)||sessionStorage.getItem(k);if(v)return v}return''}
+function saveAdmin(v){if(typeof CONFIG.setAdminCode==='function')CONFIG.setAdminCode(v,true);else adminKeys.forEach(k=>localStorage.setItem(k,v))}
+function jstDate(){return new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date())}
+function url(file,extra={}){const u=new URL(file,location.href);u.searchParams.set('clinic_code',CLINIC);if(DEMO)u.searchParams.set('demo','ready');Object.entries(extra).forEach(([k,v])=>u.searchParams.set(k,v));return u.toString()}
+function hpUrl(){return 'https://dpromstk2000-lab.github.io/DPRO-PET-CARE-HP-DEMO/'}
+function setClass(el,kind){el.classList.remove('good','warn','bad');if(kind)el.classList.add(kind)}
+function gate(id,kind,text){const el=$(id);setClass(el,kind);el.querySelector('b').innerHTML='<span class="dot"></span>'+text}
+async function get(path,query={},admin=false){const u=new URL(API+path);Object.entries({clinic_code:CLINIC,...query}).forEach(([k,v])=>{if(v!==undefined&&v!==null&&String(v)!=='')u.searchParams.set(k,String(v))});const code=adminCode();const headers={Accept:'application/json',...(admin&&code?{'X-DPRO-Admin-Code':code,Authorization:`Bearer ${code}`}:{})};const r=await fetch(u,{cache:'no-store',headers});const d=await r.json().catch(()=>({}));if(!r.ok||d.ok===false)throw new Error(d.message||d.error||`API ${r.status}`);return d}
+function sourceOf(x){const raw=String(x?.source||x?.reception_source||x?.booking_source||'').trim().toLowerCase();const text=[x?.purpose,x?.symptoms_summary,x?.staff_note,x?.memo,x?.questionnaire?.reception_source_label,x?.questionnaire?.reception_source].map(v=>String(v||'')).join(' ');if(text.includes('電話受付'))return'phone';if(text.includes('窓口受付')||text.includes('QR来院受付'))return'counter';const a={telephone:'phone',front_desk:'counter',manual_front:'counter',window:'counter',qr:'counter',qr_reception:'counter'};if(a[raw])return a[raw];if(['web','line','phone','counter'].includes(raw))return raw;if(/\bweb\b/i.test(text))return'web';if(/\bline\b/i.test(text))return'line';return'other'}
+async function loadPublic(){
+ const [health,state]=await Promise.all([get('/api/health',{}),get('/api/public/integrated-state',{})]);publicState=state;
+ $('mWorker').querySelector('b').textContent=health.version||'running';setClass($('mWorker'),health.ok?'good':'bad');
+ const rs=state.reception_state||{};$('mState').querySelector('b').textContent=rs.label||rs.code||'-';setClass($('mState'),rs.code==='open'?'good':rs.code?'warn':'bad');
+ const hpSync=state.feature_flags?.hp_sync===true;$('mHp').querySelector('b').textContent=hpSync?'SYNC ON':'SYNC OFF';setClass($('mHp'),hpSync?'good':'bad');
+ gate('gApi',health.ok&&state.ok?'good':'bad',health.ok&&state.ok?'API PASS':'API ERROR');
+ const lineReady=state.public_channel_settings?.line?.today_status!==false;gate('gHpLine',hpSync&&lineReady?'good':'bad',hpSync&&lineReady?'HP / LINE PASS':'設定確認');
+ let blockKind='warn',blockText='未判定',bookingLabel='確認中';
+ try{
+   const av=await get('/api/public/exact-appointments/availability',{date:jstDate()});
+   const aft=String(state.today_status?.afternoon_open_time||state.settings?.afternoon_open_time||'12:00').slice(0,5);
+   const pm=(av.slots||[]).filter(s=>String(s.start_time||'').slice(0,5)>=aft);
+   const availablePm=pm.filter(s=>s.available!==false).length;
+   const closed=state.today_status?.is_afternoon_closed===true||['afternoon_closed','closed_today','reception_stopped'].includes(rs.code);
+   if(closed&&availablePm===0){blockKind='good';blockText='午後 BLOCK PASS';bookingLabel='BLOCK';}
+   else if(closed&&availablePm>0){blockKind='bad';blockText='午後枠が残っています';bookingLabel='要確認';}
+   else{blockKind='warn';blockText=`午後予約 ${availablePm}枠`;bookingLabel=`OPEN ${availablePm}`;}
+ }catch(e){blockKind='warn';blockText='予約API確認不可';bookingLabel='CHECK';}
+ gate('gBlock',blockKind,blockText);$('mBooking').querySelector('b').textContent=bookingLabel;setClass($('mBooking'),blockKind);
+ $('gateSummary').textContent=(health.ok&&state.ok&&hpSync)?'COMMON DATA PASS':'CHECK REQUIRED';
+}
+async function loadAdmin(){
+ if(!adminCode()){gate('gReception','warn','管理コード待ち');$('sourceTotal').textContent='未接続';return}
+ const d=jstDate();const [q,a]=await Promise.all([get('/api/admin/queue/entries',{date:d,limit:300},true),get('/api/admin/exact-appointments',{from:d,to:d},true)]);
+ const items=[...(q.items||q.rows||[]),...(a.appointments||[])];const counts={web:0,line:0,phone:0,counter:0,other:0};items.forEach(x=>counts[sourceOf(x)]++);
+ $('sWeb').textContent=counts.web;$('sLine').textContent=counts.line;$('sPhone').textContent=counts.phone;$('sCounter').textContent=counts.counter;$('sOther').textContent=counts.other;
+ $('sourceTotal').textContent=`本日 ${items.length}件`;gate('gReception','good',`共通一覧 ${items.length}件`);
+}
+async function loadAll(){
+ const n=$('notice');n.className='notice info';n.textContent='共通API・HP/LINE同期・予約ブロックを確認しています。';
+ try{await loadPublic();try{await loadAdmin()}catch(e){gate('gReception','bad','受付API ERROR');throw e}n.className='notice ok';n.textContent='統合LIVE GATEを更新しました。各入口は同じDPRO共通データを参照しています。';}
+ catch(e){n.className='notice ng';n.textContent='確認に失敗しました：'+e.message}
+ $('updated').textContent='最終更新：'+new Intl.DateTimeFormat('ja-JP',{timeZone:'Asia/Tokyo',hour:'2-digit',minute:'2-digit',second:'2-digit'}).format(new Date());
+}
+const hp=hpUrl(),line=url('./rich-menu.html',{line_user_id:'demo_line_link_001',source:'line'}),board=url('./today-board.html'),settings=url('./integrated-settings.html'),appointment=url('./appointment.html',{line_user_id:'demo_line_link_001',source:'line'}),check=url('./system-check.html');
+[['hpLink',hp],['lineLink',line],['boardLink',board],['settingsLink',settings],['appointmentLink',appointment],['checkLink',check],['hpStep',hp],['boardStep1',board],['lineStep',line],['boardStep2',board],['settingsStep',settings],['hpStep2',hp],['lineStep2',line],['appointmentStep',appointment],['settingsStep2',settings]].forEach(([id,href])=>$(id).href=href);
+$('connect').onclick=()=>{const v=$('adminCode').value.trim();if(v&&v!=='••••'){saveAdmin(v);$('adminCode').value='••••'}loadAll()};$('refresh').onclick=loadAll;if(adminCode())$('adminCode').value='••••';loadAll();setInterval(loadAll,30000);
+})();
+</script>
+</body>
+</html>
