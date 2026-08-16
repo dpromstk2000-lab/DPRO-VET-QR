@@ -4,25 +4,65 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#10392d">
-<title>DPRO PET CARE LINE｜LINE入口 V1.1</title>
+<title>DPRO PET CARE LINE｜LINE入口 INTEGRATED-4</title>
 <script src="./config.js"></script>
 <script src="./feature-switch.js"></script>
 <style>
-:root{--bg:#f4f1ea;--card:#fff;--ink:#22302c;--muted:#6f7b75;--line:#d9d2c4;--main:#1f8f65;--main-dark:#223b34;--green-soft:#e8f7ef;--shadow:0 18px 50px rgba(21,54,44,.12)}
-*{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#edf6f1 0,#fbfaf6 40%,#f4f7f5 100%);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP","Yu Gothic",sans-serif;line-height:1.65}a{color:inherit}.page{width:min(1080px,calc(100% - 28px));margin:0 auto;padding:18px 0 56px}.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}.brand{display:flex;align-items:center;gap:12px}.logo{width:52px;height:52px;border-radius:18px;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,#1f8f65,#83c99f);font-weight:1000}.brand small{display:block;color:var(--muted);font-size:11px;font-weight:900;letter-spacing:.08em}.brand strong{display:block;font-size:clamp(20px,3vw,30px)}.actions{display:flex;gap:8px;flex-wrap:wrap}.pill{display:inline-flex;align-items:center;justify-content:center;padding:9px 12px;border:1px solid var(--line);border-radius:999px;background:#fff;text-decoration:none;font-size:12px;font-weight:900}.hero{display:grid;grid-template-columns:1.08fr .92fr;gap:16px}.heroMain{position:relative;overflow:hidden;border-radius:30px;padding:32px;background:linear-gradient(135deg,#10392d,#1b6b50);color:#fff;box-shadow:var(--shadow)}.heroMain:after{content:"PET";position:absolute;right:-8px;bottom:-40px;font-size:130px;font-weight:1000;opacity:.06}.badge{display:inline-flex;padding:7px 11px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.13);border-radius:999px;font-size:12px;font-weight:900}.hero h1{position:relative;z-index:1;margin:14px 0 8px;font-size:clamp(34px,5vw,56px);line-height:1.08;letter-spacing:-.05em}.hero p{position:relative;z-index:1;margin:0;color:rgba(255,255,255,.9);font-weight:750}.side{border:1px solid var(--line);border-radius:26px;background:#fff;padding:22px;box-shadow:var(--shadow)}.side strong{display:block;font-size:19px;margin-bottom:6px}.side p{margin:0;color:var(--muted);font-size:13px;font-weight:750}.note{margin-top:12px;padding:12px;border-radius:15px;background:var(--green-soft);color:#176a51;font-size:12px;font-weight:850}.menuGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:13px;margin-top:16px}.menuCard{display:flex;gap:14px;align-items:center;border:1px solid var(--line);border-radius:22px;background:#fff;padding:17px;text-decoration:none;min-height:116px;box-shadow:0 10px 28px rgba(34,70,58,.07);transition:.15s}.menuCard:hover{transform:translateY(-1px);box-shadow:0 16px 32px rgba(34,70,58,.11)}.icon{width:58px;height:58px;border-radius:20px;display:grid;place-items:center;background:var(--green-soft);font-size:31px;flex:0 0 auto}.menuCard h3{margin:0 0 4px;font-size:20px}.menuCard p{margin:0;color:var(--muted);font-size:12px;font-weight:780}.footer{margin-top:16px;padding:13px;border:1px solid var(--line);background:rgba(255,255,255,.8);border-radius:18px;text-align:center;color:var(--muted);font-size:12px;font-weight:800}.hidden{display:none!important}
-@media(max-width:760px){.topbar{align-items:flex-start;flex-direction:column}.hero,.menuGrid{grid-template-columns:1fr}.heroMain{padding:24px;border-radius:24px}.side,.menuCard{border-radius:20px}}
+:root{
+  --bg:#f4f1ea;--card:#fff;--ink:#22302c;--muted:#6f7b75;--line:#d9d2c4;
+  --main:#1f8f65;--main-dark:#223b34;--green-soft:#e8f7ef;--warn:#8a6515;
+  --warn-bg:#fff7df;--danger:#a94545;--danger-bg:#fff0ef;--shadow:0 18px 50px rgba(21,54,44,.12)
+}
+*{box-sizing:border-box}
+body{margin:0;background:linear-gradient(180deg,#edf6f1 0,#fbfaf6 40%,#f4f7f5 100%);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP","Yu Gothic",sans-serif;line-height:1.65}
+a{color:inherit}.page{width:min(1080px,calc(100% - 28px));margin:0 auto;padding:18px 0 56px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+.brand{display:flex;align-items:center;gap:12px}.logo{width:52px;height:52px;border-radius:18px;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,#1f8f65,#83c99f);font-weight:1000}
+.brand small{display:block;color:var(--muted);font-size:11px;font-weight:900;letter-spacing:.08em}.brand strong{display:block;font-size:clamp(20px,3vw,30px)}
+.actions{display:flex;gap:8px;flex-wrap:wrap}.pill{display:inline-flex;align-items:center;justify-content:center;padding:9px 12px;border:1px solid var(--line);border-radius:999px;background:#fff;text-decoration:none;font-size:12px;font-weight:900}
+.syncPill{display:inline-flex;align-items:center;gap:7px;padding:7px 10px;border-radius:999px;background:#edf7f2;color:#176a51;border:1px solid #c9e7d8;font-size:11px;font-weight:950}
+.syncPill i{width:8px;height:8px;border-radius:50%;background:#1f8f65}.syncPill.ng{background:var(--danger-bg);color:var(--danger);border-color:#efc5c5}.syncPill.ng i{background:var(--danger)}
+.hero{display:grid;grid-template-columns:1.08fr .92fr;gap:16px}.heroMain{position:relative;overflow:hidden;border-radius:30px;padding:32px;background:linear-gradient(135deg,#10392d,#1b6b50);color:#fff;box-shadow:var(--shadow)}
+.heroMain:after{content:"PET";position:absolute;right:-8px;bottom:-40px;font-size:130px;font-weight:1000;opacity:.06}.badge{display:inline-flex;padding:7px 11px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.13);border-radius:999px;font-size:12px;font-weight:900}
+.hero h1{position:relative;z-index:1;margin:14px 0 8px;font-size:clamp(34px,5vw,56px);line-height:1.08;letter-spacing:-.05em}.hero p{position:relative;z-index:1;margin:0;color:rgba(255,255,255,.9);font-weight:750}
+.side{border:1px solid var(--line);border-radius:26px;background:#fff;padding:22px;box-shadow:var(--shadow)}.side strong{display:block;font-size:19px;margin-bottom:6px}.side p{margin:0;color:var(--muted);font-size:13px;font-weight:750}.note{margin-top:12px;padding:12px;border-radius:15px;background:var(--green-soft);color:#176a51;font-size:12px;font-weight:850}
+.livePanel{margin-top:16px;border:1px solid #cfe4d6;background:linear-gradient(180deg,#fff,#f3faf6);border-radius:24px;padding:18px;box-shadow:0 10px 28px rgba(34,70,58,.07)}
+.liveHead{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}.liveHead h2{margin:0;font-size:20px}.liveHead p{margin:3px 0 0;color:var(--muted);font-size:12px;font-weight:800}
+.statusTag{display:inline-flex;padding:5px 9px;border-radius:999px;background:var(--green-soft);color:#176a51;font-size:12px;font-weight:950}
+.statusTag.warn{background:var(--warn-bg);color:var(--warn)}.statusTag.closed{background:var(--danger-bg);color:var(--danger)}
+.timeGrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:13px}.timeBox{border:1px solid var(--line);border-radius:15px;background:#fff;padding:11px}.timeBox small{display:block;color:var(--muted);font-size:11px;font-weight:900}.timeBox b{display:block;margin-top:2px}.timeBox.off{background:#fff6f5;border-color:#efc5c5;color:var(--danger)}
+.liveMessage{margin-top:10px;font-size:13px;font-weight:850;color:#405349}.publicNotice{margin-top:10px;padding:11px 12px;border-radius:15px;background:var(--warn-bg);border:1px solid #ead49a;color:#6b511d;font-size:13px;font-weight:850}.hidden{display:none!important}
+.menuGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:13px;margin-top:16px}.menuCard{display:flex;gap:14px;align-items:center;border:1px solid var(--line);border-radius:22px;background:#fff;padding:17px;text-decoration:none;min-height:116px;box-shadow:0 10px 28px rgba(34,70,58,.07);transition:.15s}
+.menuCard:hover{transform:translateY(-1px);box-shadow:0 16px 32px rgba(34,70,58,.11)}.icon{width:58px;height:58px;border-radius:20px;display:grid;place-items:center;background:var(--green-soft);font-size:31px;flex:0 0 auto}.menuCard h3{margin:0 0 4px;font-size:20px}.menuCard p{margin:0;color:var(--muted);font-size:12px;font-weight:780}
+.footer{margin-top:16px;padding:13px;border:1px solid var(--line);background:rgba(255,255,255,.8);border-radius:18px;text-align:center;color:var(--muted);font-size:12px;font-weight:800}
+@media(max-width:760px){.topbar{align-items:flex-start;flex-direction:column}.hero,.menuGrid,.timeGrid{grid-template-columns:1fr}.heroMain{padding:24px;border-radius:24px}.side,.menuCard,.livePanel{border-radius:20px}}
 </style>
 </head>
 <body>
 <main class="page">
 <header class="topbar">
-  <div class="brand"><div class="logo">LINE</div><div><small>お客さまスマホ｜LINEリッチメニュー想定</small><strong>DPRO PET CARE LINE</strong></div></div>
-  <nav class="actions"><a class="pill" id="demoTopLink" href="./index.html">管理トップ</a><a class="pill" id="checkLink" href="./system-check.html">確認</a></nav>
+  <div class="brand"><div class="logo">LINE</div><div><small>お客さまスマホ｜LINE公式リッチメニュー想定</small><strong id="clinicBrand">DPRO PET CARE LINE</strong></div></div>
+  <nav class="actions"><span id="syncPill" class="syncPill"><i></i>DPRO共通API 接続中</span><a class="pill" id="demoTopLink" href="./index.html">管理トップ</a><a class="pill" id="checkLink" href="./system-check.html">確認</a></nav>
 </header>
+
 <section class="hero">
-  <div class="heroMain"><span class="badge">ANIMARY-COUNTER-V1.1-2｜病院別スイッチ対応</span><h1>必要な機能だけ、<br>迷わず使える。</h1><p>病院設定でOFFにした機能は、この入口から自動的に消えます。</p></div>
-  <div class="side"><strong>病院ごとに表示が変わります</strong><p>順番受付、日時予約、お薬・予防、混雑表示などを病院ごとにON/OFFできます。</p><div class="note" id="featureNote">機能設定を確認中です。</div></div>
+  <div class="heroMain"><span class="badge">DPRO-PET-CARE-INTEGRATED-4｜HP・LINE・DPRO共通データ</span><h1>必要な機能だけ、<br>迷わず使える。</h1><p>病院の共通設定・本日の診療状態・お知らせを、HPと同じデータから表示します。</p></div>
+  <div class="side"><strong>病院ごとに表示が変わります</strong><p>順番受付、日時予約、お薬・予防、混雑表示などを病院ごとにON/OFFできます。</p><div class="note" id="featureNote">DPRO共通設定を確認中です。</div></div>
 </section>
+
+<section id="lineLivePanel" class="livePanel">
+  <div class="liveHead">
+    <div><h2>本日の診療・受付状況</h2><p id="statusDate">共通APIから最新状態を読み込んでいます。</p></div>
+    <span id="statusTag" class="statusTag">確認中</span>
+  </div>
+  <div class="timeGrid">
+    <div id="morningBox" class="timeBox"><small>午前受付</small><b id="morningStatus">確認中</b></div>
+    <div id="afternoonBox" class="timeBox"><small>午後受付</small><b id="afternoonStatus">確認中</b></div>
+  </div>
+  <div id="statusMessage" class="liveMessage">DPRO共通APIへ接続しています。</div>
+  <div id="publicNotice" class="publicNotice hidden"></div>
+</section>
+
 <section class="menuGrid" id="menuGrid">
   <a class="menuCard" data-route-id="pet-card" data-feature="pet_card" href="./member.html"><div class="icon">🐾</div><div><h3>ペット診察券</h3><p>ペットごとのQR診察券、予防予定、病院情報を確認します。</p></div></a>
   <a class="menuCard" data-route-id="today-queue" data-feature="reception_queue" data-requires-feature="reception_general" href="./waiting.html?mode=today_queue"><div class="icon">🎫</div><div><h3>今日の順番受付</h3><p>今日診てもらいたい時に、受付番号を取ります。</p></div></a>
@@ -31,8 +71,10 @@
   <a class="menuCard" data-route-id="congestion" data-feature="congestion_view" href="./queue-status.html"><div class="icon">🚦</div><div><h3>混雑目安</h3><p>現在の受付件数、診察待ち、現在の診察番号を確認します。</p></div></a>
   <a class="menuCard" data-route-id="access" href="./access.html"><div class="icon">📍</div><div><h3>診療時間・アクセス</h3><p>診療時間、休診日、住所、電話、Googleマップを確認します。</p></div></a>
 </section>
-<div class="footer" id="routeFooter">LINE公式リッチメニュー｜病院別機能設定を確認中</div>
+
+<div class="footer" id="routeFooter">LINE公式リッチメニュー｜DPRO共通APIを確認中</div>
 </main>
+
 <script>
 (async()=>{
 "use strict";
@@ -49,40 +91,129 @@ const LINE_USER_ID=DEMO?(incomingLineUserId||DEMO_LINE_USER_ID):"";
 const LIFF_ID=params.get("liff_id")||"";
 const BOOKING_SOURCE_RAW=String(params.get("booking_source")||params.get("source")||"line").trim().toLowerCase();
 const BOOKING_SOURCE=["line","web"].includes(BOOKING_SOURCE_RAW)?BOOKING_SOURCE_RAW:"line";
-const VERSION="animary-counter-v1.1-2-integrated3";
-function buildRoute(item){
- const target=new URL(item.path||item.url||"./index.html",location.href);
- Object.entries(item.query||{}).forEach(([k,v])=>{if(v!==undefined&&v!==null&&String(v)!=="")target.searchParams.set(k,String(v))});
- target.searchParams.set("clinic_code",CLINIC_CODE);target.searchParams.set("v",VERSION);target.searchParams.set("source",BOOKING_SOURCE);
- if(DEMO)target.searchParams.set("demo","ready");if(LIFF_ID)target.searchParams.set("liff_id",LIFF_ID);
- if(item.requiresIdentity&&LINE_USER_ID)target.searchParams.set("line_user_id",LINE_USER_ID);return target.toString()
+const API_BASE=String(CONFIG?.api?.baseUrl||CONFIG?.urls?.apiBaseUrl||CONFIG.API_BASE_URL||"https://dpro-vet-qr-api.dpromstk2000.workers.dev").replace(/\/$/,"");
+const VERSION="dpro-pet-care-integrated4-20260816";
+
+const $=id=>document.getElementById(id);
+function time5(v){return String(v||"").slice(0,5)||"-"}
+function dateLabel(v){
+  if(!v)return"";
+  const [y,m,d]=String(v).split("-");
+  return `${y}年${Number(m)}月${Number(d)}日`;
 }
-const fs=await FEATURES.load({force:true});
+function buildRoute(item){
+  const target=new URL(item.path||item.url||"./index.html",location.href);
+  Object.entries(item.query||{}).forEach(([k,v])=>{if(v!==undefined&&v!==null&&String(v)!=="")target.searchParams.set(k,String(v))});
+  target.searchParams.set("clinic_code",CLINIC_CODE);
+  target.searchParams.set("v",VERSION);
+  target.searchParams.set("source",BOOKING_SOURCE);
+  target.searchParams.set("booking_source",BOOKING_SOURCE);
+  if(DEMO)target.searchParams.set("demo","ready");
+  if(LIFF_ID)target.searchParams.set("liff_id",LIFF_ID);
+  if(item.requiresIdentity&&LINE_USER_ID)target.searchParams.set("line_user_id",LINE_USER_ID);
+  return target.toString();
+}
+async function getIntegratedState(){
+  const u=new URL(API_BASE+"/api/public/integrated-state");
+  u.searchParams.set("clinic_code",CLINIC_CODE);
+  const r=await fetch(u,{cache:"no-store",headers:{Accept:"application/json"}});
+  const d=await r.json().catch(()=>({}));
+  if(!r.ok||d.ok===false)throw new Error(d.message||d.error||`Integrated API ${r.status}`);
+  return d;
+}
+function flagOn(flags,key){return flags?.[key]!==false}
+function applyMenuFlags(flags){
+  document.querySelectorAll("[data-feature]").forEach(el=>{
+    const k=el.getAttribute("data-feature");
+    el.classList.toggle("hidden",!flagOn(flags,k));
+  });
+  document.querySelectorAll("[data-requires-feature]").forEach(el=>{
+    const k=el.getAttribute("data-requires-feature");
+    if(!flagOn(flags,k))el.classList.add("hidden");
+  });
+}
+function renderLive(data){
+  const t=data?.today_status||{};
+  const r=data?.reception_state||{};
+  const pc=data?.public_channel_settings||data?.settings?.public_channel_settings||{};
+  const line=pc.line||{};
+  const noticeChannel=data?.notice?.channel||pc.notice||{};
+  const clinic=data?.clinic||{};
+  const settings=data?.settings||{};
+  const clinicName=settings.display_name||settings.clinic_name||clinic.display_name||clinic.clinic_name||"DPROどうぶつ病院";
+  $("clinicBrand").textContent=clinicName+" 公式LINE";
+  if(line.today_status===false){
+    $("lineLivePanel").classList.add("hidden");
+    return;
+  }
+  $("statusDate").textContent=(t.target_date?dateLabel(t.target_date)+"｜":"")+clinicName;
+  const am=t.can_accept_morning===true;
+  const pm=t.can_accept_afternoon===true;
+  const full=t.is_full_closed===true;
+  $("morningStatus").textContent=am?`${time5(t.morning_open_time||settings.morning_open_time)}〜${time5(t.morning_last_accept_time||settings.morning_last_accept_time)}`:(full?"休診":"受付できません");
+  $("afternoonStatus").textContent=pm?`${time5(t.afternoon_open_time||settings.afternoon_open_time)}〜${time5(t.afternoon_last_accept_time||settings.afternoon_last_accept_time)}`:(full?"休診":"受付できません");
+  $("morningBox").classList.toggle("off",!am);
+  $("afternoonBox").classList.toggle("off",!pm);
+  const label=r.label||t.reception_label||(full?"休診":(am||pm?"受付中":"受付終了"));
+  $("statusTag").textContent=label;
+  $("statusTag").className="statusTag"+(full?" closed":(!am||!pm?" warn":""));
+  $("statusMessage").textContent=r.message||t.display_message||data?.notice?.text||"本日の受付状況をご確認ください。";
+  const noticeAllowed=line.notice!==false&&noticeChannel.enabled!==false;
+  const noticeText=data?.notice?.text||settings.public_notice||"";
+  $("publicNotice").classList.toggle("hidden",!(noticeAllowed&&noticeText));
+  if(noticeAllowed&&noticeText)$("publicNotice").textContent=`${noticeChannel.title||"お知らせ"}｜${noticeText}`;
+}
+function buildQuestionnaireUrl(item,returnUrl){
+  const q=new URL("questionnaire.html",location.href);
+  q.searchParams.set("clinic_code",CLINIC_CODE);
+  // INTEGRATED-4: source は流入元契約(line/web)専用。受付用途は entry_source へ分離。
+  q.searchParams.set("source",BOOKING_SOURCE);
+  q.searchParams.set("booking_source",BOOKING_SOURCE);
+  q.searchParams.set("entry_source",item.id);
+  q.searchParams.set("return_url",returnUrl);
+  q.searchParams.set("v",VERSION);
+  if(DEMO)q.searchParams.set("demo","ready");
+  if(LINE_USER_ID)q.searchParams.set("line_user_id",LINE_USER_ID);
+  if(LIFF_ID)q.searchParams.set("liff_id",LIFF_ID);
+  return q.toString();
+}
+
+let integrated=null;
+let fallbackFs=null;
+try{
+  integrated=await getIntegratedState();
+  $("syncPill").className="syncPill";
+  $("syncPill").innerHTML="<i></i>DPRO共通API 同期中";
+  renderLive(integrated);
+}catch(error){
+  console.warn("integrated-state unavailable:",error);
+  $("syncPill").className="syncPill ng";
+  $("syncPill").innerHTML="<i></i>共通API確認できず";
+  $("statusMessage").textContent="DPRO共通APIを確認できませんでした。各機能画面で最新状態を再確認します。";
+}
+
+try{fallbackFs=await FEATURES.load({force:true})}catch(_){fallbackFs={flags:{},preset:"standard"}}
+const flags=integrated?.feature_flags||integrated?.settings?.feature_flags||fallbackFs?.flags||{};
+const preset=integrated?.settings?.feature_preset||fallbackFs?.preset||"standard";
+applyMenuFlags(flags);
+
 const buttons=Array.isArray(CONFIG?.richMenu?.buttons)?CONFIG.richMenu.buttons:[];
 buttons.forEach(item=>{
   const a=document.querySelector(`[data-route-id="${item.id}"]`);
   if(!a)return;
   let href=buildRoute(item);
-  if(fs.flags.previsit_questionnaire===true && (item.id==="today-queue" || item.id==="medicine-prevention")){
-    const q=new URL("questionnaire.html",location.href);
-    q.searchParams.set("clinic_code",CLINIC_CODE);
-    q.searchParams.set("source",item.id);
-    q.searchParams.set("booking_source",BOOKING_SOURCE);
-    q.searchParams.set("return_url",href);
-    if(DEMO)q.searchParams.set("demo","ready");
-    if(LINE_USER_ID)q.searchParams.set("line_user_id",LINE_USER_ID);
-    if(LIFF_ID)q.searchParams.set("liff_id",LIFF_ID);
-    href=q.toString();
+  if(flagOn(flags,"previsit_questionnaire")&&(item.id==="today-queue"||item.id==="medicine-prevention")){
+    href=buildQuestionnaireUrl(item,href);
   }
   a.href=href;
 });
-document.getElementById("demoTopLink").href=buildRoute({path:"index.html"});
-document.getElementById("checkLink").href=buildRoute({path:"system-check.html"});
-FEATURES.applyDom();
-document.querySelectorAll("[data-requires-feature]").forEach(el=>{const k=el.getAttribute("data-requires-feature");if(!FEATURES.isEnabled(k))el.classList.add("hidden")});
-const visible=[...document.querySelectorAll(".menuCard")].filter(el=>!el.hidden&&!el.classList.contains("hidden")).length;
-document.getElementById("featureNote").textContent=`${fs.preset}設定｜表示中 ${visible}項目`;
-document.getElementById("routeFooter").textContent=`LINE公式リッチメニュー｜病院別機能スイッチ適用済み｜${visible}項目`;
+
+$("demoTopLink").href=buildRoute({path:"index.html"});
+$("checkLink").href=buildRoute({path:"system-check.html"});
+
+const visible=[...document.querySelectorAll(".menuCard")].filter(el=>!el.classList.contains("hidden")).length;
+$("featureNote").textContent=`${integrated?"DPRO共通設定":"設定フォールバック"}｜${preset}｜表示中 ${visible}項目`;
+$("routeFooter").textContent=`LINE公式リッチメニュー｜INTEGRATED-4｜${BOOKING_SOURCE.toUpperCase()}起点｜${visible}項目`;
 })();
 </script>
 </body>
