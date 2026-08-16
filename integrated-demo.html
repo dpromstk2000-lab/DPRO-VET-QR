@@ -25,7 +25,7 @@
 <main class="wrap">
 <section class="hero">
  <div>
-  <span class="badge">DPRO PET CARE INTEGRATED-7｜HP × LINE公式 × DPRO 統合E2E営業DEMO</span>
+  <span class="badge">DPRO PET CARE INTEGRATED-7-R1｜HP × LINE公式 × DPRO 統合E2E営業DEMO</span>
   <h1>予約・受付・病院設定が、<br>ひとつのデータで動く。</h1>
   <p>HPから受付しても、LINE公式から受付しても、病院では同じDPRO受付一覧へ。病院側で診療状態を変えれば、HPとLINEの両方へ同時反映します。</p>
  </div>
@@ -67,7 +67,7 @@
 </section>
 
 <section class="section">
- <div class="head"><div><h2>3〜5分 統合営業デモ台本</h2><p>「機能を説明する」のではなく、「同じデータが動く」ことを順番に見せます。</p></div><span class="pill">INTEGRATED-7</span></div>
+ <div class="head"><div><h2>3〜5分 統合営業デモ台本</h2><p>「機能を説明する」のではなく、「同じデータが動く」ことを順番に見せます。</p></div><span class="pill">INTEGRATED-7-R1</span></div>
  <div class="flow">
   <div class="step"><div class="stepNo">1</div><div><h3>HPから受付</h3><p>病院HPの「今日の順番受付」から1件受付。WEB起点であることを見せます。</p></div><div class="stepActions"><a id="hpStep" class="mini green" target="_blank">HPを開く</a></div></div>
   <div class="step"><div class="stepNo">2</div><div><h3>DPROへ即反映</h3><p>共通受付一覧に同じ受付が入り、sourceが「WEB」になっていることを確認。</p></div><div class="stepActions"><a id="boardStep1" class="mini green" target="_blank">共通受付を見る</a></div></div>
@@ -130,7 +130,11 @@ async function loadPublic(){
  const lineReady=state.public_channel_settings?.line?.today_status!==false;gate('gHpLine',hpSync&&lineReady?'good':'bad',hpSync&&lineReady?'HP / LINE PASS':'設定確認');
  let blockKind='warn',blockText='未判定',bookingLabel='確認中';
  try{
-   const av=await get('/api/public/exact-appointments/availability',{date:jstDate()});
+   // INTEGRATED-7-R1: 正式appointment.htmlと同じ契約で、予約設定→先頭service→availabilityの順に確認する。
+   const bookingSettings=await get('/api/public/exact-appointments/settings',{});
+   const bookingService=(bookingSettings.services||[])[0]||null;
+   if(!bookingService?.id) throw new Error('予約対象サービス未設定');
+   const av=await get('/api/public/exact-appointments/availability',{date:jstDate(),service_id:bookingService.id,pet_id:'',doctor_id:'',exclude_appointment_id:''});
    const aft=String(state.today_status?.afternoon_open_time||state.settings?.afternoon_open_time||'12:00').slice(0,5);
    const pm=(av.slots||[]).filter(s=>String(s.start_time||'').slice(0,5)>=aft);
    const availablePm=pm.filter(s=>s.available!==false).length;
@@ -138,7 +142,7 @@ async function loadPublic(){
    if(closed&&availablePm===0){blockKind='good';blockText='午後 BLOCK PASS';bookingLabel='BLOCK';}
    else if(closed&&availablePm>0){blockKind='bad';blockText='午後枠が残っています';bookingLabel='要確認';}
    else{blockKind='warn';blockText=`午後予約 ${availablePm}枠`;bookingLabel=`OPEN ${availablePm}`;}
- }catch(e){blockKind='warn';blockText='予約API確認不可';bookingLabel='CHECK';}
+ }catch(e){blockKind='warn';blockText=`予約API確認不可：${e.message}`;bookingLabel='CHECK';}
  gate('gBlock',blockKind,blockText);$('mBooking').querySelector('b').textContent=bookingLabel;setClass($('mBooking'),blockKind);
  $('gateSummary').textContent=(health.ok&&state.ok&&hpSync)?'COMMON DATA PASS':'CHECK REQUIRED';
 }
