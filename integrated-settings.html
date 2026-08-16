@@ -25,7 +25,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}a{color:inherit}
 <main class="app">
 <section class="hero">
   <div class="heroTop">
-    <div><span class="badge">DPRO PET CARE INTEGRATED-5-R1</span><h1>HP・LINE 共通設定</h1><p>DPROで変更した診療状態・お知らせ・機能スイッチを、HPとLINE公式へ同じデータで反映します。</p></div>
+    <div><span class="badge">DPRO PET CARE INTEGRATED-5-R2</span><h1>HP・LINE 共通設定</h1><p>DPROで変更した診療状態・お知らせ・機能スイッチを、HPとLINE公式へ同じデータで反映します。</p></div>
     <nav class="heroLinks"><a id="adminLink" href="./admin.html">管理設定へ</a><a id="queueLink" href="./admin-queue.html">受付設定へ</a><a id="hpLink" target="_blank" rel="noopener">HPを確認</a><a id="lineLink" target="_blank" rel="noopener">LINE入口を確認</a></nav>
   </div>
 </section>
@@ -164,7 +164,26 @@ async function saveSpecial(){const type=$("specialType").value;const payload={ta
 async function deleteSpecial(date,type,silent=false){await apiPost("/api/admin/clinic-special-days/delete",{target_date:date,day_type:type});if(!silent)toast("特別日を削除しました。")}
 async function clearTodaySpecials(){const rows=(state.specialDays||[]).filter(x=>x.target_date===today());for(const x of rows){await deleteSpecial(x.target_date,x.day_type,true)}}
 function noticeForState(x){const r=x?.reception_state||{};const code=r.code||"open";if(code==="closed_today")return"本日は休診です。緊急時はお電話でご相談ください。";if(code==="morning_closed")return"本日は午前休診です。午後受付は可能です。";if(code==="afternoon_closed")return"本日は午後休診です。午前受付は可能です。";if(code==="reception_stopped")return"本日の受付は停止しています。診療時間・日時指定予約については病院へご確認ください。";if(code==="crowded")return"現在混雑しています。待ち状況をご確認のうえご来院ください。";return"本日は通常受付中です。診察券QRまたはLINEから受付できます。"}
-async function setTodayMode(mode){document.querySelectorAll("[data-today-mode]").forEach(b=>b.disabled=true);try{await clearTodaySpecials();if(mode==="reception_stopped"){await apiPost("/api/admin/clinic-settings/save",{reception_status:"reception_stopped"});}else{await apiPost("/api/admin/clinic-settings/save",{reception_status:"open"});if(mode!=="open"){const map={closed_today:"special_closed",morning_closed:"morning_closed",afternoon_closed:"afternoon_closed"};const type=map[mode];if(type)await apiPost("/api/admin/clinic-special-days/save",{target_date:today(),day_type:type,title:{closed_today:"本日休診",morning_closed:"午前休診",afternoon_closed:"午後休診"}[mode],note:"INTEGRATED-5 共通設定から変更"});}}await loadAll();const noticeText=noticeForState(state.integrated);await apiPost("/api/admin/clinic-settings/save",{public_notice:noticeText});toast("今日の状態と公開お知らせを更新しました。");await loadAll()}catch(e){toast(e.message||"状態変更に失敗しました。")}finally{document.querySelectorAll("[data-today-mode]").forEach(b=>b.disabled=false)}}
+async function setTodayMode(mode){document.querySelectorAll("[data-today-mode]").forEach(b=>b.disabled=true);try{
+  // R1で誤ってglobal reception_statusへ保存された受付停止も、最初に必ず解除する。
+  await apiPost("/api/admin/clinic-settings/save",{reception_status:"open"});
+  await clearTodaySpecials();
+  if(mode!=="open"){
+    const map={closed_today:"special_closed",morning_closed:"morning_closed",afternoon_closed:"afternoon_closed",reception_stopped:"reception_stopped"};
+    const type=map[mode];
+    if(type)await apiPost("/api/admin/clinic-special-days/save",{
+      target_date:today(),
+      day_type:type,
+      title:{closed_today:"本日休診",morning_closed:"午前休診",afternoon_closed:"午後休診",reception_stopped:"受付停止"}[mode],
+      note:"INTEGRATED-5-R2 共通設定から変更"
+    });
+  }
+  await loadAll();
+  const noticeText=noticeForState(state.integrated);
+  await apiPost("/api/admin/clinic-settings/save",{public_notice:noticeText});
+  toast("今日の状態と公開お知らせを更新しました。");
+  await loadAll();
+}catch(e){toast(e.message||"状態変更に失敗しました。")}finally{document.querySelectorAll("[data-today-mode]").forEach(b=>b.disabled=false)}}
 async function publicRefresh(){const x=await apiGet("/api/public/integrated-state",{},false);renderIntegrated(x);toast("共通APIを再確認しました。")}
 async function openSettings(){try{saveCode();await loadAll()}catch(e){$("authMessage").textContent="❌ "+(e.message||"管理コードを確認してください。");toast(e.message||"読み込みに失敗しました。")}}
 $("openBtn").addEventListener("click",openSettings);$("clearCodeBtn").addEventListener("click",()=>{sessionStorage.removeItem(ADMIN_KEY);localStorage.removeItem(ADMIN_KEY);$("adminCode").value="";$("content").classList.add("hidden");$("authMessage").textContent="保存コードを削除しました。"});$("reloadBtn").addEventListener("click",loadAll);$("saveMasterBtn").addEventListener("click",saveMaster);$("saveChannelsBtn").addEventListener("click",saveChannels);$("saveFeaturesBtn").addEventListener("click",saveFeatures);$("saveQuestionnaireBtn").addEventListener("click",saveQuestionnaire);$("saveSpecialBtn").addEventListener("click",saveSpecial);$("refreshPublicBtn").addEventListener("click",publicRefresh);document.querySelectorAll("[data-today-mode]").forEach(b=>b.addEventListener("click",()=>setTodayMode(b.dataset.todayMode)));

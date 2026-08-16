@@ -97,7 +97,7 @@ const TABLES = {
 };
 
 const DEFAULT_CLINIC_CODE = "dpro_vet_demo";
-const WORKER_VERSION = "ANIMARY-COUNTER-V1.3-VACCINE-INTERVAL-20260816-INTEGRATED-2-R1";
+const WORKER_VERSION = "ANIMARY-COUNTER-V1.3-VACCINE-INTERVAL-20260816-INTEGRATED-5-R2";
 const INTEGRATED_API_VERSION = "DPRO-PET-CARE-INTEGRATED-V1.0";
 const FEATURE_SWITCH_VERSION = "DPRO-VET-FEATURE-SWITCH-V1.1";
 const WEB_QUESTIONNAIRE_VERSION = "DPRO-VET-WEB-QUESTIONNAIRE-V1.1.6";
@@ -2677,13 +2677,18 @@ function integratedTodayState(settings, todayStatus, queueSummaries, queueSettin
   if (queuePartClosed(afternoonSummary)) canAfternoon = false;
 
   const queueFeatureEnabled = flags.reception_queue === true && flags.reception_general === true && queueSettings.same_day_queue_enabled !== false;
-  const receptionStopped = receptionStatus === "reception_stopped";
+  // INTEGRATED-5-R2:
+  // reception_stopped is an operational reception state, NOT a clinic closure.
+  // It may come from the clinic setting (legacy/global) or today's special-day view flag.
+  const receptionStopped =
+    receptionStatus === "reception_stopped" ||
+    todayStatus?.is_reception_stopped === true;
   const canAcceptQueue = queueFeatureEnabled && !receptionStopped && (canMorning || canAfternoon);
 
   let code = "open";
   if (!queueFeatureEnabled) code = "feature_off";
-  else if (receptionStatus === "closed_today" || (canMorning === false && canAfternoon === false)) code = "closed_today";
   else if (receptionStopped) code = "reception_stopped";
+  else if (receptionStatus === "closed_today" || (canMorning === false && canAfternoon === false)) code = "closed_today";
   else if (!canMorning && canAfternoon) code = "morning_closed";
   else if (canMorning && !canAfternoon) code = "afternoon_closed";
   else if (queueSummaries.some((row) => cleanString(row.display_level || row.manual_level).toLowerCase() === "crowded")) code = "crowded";
@@ -2698,10 +2703,12 @@ function integratedTodayState(settings, todayStatus, queueSummaries, queueSettin
     reception_stopped: "受付停止"
   };
   const summaryMessage = queueSummaries.find((row) => cleanString(row.manual_message || row.closed_reason || row.display_message)) || null;
-  const message = cleanString(
-    summaryMessage?.manual_message || summaryMessage?.closed_reason ||
-    todayStatus?.display_message || settings.public_notice || summaryMessage?.display_message || ""
-  );
+  const message = receptionStopped
+    ? cleanString(settings.public_notice || "本日の受付は停止しています。診療時間・日時指定予約については病院へご確認ください。")
+    : cleanString(
+        summaryMessage?.manual_message || summaryMessage?.closed_reason ||
+        todayStatus?.display_message || settings.public_notice || summaryMessage?.display_message || ""
+      );
 
   return {
     code,
