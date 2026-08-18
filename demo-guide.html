@@ -1,354 +1,248 @@
 <!doctype html>
+<!-- DPRO LIVE DEMO COMMON TEMPLATE V1.0 LOCK / CONFIGURABLE TEMPLATE -->
 <html lang="ja">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>DPRO PET CARE LINE｜営業デモガイド STEP VET-29</title>
-  <script src="./config.js"></script>
-  <style>
-    :root{
-      --bg:#f4f1ea; --panel:#fff; --ink:#22302c; --muted:#6f7b75; --line:#d9d2c4;
-      --main:#1f8f65; --main-dark:#223b34; --green:#18a765; --green-soft:#e8f7ef;
-      --blue:#2d68a6; --blue-soft:#edf5ff; --amber:#8a621f; --amber-soft:#fff6de;
-      --red:#b84a4a; --red-soft:#fff0ef; --gold:#b9924b; --gold-soft:#fff7e6;
-      --shadow:0 24px 72px rgba(34,48,44,.13); --radius:24px;
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0; min-height:100vh; color:var(--ink);
-      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Yu Gothic","YuGothic","Noto Sans JP",Meiryo,sans-serif;
-      background:radial-gradient(circle at 10% 0%,rgba(31,143,101,.16),transparent 32%),
-      radial-gradient(circle at 88% 8%,rgba(231,151,36,.13),transparent 30%),
-      linear-gradient(180deg,#fbfaf6 0%,var(--bg) 100%);
-      line-height:1.75;
-    }
-    a{color:inherit} button,input,textarea{font:inherit}
-    .wrap{width:min(1280px,calc(100% - 28px));margin:18px auto 54px}
-    .topbar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:14px}
-    .brand{display:flex;align-items:center;gap:12px;min-width:0}
-    .logo{width:52px;height:52px;border-radius:18px;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,#1f8f65,#83c99f);box-shadow:0 14px 26px rgba(31,143,101,.23);font-size:24px;font-weight:1000;flex:0 0 auto}
-    .brand small{display:block;color:var(--muted);font-weight:950;font-size:12px;letter-spacing:.08em}
-    .brand strong{display:block;font-size:clamp(19px,2.4vw,30px);line-height:1.12;letter-spacing:-.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .nav{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px}
-    .pill,.btn{
-      display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1px solid var(--line);
-      border-radius:999px;padding:9px 13px;background:rgba(255,255,255,.86);color:var(--ink);text-decoration:none;
-      font-size:13px;font-weight:950;line-height:1.15;cursor:pointer;transition:.15s transform,.15s box-shadow,.15s background;
-    }
-    .pill:hover,.btn:hover{transform:translateY(-1px);box-shadow:0 10px 22px rgba(34,48,44,.11);background:#fff}
-    .btn-main{border-color:transparent;background:var(--main);color:#fff;box-shadow:0 14px 28px rgba(31,143,101,.24)}
-    .btn-sub{border-color:#bfe3cc;background:var(--green-soft);color:#11704c}
-    .btn-warn{border-color:#efd89e;background:var(--amber-soft);color:var(--amber)}
-    .btn-danger{border-color:#ecc0bc;background:var(--red-soft);color:#9f3939}
-    .btn-dark{border-color:#234038;background:#07100d;color:#eafff4}
-    .hero{display:grid;grid-template-columns:1.05fr .95fr;gap:16px;align-items:stretch;margin-bottom:16px}
-    .hero-card{
-      position:relative;overflow:hidden;border-radius:32px;background:linear-gradient(135deg,rgba(34,59,52,.98),rgba(31,143,101,.92));
-      color:#fff;padding:clamp(22px,3.6vw,42px);box-shadow:var(--shadow);
-    }
-    .hero-card::after{content:"DEMO";position:absolute;right:-30px;bottom:-46px;font-size:clamp(78px,14vw,180px);font-weight:1000;letter-spacing:.06em;opacity:.06;pointer-events:none}
-    .badge{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:8px 12px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.24);color:#fff;font-size:12px;font-weight:950;letter-spacing:.04em;margin-bottom:14px}
-    .badge-dark{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:7px 11px;background:var(--green-soft);color:#11704c;font-size:12px;font-weight:950;margin-bottom:12px}
-    h1{position:relative;z-index:1;margin:0 0 14px;font-size:clamp(31px,4.5vw,60px);line-height:1.08;letter-spacing:-.055em}
-    h2{margin:0 0 10px;font-size:clamp(22px,2.6vw,32px);line-height:1.2;letter-spacing:-.03em}
-    h3{margin:0 0 8px;font-size:19px;line-height:1.35}
-    .lead{position:relative;z-index:1;margin:0;color:rgba(255,255,255,.88);font-size:clamp(14px,1.7vw,17px);font-weight:770;line-height:1.9}
-    .plain-lead{margin:0;color:#5a6862;font-size:14px;font-weight:780;line-height:1.8}
-    .panel{border:1px solid rgba(217,210,196,.88);border-radius:var(--radius);background:rgba(255,255,255,.92);box-shadow:var(--shadow);padding:clamp(18px,2.5vw,28px);margin:16px 0}
-    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-    .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-    .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-    .summary-card{background:#fff;border:1px solid rgba(217,210,196,.9);border-radius:20px;padding:15px;box-shadow:0 12px 36px rgba(34,48,44,.06)}
-    .summary-card strong{display:block;font-size:18px;line-height:1.25;margin-bottom:6px}
-    .summary-card p{margin:0;color:var(--muted);font-size:12px;font-weight:850;line-height:1.6}
-    .summary-card.green{background:#f0fbf5;border-color:#bfe3cc}.summary-card.gold{background:#fffaf0;border-color:#efd89e}.summary-card.blue{background:#f4f9ff;border-color:#bdd5ef}.summary-card.red{background:#fff5f3;border-color:#ecc0bc}
-    .route{display:grid;grid-template-columns:48px 1fr auto;gap:12px;align-items:center;border:1px solid rgba(217,210,196,.9);background:#fff;border-radius:18px;padding:13px;margin-top:10px}
-    .route-no{width:48px;height:48px;border-radius:16px;display:grid;place-items:center;background:var(--green-soft);color:#11704c;font-weight:1000;font-size:18px}
-    .route h3{font-size:16px;margin:0 0 2px}.route p{font-size:12px;margin:0;color:#61706a;font-weight:850}.route-actions{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}
-    .script-box{background:#07100d;color:#eafff4;border-radius:22px;padding:18px;border:1px solid #234038;box-shadow:inset 0 0 0 1px rgba(255,255,255,.02)}
-    .script-box h3{color:#43e886}.script-box p{color:#d3f3e7;margin:0 0 12px;font-size:13px;font-weight:780}
-    textarea.copy-box{width:100%;min-height:190px;background:#07100d;color:#eafff4;border:1px solid #234038;border-radius:16px;padding:14px;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:12px;line-height:1.65;resize:vertical}
-    .checklist{display:grid;gap:9px}
-    .check{display:grid;grid-template-columns:34px 1fr;gap:10px;align-items:start;border:1px solid rgba(217,210,196,.9);background:#fffdf9;border-radius:16px;padding:12px}
-    .check span:first-child{width:34px;height:34px;border-radius:12px;display:grid;place-items:center;background:var(--green-soft);color:#11704c;font-weight:1000}
-    .check b{display:block;font-size:14px;line-height:1.35}.check small{display:block;color:#61706a;font-size:12px;font-weight:850;margin-top:3px}
-    .talk{border:1px solid rgba(217,210,196,.9);background:#fff;border-radius:18px;padding:14px}
-    .talk .q{font-weight:1000;color:#22302c}.talk .a{margin-top:6px;color:#56645e;font-size:13px;font-weight:820}
-    .note{border-radius:18px;padding:14px;font-size:13px;font-weight:850;line-height:1.7;background:var(--amber-soft);border:1px solid #efd89e;color:var(--amber);margin-top:12px}
-    .note.ok{background:var(--green-soft);border-color:#bfe3cc;color:#11704c}.note.ng{background:var(--red-soft);border-color:#ecc0bc;color:#9f3939}.note.info{background:var(--blue-soft);border-color:#bdd5ef;color:#2d68a6}
-    .tabs{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.tab{border:1px solid var(--line);background:#fff;border-radius:999px;padding:9px 13px;font-size:13px;font-weight:950;cursor:pointer}.tab.active{background:var(--main);border-color:var(--main);color:#fff}
-    .tab-panel{display:none}.tab-panel.active{display:block}
-    .footer{text-align:center;color:var(--muted);font-size:12px;margin-top:28px;font-weight:850}
-    @media(max-width:980px){.hero,.grid2,.grid3,.grid4{grid-template-columns:1fr}.route{grid-template-columns:48px 1fr}.route-actions{grid-column:1/-1;justify-content:flex-start}.topbar{align-items:flex-start;flex-direction:column}.nav{justify-content:flex-start}}
-    @media(max-width:620px){.wrap{width:min(100% - 18px,1280px);margin-top:10px}.hero-card,.panel{border-radius:22px}.btn,.pill{width:100%}.route{grid-template-columns:1fr}.route-no{width:42px;height:42px}}
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<title id="pageTitle">DPRO 公開操作デモ・画面一覧</title>
+<style>
+:root{
+  --bg:#edf5ef;--card:#fff;--ink:#18312a;--muted:#687b74;--line:#d7e3dd;
+  --brand:#1f8f65;--deep:#123d31;--brand2:#83c99f;--soft:#eef8f3;
+  --shadow:0 16px 46px rgba(20,55,44,.11)
+}
+*{box-sizing:border-box}
+html{background:var(--bg);scroll-behavior:smooth}
+body{margin:0;min-height:100vh;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP","Yu Gothic UI",Meiryo,sans-serif;line-height:1.65;background:linear-gradient(180deg,#fff 0%,var(--bg) 100%)}
+a{color:inherit}.page{width:min(1140px,calc(100% - 24px));margin:0 auto;padding:20px 0 48px}
+.hero{position:relative;overflow:hidden;padding:34px;border-radius:28px;color:#fff;background:linear-gradient(135deg,var(--deep),var(--brand) 63%,var(--brand2));box-shadow:0 23px 58px rgba(35,30,27,.20)}
+.hero:after{content:"";position:absolute;right:-95px;bottom:-150px;width:290px;height:290px;border-radius:50%;background:rgba(255,255,255,.07)}
+.kicker{position:relative;z-index:1;font-size:11px;font-weight:1000;letter-spacing:.14em;opacity:.9}
+.hero h1{position:relative;z-index:1;margin:10px 0 0;font-size:clamp(28px,5vw,49px);line-height:1.24}
+.hero p{position:relative;z-index:1;max-width:830px;margin:13px 0 0;font-size:14px;opacity:.93}
+.hero-actions{position:relative;z-index:1;display:flex;gap:9px;flex-wrap:wrap;margin-top:20px}
+.button{min-height:45px;display:inline-flex;align-items:center;justify-content:center;padding:9px 15px;border-radius:999px;text-decoration:none;font-size:12px;font-weight:950}
+.button-light{color:var(--deep);background:#fff}.button-ghost{color:#fff;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.09)}
+.notice{margin-top:15px;padding:15px 17px;border:1px solid #e5cda3;border-radius:15px;background:#fff5e5;color:#725013;font-size:12px;font-weight:760}
+.demo-info{margin-top:16px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.demo-info>div{padding:14px;border:1px solid var(--line);border-radius:15px;background:rgba(255,255,255,.96);box-shadow:var(--shadow)}
+.demo-info small{display:block;color:var(--brand);font-size:9px;font-weight:1000;letter-spacing:.08em}.demo-info strong{display:block;margin-top:4px;font-size:14px}
+.section-head{margin:32px 0 15px}.section-head small{color:var(--brand);font-size:10px;font-weight:1000;letter-spacing:.12em}.section-head h2{margin:5px 0 0;font-size:clamp(23px,4vw,34px)}.section-head p{max-width:840px;margin:7px 0 0;color:var(--muted);font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.card{min-width:0;padding:20px;border:1px solid var(--line);border-radius:20px;background:rgba(255,255,255,.98);box-shadow:var(--shadow)}
+.card-number{color:var(--brand);font-size:10px;font-weight:1000;letter-spacing:.1em}.card h3{margin:7px 0 0;font-size:21px;line-height:1.4}.card p{margin:8px 0 0;color:var(--muted);font-size:12px}
+.pills{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}.pills span{padding:5px 8px;border-radius:999px;background:var(--soft);color:var(--deep);font-size:9px;font-weight:900}
+.card-note{margin-top:13px;padding:11px;border-radius:12px;background:var(--soft);color:#675a54;font-size:11px}.card-note b{color:var(--deep)}
+.card-actions{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:15px}
+.open,.official{min-height:44px;display:flex;align-items:center;justify-content:center;padding:9px 13px;border-radius:12px;text-decoration:none;font-size:10px;font-weight:950}
+.open{color:#fff;background:linear-gradient(135deg,var(--deep),var(--brand2))}.official{color:var(--deep);border:1px solid var(--line);background:var(--soft)}
+.flow{margin-top:14px;padding:19px;border:1px solid var(--line);border-radius:19px;background:#fff;box-shadow:var(--shadow)}
+.flow-grid{display:grid;grid-template-columns:repeat(var(--flow-cols,5),minmax(0,1fr));gap:8px}
+.flow-step{padding:12px;border-radius:12px;background:var(--soft)}.flow-step b{display:block;color:var(--brand);font-size:10px}.flow-step strong{display:block;margin-top:4px;font-size:11px}.flow-step.same{border:1px dashed #cdbfb6}
+.footer{margin-top:26px;color:#82736c;font-size:10px;text-align:center}
+@media(max-width:900px){.flow-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){.hero{padding:25px 20px}.demo-info,.grid,.flow-grid{grid-template-columns:1fr}}
+@media(max-width:420px){.page{width:min(100% - 16px,1140px)}.card-actions{grid-template-columns:1fr}}
+</style>
 </head>
-
 <body>
-  <main class="wrap">
-    <header class="topbar">
-      <div class="brand">
-        <div class="logo">🎬</div>
-        <div>
-          <small>STEP VET-29｜営業デモガイド</small>
-          <strong>DPRO PET CARE LINE</strong>
-        </div>
-      </div>
-      <nav class="nav">
-        <a class="pill" href="./index.html?v=step-vet-29">管理トップ</a>
-        <a class="pill" href="./system-check.html?v=step-vet-29">システム確認</a>
-        <a class="pill" href="./rich-menu.html?v=step-vet-29">LINE入口</a>
-        <a class="pill" href="./owner.html?v=step-vet-29">オーナー</a>
-      </nav>
-    </header>
+<main class="page">
+<section class="hero">
+  <div class="kicker">PUBLIC OPERATION DEMO / V1.0</div>
+  <h1 id="heroTitle"></h1>
+  <p id="heroCopy"></p>
+  <div class="hero-actions">
+    <a class="button button-light" id="officialLink">公式の機能・料金説明を見る</a>
+    <a class="button button-ghost" id="primaryDemoLink">まず体験する</a>
+  </div>
+</section>
 
-    <section class="hero">
-      <div class="hero-card">
-        <span class="badge">3分で伝える営業デモ台本</span>
-        <h1>順番待ちだけではなく、<br>受付の前後までつながる。</h1>
-        <p class="lead">
-          DPRO PET CARE LINEの営業デモは、機能を全部説明するのではなく、
-          「飼い主がLINEで受付 → 受付がQR確認 → 先生が問診確認 → 受付がLINEフォロー → オーナーが未対応ゼロ確認」
-          の流れで見せます。
-        </p>
-      </div>
+<div class="notice" id="notice"></div>
 
-      <div class="panel" style="margin:0;">
-        <span class="badge-dark">営業前の必須確認</span>
-        <div class="checklist">
-          <div class="check"><span>1</span><div><b>system-check.html を開く</b><small>営業前DEMOリセット → リセット後チェック → 一括チェック</small></div></div>
-          <div class="check"><span>2</span><div><b>お客スマホ画面を開く</b><small>rich-menu.html / member.html / waiting.html</small></div></div>
-          <div class="check"><span>3</span><div><b>院内画面を開く</b><small>scan-pc.html / doctor.html / owner.html</small></div></div>
-          <div class="check"><span>4</span><div><b>見せる順番を守る</b><small>順番受付 → QR受付 → 診察 → フォロー → オーナー管理</small></div></div>
-        </div>
-        <div class="button-row" style="margin-top:14px;">
-          <a class="btn btn-main" href="./system-check.html?v=step-vet-29">営業前チェックへ</a>
-          <a class="btn btn-sub" href="./rich-menu.html?v=step-vet-29">LINE入口を開く</a>
-        </div>
-      </div>
-    </section>
+<section class="demo-info" id="quickInfo" aria-label="デモ利用情報"></section>
 
-    <section class="grid4">
-      <div class="summary-card green"><strong>お客さん</strong><p>LINE診察券、順番受付、優先受付、お薬・予防受付、問診。</p></div>
-      <div class="summary-card blue"><strong>受付</strong><p>QR読み取り、来院確認、受付番号、LINEフォロー送信。</p></div>
-      <div class="summary-card gold"><strong>ドクター</strong><p>問診確認、診察メモ、診療済み、フォロー指示。</p></div>
-      <div class="summary-card red"><strong>オーナー</strong><p>今日やること、未対応、予防案内、LINE未連携を確認。</p></div>
-    </section>
+<div class="section-head">
+  <small>CHOOSE A SCREEN</small>
+  <h2>確認する画面を選択</h2>
+  <p id="screenIntro"></p>
+</div>
 
-    <section class="panel">
-      <h2>営業デモの見せる順番</h2>
-      <p class="plain-lead">この順番で見せると、動物病院オーナーに「現場で使うイメージ」が伝わります。</p>
+<section class="grid" id="screenGrid"></section>
 
-      <div id="routeList">
-        <div class="route">
-          <div class="route-no">1</div>
-          <div><h3>システム確認・営業前DEMOリセット</h3><p>まず system-check でOK状態を見せます。信頼感を作る入口です。</p></div>
-          <div class="route-actions"><a class="btn btn-main" href="./system-check.html?v=step-vet-29">開く</a></div>
-        </div>
-        <div class="route">
-          <div class="route-no">2</div>
-          <div><h3>お客スマホ：LINE入口</h3><p>飼い主さんがLINEから迷わず使える入口を見せます。</p></div>
-          <div class="route-actions"><a class="btn btn-main" href="./rich-menu.html?v=step-vet-29">開く</a></div>
-        </div>
-        <div class="route">
-          <div class="route-no">3</div>
-          <div><h3>お客スマホ：ペット診察券</h3><p>QR診察券、多頭管理、予防予定を見せます。歯科版から引き継いだ強みです。</p></div>
-          <div class="route-actions"><a class="btn btn-main" href="./member.html?demo=true&v=step-vet-29">開く</a></div>
-        </div>
-        <div class="route">
-          <div class="route-no">4</div>
-          <div><h3>お客スマホ：今日の順番受付</h3><p>受付番号と来院前問診を見せます。ここで「ただの順番待ちではない」と伝えます。</p></div>
-          <div class="route-actions"><a class="btn btn-main" href="./waiting.html?demo=true&mode=today_queue&v=step-vet-29">開く</a></div>
-        </div>
-        <div class="route">
-          <div class="route-no">5</div>
-          <div><h3>受付PC：QRリーダー受付</h3><p>来院時にQRを読んで、ペット確認・来院受付・受付番号に入れる流れを見せます。</p></div>
-          <div class="route-actions"><a class="btn btn-main" href="./scan-pc.html?v=step-vet-29">開く</a></div>
-        </div>
-        <div class="route">
-          <div class="route-no">6</div>
-          <div><h3>ドクター：問診確認とフォロー指示</h3><p>先生はLINE送信しません。診察メモとフォロー指示だけを残します。</p></div>
-          <div class="route-actions"><a class="btn btn-main" href="./doctor.html?v=step-vet-29">開く</a></div>
-        </div>
-        <div class="route">
-          <div class="route-no">7</div>
-          <div><h3>オーナー：今日やること確認</h3><p>未対応、LINEフォロー、予防案内、LINE未連携を一画面で見せます。</p></div>
-          <div class="route-actions"><a class="btn btn-main" href="./owner.html?v=step-vet-29">開く</a></div>
-        </div>
-      </div>
-    </section>
+<div class="section-head">
+  <small>RECOMMENDED JOURNEY</small>
+  <h2>おすすめの確認順</h2>
+  <p id="journeyIntro"></p>
+</div>
+<section class="flow"><div class="flow-grid" id="flowGrid"></div></section>
 
-    <section class="panel">
-      <h2>営業トーク台本</h2>
-      <div class="tabs">
-        <button class="tab active" data-tab="short">30秒版</button>
-        <button class="tab" data-tab="normal">3分版</button>
-        <button class="tab" data-tab="owner">オーナー向け</button>
-        <button class="tab" data-tab="staff">受付スタッフ向け</button>
-      </div>
+<div class="footer" id="footer"></div>
+</main>
 
-      <div class="tab-panel active" id="tab-short">
-        <div class="script-box">
-          <h3>30秒版</h3>
-          <p>最初に短く伝える用です。</p>
-          <textarea class="copy-box" id="copyShort" readonly>DPRO PET CARE LINEは、動物病院のLINE公式を、ただのお知らせ配信ではなく、診察券・受付・問診・フォロー管理まで使える仕組みに変えるサービスです。
-
-飼い主さんはLINEから診察券を出し、順番受付やお薬・予防受付ができます。
-受付ではQRを読んで来院確認、先生は問診を見て診察、診察後は受付がLINEフォローを送ります。
-オーナーは今日の未対応や予防案内漏れを一画面で確認できます。</textarea>
-          <div class="button-row"><button class="btn btn-sub" data-copy-target="copyShort">コピー</button></div>
-        </div>
-      </div>
-
-      <div class="tab-panel" id="tab-normal">
-        <div class="script-box">
-          <h3>3分版</h3>
-          <p>実際の営業デモで読みながら使えます。</p>
-          <textarea class="copy-box" id="copyNormal" readonly>まず、飼い主さん側はLINEから使います。
-ペット診察券を開くと、ペットごとのQR診察券と予防予定が見られます。
-そこから今日の順番受付、優先受付予約、お薬・予防受付に進めます。
-
-次に、受付側です。
-来院した飼い主さんのQR診察券を受付PCやタブレットで読むと、飼い主名、ペット名、注意メモが表示されます。
-そのまま来院受付に入れるので、先生の画面やオーナー画面に反映されます。
-
-先生は診察室で、来院前問診を見ながら診察できます。
-先生がやるのは、診察メモ、診療済み、3日後の様子確認や1週間後の再診案内などのフォロー指示です。
-LINEを送る作業は先生ではなく受付に回します。
-
-最後にオーナー画面です。
-今日の受付、LINEフォロー待ち、予防案内待ち、LINE未連携の飼い主が一画面で見えます。
-順番待ちだけでなく、受付の前後までLINEでつながることが、このシステムの強みです。</textarea>
-          <div class="button-row"><button class="btn btn-sub" data-copy-target="copyNormal">コピー</button></div>
-        </div>
-      </div>
-
-      <div class="tab-panel" id="tab-owner">
-        <div class="script-box">
-          <h3>オーナー向け</h3>
-          <p>院長・オーナーに刺さる説明です。</p>
-          <textarea class="copy-box" id="copyOwner" readonly>このシステムで一番大事なのは、受付を増やすことよりも、取りこぼしを減らすことです。
-
-診察後の様子確認、再診案内、ワクチンやフィラリアなどの予防案内は、忙しい現場ではどうしても漏れやすいです。
-DPRO PET CARE LINEでは、先生がフォロー指示を残し、受付がLINE文面をコピーして送信、オーナーが未対応を確認できます。
-
-売上管理より先に、現場の混乱を減らし、フォロー漏れ・予防案内漏れ・LINE未連携を見える化することを重視しています。
-小さな動物病院でも始めやすい、LINE公式を活かした受付・診察券・フォロー管理です。</textarea>
-          <div class="button-row"><button class="btn btn-sub" data-copy-target="copyOwner">コピー</button></div>
-        </div>
-      </div>
-
-      <div class="tab-panel" id="tab-staff">
-        <div class="script-box">
-          <h3>受付スタッフ向け</h3>
-          <p>現場スタッフが不安にならない説明です。</p>
-          <textarea class="copy-box" id="copyStaff" readonly>受付スタッフさんに新しい作業を増やすというより、今やっている受付・案内・LINE送信を整理するイメージです。
-
-来院したらQRを読む。
-受付内容を選ぶ。
-診察が終わったら、先生の指示から作られたLINE文面をコピーして送る。
-送ったら送信済みにする。
-
-難しい設定や電子カルテ入力を増やすものではありません。
-受付で「次に何をすればいいか」が見えるようにするための画面です。</textarea>
-          <div class="button-row"><button class="btn btn-sub" data-copy-target="copyStaff">コピー</button></div>
-        </div>
-      </div>
-    </section>
-
-    <section class="panel">
-      <h2>ソトマチ対抗の説明ポイント</h2>
-      <div class="grid3">
-        <div class="talk">
-          <div class="q">Q. 順番待ちシステムと何が違う？</div>
-          <div class="a">順番受付だけではなく、LINE診察券、QR来院受付、問診、診察後フォロー、予防案内までつながる点が違います。</div>
-        </div>
-        <div class="talk">
-          <div class="q">Q. 待ち時間は出せる？</div>
-          <div class="a">正確な待ち時間はズレるとクレームになるので、DPROは「混雑目安」で安全に見せます。</div>
-        </div>
-        <div class="talk">
-          <div class="q">Q. 電子カルテですか？</div>
-          <div class="a">電子カルテを置き換えるものではありません。受付・問診・LINEフォローを軽く管理する仕組みです。</div>
-        </div>
-        <div class="talk">
-          <div class="q">Q. LINEは自動送信？</div>
-          <div class="a">初期版は文面コピー方式です。勝手に送らないので、病院側が内容を確認してから送れます。</div>
-        </div>
-        <div class="talk">
-          <div class="q">Q. 高齢の飼い主さんは？</div>
-          <div class="a">LINE受付ができない人は、受付でQRを読んでスタッフが来院受付できます。</div>
-        </div>
-        <div class="talk">
-          <div class="q">Q. 小さい病院でも使える？</div>
-          <div class="a">はい。複雑な予約・会計・電子カルテ連携は初期版に入れず、低コストで始めやすい構成です。</div>
-        </div>
-      </div>
-    </section>
-
-    <section class="panel">
-      <h2>営業で言わない方がいいこと</h2>
-      <div class="grid2">
-        <div class="note ng">
-          <b>言わない：</b><br>
-          「正確な待ち時間が出ます」<br>
-          「電子カルテの代わりになります」<br>
-          「全部自動でLINE送信します」<br>
-          「時間予約を完全に管理できます」
-        </div>
-        <div class="note ok">
-          <b>言う：</b><br>
-          「混雑目安で安全に表示します」<br>
-          「電子カルテの前段階の受付・問診を整理します」<br>
-          「LINE文面を確認してから送れます」<br>
-          「優先受付枠として柔軟に運用できます」
-        </div>
-      </div>
-    </section>
-
-    <section class="panel">
-      <h2>営業後の確認・次アクション</h2>
-      <div class="grid3">
-        <div class="summary-card green"><strong>興味あり</strong><p>本番導入チェックリストへ。LINE公式、Supabase、Cloudflare、GitHubの所有者を決めます。</p></div>
-        <div class="summary-card gold"><strong>保留</strong><p>受付現場の困りごとを聞き直し、フォロー漏れ・予防案内漏れを中心に再提案します。</p></div>
-        <div class="summary-card blue"><strong>契約後</strong><p>demo clinic_codeを使わず、病院専用環境でSupabase・LINE LIFF・リッチメニューを設定します。</p></div>
-      </div>
-    </section>
-
-    <div class="footer">
-      DPRO PET CARE LINE / STEP VET-29 営業デモガイド<br>
-      営業時は system-check.html でリセット後、このページの順番通りに見せてください。
-    </div>
-  </main>
-
-  <script>
-    async function copyText(text){
-      if(navigator.clipboard && window.isSecureContext){
-        await navigator.clipboard.writeText(text);
-      }else{
-        const t=document.createElement("textarea");
-        t.value=text; document.body.appendChild(t); t.select(); document.execCommand("copy"); t.remove();
-      }
-      alert("コピーしました。");
+<script>
+/*
+  DPRO LIVE DEMO COMMON TEMPLATE V1.0
+  ------------------------------------------------------------
+  変更してよいのは CONFIG の値とCSS変数のブランド色のみ。
+  DOM骨格・セクション順・公開注意・CHOOSE A SCREEN・
+  RECOMMENDED JOURNEYはCOMMON TEMPLATE V1.0 LOCK対象。
+*/
+const CONFIG = {
+  "systemName": "DPRO PET CARE LINE",
+  "pageTitle": "DPRO PET CARE LINE｜公開操作デモ・画面一覧",
+  "heroCopy": "LINEペット診察券から順番・日時予約、QR来院受付、獣医師の診察進行、会計待ちまで。飼い主側と院内側がつながる流れを、実在する公開デモ画面で確認できます。",
+  "officialUrl": "https://dpromstk2000-lab.github.io/dpro-line-systems-site/systems/pet-care.html",
+  "primaryDemoUrl": "rich-menu.html?clinic_code=dpro_vet_demo&demo=ready",
+  "notice": "公開デモでは、実在する飼い主名・電話番号・住所・ペット情報・診療情報・問診内容・予防情報・保険／マイクロチップ情報・症状写真などを入力しないでください。必ず架空の内容だけを使用してください。",
+  "screenIntro": "最初に01の飼い主LINE入口を開き、ペット診察券・当日順番受付・30分単位の日時指定予約を確認します。その後、院内側はデモ管理コード1234を使い、QR来院受付→獣医師→会計待ち／完了→医院運用設定の順に確認します。",
+  "journeyIntro": "DPRO PET CARE LINEの主価値である「飼い主のLINE受付から院内進行までつながる流れ」を、5つの実在画面で順番に確認します。",
+  "adminCode": "1234",
+  "quickInfo": [
+    {
+      "label": "CUSTOMER FLOW",
+      "text": "LINE入口 → ペット診察券 → 順番受付／30分日時予約"
+    },
+    {
+      "label": "ADMIN CODE",
+      "text": "院内側デモ管理コード：1234"
+    },
+    {
+      "label": "SCREEN STRUCTURE",
+      "text": "5画面で受付〜診察〜会計待ち・医院運用を確認"
     }
+  ],
+  "screens": [
+    {
+      "step": "01 / CUSTOMER LINE / PRIMARY EXPERIENCE",
+      "title": "飼い主LINE｜ペット診察券・順番／日時予約",
+      "description": "LINE入口から、ペット診察券、今日の順番受付、30分単位の日時指定予約、お薬・予防受付、混雑目安へ進めます。LPの最重要訴求を最初に確認する画面です。",
+      "tags": [
+        "LINEペット診察券",
+        "当日順番受付",
+        "30分日時予約"
+      ],
+      "note": "<b>最初にここから：</b>公開デモ用の架空情報だけを使用してください。ペット診察券や受付画面へは、このLINE入口から進めます。",
+      "url": "rich-menu.html?clinic_code=dpro_vet_demo&demo=ready",
+      "cta": "飼い主LINE入口を開く",
+      "officialUrl": "https://dpromstk2000-lab.github.io/dpro-line-systems-site/lp-vet.html"
+    },
+    {
+      "step": "02 / QR RECEPTION",
+      "title": "受付PC｜QR来院受付",
+      "description": "ペット診察券QRを読み取り、飼い主・ペットを確認して来院受付へ進めます。LINE側の受付を院内運用へつなぐ入口です。",
+      "tags": [
+        "QR読み取り",
+        "来院確認",
+        "受付進行"
+      ],
+      "note": "<b>デモ管理コード：</b>1234。実在する診察券情報や個人情報は入力しないでください。",
+      "url": "scan-pc.html?clinic_code=dpro_vet_demo&demo=ready",
+      "cta": "受付PCを開く",
+      "officialUrl": "https://dpromstk2000-lab.github.io/dpro-line-systems-site/lp-vet.html"
+    },
+    {
+      "step": "03 / DOCTOR",
+      "title": "獣医師｜問診確認・診察進行",
+      "description": "院内受付済み・診察中のペットを確認し、来院前問診、診察進行、診察メモ、フォロー指示などを確認します。",
+      "tags": [
+        "来院前問診",
+        "診察進行",
+        "フォロー指示"
+      ],
+      "note": "<b>デモ管理コード：</b>1234。症状画像・問診内容など医療情報は、公開デモでは架空データのみ使用してください。",
+      "url": "doctor.html?clinic_code=dpro_vet_demo&demo=ready",
+      "cta": "獣医師画面を開く",
+      "officialUrl": "https://dpromstk2000-lab.github.io/dpro-line-systems-site/lp-vet.html"
+    },
+    {
+      "step": "04 / TODAY BOARD",
+      "title": "受付・当日ボード｜会計待ち・完了まで確認",
+      "description": "WEB・LINE・電話・窓口から入った順番受付と日時予約を同じ一覧で確認し、診察中、会計待ち、完了など本日の進行を見ます。",
+      "tags": [
+        "受付一元化",
+        "会計待ち",
+        "完了確認"
+      ],
+      "note": "<b>デモ管理コード：</b>1234。既存の本日共通受付一覧をそのまま使用し、新しい会計画面は作りません。",
+      "url": "today-board.html?clinic_code=dpro_vet_demo&demo=ready",
+      "cta": "本日共通受付を開く",
+      "officialUrl": "https://dpromstk2000-lab.github.io/dpro-line-systems-site/lp-vet.html"
+    },
+    {
+      "step": "05 / OWNER SETTINGS",
+      "title": "オーナー｜医院運用設定",
+      "description": "医院名、受付時間、定休日、臨時休診、受付状態、2か月カレンダーなど、飼い主画面と受付運用に関わる医院設定を確認します。",
+      "tags": [
+        "受付時間",
+        "休診設定",
+        "医院運用"
+      ],
+      "note": "<b>デモ管理コード：</b>1234。設定を変更して確認した場合は、デモ環境の元の値へ戻してください。",
+      "url": "owner.html?clinic_code=dpro_vet_demo&demo=ready",
+      "cta": "医院運用設定を開く",
+      "officialUrl": "https://dpromstk2000-lab.github.io/dpro-line-systems-site/lp-vet.html"
+    }
+  ],
+  "journey": [
+    {
+      "step": "01",
+      "text": "LINE入口から診察券・順番／日時予約を確認"
+    },
+    {
+      "step": "02",
+      "text": "QR診察券で来院受付"
+    },
+    {
+      "step": "03",
+      "text": "獣医師が問診・診察進行を確認"
+    },
+    {
+      "step": "04",
+      "text": "当日ボードで会計待ち・完了を確認"
+    },
+    {
+      "step": "05",
+      "text": "オーナーが受付時間・休診設定を確認"
+    }
+  ]
+};
 
-    document.querySelectorAll("[data-copy-target]").forEach(btn=>{
-      btn.addEventListener("click",()=>{
-        const id=btn.getAttribute("data-copy-target");
-        const el=document.getElementById(id);
-        copyText(el ? el.value : "");
-      });
-    });
+document.documentElement.style.setProperty("--flow-cols", String(Math.min(CONFIG.journey.length, 7)));
+document.title = CONFIG.pageTitle;
+document.getElementById("heroTitle").innerHTML = `${CONFIG.systemName}<br>公開操作デモ・画面一覧`;
+document.getElementById("heroCopy").textContent = CONFIG.heroCopy;
+document.getElementById("officialLink").href = CONFIG.officialUrl;
+document.getElementById("primaryDemoLink").href = CONFIG.primaryDemoUrl;
+document.getElementById("notice").textContent = CONFIG.notice;
+document.getElementById("screenIntro").textContent = CONFIG.screenIntro;
+document.getElementById("journeyIntro").textContent = CONFIG.journeyIntro;
+document.getElementById("footer").textContent = `${CONFIG.systemName}｜PUBLIC OPERATION DEMO V1.0`;
 
-    document.querySelectorAll(".tab").forEach(btn=>{
-      btn.addEventListener("click",()=>{
-        document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
-        document.querySelectorAll(".tab-panel").forEach(x=>x.classList.remove("active"));
-        btn.classList.add("active");
-        const target=document.getElementById("tab-"+btn.dataset.tab);
-        if(target) target.classList.add("active");
-      });
-    });
-  </script>
+document.getElementById("quickInfo").innerHTML = CONFIG.quickInfo.map(x =>
+  `<div><small>${x.label}</small><strong>${x.text}</strong></div>`
+).join("");
+
+document.getElementById("screenGrid").innerHTML = CONFIG.screens.map(x => `
+  <article class="card">
+    <div class="card-number">${x.step}</div>
+    <h3>${x.title}</h3>
+    <p>${x.description}</p>
+    <div class="pills">${x.tags.map(t => `<span>${t}</span>`).join("")}</div>
+    <div class="card-note">${x.note}</div>
+    <div class="card-actions">
+      <a class="open" href="${x.url}">${x.cta}</a>
+      <a class="official" href="${x.officialUrl}">説明</a>
+    </div>
+  </article>
+`).join("");
+
+document.getElementById("flowGrid").innerHTML = CONFIG.journey.map(x => `
+  <div class="flow-step${x.sameScreen ? " same" : ""}">
+    <b>${x.step}${x.sameScreen ? " / SAME SCREEN" : ""}</b>
+    <strong>${x.text}</strong>
+  </div>
+`).join("");
+</script>
 </body>
 </html>
