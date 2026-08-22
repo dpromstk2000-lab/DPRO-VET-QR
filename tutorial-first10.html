@@ -77,9 +77,9 @@ const BIND={
 "vet.owner.menu":{primary:".tabs",fallback:["aside.card.sticky","#section-status","main"]}
 };
 const KEY="dpro_tutorial_vet_first10_v1",q=new URLSearchParams(location.search),mode=q.get("mode")||"resume",clinic=q.get("clinic_code")||"dpro_vet_demo",demo=q.get("demo")||"ready";
+const $=id=>document.getElementById(id);let index=0,lastPage="",boundMode="";
 function guideUrl(file,extra){const u=new URL(file,location.href);u.searchParams.set("clinic_code",clinic);if(demo)u.searchParams.set("demo",demo);Object.entries(extra||{}).forEach(([k,v])=>u.searchParams.set(k,v));return u.toString()}
 $("menuCenter").href=guideUrl("tutorial-guide-center.html");$("runtimeGuideLink").href=guideUrl("tutorial-guide-center.html");
-const $=id=>document.getElementById(id);let index=0,lastPage="",boundMode="";
 function loadState(){try{return JSON.parse(localStorage.getItem(KEY)||"null")}catch{return null}}
 function saveState(patch){const old=loadState()||{};const next={status:"IN_PROGRESS",index,started_at:old.started_at||new Date().toISOString(),...old,...patch,index,updated_at:new Date().toISOString()};try{localStorage.setItem(KEY,JSON.stringify(next))}catch{}return next}
 function resetState(){index=0;saveState({status:"IN_PROGRESS",index:0,started_at:new Date().toISOString(),completed_at:null})}
