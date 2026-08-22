@@ -1,0 +1,40 @@
+schema: DPRO-TUTORIAL-PRINT-MAPPING-V1.0
+date: '2026-08-22'
+single_source: CONTENT_PACKAGE.json
+documents:
+- id: PRINT-QUICK
+  title: DPRO PET CARE LINE クイックスタート
+  format: A4 portrait
+  source_sections:
+  - first10.chapters
+  - first10.cards
+  - guide_center.faqs:Q001-Q005,Q015
+  target_pages: 4-6
+  required_blocks:
+  - 店舗名記入欄
+  - 担当者記入欄
+  - Guide version
+  - 更新日
+  - online guide QR/link
+  - privacy note
+  screenshots: 'R5 only: safe demo/fictional data, no real customer/pet clinical data'
+- id: PRINT-DETAIL
+  title: DPRO PET CARE LINE 詳細操作マニュアル
+  format: A4 portrait
+  source_sections:
+  - guide_center.categories
+  - guide_center.articles
+  - guide_center.faqs
+  target_pages: 18-32
+  required_blocks:
+  - 目次
+  - カテゴリ別手順
+  - 困った時
+  - 店舗名記入欄
+  - 担当者記入欄
+  - Guide version
+  - 更新日
+  - online guide QR/link
+  - privacy note
+  screenshots: 'R5 only: safe demo/fictional data; sensitive questionnaire screenshots must be synthetic'
+generation_rule: R5 generates PDFs from the same canonical CONTENT_PACKAGE.json; no manual copy divergence.

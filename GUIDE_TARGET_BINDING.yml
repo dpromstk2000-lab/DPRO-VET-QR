@@ -1,0 +1,116 @@
+schema: DPRO-TUTORIAL-GUIDE-TARGET-BINDING-V1.0
+date: '2026-08-22'
+locked_commit: 2694fdf9e24971b6dced2b3b1e0d13811fc24017
+formal_attribute: data-dpro-guide-id
+binding_count: 16
+missing_binding_count: 0
+bindings:
+- guide_id: vet.operations.hero
+  page: operations.html
+  primary: section.hero h1
+  fallback:
+  - section.hero
+  - main
+  status: BOUND
+- guide_id: vet.operations.today_board_card
+  page: operations.html
+  primary: '[data-file="today-board.html"] h3'
+  fallback:
+  - '[data-file="today-board.html"]'
+  - section.grid
+  status: BOUND
+- guide_id: vet.today_board.list
+  page: today-board.html
+  primary: '#unifiedList'
+  fallback:
+  - .panel .panelHead
+  - main
+  status: BOUND
+- guide_id: vet.today_board.attention
+  page: today-board.html
+  primary: '#attentionPanel'
+  fallback:
+  - '#globalNotice'
+  - .toolbar
+  status: BOUND
+- guide_id: vet.scan_pc.today_menu
+  page: scan-pc.html
+  primary: .ops-nav-btn[data-open-panel="today"]
+  fallback:
+  - '[data-panel="today"]'
+  - '#entryList'
+  status: BOUND
+- guide_id: vet.scan_pc.qr_menu
+  page: scan-pc.html
+  primary: .ops-nav-btn[data-open-panel="qr"]
+  fallback:
+  - '[data-panel="qr"]'
+  - '#qrInput'
+  status: BOUND
+- guide_id: vet.scan_pc.manual_menu
+  page: scan-pc.html
+  primary: .ops-nav-btn[data-open-panel="manual"]
+  fallback:
+  - '[data-panel="manual"]'
+  - .manual-reception-card
+  status: BOUND
+- guide_id: vet.scan_pc.status_list
+  page: scan-pc.html
+  primary: '#entryList'
+  fallback:
+  - '[data-panel="today"]'
+  - .status-grid
+  status: BOUND
+- guide_id: vet.doctor.main
+  page: doctor.html
+  primary: main
+  fallback:
+  - body
+  status: BOUND_COARSE_VERIFY_R3
+  note: Use semantic inner target after R3 DOM re-read; page-level fallback already prevents breakage.
+- guide_id: vet.appointment_admin.main
+  page: appointment-admin.html
+  primary: main
+  fallback:
+  - body
+  status: BOUND_COARSE_VERIFY_R3
+- guide_id: vet.appointment_calendar.main
+  page: appointment-calendar.html
+  primary: main
+  fallback:
+  - body
+  status: BOUND_COARSE_VERIFY_R3
+- guide_id: vet.patients.main
+  page: patients.html
+  primary: main
+  fallback:
+  - body
+  status: BOUND_COARSE_VERIFY_R3
+- guide_id: vet.line_call.main
+  page: line-call-admin.html
+  primary: main
+  fallback:
+  - body
+  status: BOUND_COARSE_VERIFY_R3
+- guide_id: vet.recall.main
+  page: recall-admin.html
+  primary: main
+  fallback:
+  - body
+  status: BOUND_COARSE_VERIFY_R3
+- guide_id: vet.owner.menu
+  page: owner.html
+  primary: .tabs
+  fallback:
+  - aside.card.sticky
+  - '#section-status'
+  - main
+  status: BOUND
+- guide_id: vet.guide.launcher
+  page: RUNTIME
+  primary: '[data-dpro-guide-id="vet.guide.launcher"]'
+  fallback:
+  - body
+  status: RUNTIME_TARGET_PLANNED
+r3_rule: Add data-dpro-guide-id attributes additively; do not alter existing business behavior. Coarse bindings must be refined
+  only after re-reading current DOM at R3 start.

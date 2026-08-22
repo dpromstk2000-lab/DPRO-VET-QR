@@ -1,0 +1,21 @@
+LIVE QA RESULT
+DATE: 2026-08-22
+
+R3 production target URLs:
+- https://dpromstk2000-lab.github.io/DPRO-VET-QR/operations.html?clinic_code=dpro_vet_demo&demo=ready
+- https://dpromstk2000-lab.github.io/DPRO-VET-QR/tutorial-first10.html?clinic_code=dpro_vet_demo&demo=ready&mode=start
+
+Current production commit/tree at work start and after failed writes:
+commit: 2694fdf9e24971b6dced2b3b1e0d13811fc24017
+tree:   27a88219480a06ba5f0eaf0e30381bf02a97c029
+source drift at start: NONE
+
+Expected R3 guide target binding count: 16
+Static missing binding: 0 by locked mapping/runtime fallback design
+Production binding live count: NOT RUN
+Mutation-zero source check: PASS
+Existing business source regression: 0 intended; operations routes retained
+
+BLOCKER STATE: GITHUB_WRITE_PERMISSION_403
+R3 live QA overall: BLOCKED
+R4 live QA: NOT STARTED

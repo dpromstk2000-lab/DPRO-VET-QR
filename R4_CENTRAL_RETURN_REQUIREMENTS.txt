@@ -1,0 +1,46 @@
+DPRO TUTORIAL 動物病院（VET） / R4 CENTRAL RETURN REQUIREMENTS
+Lane: LANE-2
+Date: 2026-08-22
+
+Return ONE root-only ZIP after R3 + R4.
+Do not start R5.
+
+Required root files:
+1. 00_START_HERE.txt
+2. HANDOFF.txt
+3. STATUS.txt
+4. NEXT_ACTION.txt
+5. CENTRAL_R2_APPROVAL.txt
+6. CONTENT_PACKAGE.json
+7. FIRST_10_MINUTES.yml
+8. GUIDE_TARGET_BINDING.yml
+9. GUIDE_CENTER_MAP.yml
+10. PRINT_MAPPING.yml
+11. R3_R4_QA_PLAN.yml
+12. R3_IMPLEMENTATION_RESULT.txt
+13. R3_QA_RESULT.txt
+14. R4_IMPLEMENTATION_RESULT.txt
+15. R4_QA_RESULT.txt
+16. LIVE_QA_RESULT.txt
+17. SOURCE_COMMIT.txt
+18. SHA256.txt
+19+. every production file created/changed for R3/R4
+20+. desktop/mobile evidence images where available
+
+LIVE_QA_RESULT.txt must record:
+- exact production URLs
+- HTTP/load/render result
+- desktop/mobile
+- First10 start/resume/replay result
+- Guide Center search/category/article/FAQ result
+- actual feature link result
+- guide target binding count / missing count
+- mutation-zero result
+- existing business regression result
+- exact final commit/tree
+- blocker state
+
+ZIP rules:
+- root-only
+- no ZIP-inside-ZIP
+- SHA256 covers every file except SHA256.txt

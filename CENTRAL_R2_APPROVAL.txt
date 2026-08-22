@@ -1,0 +1,43 @@
+DPRO TUTORIAL 動物病院（VET） / CENTRAL R2 APPROVAL
+Lane: LANE-2
+Date: 2026-08-22
+
+DECISION
+PASS
+R0 SOURCE LOCK: APPROVED
+R1 CURRENT SYSTEM AUDIT: APPROVED
+R2 INFORMATION DESIGN: FINAL LOCK FOR BLOCK-2
+R3: GO
+R4: GO only after R3 self-QA PASS under this authorization
+R5: NOT AUTHORIZED
+
+R2 DESIGN SOURCE
+commit: 2694fdf9e24971b6dced2b3b1e0d13811fc24017
+tree:   27a88219480a06ba5f0eaf0e30381bf02a97c029
+
+EFFECTIVE R3 START BASELINE OBSERVED BY CENTRAL
+commit: 2694fdf9e24971b6dced2b3b1e0d13811fc24017
+tree:   27a88219480a06ba5f0eaf0e30381bf02a97c029
+
+COUNTS
+First10 7章/16カード | Guide 8カテゴリ/40記事/FAQ15
+
+CENTRAL RETURN AUDIT
+- required files: 19/19 present
+- ZIP root-only: PASS
+- ZIP-inside-ZIP: 0
+- SHA256: all 18 non-manifest files referenced and matched
+- canonical duplicate IDs: 0
+- Guide article/category reference audit: PASS
+- missing First10 guide binding: 0
+- internal-support boundary: PASS
+- real-customer-data boundary: PASS
+- tutorial-driven Worker/API/DB/Supabase/SQL/AUTH/permission/feature-flag change: 0
+
+SOURCE DRIFT
+NONE
+
+RULE
+At actual R3 work start, re-read current main.
+Never reset main backward.
+If main moved again, audit the new diff before implementation.

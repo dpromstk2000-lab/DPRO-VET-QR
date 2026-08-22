@@ -1,0 +1,717 @@
+{
+  "schema": "DPRO-TUTORIAL-CONTENT-PACKAGE-V1.0",
+  "date": "2026-08-22",
+  "industry": "動物病院（VET）",
+  "content_version": "VET-R2-LOCK-CANDIDATE-1",
+  "locked_source": {
+    "repository": "dpromstk2000-lab/DPRO-VET-QR",
+    "commit": "2694fdf9e24971b6dced2b3b1e0d13811fc24017",
+    "tree": "27a88219480a06ba5f0eaf0e30381bf02a97c029"
+  },
+  "safety": {
+    "mutation_zero": true,
+    "real_customer_data": false,
+    "real_pet_clinical_data": false,
+    "real_photos": false,
+    "real_questionnaire_images": false,
+    "secrets": false,
+    "medical_advice_scope": "operation only; no diagnosis or fixed medical interval recommendation"
+  },
+  "first10": {
+    "schema": "DPRO-TUTORIAL-FIRST10-V1.0",
+    "date": "2026-08-22",
+    "industry": "動物病院（VET）",
+    "version": "R2-DESIGN-LOCK-CANDIDATE",
+    "chapter_count": 7,
+    "card_count": 16,
+    "estimated_minutes": 10,
+    "selection_rationale": "VET daily operations have a distinct start-board, reception, doctor/accounting handoff, appointment, patient search and follow-up flow. Low-frequency settings/migration and high-sensitivity questionnaire image operations are moved to Guide Center.",
+    "chapters": [
+      {
+        "id": "F10-CH01",
+        "title": "開始地点を確認",
+        "goal": "毎日の開始地点を迷わない",
+        "start_page": "operations.html",
+        "cards": [
+          "F10-C01",
+          "F10-C02"
+        ]
+      },
+      {
+        "id": "F10-CH02",
+        "title": "今日の受付を把握",
+        "goal": "WEB/LINE/電話/窓口を1つの一覧で把握",
+        "start_page": "today-board.html",
+        "cards": [
+          "F10-C03",
+          "F10-C04"
+        ]
+      },
+      {
+        "id": "F10-CH03",
+        "title": "来院受付の入口",
+        "goal": "受付PCでQR/窓口/電話の入口を理解",
+        "start_page": "scan-pc.html",
+        "cards": [
+          "F10-C05",
+          "F10-C06",
+          "F10-C07"
+        ]
+      },
+      {
+        "id": "F10-CH04",
+        "title": "診察から会計への引継ぎ",
+        "goal": "ステータスと役割境界を理解",
+        "start_page": "scan-pc.html",
+        "cards": [
+          "F10-C08",
+          "F10-C09"
+        ]
+      },
+      {
+        "id": "F10-CH05",
+        "title": "日時予約を確認",
+        "goal": "予約管理と週間確認の場所を理解",
+        "start_page": "appointment-admin.html",
+        "cards": [
+          "F10-C10",
+          "F10-C11"
+        ]
+      },
+      {
+        "id": "F10-CH06",
+        "title": "患者検索とフォロー",
+        "goal": "患者を探し、LINE/リコールの場所を理解",
+        "start_page": "patients.html",
+        "cards": [
+          "F10-C12",
+          "F10-C13",
+          "F10-C14"
+        ]
+      },
+      {
+        "id": "F10-CH07",
+        "title": "設定と困った時",
+        "goal": "医院設定の入口とGuide Center再実行を理解",
+        "start_page": "owner.html",
+        "cards": [
+          "F10-C15",
+          "F10-C16"
+        ]
+      }
+    ],
+    "cards": [
+      {
+        "id": "F10-C01",
+        "chapter": "F10-CH01",
+        "title": "運用ホームから始める",
+        "page": "operations.html",
+        "target": "vet.operations.hero",
+        "mode": "READ_ONLY",
+        "text": "まず「運用ホーム」を開き、日常業務の入口がまとまっていることを確認します。"
+      },
+      {
+        "id": "F10-C02",
+        "chapter": "F10-CH01",
+        "title": "本日の診療・統合ボード",
+        "page": "operations.html",
+        "target": "vet.operations.today_board_card",
+        "mode": "OPEN_ONLY",
+        "text": "毎日の最初の確認先は本日共通受付一覧です。クリックは利用者が行い、ガイドは自動操作しません。"
+      },
+      {
+        "id": "F10-C03",
+        "chapter": "F10-CH02",
+        "title": "受付元と受付種別を見る",
+        "page": "today-board.html",
+        "target": "vet.today_board.list",
+        "mode": "READ_ONLY",
+        "text": "WEB・LINE・電話・窓口を同じ一覧で見て、順番受付か日時予約かをバッジで確認します。"
+      },
+      {
+        "id": "F10-C04",
+        "chapter": "F10-CH02",
+        "title": "要確認と最新更新",
+        "page": "today-board.html",
+        "target": "vet.today_board.attention",
+        "mode": "READ_ONLY",
+        "text": "要確認欄と更新時刻を確認します。ガイドは更新ボタンや業務操作を自動実行しません。"
+      },
+      {
+        "id": "F10-C05",
+        "chapter": "F10-CH03",
+        "title": "受付PCは「今日の受付」が主役",
+        "page": "scan-pc.html",
+        "target": "vet.scan_pc.today_menu",
+        "mode": "READ_ONLY",
+        "text": "通常は「今日の受付」を見ます。新しい受付が必要な時だけ左メニューを開きます。"
+      },
+      {
+        "id": "F10-C06",
+        "chapter": "F10-CH03",
+        "title": "QR受付の流れ",
+        "page": "scan-pc.html",
+        "target": "vet.scan_pc.qr_menu",
+        "mode": "READ_ONLY",
+        "text": "QRは「読取→ペット確認→来院受付」の順です。チュートリアルでは実受付を作成しません。"
+      },
+      {
+        "id": "F10-C07",
+        "chapter": "F10-CH03",
+        "title": "LINEなしでも受付できる",
+        "page": "scan-pc.html",
+        "target": "vet.scan_pc.manual_menu",
+        "mode": "READ_ONLY",
+        "text": "窓口・電話受付、既存患者検索、代理登録があるためLINE未連携でも現場を止めません。"
+      },
+      {
+        "id": "F10-C08",
+        "chapter": "F10-CH04",
+        "title": "ステータスの流れ",
+        "page": "scan-pc.html",
+        "target": "vet.scan_pc.status_list",
+        "mode": "READ_ONLY",
+        "text": "来院待ち→院内受付済み→診察中→会計待ち→完了の流れを確認します。"
+      },
+      {
+        "id": "F10-C09",
+        "chapter": "F10-CH04",
+        "title": "獣医師は会計待ちへ引き継ぐ",
+        "page": "doctor.html",
+        "target": "vet.doctor.main",
+        "mode": "READ_ONLY",
+        "text": "獣医師画面の「診察済み」は会計待ちへの引継ぎです。最終完了は受付側の役割です。"
+      },
+      {
+        "id": "F10-C10",
+        "chapter": "F10-CH05",
+        "title": "日時指定予約管理",
+        "page": "appointment-admin.html",
+        "target": "vet.appointment_admin.main",
+        "mode": "READ_ONLY",
+        "text": "日時指定予約、獣医師指定、変更・キャンセル、来院受付の管理場所を確認します。"
+      },
+      {
+        "id": "F10-C11",
+        "chapter": "F10-CH05",
+        "title": "週間予約ボード",
+        "page": "appointment-calendar.html",
+        "target": "vet.appointment_calendar.main",
+        "mode": "OPEN_ONLY",
+        "text": "1日の操作だけでなく、週間ボードで予約の偏りや状態を見渡せます。"
+      },
+      {
+        "id": "F10-C12",
+        "chapter": "F10-CH06",
+        "title": "患者を検索する場所",
+        "page": "patients.html",
+        "target": "vet.patients.main",
+        "mode": "READ_ONLY",
+        "text": "飼い主・ペットを探す場所を確認します。教材には実顧客名や実電話番号を使いません。"
+      },
+      {
+        "id": "F10-C13",
+        "chapter": "F10-CH06",
+        "title": "LINE呼び出し",
+        "page": "line-call-admin.html",
+        "target": "vet.line_call.main",
+        "mode": "READ_ONLY",
+        "text": "必要な飼い主へのLINE案内を管理する場所です。チュートリアルは送信を自動実行しません。"
+      },
+      {
+        "id": "F10-C14",
+        "chapter": "F10-CH06",
+        "title": "予防・再診リコール",
+        "page": "recall-admin.html",
+        "target": "vet.recall.main",
+        "mode": "READ_ONLY",
+        "text": "継続診療のフォロー対象を確認します。実送信や医療判断はガイドの範囲外です。"
+      },
+      {
+        "id": "F10-C15",
+        "chapter": "F10-CH07",
+        "title": "医院設定の場所",
+        "page": "owner.html",
+        "target": "vet.owner.menu",
+        "mode": "READ_ONLY",
+        "text": "基本情報・受付時間・休診日などは医院設定から管理します。設定変更はFirst10では実行しません。"
+      },
+      {
+        "id": "F10-C16",
+        "chapter": "F10-CH07",
+        "title": "困った時は操作ガイド",
+        "page": "RUNTIME",
+        "target": "vet.guide.launcher",
+        "mode": "RUNTIME_UI",
+        "text": "常設の「？ 操作ガイド」から記事検索と10分ガイド再実行へ進める設計にします。"
+      }
+    ],
+    "mutation_policy": "ZERO_AUTO_MUTATION",
+    "replay": true
+  },
+  "guide_center": {
+    "categories": [
+      {
+        "id": "GC-START",
+        "title": "まず始める・本日の運用"
+      },
+      {
+        "id": "GC-RECEPTION",
+        "title": "受付・QR・待ち状況"
+      },
+      {
+        "id": "GC-APPOINTMENT",
+        "title": "日時予約・複数ペット予約"
+      },
+      {
+        "id": "GC-CARD",
+        "title": "診察券・飼い主/ペット"
+      },
+      {
+        "id": "GC-DOCTOR",
+        "title": "診察・会計引継ぎ・患者検索"
+      },
+      {
+        "id": "GC-LINE",
+        "title": "LINE呼び出し・フォロー・リコール"
+      },
+      {
+        "id": "GC-SETTINGS",
+        "title": "医院設定・機能設定・予防ルール"
+      },
+      {
+        "id": "GC-SUPPORT",
+        "title": "WEB問診・トラブル・データ/プライバシー"
+      }
+    ],
+    "articles": [
+      {
+        "id": "A001",
+        "category_id": "GC-START",
+        "title": "運用ホームの使い方",
+        "feature_link": "operations.html",
+        "audience": "all"
+      },
+      {
+        "id": "A002",
+        "category_id": "GC-START",
+        "title": "本日共通受付一覧の見方",
+        "feature_link": "today-board.html",
+        "audience": "all"
+      },
+      {
+        "id": "A003",
+        "category_id": "GC-START",
+        "title": "受付元 WEB/LINE/電話/窓口の見分け方",
+        "feature_link": "today-board.html",
+        "audience": "all"
+      },
+      {
+        "id": "A004",
+        "category_id": "GC-START",
+        "title": "最初の10分ガイドを再実行する",
+        "feature_link": "RUNTIME",
+        "audience": "all"
+      },
+      {
+        "id": "A005",
+        "category_id": "GC-RECEPTION",
+        "title": "受付PC「今日の受付」",
+        "feature_link": "scan-pc.html",
+        "audience": "all"
+      },
+      {
+        "id": "A006",
+        "category_id": "GC-RECEPTION",
+        "title": "診察券QRで来院受付する",
+        "feature_link": "scan-pc.html",
+        "audience": "all"
+      },
+      {
+        "id": "A007",
+        "category_id": "GC-RECEPTION",
+        "title": "受付iPadでQRを読む",
+        "feature_link": "scan-ipad.html",
+        "audience": "all"
+      },
+      {
+        "id": "A008",
+        "category_id": "GC-RECEPTION",
+        "title": "窓口受付・電話受付の違い",
+        "feature_link": "scan-pc.html",
+        "audience": "all"
+      },
+      {
+        "id": "A009",
+        "category_id": "GC-RECEPTION",
+        "title": "既存患者検索から受付する",
+        "feature_link": "scan-pc.html",
+        "audience": "all"
+      },
+      {
+        "id": "A010",
+        "category_id": "GC-RECEPTION",
+        "title": "受付ステータスの意味",
+        "feature_link": "scan-pc.html",
+        "audience": "all"
+      },
+      {
+        "id": "A011",
+        "category_id": "GC-RECEPTION",
+        "title": "混雑目安を見る",
+        "feature_link": "queue-status.html",
+        "audience": "all"
+      },
+      {
+        "id": "A012",
+        "category_id": "GC-RECEPTION",
+        "title": "順番通知は必要な人だけ使う",
+        "feature_link": "queue-notice.html",
+        "audience": "all"
+      },
+      {
+        "id": "A013",
+        "category_id": "GC-APPOINTMENT",
+        "title": "日時指定予約の基本",
+        "feature_link": "appointment.html",
+        "audience": "all"
+      },
+      {
+        "id": "A014",
+        "category_id": "GC-APPOINTMENT",
+        "title": "スタッフの日時予約管理",
+        "feature_link": "appointment-admin.html",
+        "audience": "all"
+      },
+      {
+        "id": "A015",
+        "category_id": "GC-APPOINTMENT",
+        "title": "週間予約ボード",
+        "feature_link": "appointment-calendar.html",
+        "audience": "all"
+      },
+      {
+        "id": "A016",
+        "category_id": "GC-APPOINTMENT",
+        "title": "複数ペットをまとめて予約する",
+        "feature_link": "appointment-multi.html",
+        "audience": "all"
+      },
+      {
+        "id": "A017",
+        "category_id": "GC-APPOINTMENT",
+        "title": "予約変更・キャンセルの考え方",
+        "feature_link": "appointment.html",
+        "audience": "all"
+      },
+      {
+        "id": "A018",
+        "category_id": "GC-CARD",
+        "title": "LINEペット診察券を見る",
+        "feature_link": "member.html",
+        "audience": "all"
+      },
+      {
+        "id": "A019",
+        "category_id": "GC-CARD",
+        "title": "複数ペットを切り替える",
+        "feature_link": "member.html",
+        "audience": "all"
+      },
+      {
+        "id": "A020",
+        "category_id": "GC-CARD",
+        "title": "飼い主・ペットを登録/連携する",
+        "feature_link": "register.html",
+        "audience": "all"
+      },
+      {
+        "id": "A021",
+        "category_id": "GC-CARD",
+        "title": "LINE連携の確認",
+        "feature_link": "link.html",
+        "audience": "all"
+      },
+      {
+        "id": "A022",
+        "category_id": "GC-DOCTOR",
+        "title": "獣医師画面の基本",
+        "feature_link": "doctor.html",
+        "audience": "all"
+      },
+      {
+        "id": "A023",
+        "category_id": "GC-DOCTOR",
+        "title": "診察中から会計待ちへ引き継ぐ",
+        "feature_link": "doctor.html",
+        "audience": "all"
+      },
+      {
+        "id": "A024",
+        "category_id": "GC-DOCTOR",
+        "title": "患者・飼い主を検索する",
+        "feature_link": "patients.html",
+        "audience": "all"
+      },
+      {
+        "id": "A025",
+        "category_id": "GC-DOCTOR",
+        "title": "受付と獣医師の役割分担",
+        "feature_link": "operation-guide.html",
+        "audience": "all"
+      },
+      {
+        "id": "A026",
+        "category_id": "GC-LINE",
+        "title": "LINE呼び出し管理",
+        "feature_link": "line-call-admin.html",
+        "audience": "all"
+      },
+      {
+        "id": "A027",
+        "category_id": "GC-LINE",
+        "title": "診察後フォロー",
+        "feature_link": "doctor.html",
+        "audience": "all"
+      },
+      {
+        "id": "A028",
+        "category_id": "GC-LINE",
+        "title": "予防・再診リコール",
+        "feature_link": "recall-admin.html",
+        "audience": "all"
+      },
+      {
+        "id": "A029",
+        "category_id": "GC-LINE",
+        "title": "LINE未連携の飼い主をフォロー",
+        "feature_link": "line-unlinked-follow.html",
+        "audience": "all"
+      },
+      {
+        "id": "A030",
+        "category_id": "GC-SETTINGS",
+        "title": "医院基本情報・受付時間を設定",
+        "feature_link": "owner.html",
+        "audience": "clinic_owner_admin"
+      },
+      {
+        "id": "A031",
+        "category_id": "GC-SETTINGS",
+        "title": "定休日・臨時休業を設定",
+        "feature_link": "owner.html",
+        "audience": "clinic_owner_admin"
+      },
+      {
+        "id": "A032",
+        "category_id": "GC-SETTINGS",
+        "title": "機能ON/OFFを管理",
+        "feature_link": "feature-settings.html",
+        "audience": "clinic_owner_admin"
+      },
+      {
+        "id": "A033",
+        "category_id": "GC-SETTINGS",
+        "title": "ワクチン間隔ルールを管理",
+        "feature_link": "vaccine-interval-admin.html",
+        "audience": "clinic_owner_admin"
+      },
+      {
+        "id": "A034",
+        "category_id": "GC-SETTINGS",
+        "title": "HP・LINE共通設定を確認",
+        "feature_link": "integrated-settings.html",
+        "audience": "clinic_owner_admin"
+      },
+      {
+        "id": "A035",
+        "category_id": "GC-SUPPORT",
+        "title": "来院前WEB問診の使い方",
+        "feature_link": "questionnaire.html",
+        "audience": "all"
+      },
+      {
+        "id": "A036",
+        "category_id": "GC-SUPPORT",
+        "title": "院内でWEB問診を確認",
+        "feature_link": "questionnaire-admin.html",
+        "audience": "all"
+      },
+      {
+        "id": "A037",
+        "category_id": "GC-SUPPORT",
+        "title": "問診画像と個人情報の安全ルール",
+        "feature_link": "questionnaire.html",
+        "audience": "all"
+      },
+      {
+        "id": "A038",
+        "category_id": "GC-SUPPORT",
+        "title": "system-checkで確認する",
+        "feature_link": "system-check.html",
+        "audience": "all"
+      },
+      {
+        "id": "A039",
+        "category_id": "GC-SUPPORT",
+        "title": "患者データ取込・乗り換えはいつ使うか",
+        "feature_link": "owner-data.html",
+        "audience": "all"
+      },
+      {
+        "id": "A040",
+        "category_id": "GC-SUPPORT",
+        "title": "困った時の基本チェック",
+        "feature_link": "operation-guide.html",
+        "audience": "all"
+      }
+    ],
+    "faqs": [
+      {
+        "id": "Q001",
+        "question": "LINEを使っていない飼い主も受付できますか？",
+        "answer": "はい。受付PCの窓口・電話受付や既存患者検索を使えます。"
+      },
+      {
+        "id": "Q002",
+        "question": "最初にどの画面を開けばよいですか？",
+        "answer": "operations.html から today-board.html を開き、本日の全体状況を確認します。"
+      },
+      {
+        "id": "Q003",
+        "question": "QRが読めない時は？",
+        "answer": "明るさやカメラ許可を確認し、受付PCではQR文字列貼り付けや既存患者検索へ切り替えます。"
+      },
+      {
+        "id": "Q004",
+        "question": "獣医師が診察済みにしたら完了ですか？",
+        "answer": "いいえ。診察済みは会計待ちへの引継ぎで、最終完了は受付側が行います。"
+      },
+      {
+        "id": "Q005",
+        "question": "順番受付と日時指定予約はどこで一緒に見られますか？",
+        "answer": "today-board.html の本日共通受付一覧で確認します。"
+      },
+      {
+        "id": "Q006",
+        "question": "複数のペットをまとめて予約できますか？",
+        "answer": "featureが有効な医院では appointment-multi.html を使用します。"
+      },
+      {
+        "id": "Q007",
+        "question": "WEB問診は必ず使う必要がありますか？",
+        "answer": "いいえ。病院ごとの機能設定でON/OFFできます。"
+      },
+      {
+        "id": "Q008",
+        "question": "問診の画像をチュートリアルに使ってよいですか？",
+        "answer": "実患者の画像は使いません。教材は架空・デモデータだけにします。"
+      },
+      {
+        "id": "Q009",
+        "question": "LINE呼び出しをガイドが自動送信しますか？",
+        "answer": "しません。送信・再送・キャンセルを含む業務mutationは利用者が明示操作します。"
+      },
+      {
+        "id": "Q010",
+        "question": "リコールの医療判断をDPROが決めますか？",
+        "answer": "いいえ。病院側の設定・運用を優先し、ガイドは操作方法だけを説明します。"
+      },
+      {
+        "id": "Q011",
+        "question": "ワクチン間隔の日数は何日にすればよいですか？",
+        "answer": "ガイドでは決めません。採用ワクチン、接種歴、院内方針に基づき病院側で設定します。"
+      },
+      {
+        "id": "Q012",
+        "question": "管理コードをマニュアルに載せますか？",
+        "answer": "実際の管理コードや秘密情報は掲載しません。"
+      },
+      {
+        "id": "Q013",
+        "question": "設定を間違えそうで怖いです。",
+        "answer": "First10では設定保存を実行せず、設定場所だけ案内します。詳細手順はGuide Centerで確認します。"
+      },
+      {
+        "id": "Q014",
+        "question": "患者データ移行はFirst10に入っていますか？",
+        "answer": "入りません。低頻度かつ高リスクなのでGuide Centerの管理者向け記事へ分離します。"
+      },
+      {
+        "id": "Q015",
+        "question": "10分ガイドをもう一度見られますか？",
+        "answer": "はい。常設の「？ 操作ガイド」から再実行できる設計にします。"
+      }
+    ]
+  },
+  "print": {
+    "quick_start_source": [
+      "F10-CH01",
+      "F10-CH02",
+      "F10-CH03",
+      "F10-CH04",
+      "F10-CH05",
+      "F10-CH06",
+      "F10-CH07"
+    ],
+    "detailed_manual_source": [
+      "A001",
+      "A002",
+      "A003",
+      "A004",
+      "A005",
+      "A006",
+      "A007",
+      "A008",
+      "A009",
+      "A010",
+      "A011",
+      "A012",
+      "A013",
+      "A014",
+      "A015",
+      "A016",
+      "A017",
+      "A018",
+      "A019",
+      "A020",
+      "A021",
+      "A022",
+      "A023",
+      "A024",
+      "A025",
+      "A026",
+      "A027",
+      "A028",
+      "A029",
+      "A030",
+      "A031",
+      "A032",
+      "A033",
+      "A034",
+      "A035",
+      "A036",
+      "A037",
+      "A038",
+      "A039",
+      "A040"
+    ],
+    "faq_source": [
+      "Q001",
+      "Q002",
+      "Q003",
+      "Q004",
+      "Q005",
+      "Q006",
+      "Q007",
+      "Q008",
+      "Q009",
+      "Q010",
+      "Q011",
+      "Q012",
+      "Q013",
+      "Q014",
+      "Q015"
+    ]
+  }
+}

@@ -1,0 +1,15 @@
+次のアクション
+
+1. GitHubアップロード画面を開く:
+   https://github.com/dpromstk2000-lab/DPRO-VET-QR/upload/main
+2. GitHubアップロード用ZIPを展開し、ZIP直下の2ファイルをドラッグ＆ドロップ:
+   - operations.html
+   - tutorial-first10.html
+3. operations.html の上書き警告が出た場合は、そのまま今回ファイルで置換対象にする。
+4. Commit message例: DPRO TUTORIAL VET R3 First10
+5. Commit changes を実行。
+6. 次のproduction URLが開く状態になったら、このBLOCKER RETURN ZIPを同じチャットへ戻す:
+   https://dpromstk2000-lab.github.io/DPRO-VET-QR/operations.html?clinic_code=dpro_vet_demo&demo=ready
+   https://dpromstk2000-lab.github.io/DPRO-VET-QR/tutorial-first10.html?clinic_code=dpro_vet_demo&demo=ready&mode=start
+7. ChatGPT側でR3 production/live QAを再開し、PASSならR4 Guide Centerまで進める。
+8. R5には進まない。

@@ -1,0 +1,103 @@
+schema: DPRO-TUTORIAL-GUIDE-CENTER-MAP-V1.0
+date: '2026-08-22'
+category_count: 8
+article_count: 40
+faq_count: 15
+categories:
+- id: GC-START
+  title: まず始める・本日の運用
+  article_ids:
+  - A001
+  - A002
+  - A003
+  - A004
+  count: 4
+- id: GC-RECEPTION
+  title: 受付・QR・待ち状況
+  article_ids:
+  - A005
+  - A006
+  - A007
+  - A008
+  - A009
+  - A010
+  - A011
+  - A012
+  count: 8
+- id: GC-APPOINTMENT
+  title: 日時予約・複数ペット予約
+  article_ids:
+  - A013
+  - A014
+  - A015
+  - A016
+  - A017
+  count: 5
+- id: GC-CARD
+  title: 診察券・飼い主/ペット
+  article_ids:
+  - A018
+  - A019
+  - A020
+  - A021
+  count: 4
+- id: GC-DOCTOR
+  title: 診察・会計引継ぎ・患者検索
+  article_ids:
+  - A022
+  - A023
+  - A024
+  - A025
+  count: 4
+- id: GC-LINE
+  title: LINE呼び出し・フォロー・リコール
+  article_ids:
+  - A026
+  - A027
+  - A028
+  - A029
+  count: 4
+- id: GC-SETTINGS
+  title: 医院設定・機能設定・予防ルール
+  article_ids:
+  - A030
+  - A031
+  - A032
+  - A033
+  - A034
+  count: 5
+- id: GC-SUPPORT
+  title: WEB問診・トラブル・データ/プライバシー
+  article_ids:
+  - A035
+  - A036
+  - A037
+  - A038
+  - A039
+  - A040
+  count: 6
+search_fields:
+- title
+- keywords
+- feature_link
+entry_points:
+- '? 操作ガイド'
+- First10 final card
+- online guide link in print/manual
+replay_first10: true
+faq_ids:
+- Q001
+- Q002
+- Q003
+- Q004
+- Q005
+- Q006
+- Q007
+- Q008
+- Q009
+- Q010
+- Q011
+- Q012
+- Q013
+- Q014
+- Q015

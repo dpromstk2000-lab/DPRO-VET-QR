@@ -1,0 +1,25 @@
+DPRO TUTORIAL VET HANDOFF / R3 WRITE-BLOCKER
+
+Baseline source at work start:
+commit 2694fdf9e24971b6dced2b3b1e0d13811fc24017
+tree   27a88219480a06ba5f0eaf0e30381bf02a97c029
+source drift: NONE at R3 start
+
+R3 production-ready implementation:
+- operations.html: existing operations hub retained; additive First10/guide dock; formal guide IDs for operations hero/today-board card/launcher.
+- tutorial-first10.html: 7 chapters / 16 cards; same-origin read-only screen preview; target binding/fallback; highlight; pointer interaction shield; Back/Next/Close/Esc/Skip/resume/replay; local-only progress state; zero API calls.
+
+Local QA:
+- locked chapter/card count: PASS
+- HTML parse: PASS
+- JS syntax: PASS
+- control/state presence: PASS
+- tutorial fetch/XHR: 0
+- mutation automation: 0
+- real customer/pet/medical data embedded: 0
+
+GitHub write attempts:
+- create_file tutorial-first10.html -> 403 Resource not accessible by integration
+- create_blob permission probe -> 403 Resource not accessible by integration
+
+R4 MUST remain NOT STARTED until production commit/live R3 gate passes.

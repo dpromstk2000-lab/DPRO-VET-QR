@@ -1,0 +1,85 @@
+schema: DPRO-TUTORIAL-R3-R4-QA-PLAN-V1.0
+date: '2026-08-22'
+industry: 動物病院（VET）
+precondition: CENTRAL approves this R2 lock candidate before R3 starts
+R3_in_app:
+- id: R3-Q01
+  test: first_login_entry_and_launcher
+  expect: entry + ?操作ガイド visible without blocking work
+- id: R3-Q02
+  test: all_16_cards_reachable
+  expect: 7 chapters / 16 cards complete
+- id: R3-Q03
+  test: target_binding_fallback
+  expect: missing/changed inner selector falls back without screen break
+- id: R3-Q04
+  test: mutation_zero
+  expect: no create/update/delete/send/save/confirm/payment/status change/demo_prepare
+- id: R3-Q05
+  test: status_flow_wording
+  expect: doctor completion described as accounting handoff, not final completed
+- id: R3-Q06
+  test: feature_switch_respect
+  expect: guide does not surface disabled optional features as mandatory daily operations
+- id: R3-Q07
+  test: privacy_high_sensitivity
+  expect: no real guardian/pet/medical/questionnaire image data
+- id: R3-Q08
+  test: desktop_1440x900
+  expect: no card/target overlap
+- id: R3-Q09
+  test: mobile_390x844
+  expect: horizontal overflow 0; controls reachable
+- id: R3-Q10
+  test: close_esc_back_resume_replay
+  expect: state transitions NOT_STARTED/IN_PROGRESS/SKIPPED/COMPLETED work
+- id: R3-Q11
+  test: keyboard_focus
+  expect: launcher/cards usable by keyboard
+- id: R3-Q12
+  test: existing_business_regression
+  expect: existing form/buttons/API calls unchanged
+R4_guide_center:
+- id: R4-Q01
+  test: category_count
+  expect: 8 categories
+- id: R4-Q02
+  test: article_count
+  expect: 40 articles
+- id: R4-Q03
+  test: faq_count
+  expect: 15 FAQs
+- id: R4-Q04
+  test: keyword_search
+  expect: title/keywords/feature links searchable
+- id: R4-Q05
+  test: article_routes
+  expect: direct route/hash + back/forward works
+- id: R4-Q06
+  test: actual_feature_links
+  expect: all links remain inside observed current screens or runtime guide
+- id: R4-Q07
+  test: auth_boundary
+  expect: owner/admin guides preserve current authentication approach; no new role
+- id: R4-Q08
+  test: privacy_no_secrets
+  expect: no admin code/password/token/service role/private API info
+- id: R4-Q09
+  test: medical_boundary
+  expect: no diagnosis, dosing, vaccine interval prescription; hospital policy remains authoritative
+- id: R4-Q10
+  test: desktop_mobile_keyboard
+  expect: desktop + 390px + keyboard + overflow 0
+- id: R4-Q11
+  test: first10_replay
+  expect: Guide Center can relaunch First10
+- id: R4-Q12
+  test: content_source_consistency
+  expect: rendered articles/FAQ IDs all originate in CONTENT_PACKAGE.json
+blocker_definition:
+- any production mutation caused by tutorial
+- real customer/pet medical data visible
+- secret/admin credential visible
+- unreachable First10 card
+- broken target causes application obstruction
+- medical guidance presented as DPRO-prescribed clinical rule

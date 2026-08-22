@@ -1,0 +1,177 @@
+schema: DPRO-TUTORIAL-FIRST10-V1.0
+date: '2026-08-22'
+industry: 動物病院（VET）
+version: R2-DESIGN-LOCK-CANDIDATE
+chapter_count: 7
+card_count: 16
+estimated_minutes: 10
+selection_rationale: VET daily operations have a distinct start-board, reception, doctor/accounting handoff, appointment,
+  patient search and follow-up flow. Low-frequency settings/migration and high-sensitivity questionnaire image operations
+  are moved to Guide Center.
+chapters:
+- id: F10-CH01
+  title: 開始地点を確認
+  goal: 毎日の開始地点を迷わない
+  start_page: operations.html
+  cards:
+  - F10-C01
+  - F10-C02
+- id: F10-CH02
+  title: 今日の受付を把握
+  goal: WEB/LINE/電話/窓口を1つの一覧で把握
+  start_page: today-board.html
+  cards:
+  - F10-C03
+  - F10-C04
+- id: F10-CH03
+  title: 来院受付の入口
+  goal: 受付PCでQR/窓口/電話の入口を理解
+  start_page: scan-pc.html
+  cards:
+  - F10-C05
+  - F10-C06
+  - F10-C07
+- id: F10-CH04
+  title: 診察から会計への引継ぎ
+  goal: ステータスと役割境界を理解
+  start_page: scan-pc.html
+  cards:
+  - F10-C08
+  - F10-C09
+- id: F10-CH05
+  title: 日時予約を確認
+  goal: 予約管理と週間確認の場所を理解
+  start_page: appointment-admin.html
+  cards:
+  - F10-C10
+  - F10-C11
+- id: F10-CH06
+  title: 患者検索とフォロー
+  goal: 患者を探し、LINE/リコールの場所を理解
+  start_page: patients.html
+  cards:
+  - F10-C12
+  - F10-C13
+  - F10-C14
+- id: F10-CH07
+  title: 設定と困った時
+  goal: 医院設定の入口とGuide Center再実行を理解
+  start_page: owner.html
+  cards:
+  - F10-C15
+  - F10-C16
+cards:
+- id: F10-C01
+  chapter: F10-CH01
+  title: 運用ホームから始める
+  page: operations.html
+  target: vet.operations.hero
+  mode: READ_ONLY
+  text: まず「運用ホーム」を開き、日常業務の入口がまとまっていることを確認します。
+- id: F10-C02
+  chapter: F10-CH01
+  title: 本日の診療・統合ボード
+  page: operations.html
+  target: vet.operations.today_board_card
+  mode: OPEN_ONLY
+  text: 毎日の最初の確認先は本日共通受付一覧です。クリックは利用者が行い、ガイドは自動操作しません。
+- id: F10-C03
+  chapter: F10-CH02
+  title: 受付元と受付種別を見る
+  page: today-board.html
+  target: vet.today_board.list
+  mode: READ_ONLY
+  text: WEB・LINE・電話・窓口を同じ一覧で見て、順番受付か日時予約かをバッジで確認します。
+- id: F10-C04
+  chapter: F10-CH02
+  title: 要確認と最新更新
+  page: today-board.html
+  target: vet.today_board.attention
+  mode: READ_ONLY
+  text: 要確認欄と更新時刻を確認します。ガイドは更新ボタンや業務操作を自動実行しません。
+- id: F10-C05
+  chapter: F10-CH03
+  title: 受付PCは「今日の受付」が主役
+  page: scan-pc.html
+  target: vet.scan_pc.today_menu
+  mode: READ_ONLY
+  text: 通常は「今日の受付」を見ます。新しい受付が必要な時だけ左メニューを開きます。
+- id: F10-C06
+  chapter: F10-CH03
+  title: QR受付の流れ
+  page: scan-pc.html
+  target: vet.scan_pc.qr_menu
+  mode: READ_ONLY
+  text: QRは「読取→ペット確認→来院受付」の順です。チュートリアルでは実受付を作成しません。
+- id: F10-C07
+  chapter: F10-CH03
+  title: LINEなしでも受付できる
+  page: scan-pc.html
+  target: vet.scan_pc.manual_menu
+  mode: READ_ONLY
+  text: 窓口・電話受付、既存患者検索、代理登録があるためLINE未連携でも現場を止めません。
+- id: F10-C08
+  chapter: F10-CH04
+  title: ステータスの流れ
+  page: scan-pc.html
+  target: vet.scan_pc.status_list
+  mode: READ_ONLY
+  text: 来院待ち→院内受付済み→診察中→会計待ち→完了の流れを確認します。
+- id: F10-C09
+  chapter: F10-CH04
+  title: 獣医師は会計待ちへ引き継ぐ
+  page: doctor.html
+  target: vet.doctor.main
+  mode: READ_ONLY
+  text: 獣医師画面の「診察済み」は会計待ちへの引継ぎです。最終完了は受付側の役割です。
+- id: F10-C10
+  chapter: F10-CH05
+  title: 日時指定予約管理
+  page: appointment-admin.html
+  target: vet.appointment_admin.main
+  mode: READ_ONLY
+  text: 日時指定予約、獣医師指定、変更・キャンセル、来院受付の管理場所を確認します。
+- id: F10-C11
+  chapter: F10-CH05
+  title: 週間予約ボード
+  page: appointment-calendar.html
+  target: vet.appointment_calendar.main
+  mode: OPEN_ONLY
+  text: 1日の操作だけでなく、週間ボードで予約の偏りや状態を見渡せます。
+- id: F10-C12
+  chapter: F10-CH06
+  title: 患者を検索する場所
+  page: patients.html
+  target: vet.patients.main
+  mode: READ_ONLY
+  text: 飼い主・ペットを探す場所を確認します。教材には実顧客名や実電話番号を使いません。
+- id: F10-C13
+  chapter: F10-CH06
+  title: LINE呼び出し
+  page: line-call-admin.html
+  target: vet.line_call.main
+  mode: READ_ONLY
+  text: 必要な飼い主へのLINE案内を管理する場所です。チュートリアルは送信を自動実行しません。
+- id: F10-C14
+  chapter: F10-CH06
+  title: 予防・再診リコール
+  page: recall-admin.html
+  target: vet.recall.main
+  mode: READ_ONLY
+  text: 継続診療のフォロー対象を確認します。実送信や医療判断はガイドの範囲外です。
+- id: F10-C15
+  chapter: F10-CH07
+  title: 医院設定の場所
+  page: owner.html
+  target: vet.owner.menu
+  mode: READ_ONLY
+  text: 基本情報・受付時間・休診日などは医院設定から管理します。設定変更はFirst10では実行しません。
+- id: F10-C16
+  chapter: F10-CH07
+  title: 困った時は操作ガイド
+  page: RUNTIME
+  target: vet.guide.launcher
+  mode: RUNTIME_UI
+  text: 常設の「？ 操作ガイド」から記事検索と10分ガイド再実行へ進める設計にします。
+mutation_policy: ZERO_AUTO_MUTATION
+replay: true

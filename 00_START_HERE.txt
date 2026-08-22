@@ -1,0 +1,28 @@
+DPRO TUTORIAL 動物病院（VET）
+R3 BLOCKER RETURN / RESUME PACKAGE
+Date: 2026-08-22
+
+CURRENT STATE
+- R0-R2: FINAL LOCK / CENTRAL APPROVED
+- R3 First10 implementation: COMPLETE LOCALLY
+- R3 static/self QA: PASS
+- R3 production commit/live gate: BLOCKED
+- R4: NOT STARTED (correctly stopped by gate)
+- R5: NOT STARTED
+
+BLOCKER
+Connected GitHub integration returned 403 Resource not accessible by integration
+for both Contents API create_file and Git Data create_blob.
+Repository read access is available; write access is not.
+
+READY PRODUCTION FILES
+- operations.html
+- tutorial-first10.html
+
+RESUME
+1. Upload the two production files to dpromstk2000-lab/DPRO-VET-QR main.
+2. In the next chat, upload this ZIP only.
+3. Re-read current main and verify the two files/commit/tree.
+4. Run R3 production/live QA.
+5. ONLY if R3 PASS, proceed directly to R4 Guide Center and create R4 CENTRAL return ZIP.
+6. Do not start R5.

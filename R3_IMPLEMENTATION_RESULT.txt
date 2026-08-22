@@ -1,0 +1,26 @@
+R3 IMPLEMENTATION RESULT
+STATUS: IMPLEMENTATION COMPLETE / PRODUCTION READY
+DATE: 2026-08-22
+
+Locked First10: 7 chapters / 16 cards
+Implementation files: 2
+- operations.html (modified additively)
+- tutorial-first10.html (new)
+
+Implemented:
+- visible ? 操作ガイド launcher on operations hub
+- First10 entry
+- formal data-dpro-guide-id on hub + runtime-injected targets
+- target highlight and ordered safe fallback
+- same-origin actual-screen preview
+- interaction shield (read-only)
+- Back / Next / Close / Esc / Skip / resume / replay
+- NOT_STARTED concept via no-state, IN_PROGRESS / SKIPPED / COMPLETED storage lifecycle
+- localStorage-only tutorial progress
+- desktop/mobile responsive layout
+- keyboard-accessible controls
+- doctor completion wording fixed to accounting handoff, not final completion
+- no automatic business mutation
+
+Backend/runtime architecture changes: 0
+Worker/API/DB/Supabase/SQL/AUTH/permission/feature-flag changes: 0
